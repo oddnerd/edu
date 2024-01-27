@@ -1,4 +1,5 @@
 pub mod top_down {
+
     pub fn sort<T: Ord + Clone>(slice: &mut [T]) -> () {
         let mut auxiliary = slice.to_vec();
         split(slice, 0, slice.len(), &mut auxiliary);
@@ -9,7 +10,7 @@ pub mod top_down {
             let middle = (begin + end) / 2;
             split(auxiliary, begin, middle, slice);
             split(auxiliary, middle, end, slice);
-            merge(slice, begin, middle, end, auxiliary);
+            merge(slice, begin, middle, auxiliary);
         }
     }
 
@@ -17,21 +18,33 @@ pub mod top_down {
         first: &mut [T],
         begin: usize,
         middle: usize,
-        end: usize,
         second: &mut [T],
     ) -> () {
-        let mut i = begin;
-        let mut j = middle;
-        let mut k = begin;
-        while k < end {
-            if i < middle && (j >= end || second[i] <= second[j]) {
-                first[k] = second[i].clone();
-                i += 1;
-            } else {
-                first[k] = second[j].clone();
-                j += 1;
+        let mut left_peekable = second[begin..middle].iter().peekable();
+        let mut right_peekable = second[middle..].iter().peekable();
+
+        for output in &mut first[begin..] {
+            if let Some(left) = left_peekable.peek() {
+                if let Some(right) = right_peekable.peek() {
+                    if left <= right {
+                        *output = left_peekable.next().unwrap().clone();
+                    }
+                    else {
+                        *output = right_peekable.next().unwrap().clone();
+                    }
+                }
+                else {
+                    *output = left_peekable.next().unwrap().clone();
+                }
             }
-            k += 1;
+            else {
+                if let Some(right) = right_peekable.next() {
+                    *output = right.clone();
+                }
+                else {
+                    panic!("output longer than sum of inputs")
+                }
+            }
         }
     }
 
