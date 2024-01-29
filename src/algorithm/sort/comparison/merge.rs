@@ -25,7 +25,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sort_with_empty() {
+    fn top_down_empty() {
         let mut slice: [usize; 0] = [];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
@@ -33,7 +33,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_with_one() {
+    fn top_down_one() {
         let mut slice = [0];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
@@ -41,7 +41,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_with_two() {
+    fn top_down_two() {
         let mut slice = [2, 1];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
@@ -49,7 +49,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_with_multiple() {
+    fn top_down_multiple() {
         let mut slice = [3, 2, 1];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
