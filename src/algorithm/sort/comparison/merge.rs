@@ -13,14 +13,14 @@ pub mod top_down {
             sort_with(left_aux, left_slice);
             sort_with(right_aux, right_slice);
 
-            let mut merger = Merge {
+            let merger = Merge {
                 first: left_aux.iter().peekable(),
                 second: right_aux.iter().peekable(),
             };
 
-            for element in &mut slice.iter_mut() {
-                *element = merger.next().unwrap().clone();
-            }
+            std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+                *old = new.clone();
+            });
         }
     }
 
