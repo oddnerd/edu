@@ -35,7 +35,7 @@ where
     }
 
     let mut length: usize = 2;
-    while length < slice.len() {
+    while length <= slice.len() {
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
 
         for (slice, auxiliary) in chunks {
