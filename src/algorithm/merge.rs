@@ -34,8 +34,25 @@ impl<T: Ord, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter<T, Iter
 
 pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
 where
-    T: Ord,
+    T: Ord + Clone,
 {
+    if first.len() < second.len() {
+        return recursive(second, first, output);
+    }
+
+    if first.len() <= 0 {
+        return;
+    }
+
+    let r = first.len() / 2;
+    let s = match second.binary_search(first.first().unwrap()) {
+        Ok(index) => index,
+        Err(index) => index,
+    };
+    output[r + s] = first[r].clone();
+
+    recursive(&first[..r], &second[..s], &mut output[..r + s]);
+    recursive(&first[r + 1..], &second[s..], &mut output[r + s + 1..]);
 }
 
 #[cfg(test)]
@@ -97,6 +114,7 @@ mod tests {
         assert_eq!(*result[3], 3);
     }
 
+    #[test]
     fn recursive_first_empty() {
         let first = [];
         let second = [0];
