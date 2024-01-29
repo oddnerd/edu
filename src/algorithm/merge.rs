@@ -32,6 +32,28 @@ impl<T: Ord, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter<T, Iter
     }
 }
 
+pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
+where
+    T: Ord + Clone,
+{
+    if first.len() < second.len() {
+        return recursive(second, first, output);
+    }
+
+    if !first.is_empty() {
+        let middle = first.len() / 2;
+        let intersect = match second.binary_search(&first[middle]) {
+            Ok(index) => index,
+            Err(index) => index,
+        };
+
+        output[middle + intersect] = first[middle].clone();
+
+        recursive(&first[..middle], &second[..intersect], &mut output[..middle + intersect]);
+        recursive(&first[middle + 1..], &second[intersect..], &mut output[middle + intersect + 1..]);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -89,5 +111,65 @@ mod tests {
         assert_eq!(*result[1], 1);
         assert_eq!(*result[2], 2);
         assert_eq!(*result[3], 3);
+    }
+
+    #[test]
+    fn recursive_first_empty() {
+        let first = [];
+        let second = [0];
+        let mut output = vec![0; 1];
+        recursive(&first, &second, &mut output);
+
+        assert_eq!(output.len(), 1);
+        assert_eq!(output[0], 0);
+    }
+
+    #[test]
+    fn recursive_second_empty() {
+        let first = [0];
+        let second = [];
+        let mut output = vec![0; 1];
+        recursive(&first, &second, &mut output);
+
+        assert_eq!(output.len(), 1);
+        assert_eq!(output[0], 0);
+    }
+
+    #[test]
+    fn recursive_first_greater() {
+        let first = [1];
+        let second = [0];
+        let mut output = vec![0; 2];
+        recursive(&first, &second, &mut output);
+
+        assert_eq!(output.len(), 2);
+        assert_eq!(output[0], 0);
+        assert_eq!(output[1], 1);
+    }
+
+    #[test]
+    fn recursive_second_greater() {
+        let first = [0];
+        let second = [1];
+        let mut output = vec![0; 2];
+        recursive(&first, &second, &mut output);
+
+        assert_eq!(output.len(), 2);
+        assert_eq!(output[0], 0);
+        assert_eq!(output[1], 1);
+    }
+
+    #[test]
+    fn recursive_back_and_forth() {
+        let first = [1, 2];
+        let second = [0, 3];
+        let mut output = vec![0; 4];
+        recursive(&first, &second, &mut output);
+
+        assert_eq!(output.len(), 4);
+        assert_eq!(output[0], 0);
+        assert_eq!(output[1], 1);
+        assert_eq!(output[2], 2);
+        assert_eq!(output[3], 3);
     }
 }
