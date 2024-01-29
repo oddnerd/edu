@@ -40,19 +40,18 @@ where
         return recursive(second, first, output);
     }
 
-    if first.len() <= 0 {
-        return;
+    if !first.is_empty() {
+        let middle = first.len() / 2;
+        let intersect = match second.binary_search(&first[middle]) {
+            Ok(index) => index,
+            Err(index) => index,
+        };
+
+        output[middle + intersect] = first[middle].clone();
+
+        recursive(&first[..middle], &second[..intersect], &mut output[..middle + intersect]);
+        recursive(&first[middle + 1..], &second[intersect..], &mut output[middle + intersect + 1..]);
     }
-
-    let r = first.len() / 2;
-    let s = match second.binary_search(&first[r]) {
-        Ok(index) => index,
-        Err(index) => index,
-    };
-    output[r + s] = first[r].clone();
-
-    recursive(&first[..r], &second[..s], &mut output[..r + s]);
-    recursive(&first[r + 1..], &second[s..], &mut output[r + s + 1..]);
 }
 
 #[cfg(test)]
@@ -118,7 +117,7 @@ mod tests {
     fn recursive_first_empty() {
         let first = [];
         let second = [0];
-        let mut output = std::vec::Vec::<i32>::with_capacity(1);
+        let mut output = vec![0; 1];
         recursive(&first, &second, &mut output);
 
         assert_eq!(output.len(), 1);
@@ -129,7 +128,7 @@ mod tests {
     fn recursive_second_empty() {
         let first = [0];
         let second = [];
-        let mut output = std::vec::Vec::<i32>::with_capacity(1);
+        let mut output = vec![0; 1];
         recursive(&first, &second, &mut output);
 
         assert_eq!(output.len(), 1);
@@ -140,7 +139,7 @@ mod tests {
     fn recursive_first_greater() {
         let first = [1];
         let second = [0];
-        let mut output = std::vec::Vec::<i32>::with_capacity(2);
+        let mut output = vec![0; 2];
         recursive(&first, &second, &mut output);
 
         assert_eq!(output.len(), 2);
@@ -152,7 +151,7 @@ mod tests {
     fn recursive_second_greater() {
         let first = [0];
         let second = [1];
-        let mut output = std::vec::Vec::<i32>::with_capacity(2);
+        let mut output = vec![0; 2];
         recursive(&first, &second, &mut output);
 
         assert_eq!(output.len(), 2);
@@ -164,7 +163,7 @@ mod tests {
     fn recursive_back_and_forth() {
         let first = [1, 2];
         let second = [0, 3];
-        let mut output = std::vec::Vec::<i32>::with_capacity(4);
+        let mut output = vec![0; 4];
         recursive(&first, &second, &mut output);
 
         assert_eq!(output.len(), 4);
