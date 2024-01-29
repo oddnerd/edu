@@ -26,41 +26,37 @@ pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    let mut width: usize = 1;
-    loop {
-        if width < slice.len() {
-            fn min<T: Ord>(first: T, second: T) -> T {
-                if first < second {
-                    first
-                } else {
-                    second
-                }
-            }
-
-            let mut i: usize = 0;
-            loop {
-                if i < slice.len() {
-                    let right = min(i + width, slice.len());
-                    let end = min(i + 2 * width, slice.len());
-
-                    let subslice = &mut auxiliary[i..end];
-                    let (first, second) = subslice.split_at_mut(right - i);
-
-                    let merger = crate::algorithm::merge::MergeIter::new(
-                        first.iter(),
-                        second.iter(),
-                    );
-
-                    std::iter::zip(slice[i..end].iter_mut(), merger).for_each(|(old, new)| {
-                        *old = new.clone();
-                    });
-                } else {
-                    break;
-                }
-                i += width * 2
-            }
+    fn min<T: Ord>(first: T, second: T) -> T {
+        if first < second {
+            first
         } else {
-            break;
+            second
+        }
+    }
+
+    let mut width: usize = 1;
+    while width < slice.len() {
+        let mut i: usize = 0;
+        while i < slice.len() {
+            let right = min(i + width, slice.len());
+            let end = min(i + 2 * width, slice.len());
+
+            println!(
+                "RIGHT/END/LEN: {:?} versus {:?} versus {:?}",
+                i + width,
+                i + 2 * width,
+                slice.len()
+            );
+
+            let subslice = &mut auxiliary[i..end];
+            let (first, second) = subslice.split_at_mut(right - i);
+
+            let merger = crate::algorithm::merge::MergeIter::new(first.iter(), second.iter());
+
+            std::iter::zip(slice[i..end].iter_mut(), merger).for_each(|(old, new)| {
+                *old = new.clone();
+            });
+            i += width * 2
         }
         width *= 2;
     }
