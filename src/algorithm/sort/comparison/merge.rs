@@ -1,4 +1,4 @@
-pub fn top_down<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) -> () {
+pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
     if slice.len() > 1 {
         assert!(slice.len() == auxiliary.len());
         let (left_aux, right_aux) = auxiliary.split_at_mut(auxiliary.len() / 2);
