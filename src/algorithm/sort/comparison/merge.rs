@@ -8,6 +8,8 @@ where
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
 
+        // auxiliary becomes the sorted left/right slices to be merged,
+        // alternate input/auxiliary to avoid additional clone
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
