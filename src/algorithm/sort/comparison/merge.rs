@@ -1,48 +1,53 @@
 pub mod top_down {
 
     pub fn sort<T: Ord + Clone>(slice: &mut [T]) -> () {
-        let mut auxiliary = slice.to_vec();
-        split(slice, 0, slice.len(), &mut auxiliary);
+        sort_with(slice, &mut slice.to_vec());
     }
 
-    fn split<T: Ord + Clone>(slice: &mut [T], begin: usize, end: usize, auxiliary: &mut [T]) -> () {
-        if end - begin > 1 {
-            let middle = (begin + end) / 2;
-            split(auxiliary, begin, middle, slice);
-            split(auxiliary, middle, end, slice);
-            merge(slice, begin, middle, auxiliary);
+    fn sort_with<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) -> () {
+        if slice.len() > 1 {
+            let (left_aux, right_aux) = auxiliary.split_at_mut(auxiliary.len() / 2);
+
+            let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
+
+            sort_with(left_aux, left_slice);
+            sort_with(right_aux, right_slice);
+
+            let mut merger = Merge {
+                first: left_aux.iter().peekable(),
+                second: right_aux.iter().peekable(),
+            };
+
+            for element in &mut slice.iter_mut() {
+                *element = merger.next().unwrap().clone();
+            }
         }
     }
 
-    fn merge<T: Ord + Clone>(
-        first: &mut [T],
-        begin: usize,
-        middle: usize,
-        second: &mut [T],
-    ) -> () {
-        let mut left_peekable = second[begin..middle].iter().peekable();
-        let mut right_peekable = second[middle..].iter().peekable();
+    struct Merge<T: Ord + Clone, Iter: std::iter::Iterator<Item = T>> {
+        first: std::iter::Peekable<Iter>,
+        second: std::iter::Peekable<Iter>,
+    }
 
-        for output in &mut first[begin..] {
-            if let Some(left) = left_peekable.peek() {
-                if let Some(right) = right_peekable.peek() {
+    impl<T: Ord + Clone, Iter: std::iter::Iterator<Item = T>> Iterator for Merge<T, Iter> {
+        type Item = T;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if let Some(left) = self.first.peek() {
+                if let Some(right) = self.second.peek() {
                     if left <= right {
-                        *output = left_peekable.next().unwrap().clone();
+                        Some(self.first.next().unwrap().clone())
+                    } else {
+                        Some(self.second.next().unwrap().clone())
                     }
-                    else {
-                        *output = right_peekable.next().unwrap().clone();
-                    }
+                } else {
+                    Some(self.first.next().unwrap().clone())
                 }
-                else {
-                    *output = left_peekable.next().unwrap().clone();
-                }
-            }
-            else {
-                if let Some(right) = right_peekable.next() {
-                    *output = right.clone();
-                }
-                else {
-                    panic!("output longer than sum of inputs")
+            } else {
+                if let Some(right) = self.second.next() {
+                    Some(right.clone())
+                } else {
+                    None
                 }
             }
         }
