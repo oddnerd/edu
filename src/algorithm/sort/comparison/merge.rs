@@ -30,12 +30,19 @@ where
     while length <= slice.len() {
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
 
+
         for (slice, auxiliary) in chunks {
             let (left, right) = auxiliary.split_at(length / 2);
 
             let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
 
+            // merge from auxiliary into slice
             std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+                *old = new.clone();
+            });
+
+            // propogate merged slice to auxiliary for when next merged
+            std::iter::zip(auxiliary.iter_mut(), slice.iter()).for_each(|(old, new)| {
                 *old = new.clone();
             });
         }
@@ -105,9 +112,9 @@ mod tests {
 
     #[test]
     fn bottom_up_multiple() {
-        let mut slice: Vec<i32> = (0..16).collect();
-        slice.reverse();
+        let mut slice: Vec<i32> = (0..4).collect();
         let copy = slice.clone();
+        slice.reverse();
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, copy);
