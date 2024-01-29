@@ -1,16 +1,20 @@
 pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
+where
+    T: Ord + Clone,
+{
     if slice.len() > 1 {
         assert!(slice.len() == auxiliary.len());
-        let (left_aux, right_aux) = auxiliary.split_at_mut(auxiliary.len() / 2);
+        let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
 
-        top_down(left_aux, left_slice);
-        top_down(right_aux, right_slice);
+        top_down(left_auxiliary, left_slice);
+        top_down(right_auxiliary, right_slice);
 
-        let merger = crate::algorithm::merge::MergeIter::new(left_aux.iter(), right_aux.iter());
+        let merger =
+            crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter());
 
-        std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+        std::iter::zip(slice, merger).for_each(|(old, new)| {
             *old = new.clone();
         });
     }
