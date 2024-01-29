@@ -1,18 +1,51 @@
-pub fn top_down<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) -> () {
+pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
+where
+    T: Ord + Clone,
+{
     if slice.len() > 1 {
         assert!(slice.len() == auxiliary.len());
-        let (left_aux, right_aux) = auxiliary.split_at_mut(auxiliary.len() / 2);
+        let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
 
-        top_down(left_aux, left_slice);
-        top_down(right_aux, right_slice);
+        // auxiliary becomes the sorted left/right slices to be merged,
+        // alternate input/auxiliary to avoid additional clone
+        top_down(left_auxiliary, left_slice);
+        top_down(right_auxiliary, right_slice);
 
-        let merger = crate::algorithm::merge::MergeIter::new(left_aux.iter(), right_aux.iter());
+        let merger =
+            crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter());
 
-        std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+        std::iter::zip(slice, merger).for_each(|(old, new)| {
             *old = new.clone();
         });
+    }
+}
+
+pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
+where
+    T: Ord + Clone + std::fmt::Debug,
+{
+    let mut length: usize = 2;
+    while length <= slice.len() {
+        let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
+
+        for (slice, auxiliary) in chunks {
+            let (left, right) = auxiliary.split_at(length / 2);
+
+            let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
+
+            // merge from auxiliary into slice
+            std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+                *old = new.clone();
+            });
+
+            // propogate merged slice to auxiliary for when next merged
+            std::iter::zip(auxiliary.iter_mut(), slice.iter()).for_each(|(old, new)| {
+                *old = new.clone();
+            });
+        }
+        length *= 2;
     }
 }
 
@@ -21,7 +54,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn sort_with_empty() {
+    fn top_down_empty() {
         let mut slice: [usize; 0] = [];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
@@ -29,7 +62,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_with_one() {
+    fn top_down_one() {
         let mut slice = [0];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
@@ -37,7 +70,7 @@ mod tests {
     }
 
     #[test]
-    fn sort_with_two() {
+    fn top_down_two() {
         let mut slice = [2, 1];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
@@ -45,10 +78,44 @@ mod tests {
     }
 
     #[test]
-    fn sort_with_multiple() {
+    fn top_down_multiple() {
         let mut slice = [3, 2, 1];
         let mut auxiliary = slice.to_vec();
         top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [1, 2, 3]);
+    }
+
+    #[test]
+    fn bottom_up_empty() {
+        let mut slice: [usize; 0] = [];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn bottom_up_one() {
+        let mut slice = [0];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn bottom_up_two() {
+        let mut slice = [2, 1];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2]);
+    }
+
+    #[test]
+    fn bottom_up_multiple() {
+        let mut slice: Vec<i32> = (0..4).collect();
+        let copy = slice.clone();
+        slice.reverse();
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, copy);
     }
 }
