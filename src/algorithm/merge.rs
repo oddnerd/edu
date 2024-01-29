@@ -59,32 +59,112 @@ mod tests {
     use super::*;
 
     #[test]
-    fn mergeiter_left_empty() {}
+    fn mergeiter_first_empty() {
+        let first = [];
+        let second = [0];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(*result[0], 0);
+    }
 
     #[test]
-    fn mergeiter_right_empty() {}
+    fn mergeiter_second_empty() {
+        let first = [0];
+        let second = [];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(*result[0], 0);
+    }
 
     #[test]
-    fn mergeiter_left_greater() {}
+    fn mergeiter_first_greater() {
+        let first = [1];
+        let second = [0];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+    }
 
     #[test]
-    fn mergeiter_right_greater() {}
+    fn mergeiter_second_greater() {
+        let first = [0];
+        let second = [1];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+    }
 
     #[test]
-    fn mergeiter_back_and_forth() {}
+    fn mergeiter_back_and_forth() {
+        let first = [1,2];
+        let second = [0,3];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 4);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+        assert_eq!(*result[2], 2);
+        assert_eq!(*result[3], 3);
+    }
 
     #[test]
-    fn recursive_left_empty() {}
+    fn recursive_first_empty() {
+        let first = [];
+        let second = [0];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(*result[0], 0);
+    }
 
     #[test]
-    fn recursive_right_empty() {}
+    fn recursive_second_empty() {
+        let first = [0];
+        let second = [];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(*result[0], 0);
+    }
 
     #[test]
-    fn recursive_left_greater() {}
+    fn recursive_first_greater() {
+        let first = [1];
+        let second = [0];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+    }
 
     #[test]
-    fn recursive_right_greater() {}
+    fn recursive_second_greater() {
+        let first = [0];
+        let second = [1];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+    }
 
     #[test]
-    fn recursive_back_and_forth() {}
+    fn recursive_back_and_forth() {
+        let first = [1,2];
+        let second = [0,3];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 4);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+        assert_eq!(*result[2], 2);
+        assert_eq!(*result[3], 3);
+    }
 }
