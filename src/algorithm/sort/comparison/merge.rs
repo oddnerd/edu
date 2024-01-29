@@ -1,13 +1,12 @@
-
-
-pub fn sort_with<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) -> () {
+pub fn top_down<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) -> () {
     if slice.len() > 1 {
+        assert!(slice.len() == auxiliary.len());
         let (left_aux, right_aux) = auxiliary.split_at_mut(auxiliary.len() / 2);
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
 
-        sort_with(left_aux, left_slice);
-        sort_with(right_aux, right_slice);
+        top_down(left_aux, left_slice);
+        top_down(right_aux, right_slice);
 
         let merger = crate::algorithm::merge::MergeIter::new(left_aux.iter(), right_aux.iter());
 
@@ -25,7 +24,7 @@ mod tests {
     fn sort_with_empty() {
         let mut slice: [usize; 0] = [];
         let mut auxiliary = slice.to_vec();
-        sort_with(&mut slice, &mut auxiliary);
+        top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, []);
     }
 
@@ -33,7 +32,7 @@ mod tests {
     fn sort_with_one() {
         let mut slice = [0];
         let mut auxiliary = slice.to_vec();
-        sort_with(&mut slice, &mut auxiliary);
+        top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0]);
     }
 
@@ -41,7 +40,7 @@ mod tests {
     fn sort_with_two() {
         let mut slice = [2, 1];
         let mut auxiliary = slice.to_vec();
-        sort_with(&mut slice, &mut auxiliary);
+        top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [1, 2]);
     }
 
@@ -49,7 +48,7 @@ mod tests {
     fn sort_with_multiple() {
         let mut slice = [3, 2, 1];
         let mut auxiliary = slice.to_vec();
-        sort_with(&mut slice, &mut auxiliary);
+        top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [1, 2, 3]);
     }
 }
