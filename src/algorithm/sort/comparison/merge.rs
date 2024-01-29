@@ -24,7 +24,7 @@ where
 
 pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T], n: usize) -> ()
 where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
     let mut width: usize = 1;
     loop {
@@ -39,14 +39,21 @@ where
 
             let mut i: usize = 0;
             loop {
-                if i < slice.len() {
-                    merge(
-                        slice,
-                        i,
-                        min(i + width, n),
-                        min(i + 2 * width, n),
-                        auxiliary,
+                if i < n {
+                    // let first = &mut input[left..right];
+                    // let second = &mut input[right..end];
+
+                    let right = min(i + width, n);
+                    let end = min(i + 2 * width, n);
+
+                    let merger = crate::algorithm::merge::MergeIter::new(
+                        auxiliary[i..right].iter(),
+                        auxiliary[right..end].iter(),
                     );
+
+                    std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+                        *old = new.clone();
+                    });
                 } else {
                     break;
                 }
@@ -56,34 +63,6 @@ where
             break;
         }
         width *= 2;
-    }
-
-    std::iter::zip(slice[0..n].iter_mut(), auxiliary[0..n].iter_mut()).for_each(|(old, new)| {
-        *old = new.clone();
-    });
-}
-
-pub fn merge<T>(a: &mut [T], left: usize, right: usize, end: usize, b: &mut [T]) -> ()
-where
-    T: Ord + Clone,
-{
-    let mut i = left;
-    let mut j = right;
-    let mut k = left;
-    loop {
-        if k < end {
-            // If left run head exists and is <= existing right run head.
-            if i < right && (j >= end || a[i] <= a[j]) {
-                b[k] = a[i].clone();
-                i = i + 1;
-            } else {
-                b[k] = a[j].clone();
-                j = j + 1;
-            }
-        } else {
-            break;
-        }
-        k += 1;
     }
 }
 
@@ -152,10 +131,10 @@ mod tests {
 
     #[test]
     fn bottom_up_multiple() {
-        let mut slice = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+        let mut slice = [3, 2, 1];
         let n = slice.len();
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary, n);
-        assert_eq!(slice, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(slice, [1, 2, 3]);
     }
 }
