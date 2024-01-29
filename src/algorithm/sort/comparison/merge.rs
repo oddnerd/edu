@@ -22,13 +22,13 @@ where
     }
 }
 
-pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T], n: usize) -> ()
+pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
 where
     T: Ord + Clone + std::fmt::Debug,
 {
     let mut width: usize = 1;
     loop {
-        if width < n {
+        if width < slice.len() {
             fn min<T: Ord>(first: T, second: T) -> T {
                 if first < second {
                     first
@@ -39,9 +39,9 @@ where
 
             let mut i: usize = 0;
             loop {
-                if i < n {
-                    let right = min(i + width, n);
-                    let end = min(i + 2 * width, n);
+                if i < slice.len() {
+                    let right = min(i + width, slice.len());
+                    let end = min(i + 2 * width, slice.len());
 
                     let subslice = &mut auxiliary[i..end];
                     let (first, second) = subslice.split_at_mut(right - i);
@@ -105,27 +105,24 @@ mod tests {
     #[test]
     fn bottom_up_empty() {
         let mut slice: [usize; 0] = [];
-        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary, n);
+        bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn bottom_up_one() {
         let mut slice = [0];
-        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary, n);
+        bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn bottom_up_two() {
         let mut slice = [2, 1];
-        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary, n);
+        bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, [1, 2]);
     }
 
@@ -133,9 +130,8 @@ mod tests {
     fn bottom_up_multiple() {
         let mut slice: Vec<i32> = (0..16).collect();
         let copy = slice.clone();
-        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary, n);
+        bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, copy);
     }
 }
