@@ -22,13 +22,13 @@ where
     }
 }
 
-pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
+pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T], n: usize) -> ()
 where
     T: Ord + Clone,
 {
     let mut width: usize = 1;
     loop {
-        if width < slice.len() {
+        if width < n {
             fn min<T: Ord>(first: T, second: T) -> T {
                 if first < second {
                     first
@@ -43,8 +43,8 @@ where
                     merge(
                         slice,
                         i,
-                        min(i + slice.len(), slice.len()),
-                        min(i + 2 * width, slice.len()),
+                        min(i + width, n),
+                        min(i + 2 * width, n),
                         auxiliary,
                     );
                 } else {
@@ -58,7 +58,7 @@ where
         width *= 2;
     }
 
-    std::iter::zip(slice, auxiliary).for_each(|(old, new)| {
+    std::iter::zip(slice[0..n].iter_mut(), auxiliary[0..n].iter_mut()).for_each(|(old, new)| {
         *old = new.clone();
     });
 }
@@ -126,32 +126,36 @@ mod tests {
     #[test]
     fn bottom_up_empty() {
         let mut slice: [usize; 0] = [];
+        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary);
+        bottom_up(&mut slice, &mut auxiliary, n);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn bottom_up_one() {
         let mut slice = [0];
+        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary);
+        bottom_up(&mut slice, &mut auxiliary, n);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn bottom_up_two() {
         let mut slice = [2, 1];
+        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary);
+        bottom_up(&mut slice, &mut auxiliary, n);
         assert_eq!(slice, [1, 2]);
     }
 
     #[test]
     fn bottom_up_multiple() {
         let mut slice = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+        let n = slice.len();
         let mut auxiliary = slice.to_vec();
-        bottom_up(&mut slice, &mut auxiliary);
+        bottom_up(&mut slice, &mut auxiliary, n);
         assert_eq!(slice, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
 }
