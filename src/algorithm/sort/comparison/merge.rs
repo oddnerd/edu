@@ -26,14 +26,6 @@ pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    fn min<T: Ord>(first: T, second: T) -> T {
-        if first < second {
-            first
-        } else {
-            second
-        }
-    }
-
     let mut length: usize = 2;
     while length <= slice.len() {
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
