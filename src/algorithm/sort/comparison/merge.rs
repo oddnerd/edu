@@ -40,18 +40,18 @@ where
             let mut i: usize = 0;
             loop {
                 if i < n {
-                    // let first = &mut input[left..right];
-                    // let second = &mut input[right..end];
-
                     let right = min(i + width, n);
                     let end = min(i + 2 * width, n);
 
+                    let subslice = &mut auxiliary[i..end];
+                    let (first, second) = subslice.split_at_mut(right - i);
+
                     let merger = crate::algorithm::merge::MergeIter::new(
-                        auxiliary[i..right].iter(),
-                        auxiliary[right..end].iter(),
+                        first.iter(),
+                        second.iter(),
                     );
 
-                    std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
+                    std::iter::zip(slice[i..end].iter_mut(), merger).for_each(|(old, new)| {
                         *old = new.clone();
                     });
                 } else {
@@ -131,10 +131,11 @@ mod tests {
 
     #[test]
     fn bottom_up_multiple() {
-        let mut slice = [3, 2, 1];
+        let mut slice: Vec<i32> = (0..16).collect();
+        let copy = slice.clone();
         let n = slice.len();
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary, n);
-        assert_eq!(slice, [1, 2, 3]);
+        assert_eq!(slice, copy);
     }
 }
