@@ -34,31 +34,20 @@ where
         }
     }
 
-    let mut width: usize = 1;
-    while width < slice.len() {
-        let mut i: usize = 0;
-        while i < slice.len() {
-            let right = min(i + width, slice.len());
-            let end = min(i + 2 * width, slice.len());
+    let mut length: usize = 2;
+    while length < slice.len() {
+        let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
 
-            println!(
-                "RIGHT/END/LEN: {:?} versus {:?} versus {:?}",
-                i + width,
-                i + 2 * width,
-                slice.len()
-            );
+        for (slice, auxiliary) in chunks {
+            let (left, right) = auxiliary.split_at(length / 2);
 
-            let subslice = &mut auxiliary[i..end];
-            let (first, second) = subslice.split_at_mut(right - i);
+            let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
 
-            let merger = crate::algorithm::merge::MergeIter::new(first.iter(), second.iter());
-
-            std::iter::zip(slice[i..end].iter_mut(), merger).for_each(|(old, new)| {
+            std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
                 *old = new.clone();
             });
-            i += width * 2
         }
-        width *= 2;
+        length *= 2;
     }
 }
 
