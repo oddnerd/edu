@@ -27,10 +27,6 @@ impl<T: Ord + Clone, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter
                 Some(self.first.next().unwrap().clone())
             }
         }
-        else if let Some(right) = self.second.next() {
-            Some(right.clone())
-        } else {
-            None
-        }
+        else { self.second.next() }
     }
 }
