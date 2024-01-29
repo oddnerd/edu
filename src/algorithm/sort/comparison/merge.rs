@@ -1,4 +1,4 @@
-pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
+pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone,
 {
@@ -22,14 +22,13 @@ where
     }
 }
 
-pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
+pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
     let mut length: usize = 2;
     while length <= slice.len() {
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
-
 
         for (slice, auxiliary) in chunks {
             let (left, right) = auxiliary.split_at(length / 2);
