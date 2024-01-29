@@ -30,3 +30,22 @@ impl<T: Ord + Clone, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter
         else { self.second.next() }
     }
 }
+
+pub fn merge<T: Ord + Clone>(
+    input: &[T],
+    low: usize,
+    high: usize,
+    output: &mut [T],
+    offset: usize,
+) {
+    let len = high - low + 1;
+    if len == 1 {
+        output[offset] = input[low].clone();
+    } else {
+        let mut auxiliary: Vec<T> = std::vec::Vec::with_capacity(len);
+        let middle = (low + high) / 2;
+        let other_middle = middle - low + 1;
+        merge(input, low, middle, &mut auxiliary, 1);
+        merge(input, middle + 1, high, &mut auxiliary, other_middle + 1);
+    }
+}
