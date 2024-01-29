@@ -106,6 +106,7 @@ mod tests {
     #[test]
     fn bottom_up_multiple() {
         let mut slice: Vec<i32> = (0..16).collect();
+        slice.reverse();
         let copy = slice.clone();
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
