@@ -22,6 +22,72 @@ where
     }
 }
 
+pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T]) -> ()
+where
+    T: Ord + Clone,
+{
+    let mut width: usize = 1;
+    loop {
+        if width < slice.len() {
+            let mut i: usize = 0;
+
+            fn min<T: Ord>(first: T, second: T) -> T {
+                if first < second {
+                    first
+                } else {
+                    second
+                }
+            }
+
+            loop {
+                if i < slice.len() {
+                    merge(
+                        slice,
+                        i,
+                        min(i + slice.len(), slice.len()),
+                        min(i + 2 * width, slice.len()),
+                        auxiliary,
+                    );
+                } else {
+                    break;
+                }
+                i = i + width * 2
+            }
+        } else {
+            break;
+        }
+        width = 2 * width;
+    }
+
+    std::iter::zip(slice, auxiliary).for_each(|(old, new)| {
+        *old = new.clone();
+    });
+}
+
+pub fn merge<T>(a: &mut [T], left: usize, right: usize, end: usize, b: &mut [T]) -> ()
+where
+    T: Ord + Clone,
+{
+    let mut i = left;
+    let mut j = right;
+    let mut k = left;
+    loop {
+        if k < end {
+            // If left run head exists and is <= existing right run head.
+            if i < right && (j >= end || a[i] <= a[j]) {
+                b[k] = a[i].clone();
+                i = i + 1;
+            } else {
+                b[k] = a[j].clone();
+                j = j + 1;
+            }
+        } else {
+            break;
+        }
+        k += 1;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
