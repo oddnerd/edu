@@ -29,8 +29,6 @@ where
     let mut width: usize = 1;
     loop {
         if width < slice.len() {
-            let mut i: usize = 0;
-
             fn min<T: Ord>(first: T, second: T) -> T {
                 if first < second {
                     first
@@ -39,6 +37,7 @@ where
                 }
             }
 
+            let mut i: usize = 0;
             loop {
                 if i < slice.len() {
                     merge(
@@ -51,12 +50,12 @@ where
                 } else {
                     break;
                 }
-                i = i + width * 2
+                i += width * 2
             }
         } else {
             break;
         }
-        width = 2 * width;
+        width *= 2;
     }
 
     std::iter::zip(slice, auxiliary).for_each(|(old, new)| {
@@ -155,5 +154,4 @@ mod tests {
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
-
 }
