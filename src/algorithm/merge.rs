@@ -45,7 +45,7 @@ where
     }
 
     let r = first.len() / 2;
-    let s = match second.binary_search(first.first().unwrap()) {
+    let s = match second.binary_search(&first[r]) {
         Ok(index) => index,
         Err(index) => index,
     };
