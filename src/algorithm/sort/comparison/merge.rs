@@ -123,4 +123,37 @@ mod tests {
         top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [1, 2, 3]);
     }
+
+    #[test]
+    fn bottom_up_empty() {
+        let mut slice: [usize; 0] = [];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn bottom_up_one() {
+        let mut slice = [0];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn bottom_up_two() {
+        let mut slice = [2, 1];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2]);
+    }
+
+    #[test]
+    fn bottom_up_multiple() {
+        let mut slice = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+        let mut auxiliary = slice.to_vec();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
+
 }
