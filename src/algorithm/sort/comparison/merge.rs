@@ -1,3 +1,16 @@
+//! Implementations of [Merge Sort](https://en.wikipedia.org/wiki/Merge_sort).
+
+/// Sort `slice` using duplicate `auxiliary` memory.
+///
+/// Recursively divide `slice`, sort subslices, and merge the result.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::merge::top_down;
+/// let mut slice = [3,1,5];
+/// let mut auxiliary = slice.to_vec();
+/// top_down(&mut slice, &mut auxiliary);
+/// ```
 pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone,
@@ -22,6 +35,17 @@ where
     }
 }
 
+/// Sort `slice` using duplicate `auxiliary` memory.
+///
+/// Iteratively merge elements into larger groups.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::merge::bottom_up;
+/// let mut slice = [3,1,5];
+/// let mut auxiliary = slice.to_vec();
+/// bottom_up(&mut slice, &mut auxiliary);
+/// ```
 pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,

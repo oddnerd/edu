@@ -1,9 +1,24 @@
+//! Combine (merge) sorted collections whilst preserving order.
+
+/// Merge two other [`Iterator`].
+///
+/// Assumes the underlying `Iterator` return items in sorted order.
+///
+/// # Examples:
+/// ```
+/// use rust::algorithm::merge::MergeIter;
+/// let first = [0,2,4];
+/// let second = [1,3,5];
+/// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).collect();
+/// ```
 pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
     first: std::iter::Peekable<Iter>,
     second: std::iter::Peekable<Iter>,
 }
 
 impl<T: Ord, Iter: std::iter::Iterator<Item = T>> MergeIter<T, Iter> {
+
+    /// Construct a [`MergeIter`] from two other [`Iterator`].
     pub fn new(first: Iter, second: Iter) -> Self {
         MergeIter {
             first: first.peekable(),
@@ -32,6 +47,16 @@ impl<T: Ord, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter<T, Iter
     }
 }
 
+/// Merge `first` and `second` into `output`.
+///
+/// # Examples:
+/// ```
+/// use rust::algorithm::merge::recursive;
+/// let first = [0,2,4];
+/// let second = [1,3,5];
+/// let mut output = [0; 6];
+/// recursive(&first, &second, &mut output);
+/// ```
 pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
 where
     T: Ord + Clone,
