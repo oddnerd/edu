@@ -18,6 +18,7 @@
 /// let mut slice = [3,1,5];
 /// let mut auxiliary = slice.to_vec();
 /// top_down(&mut slice, &mut auxiliary);
+/// assert_eq!(slice, [1,3,5]);
 /// ```
 pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
 where
