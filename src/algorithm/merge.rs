@@ -107,7 +107,9 @@ mod mergeiter_tests {
     }
 }
 
-/// Merge `first` and `second` into `output`.
+/// Merge two slices into one output slice.
+///
+/// Peek each underlying [`Iterator`] and compare, returning the smaller without consuming the other, thereby allowing it to be quired again next.
 ///
 /// # Examples:
 /// ```
@@ -116,6 +118,7 @@ mod mergeiter_tests {
 /// let second = [1,3,5];
 /// let mut output = [0; 6];
 /// recursive(&first, &second, &mut output);
+/// assert_eq!(output, [0,1,2,3,4,5]);
 /// ```
 pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
 where
