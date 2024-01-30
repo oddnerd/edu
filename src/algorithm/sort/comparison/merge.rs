@@ -8,9 +8,13 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
-/// Sort `slice` using duplicate `auxiliary` memory.
+/// Sort a slice via top-down merge sort.
 ///
-/// Recursively divide `slice`, sort subslices, and merge the result.
+/// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
+///
+/// Recursively divide `slice` (and corresponding `auxiliary`) into two subsets
+/// until themsleves sorted. Merge the sorted sublists by iteratively
+/// cloneing the smallest element from `auxiliary` into `slice`.
 ///
 /// # Examples
 /// ```
@@ -30,8 +34,9 @@ where
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
 
-        // auxiliary becomes the sorted left/right slices to be merged,
-        // alternate input/auxiliary to avoid additional clone
+        // Alternating `slice`/`auxiliary` prevents unnecessary clone for
+        // top-level caller by ensuring `auxiliary` becomes the sorted
+        // left/right subslices thenceforth merged into the output (`slice`).
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
