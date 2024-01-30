@@ -1,15 +1,16 @@
 //! Combine (merge) sorted collections whilst preserving order.
 
-/// Merge two other [`Iterator`].
+/// An [`Iterator`] to traverse two other sorted [`Iterator`] in sorted order.
 ///
-/// Assumes the underlying `Iterator` return items in sorted order.
+/// <div class="warning">The underlying [`Iterator`]s MUST return items in sorted order</div>
 ///
 /// # Examples:
 /// ```
 /// use rust::algorithm::merge::MergeIter;
 /// let first = [0,2,4];
 /// let second = [1,3,5];
-/// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).collect();
+/// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).cloned().collect();
+/// assert_eq!(output, [0,1,2,3,4,5]);
 /// ```
 pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
     first: std::iter::Peekable<Iter>,
@@ -17,7 +18,6 @@ pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
 }
 
 impl<T: Ord, Iter: std::iter::Iterator<Item = T>> MergeIter<T, Iter> {
-
     /// Construct a [`MergeIter`] from two other [`Iterator`].
     pub fn new(first: Iter, second: Iter) -> Self {
         MergeIter {
@@ -105,7 +105,6 @@ mod mergeiter_tests {
         assert_eq!(*result[2], 2);
         assert_eq!(*result[3], 3);
     }
-
 }
 
 /// Merge `first` and `second` into `output`.
@@ -135,8 +134,16 @@ where
 
         output[middle + intersect] = first[middle].clone();
 
-        recursive(&first[..middle], &second[..intersect], &mut output[..middle + intersect]);
-        recursive(&first[middle + 1..], &second[intersect..], &mut output[middle + intersect + 1..]);
+        recursive(
+            &first[..middle],
+            &second[..intersect],
+            &mut output[..middle + intersect],
+        );
+        recursive(
+            &first[middle + 1..],
+            &second[intersect..],
+            &mut output[middle + intersect + 1..],
+        );
     }
 }
 
@@ -203,5 +210,4 @@ mod recursive_tests {
         assert_eq!(output[2], 2);
         assert_eq!(output[3], 3);
     }
-
 }
