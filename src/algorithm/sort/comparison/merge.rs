@@ -28,8 +28,8 @@ pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone,
 {
+    assert!(slice == auxiliary);
     if slice.len() > 1 {
-        assert!(slice.len() == auxiliary.len());
         let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
@@ -47,6 +47,44 @@ where
             *old = new.clone();
         });
     }
+}
+
+#[cfg(test)]
+mod top_down_tests {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let mut slice: [usize; 0] = [];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn one() {
+        let mut slice = [0];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn two() {
+        let mut slice = [2, 1];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2]);
+    }
+
+    #[test]
+    fn multiple() {
+        let mut slice = [3, 2, 1];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
 }
 
 /// Sort a slice via bottom-up merge sort.
@@ -69,6 +107,7 @@ pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
+    assert!(slice == auxiliary);
     let mut length: usize = 2;
     while length <= slice.len() {
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
@@ -93,43 +132,11 @@ where
 }
 
 #[cfg(test)]
-mod tests {
+mod bottom_up_tests {
     use super::*;
 
     #[test]
-    fn top_down_empty() {
-        let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, []);
-    }
-
-    #[test]
-    fn top_down_one() {
-        let mut slice = [0];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0]);
-    }
-
-    #[test]
-    fn top_down_two() {
-        let mut slice = [2, 1];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2]);
-    }
-
-    #[test]
-    fn top_down_multiple() {
-        let mut slice = [3, 2, 1];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2, 3]);
-    }
-
-    #[test]
-    fn bottom_up_empty() {
+    fn empty() {
         let mut slice: [usize; 0] = [];
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
@@ -137,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn bottom_up_one() {
+    fn one() {
         let mut slice = [0];
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
@@ -145,7 +152,7 @@ mod tests {
     }
 
     #[test]
-    fn bottom_up_two() {
+    fn two() {
         let mut slice = [2, 1];
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
@@ -153,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn bottom_up_multiple() {
+    fn multiple() {
         let mut slice: Vec<i32> = (0..4).collect();
         let copy = slice.clone();
         slice.reverse();
@@ -161,4 +168,5 @@ mod tests {
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, copy);
     }
+
 }
