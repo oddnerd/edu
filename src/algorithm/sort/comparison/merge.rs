@@ -49,9 +49,13 @@ where
     }
 }
 
-/// Sort `slice` using duplicate `auxiliary` memory.
+/// Sort a slice via bottom-up merge sort.
 ///
-/// Iteratively merge elements into larger groups.
+/// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
+///
+/// Iteratively merge chunks of 2<sup>n</sup> elements. Start by merging
+/// single elements into chunks of two elements, then merge those into chunks
+/// of four elements, then merge all those chunks, so on and so forth.
 ///
 /// # Examples
 /// ```
@@ -70,16 +74,16 @@ where
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
 
         for (slice, auxiliary) in chunks {
-            let (left, right) = auxiliary.split_at(length / 2);
+            let (left, right) = auxiliary.split_at(auxiliary.len() / 2);
 
             let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
 
-            // merge from auxiliary into slice
+            // merge from `auxiliary` into `slice`
             std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
                 *old = new.clone();
             });
 
-            // propogate merged slice to auxiliary for when next merged
+            // propagate sorted `slice` to `auxiliary` for next chunk iteration
             std::iter::zip(auxiliary.iter_mut(), slice.iter()).for_each(|(old, new)| {
                 *old = new.clone();
             });
