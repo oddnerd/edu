@@ -101,6 +101,7 @@ pub fn inplace<T>(whole: &mut [T], middle: usize)
 where
     T: Ord,
 {
+    todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
 }
 
 #[cfg(test)]
