@@ -8,9 +8,13 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
-/// Sort `slice` using duplicate `auxiliary` memory.
+/// Sort a slice via top-down merge sort.
 ///
-/// Recursively divide `slice`, sort subslices, and merge the result.
+/// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
+///
+/// Recursively divide `slice` (and corresponding `auxiliary`) into two subsets
+/// until themsleves sorted. Merge the sorted sublists by iteratively
+/// cloneing the smallest element from `auxiliary` into `slice`.
 ///
 /// # Examples
 /// ```
@@ -18,19 +22,21 @@
 /// let mut slice = [3,1,5];
 /// let mut auxiliary = slice.to_vec();
 /// top_down(&mut slice, &mut auxiliary);
+/// assert_eq!(slice, [1,3,5]);
 /// ```
 pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone,
 {
+    assert!(slice == auxiliary);
     if slice.len() > 1 {
-        assert!(slice.len() == auxiliary.len());
         let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
 
         let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
 
-        // auxiliary becomes the sorted left/right slices to be merged,
-        // alternate input/auxiliary to avoid additional clone
+        // Alternating `slice`/`auxiliary` prevents unnecessary clone for
+        // top-level caller by ensuring `auxiliary` becomes the sorted
+        // left/right subslices thenceforth merged into the output (`slice`).
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
@@ -43,9 +49,51 @@ where
     }
 }
 
-/// Sort `slice` using duplicate `auxiliary` memory.
+#[cfg(test)]
+mod top_down_tests {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let mut slice: [usize; 0] = [];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn one() {
+        let mut slice = [0];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn two() {
+        let mut slice = [2, 1];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2]);
+    }
+
+    #[test]
+    fn multiple() {
+        let mut slice = [3, 2, 1];
+        let mut auxiliary = slice.to_vec();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
+}
+
+/// Sort a slice via bottom-up merge sort.
 ///
-/// Iteratively merge elements into larger groups.
+/// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
+///
+/// Iteratively merge chunks of 2<sup>n</sup> elements. Start by merging
+/// single elements into chunks of two elements, then merge those into chunks
+/// of four elements, then merge all those chunks, so on and so forth.
 ///
 /// # Examples
 /// ```
@@ -53,26 +101,28 @@ where
 /// let mut slice = [3,1,5];
 /// let mut auxiliary = slice.to_vec();
 /// bottom_up(&mut slice, &mut auxiliary);
+/// assert_eq!(slice, [1,3,5]);
 /// ```
 pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
+    assert!(slice == auxiliary);
     let mut length: usize = 2;
     while length <= slice.len() {
         let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
 
         for (slice, auxiliary) in chunks {
-            let (left, right) = auxiliary.split_at(length / 2);
+            let (left, right) = auxiliary.split_at(auxiliary.len() / 2);
 
             let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
 
-            // merge from auxiliary into slice
+            // merge from `auxiliary` into `slice`
             std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
                 *old = new.clone();
             });
 
-            // propogate merged slice to auxiliary for when next merged
+            // propagate sorted `slice` to `auxiliary` for next chunk iteration
             std::iter::zip(auxiliary.iter_mut(), slice.iter()).for_each(|(old, new)| {
                 *old = new.clone();
             });
@@ -82,43 +132,11 @@ where
 }
 
 #[cfg(test)]
-mod tests {
+mod bottom_up_tests {
     use super::*;
 
     #[test]
-    fn top_down_empty() {
-        let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, []);
-    }
-
-    #[test]
-    fn top_down_one() {
-        let mut slice = [0];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0]);
-    }
-
-    #[test]
-    fn top_down_two() {
-        let mut slice = [2, 1];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2]);
-    }
-
-    #[test]
-    fn top_down_multiple() {
-        let mut slice = [3, 2, 1];
-        let mut auxiliary = slice.to_vec();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2, 3]);
-    }
-
-    #[test]
-    fn bottom_up_empty() {
+    fn empty() {
         let mut slice: [usize; 0] = [];
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
@@ -126,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn bottom_up_one() {
+    fn one() {
         let mut slice = [0];
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
@@ -134,7 +152,7 @@ mod tests {
     }
 
     #[test]
-    fn bottom_up_two() {
+    fn two() {
         let mut slice = [2, 1];
         let mut auxiliary = slice.to_vec();
         bottom_up(&mut slice, &mut auxiliary);
@@ -142,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn bottom_up_multiple() {
+    fn multiple() {
         let mut slice: Vec<i32> = (0..4).collect();
         let copy = slice.clone();
         slice.reverse();
@@ -150,4 +168,5 @@ mod tests {
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, copy);
     }
+
 }

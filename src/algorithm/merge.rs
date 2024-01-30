@@ -1,15 +1,16 @@
 //! Combine (merge) sorted collections whilst preserving order.
 
-/// Merge two other [`Iterator`].
+/// An [`Iterator`] to traverse two other sorted [`Iterator`] in sorted order.
 ///
-/// Assumes the underlying `Iterator` return items in sorted order.
+/// <div class="warning">The underlying [`Iterator`]s MUST return items in sorted order</div>
 ///
 /// # Examples:
 /// ```
 /// use rust::algorithm::merge::MergeIter;
 /// let first = [0,2,4];
 /// let second = [1,3,5];
-/// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).collect();
+/// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).cloned().collect();
+/// assert_eq!(output, [0,1,2,3,4,5]);
 /// ```
 pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
     first: std::iter::Peekable<Iter>,
@@ -17,7 +18,6 @@ pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
 }
 
 impl<T: Ord, Iter: std::iter::Iterator<Item = T>> MergeIter<T, Iter> {
-
     /// Construct a [`MergeIter`] from two other [`Iterator`].
     pub fn new(first: Iter, second: Iter) -> Self {
         MergeIter {
@@ -47,7 +47,69 @@ impl<T: Ord, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter<T, Iter
     }
 }
 
-/// Merge `first` and `second` into `output`.
+#[cfg(test)]
+mod mergeiter_tests {
+    use super::*;
+
+    #[test]
+    fn first_empty() {
+        let first = [];
+        let second = [0];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(*result[0], 0);
+    }
+
+    #[test]
+    fn second_empty() {
+        let first = [0];
+        let second = [];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(*result[0], 0);
+    }
+
+    #[test]
+    fn first_greater() {
+        let first = [1];
+        let second = [0];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+    }
+
+    #[test]
+    fn second_greater() {
+        let first = [0];
+        let second = [1];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 2);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+    }
+
+    #[test]
+    fn back_and_forth() {
+        let first = [1, 2];
+        let second = [0, 3];
+        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+
+        assert_eq!(result.len(), 4);
+        assert_eq!(*result[0], 0);
+        assert_eq!(*result[1], 1);
+        assert_eq!(*result[2], 2);
+        assert_eq!(*result[3], 3);
+    }
+}
+
+/// Merge two slices into one output slice.
+///
+/// Peek each underlying [`Iterator`] and compare, returning the smaller without consuming the other, thereby allowing it to be quired again next.
 ///
 /// # Examples:
 /// ```
@@ -56,6 +118,7 @@ impl<T: Ord, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter<T, Iter
 /// let second = [1,3,5];
 /// let mut output = [0; 6];
 /// recursive(&first, &second, &mut output);
+/// assert_eq!(output, [0,1,2,3,4,5]);
 /// ```
 pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
 where
@@ -74,72 +137,25 @@ where
 
         output[middle + intersect] = first[middle].clone();
 
-        recursive(&first[..middle], &second[..intersect], &mut output[..middle + intersect]);
-        recursive(&first[middle + 1..], &second[intersect..], &mut output[middle + intersect + 1..]);
+        recursive(
+            &first[..middle],
+            &second[..intersect],
+            &mut output[..middle + intersect],
+        );
+        recursive(
+            &first[middle + 1..],
+            &second[intersect..],
+            &mut output[middle + intersect + 1..],
+        );
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod recursive_tests {
     use super::*;
 
     #[test]
-    fn mergeiter_first_empty() {
-        let first = [];
-        let second = [0];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 1);
-        assert_eq!(*result[0], 0);
-    }
-
-    #[test]
-    fn mergeiter_second_empty() {
-        let first = [0];
-        let second = [];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 1);
-        assert_eq!(*result[0], 0);
-    }
-
-    #[test]
-    fn mergeiter_first_greater() {
-        let first = [1];
-        let second = [0];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 2);
-        assert_eq!(*result[0], 0);
-        assert_eq!(*result[1], 1);
-    }
-
-    #[test]
-    fn mergeiter_second_greater() {
-        let first = [0];
-        let second = [1];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 2);
-        assert_eq!(*result[0], 0);
-        assert_eq!(*result[1], 1);
-    }
-
-    #[test]
-    fn mergeiter_back_and_forth() {
-        let first = [1, 2];
-        let second = [0, 3];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 4);
-        assert_eq!(*result[0], 0);
-        assert_eq!(*result[1], 1);
-        assert_eq!(*result[2], 2);
-        assert_eq!(*result[3], 3);
-    }
-
-    #[test]
-    fn recursive_first_empty() {
+    fn first_empty() {
         let first = [];
         let second = [0];
         let mut output = vec![0; 1];
@@ -150,7 +166,7 @@ mod tests {
     }
 
     #[test]
-    fn recursive_second_empty() {
+    fn second_empty() {
         let first = [0];
         let second = [];
         let mut output = vec![0; 1];
@@ -161,7 +177,7 @@ mod tests {
     }
 
     #[test]
-    fn recursive_first_greater() {
+    fn first_greater() {
         let first = [1];
         let second = [0];
         let mut output = vec![0; 2];
@@ -173,7 +189,7 @@ mod tests {
     }
 
     #[test]
-    fn recursive_second_greater() {
+    fn second_greater() {
         let first = [0];
         let second = [1];
         let mut output = vec![0; 2];
@@ -185,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    fn recursive_back_and_forth() {
+    fn back_and_forth() {
         let first = [1, 2];
         let second = [0, 3];
         let mut output = vec![0; 4];
