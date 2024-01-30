@@ -59,6 +59,7 @@ where
 /// let mut slice = [3,1,5];
 /// let mut auxiliary = slice.to_vec();
 /// bottom_up(&mut slice, &mut auxiliary);
+/// assert_eq!(slice, [1,3,5]);
 /// ```
 pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
 where
