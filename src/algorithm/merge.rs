@@ -17,7 +17,6 @@ pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
 }
 
 impl<T: Ord, Iter: std::iter::Iterator<Item = T>> MergeIter<T, Iter> {
-
     /// Construct a [`MergeIter`] from two other [`Iterator`].
     pub fn new(first: Iter, second: Iter) -> Self {
         MergeIter {
@@ -74,9 +73,34 @@ where
 
         output[middle + intersect] = first[middle].clone();
 
-        recursive(&first[..middle], &second[..intersect], &mut output[..middle + intersect]);
-        recursive(&first[middle + 1..], &second[intersect..], &mut output[middle + intersect + 1..]);
+        recursive(
+            &first[..middle],
+            &second[..intersect],
+            &mut output[..middle + intersect],
+        );
+        recursive(
+            &first[middle + 1..],
+            &second[intersect..],
+            &mut output[middle + intersect + 1..],
+        );
     }
+}
+
+/// Merge `whole[..middle]` with `whole[middle..]` without auxiliary memory.
+///
+/// A naive solution is O(n<sup>2</sup>), this should be O(n log n).
+///
+/// # Examples:
+/// ```
+/// use rust::algorithm::merge::inplace;
+/// let mut slice = [1,3,5,2,4,6];
+/// inplace(&mut slice, 3);
+/// //assert_eq!(slice, [1,2,3,4,5,6]);
+/// ```
+pub fn inplace<T>(whole: &mut [T], middle: usize)
+where
+    T: Ord,
+{
 }
 
 #[cfg(test)]
