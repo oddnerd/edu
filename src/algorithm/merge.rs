@@ -218,20 +218,32 @@ mod recursive_tests {
 
 /// Merge two halves of a slice in-place.
 ///
-/// Has n<sup>2</sup> time complexity.
+/// Naive implementation, n<sup>2</sup> time complexity.
 ///
 /// # Examples
 /// ```
 /// use rust::algorithm::merge::inplace;
 /// let mut slice = [0,2,4,1,3,5];
-/// inplace(slice, 3);
+/// inplace(&mut slice, 3);
 /// assert_eq!(slice, [0,1,2,3,4,5]);
 /// ```
-fn inplace<T>(slice: &mut [T], middle: usize)
+pub fn inplace<T>(slice: &mut [T], mut middle: usize)
 where
     T: Ord,
 {
-    todo!("that's a rotate");
+    let mut left = 0;
+    let mut right = middle;
+
+    while (left < middle) && (right < slice.len()) {
+        if slice[left] < slice[right] {
+            left += 1;
+        } else {
+            slice[left..=right].rotate_right(1);
+            left += 1;
+            middle += 1;
+            right += 1;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -254,22 +266,22 @@ mod inplace_tests {
 
     #[test]
     fn first_greater() {
-        let mut slice = [1,0];
+        let mut slice = [1, 0];
         inplace(&mut slice, 1);
-        assert_eq!(slice, [0,1]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
     fn second_greater() {
-        let mut slice = [0,1];
+        let mut slice = [0, 1];
         inplace(&mut slice, 1);
-        assert_eq!(slice, [0,1]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
     fn back_and_forth() {
-        let mut slice = [0,3,1,2];
+        let mut slice = [0, 3, 1, 2];
         inplace(&mut slice, 2);
-        assert_eq!(slice, [0,1,2,3]);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
