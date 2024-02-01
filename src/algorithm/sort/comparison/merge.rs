@@ -82,10 +82,44 @@ where
 }
 
 fn swap<T>(slice: &mut [T], first: usize, second: usize)
-where T: Clone{
+where
+    T: Clone,
+{
     let tmp = slice[first].clone();
     slice[first] = slice[second].clone();
     slice[second] = tmp;
+}
+
+fn wmerge<T>(
+    slice: &mut [T],
+    mut l_begin: usize,
+    l_end: usize,
+    mut r_begin: usize,
+    r_end: usize,
+    mut output: usize,
+) where
+    T: Ord + Clone,
+{
+    while l_begin < l_end && r_begin < r_end {
+        if slice[l_begin] < slice[r_begin] {
+            swap(slice, output, l_begin);
+            l_begin += 1;
+        } else {
+            swap(slice, output, r_begin);
+            r_begin += 1;
+        }
+        output += 1;
+    }
+    while l_begin < l_end {
+        swap(slice, output, l_begin);
+        output += 1;
+        l_begin += 1;
+    }
+    while r_begin < r_end {
+        swap(slice, output, r_begin);
+        output += 1;
+        r_begin += 1;
+    }
 }
 
 // #[cfg(test)]
