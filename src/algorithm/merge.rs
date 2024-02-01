@@ -99,9 +99,11 @@ where
 /// ```
 pub fn inplace<T>(whole: &mut [T], middle: usize, w: usize)
 where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
     // todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
+
+    println!("merge({:?}: {:?} - {:?})", w, &whole[..middle], &whole[middle..]);
 
     w_merge(whole, 0, middle, middle, whole.len(), w);
 
@@ -113,30 +115,40 @@ where
         n: usize,
         mut w: usize,
     ) where
-        T: Ord + Clone,
+        T: Ord + Clone + std::fmt::Debug,
     {
         // let first = [i..m];
         // let second = [j..n];
         // let outout = [w..];
 
+        println!("\t m: {:?}", m);
+
         while (i < m) && (j < n) {
+            println!("\t [{:?}] both", w);
             // swap(w++, if slice[i] < slice[j] {i++} else {j++});
             if slice[i] < slice[j] {
+                println!("\t\tswap(w {:?}, i {:?})", slice[w], slice[i]);
                 (slice[w], slice[i]) = (slice[i].clone(), slice[w].clone());
+                println!("\t\t{:?}", slice);
                 i += 1;
             } else {
+                println!("\t\tswap(w {:?}, j {:?})", slice[w], slice[j]);
                 (slice[w], slice[j]) = (slice[j].clone(), slice[w].clone());
+                println!("\t\t{:?}", slice);
                 j += 1;
             }
             w += 1;
         }
         while i < m {
+            println!("\tswap(w ({:?}) {:?}, i {:?})", w, slice[w], slice[i]);
             // swap(w++, i++);
             (slice[w], slice[i]) = (slice[i].clone(), slice[w].clone());
+            println!("\t\t{:?}", slice);
             w += 1;
             i += 1;
         }
         while j < n {
+            println!("\tswap(w {:?}, j {:?})", slice[w], slice[j]);
             // swap(w++, j++);
             (slice[w], slice[j]) = (slice[j].clone(), slice[w].clone());
             w += 1;

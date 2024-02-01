@@ -83,9 +83,11 @@ where
 
 fn wsort<T>(slice: &mut [T], mut l: usize, u: usize, mut w: usize)
 where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
-    if slice.len() > 1 {
+    println!("wsort({:?}, {:?})", &slice[l..u], w);
+
+    if u - l > 1 {
         let middle = slice.len() / 2;
         let (left, right) = slice.split_at_mut(middle);
         inplace(left);
@@ -102,18 +104,31 @@ where
 
 pub fn inplace<T>(slice: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
+    println!("inplace({:?})", slice);
+
     if slice.len() > 1 {
         let middle = slice.len() / 2;
         let mut w = slice.len() - middle;
         wsort(slice, 0, middle, w);
 
-        while w  > 2 {
+        while w > 2 {
             let n = w;
             w = (n + 1) / 2;
             wsort(slice, w, n, 0);
             crate::algorithm::merge::inplace(slice, n, w);
+        }
+
+        let mut n = w;
+        while n > 0 {
+            let mut m = n;
+            while (m < slice.len()) && (slice[m] < slice[m - 1]) {
+                (slice[m], slice[m - 1]) = (slice[m - 1].clone(), slice[m].clone());
+                m += 1;
+            }
+
+            n -= 1;
         }
     }
 }
@@ -138,9 +153,9 @@ mod inplace_tests {
 
     #[test]
     fn two() {
-        let mut slice = [1,0];
+        let mut slice = [1, 0];
         inplace(&mut slice);
-        assert_eq!(slice, [0,1]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
