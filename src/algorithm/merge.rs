@@ -86,24 +86,6 @@ where
     }
 }
 
-/// Merge `whole[..middle]` with `whole[middle..]` without auxiliary memory.
-///
-/// A naive solution is O(n<sup>2</sup>), this should be O(n log n).
-///
-/// # Examples:
-/// ```
-/// use rust::algorithm::merge::inplace;
-/// let mut slice = [1,3,5,2,4,6];
-/// inplace(&mut slice, 3);
-/// //assert_eq!(slice, [1,2,3,4,5,6]);
-/// ```
-pub fn inplace<T>(slice: &mut [T], middle: usize)
-where
-    T: Ord + Clone,
-{
-    todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
