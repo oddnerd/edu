@@ -128,29 +128,8 @@ where
 {
     let merger = MergeIter::new(first.iter_mut(), second.iter_mut());
 
-    std::iter::zip(merger, output.iter_mut()).for_each(|(merged, output)| {(*merged, *output) = (output.clone(), merged.clone())});
-
-}
-
-fn wsort<T>(slice: &mut [T], mut begin: usize, end: usize, mut output: usize)
-where
-    T: Ord + Clone + std::fmt::Debug,
-{
-    println!("wsort({:?}, {:?})", &slice[begin..end], &slice[output..]);
-
-    let len = end - begin;
-    if len > 1 {
-        let middle = begin + len / 2;
-        inplace(&mut slice[begin..middle]);
-        inplace(&mut slice[middle..end]);
-        wmerge(slice, begin, middle, middle, end, output);
-    } else {
-        while begin < end {
-            (slice[begin], slice[output]) = (slice[output].clone(), slice[begin].clone());
-            begin += 1;
-            output += 1;
-        }
-    }
+    std::iter::zip(merger, output.iter_mut())
+        .for_each(|(merged, output)| (*merged, *output) = (output.clone(), merged.clone()));
 }
 
 fn inplace_mergesort_to<T>(input: &mut [T], output: &mut [T])
@@ -196,10 +175,9 @@ where
             let middle = output;
             output = (middle + 1) / 2;
 
-            // sort slice[..quarter] into slice[quarter..middle]
-            // let (left, right) = slice.split_at_mut(output);
-            // inplace_mergesort_to(&mut right[..middle], left);
-            wsort(slice, output, middle, 0);
+            // sort slice[output..middle] into slice[..output]
+            let (left, right) = slice.split_at_mut(output);
+            inplace_mergesort_to(&mut right[..middle - output], left);
 
             wmerge(slice, 0, middle - output, middle, slice.len(), output);
         }
