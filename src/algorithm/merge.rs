@@ -97,11 +97,52 @@ where
 /// inplace(&mut slice, 3);
 /// //assert_eq!(slice, [1,2,3,4,5,6]);
 /// ```
-pub fn inplace<T>(whole: &mut [T], middle: usize)
+pub fn inplace<T>(whole: &mut [T], middle: usize, w: usize)
 where
-    T: Ord,
+    T: Ord + Clone,
 {
-    todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
+    // todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
+
+    w_merge(whole, 0, middle, middle, whole.len(), w);
+
+    fn w_merge<T>(
+        slice: &mut [T],
+        mut i: usize,
+        mut m: usize,
+        mut j: usize,
+        mut n: usize,
+        mut w: usize,
+    ) where
+        T: Ord + Clone,
+    {
+        // let first = [i..m];
+        // let second = [j..n];
+        // let outout = [w..];
+
+        while (i < m) && (j < n) {
+            // swap(w++, if slice[i] < slice[j] {i++} else {j++});
+            if slice[i] < slice[j] {
+                (slice[w], slice[i]) = (slice[i].clone(), slice[w].clone());
+                i += 1;
+            } else {
+                (slice[w], slice[j]) = (slice[j].clone(), slice[w].clone());
+                j += 1;
+            }
+            w += 1;
+        }
+        while i < m {
+            // swap(w++, i++);
+            (slice[w], slice[i]) = (slice[i].clone(), slice[w].clone());
+            w += 1;
+            i += 1;
+        }
+        while j < n {
+            // swap(w++, j++);
+            (slice[w], slice[j]) = (slice[j].clone(), slice[w].clone());
+            w += 1;
+            j += 1;
+        }
+    }
 }
 
 #[cfg(test)]

@@ -8,6 +8,8 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
+use std::sync::WaitTimeoutResult;
+
 /// Sort `slice` using duplicate `auxiliary` memory.
 ///
 /// Recursively divide `slice`, sort subslices, and merge the result.
@@ -78,6 +80,43 @@ where
             });
         }
         length *= 2;
+    }
+}
+
+fn wsort<T>(slice: &mut [T], mut l: usize, u: usize, mut w: usize)
+where
+    T: Ord + Clone,
+{
+    if slice.len() > 1 {
+        let middle = slice.len() / 2;
+        let (left, right) = slice.split_at_mut(middle);
+        inplace(left);
+        inplace(right);
+        crate::algorithm::merge::inplace(slice, middle, w);
+    } else {
+        while l < u {
+            (slice[l], slice[w]) = (slice[w].clone(), slice[l].clone());
+            l += 1;
+            w += 1;
+        }
+    }
+}
+
+pub fn inplace<T>(slice: &mut [T])
+where
+    T: Ord + Clone,
+{
+    if slice.len() > 1 {
+        let middle = slice.len() / 2;
+        let mut w = slice.len() - middle;
+        wsort(slice, 0, middle, w);
+
+        while w  > 2 {
+            let n = w;
+            w = (n + 1) / 2;
+            wsort(slice, w, n, 0);
+            crate::algorithm::merge::inplace(slice, n, w);
+        }
     }
 }
 
