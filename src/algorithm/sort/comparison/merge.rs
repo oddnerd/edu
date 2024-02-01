@@ -89,8 +89,15 @@ fn wmerge<T>(
     right_end: usize,
     mut output: usize,
 ) where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
+    println!(
+        "wmerge({:?}, {:?}, {:?})",
+        &slice[left..left_end],
+        &slice[right..right_end],
+        &slice[output..]
+    );
+
     while left < left_end && right < right_end {
         if slice[left] < slice[right] {
             (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
@@ -115,8 +122,10 @@ fn wmerge<T>(
 
 fn wsort<T>(slice: &mut [T], mut begin: usize, end: usize, mut output: usize)
 where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
+    println!("wsort({:?}, {:?})", &slice[begin..end], &slice[output..]);
+
     let len = end - begin;
     if len > 1 {
         let middle = begin + len / 2;
@@ -134,10 +143,11 @@ where
 
 fn imsort<T>(slice: &mut [T], begin: usize, end: usize)
 where
-    T: Ord + Clone,
+    T: Ord + Clone + std::fmt::Debug,
 {
-    let len = end - begin;
+    println!("imsort({:?})", &slice[begin..end]);
 
+    let len = end - begin;
     if len > 1 {
         let middle = begin + len / 2;
         let mut output = begin + end - middle;
