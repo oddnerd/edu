@@ -140,6 +140,43 @@ where
     }
 }
 
+fn imsort<T>(slice: &mut [T], begin: usize, end: usize)
+where
+    T: Ord + Clone,
+{
+    let mut m = 0;
+    let mut n = 0;
+    let mut w = 0;
+    if end - begin > 1 {
+        m = begin + (end - begin) / 2;
+        w = begin + end - m;
+
+        // last half contains sorted elements???
+        wsort(slice, begin, m, w);
+
+        while w - begin > 2 {
+            n = w;
+            w = begin + (n - begin + 1) / 2;
+
+            // first half of the previous working area contains sorted elements???
+            wsort(slice, w, n, begin);
+
+            wmerge(slice, begin, begin + n - w, n, end, w);
+        }
+        // switch to insertion sort???
+
+        // for (n = w; n > l; --n)
+        for n in (begin + 1..=w).rev() {
+            // for (m = n; m < u && xs[m] < xs[m - 1]; ++m)
+            for m in n..end {
+                if slice[m] < slice[m - 1] {
+                    swap(slice, m, m - 1);
+                }
+            }
+        }
+    }
+}
+
 // #[cfg(test)]
 // mod inplace_tests {
 //     use super::*;
