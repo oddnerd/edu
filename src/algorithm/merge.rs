@@ -108,9 +108,9 @@ where
     fn w_merge<T>(
         slice: &mut [T],
         mut i: usize,
-        mut m: usize,
+        m: usize,
         mut j: usize,
-        mut n: usize,
+        n: usize,
         mut w: usize,
     ) where
         T: Ord + Clone,
