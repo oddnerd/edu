@@ -8,8 +8,6 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
-use std::sync::WaitTimeoutResult;
-
 /// Sort `slice` using duplicate `auxiliary` memory.
 ///
 /// Recursively divide `slice`, sort subslices, and merge the result.
