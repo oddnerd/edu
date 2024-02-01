@@ -147,6 +147,10 @@ where
 {
     println!("imsort({:?})", &slice[begin..end]);
 
+    let slice = &mut slice[begin..end];
+    let begin = 0;
+    let end = slice.len();
+
     let len = end - begin;
     if len > 1 {
         let middle = begin + len / 2;
