@@ -81,6 +81,13 @@ where
     }
 }
 
+fn swap<T>(slice: &mut [T], first: usize, second: usize)
+where T: Clone{
+    let tmp = slice[first].clone();
+    slice[first] = slice[second].clone();
+    slice[second] = tmp;
+}
+
 // #[cfg(test)]
 // mod inplace_tests {
 //     use super::*;
