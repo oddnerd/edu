@@ -97,44 +97,11 @@ where
 /// inplace(&mut slice, 3);
 /// //assert_eq!(slice, [1,2,3,4,5,6]);
 /// ```
-pub fn inplace<T>(slice: &mut [T], mut i: usize, m: usize, mut j: usize, n: usize, mut w: usize)
+pub fn inplace<T>(slice: &mut [T], middle: usize)
 where
-    T: Ord + Clone + std::fmt::Debug,
+    T: Ord + Clone,
 {
-    // todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
-
-    println!("MERGE({:?}, [{:?}..{:?}], [{:?}..{:?}]", w, i, m, j, n);
-    println!("merge({:?}, {:?}, {:?}", w, &slice[i..m], &slice[j..n]);
-
-    // let first = [i..m];
-    // let second = [j..n];
-    // let outout = [w..];
-
-    while (i < m) && (j < n) {
-        // swap(w++, if slice[i] < slice[j] {i++} else {j++});
-        if slice[i] < slice[j] {
-            (slice[w], slice[i]) = (slice[i].clone(), slice[w].clone());
-            i += 1;
-        } else {
-            (slice[w], slice[j]) = (slice[j].clone(), slice[w].clone());
-            j += 1;
-        }
-        w += 1;
-    }
-    while i < m {
-        // swap(w++, i++);
-        (slice[w], slice[i]) = (slice[i].clone(), slice[w].clone());
-        w += 1;
-        i += 1;
-    }
-    while j < n {
-        // swap(w++, j++);
-        (slice[w], slice[j]) = (slice[j].clone(), slice[w].clone());
-        w += 1;
-        j += 1;
-    }
-
-    println!("/merge");
+    todo!("https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm");
 }
 
 #[cfg(test)]
