@@ -122,7 +122,7 @@ fn wmerge<T>(
     }
 }
 
-fn wsort<T>(slice: &mut [T], begin: usize, end: usize, output: usize)
+fn wsort<T>(slice: &mut [T], mut begin: usize, end: usize, mut output: usize)
 where
     T: Ord + Clone,
 {
