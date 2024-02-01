@@ -97,7 +97,7 @@ fn wmerge<T>(
         "wmerge({:?}, {:?}, {:?})",
         &slice[left..left_end],
         &slice[right..right_end],
-        &slice[output..]
+        &slice[output..right]
     );
 
     while left < left_end && right < right_end {
@@ -136,8 +136,6 @@ fn inplace_mergesort_to<T>(input: &mut [T], output: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    println!("wsort({:?}, {:?})", input, output);
-
     if input.len() > 1 {
         let middle = input.len() / 2;
         let (mut left, mut right) = input.split_at_mut(middle);
@@ -178,6 +176,24 @@ where
             // sort slice[output..middle] into slice[..output]
             let (left, right) = slice.split_at_mut(output);
             inplace_mergesort_to(&mut right[..middle - output], left);
+
+            {
+                let (left, right) = slice.split_at_mut(middle);
+                let (left, center) = left.split_at_mut(middle-output);
+                let center = &mut center[output-left.len()..];
+
+                println!("INPLACE: {:?} {:?} {:?}", left, right, center);
+
+                // inplace_merge_into(left, right, center);
+            }
+
+
+            println!(
+                "WMERGE: {:?} {:?} {:?}",
+                &slice[0..middle - output],
+                &slice[middle..],
+                &slice[output..middle]
+            );
 
             wmerge(slice, 0, middle - output, middle, slice.len(), output);
         }
