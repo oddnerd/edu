@@ -145,9 +145,6 @@ fn imsort<T>(slice: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    // let slice = &mut slice[begin..end];
-    println!("imsort({:?})", slice);
-
     if slice.len() > 1 {
         let middle = slice.len() / 2;
         let mut output = slice.len() - middle;
