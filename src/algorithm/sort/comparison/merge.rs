@@ -122,6 +122,24 @@ fn wmerge<T>(
     }
 }
 
+fn wsort<T>(slice: &mut [T], begin: usize, end: usize, output: usize)
+where
+    T: Ord + Clone,
+{
+    if end - begin > 1 {
+        let m = begin + (end - begin) / 2;
+        imsort(slice, begin, m);
+        imsort(slice, m, end);
+        wmerge(slice, begin, m, m, end, output);
+    } else {
+        while begin < end {
+            swap(slice, begin, output);
+            begin += 1;
+            output += 1;
+        }
+    }
+}
+
 // #[cfg(test)]
 // mod inplace_tests {
 //     use super::*;
