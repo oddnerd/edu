@@ -83,6 +83,11 @@ where
     }
 }
 
+/// Merge two lists into a partially overlapping output.
+///
+/// `slice` is divided as [left..left_end..output..right..right_end]
+/// where the inputs are [left..left_end] and [right..right_end]
+/// which are merged into [output..right_end].
 fn inplace_merge<T>(
     slice: &mut [T],
     mut left: usize,
@@ -115,7 +120,11 @@ fn inplace_merge<T>(
     }
 }
 
-fn inplace_mergesort_to<T>(input: &mut [T], output: &mut [T])
+/// Mergesort some slice in-place of another.
+///
+/// `output` will contain the sorted entries of `input`
+/// whereas `input` will hold unsorted entried of `output`.
+fn inplace_with<T>(input: &mut [T], output: &mut [T])
 where
     T: Ord + Clone,
 {
@@ -139,7 +148,7 @@ where
 ///
 /// # Examples
 /// ```
-/// using rust::algorithm::sort::comparison::merge::inplace;
+/// use rust::algorithm::sort::comparison::merge::inplace;
 /// let mut slice = [3,2,1];
 /// inplace(&mut slice);
 /// assert_eq!(slice, [1,2,3]);
@@ -154,7 +163,7 @@ where
 
         // sort slice[..middle] into slice[output..]
         let (read, write) = slice.split_at_mut(middle);
-        inplace_mergesort_to(read, &mut write[output - middle..]);
+        inplace_with(read, &mut write[output - middle..]);
 
         while output > 2 {
             let middle = output;
@@ -162,7 +171,7 @@ where
 
             // sort slice[output..middle] into slice[..output]
             let (left, right) = slice.split_at_mut(output);
-            inplace_mergesort_to(&mut right[..middle - output], left);
+            inplace_with(&mut right[..middle - output], left);
 
             inplace_merge(slice, 0, middle - output, middle, slice.len(), output);
         }
