@@ -120,6 +120,12 @@ fn wmerge<T>(
     }
 }
 
+fn inplace_merge_into<T>(first: &mut [T], second: &mut [T], output: &mut [T])
+where
+    T: Ord + Clone + std::fmt::Debug,
+{
+}
+
 fn wsort<T>(slice: &mut [T], mut begin: usize, end: usize, mut output: usize)
 where
     T: Ord + Clone + std::fmt::Debug,
@@ -138,6 +144,22 @@ where
             begin += 1;
             output += 1;
         }
+    }
+}
+
+fn inplace_mergesort_to<T>(input: &mut [T], output: &mut [T])
+where
+    T: Ord + Clone + std::fmt::Debug,
+{
+    if input.len() > 1 {
+        let middle = input.len() / 2;
+        let (mut left, mut right) = input.split_at_mut(middle);
+        inplace(&mut left);
+        inplace(&mut right);
+        inplace_merge_into(left, right, output);
+    } else {
+        std::iter::zip(input.iter_mut(), output.iter_mut())
+            .for_each(|(input, output)| (*input, *output) = (output.clone(), input.clone()));
     }
 }
 
