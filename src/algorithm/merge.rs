@@ -215,3 +215,21 @@ mod recursive_tests {
         assert_eq!(output[3], 3);
     }
 }
+
+/// Merge two halves of a slice in-place.
+///
+/// Has n<sup>2</sup> time complexity.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::merge::inplace;
+/// let mut slice = [0,2,4,1,3,5];
+/// inplace(slice, 3);
+/// assert_eq!(slice, [0,1,2,3,4,5]);
+/// ```
+fn inplace<T>(slice: &mut [T], middle: usize)
+where
+    T: Ord,
+{
+    todo!("that's a rotate");
+}
