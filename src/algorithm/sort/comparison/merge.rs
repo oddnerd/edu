@@ -129,8 +129,8 @@ where
     let len = end - begin;
     if len > 1 {
         let middle = begin + len / 2;
-        imsort(slice, begin, middle);
-        imsort(slice, middle, end);
+        imsort(&mut slice[begin..middle]);
+        imsort(&mut slice[middle..end]);
         wmerge(slice, begin, middle, middle, end, output);
     } else {
         while begin < end {
@@ -141,19 +141,18 @@ where
     }
 }
 
-fn imsort<T>(slice: &mut [T], begin: usize, end: usize)
+fn imsort<T>(slice: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    println!("imsort({:?})", &slice[begin..end]);
-
-    let slice = &mut slice[begin..end];
+    // let slice = &mut slice[begin..end];
+    println!("imsort({:?})", slice);
 
     if slice.len() > 1 {
         let middle = slice.len() / 2;
         let mut output = slice.len() - middle;
 
-        // last half contains sorted elements???
+        // sort slice[middle..]
         wsort(slice, 0, middle, output);
 
         while output > 2 {
@@ -163,7 +162,7 @@ where
             // first half of the previous working area contains sorted elements???
             wsort(slice, output, middle, 0);
 
-            wmerge(slice, begin, middle - output, middle, slice.len(), output);
+            wmerge(slice, 0, middle - output, middle, slice.len(), output);
         }
         // switch to insertion sort???
 
@@ -186,21 +185,21 @@ mod inplace_tests {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        imsort(&mut slice, 0, 1);
+        imsort(&mut slice);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn one() {
         let mut slice = [0];
-        imsort(&mut slice, 0, 1);
+        imsort(&mut slice);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn two() {
         let mut slice = [1, 0];
-        imsort(&mut slice, 0, 2);
+        imsort(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
@@ -209,7 +208,7 @@ mod inplace_tests {
         let mut slice: Vec<i32> = (0..10).collect();
         let copy = slice.clone();
         slice.reverse();
-        imsort(&mut slice, 0, 10);
+        imsort(&mut slice);
         assert_eq!(slice, copy);
     }
 }
