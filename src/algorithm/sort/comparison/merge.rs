@@ -151,9 +151,8 @@ where
     let begin = 0;
     let end = slice.len();
 
-    let len = end - begin;
-    if len > 1 {
-        let middle = begin + len / 2;
+    if slice.len() > 1 {
+        let middle = begin + slice.len() / 2;
         let mut output = begin + end - middle;
 
         // last half contains sorted elements???
