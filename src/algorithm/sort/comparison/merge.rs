@@ -85,14 +85,17 @@ fn wsort<T>(slice: &mut [T], mut l: usize, u: usize, mut w: usize)
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    println!("wsort({:?}, {:?})", &slice[l..u], w);
+    println!("wsort({:?}, {:?})", w, &slice[l..u]);
+
 
     if u - l > 1 {
-        let middle = slice.len() / 2;
-        let (left, right) = slice.split_at_mut(middle);
-        inplace(left);
-        inplace(right);
-        crate::algorithm::merge::inplace(slice, middle, w);
+        let middle = (u - l) / 2;
+        println!("\tLEFT");
+        inplace(slice, l, middle);
+        println!("\tRIGHT");
+        inplace(slice, middle, u);
+        println!("MERGE: [{:?}..{:?}] [{:?}..{:?}]", l, middle, middle, u);
+        crate::algorithm::merge::inplace(slice, l, middle, middle, u, w);
     } else {
         while l < u {
             (slice[l], slice[w]) = (slice[w].clone(), slice[l].clone());
@@ -100,27 +103,34 @@ where
             w += 1;
         }
     }
+
+    println!("/wsort");
 }
 
-pub fn inplace<T>(slice: &mut [T])
+pub fn inplace<T>(slice: &mut [T], l: usize, u: usize)
 where
     T: Ord + Clone + std::fmt::Debug,
 {
-    println!("inplace({:?})", slice);
+    println!("inplace({:?})", &slice[l..u]);
 
-    if slice.len() > 1 {
-        let middle = slice.len() / 2;
-        let mut w = slice.len() - middle;
-        wsort(slice, 0, middle, w);
+    if u-l > 1 {
+        let middle = l + (u-l) / 2;
+        let mut output = l + u - middle;
 
-        while w > 2 {
-            let n = w;
-            w = (n + 1) / 2;
-            wsort(slice, w, n, 0);
-            crate::algorithm::merge::inplace(slice, n, w);
+        // the last half contains sorted elements???
+        wsort(slice, l, middle, output);
+
+        while output - l > 2 {
+            let n = output;
+            output = (n - l + 1) / 2;
+
+            // the first half of the previous working area contains sorted elements???
+            wsort(slice, output, n, 0);
+            crate::algorithm::merge::inplace(slice, l, l + n - output, n, u, output);
         }
 
-        let mut n = w;
+        // switch to insertion sort???
+        let mut n = output;
         while n > 0 {
             let mut m = n;
             while (m < slice.len()) && (slice[m] < slice[m - 1]) {
@@ -131,6 +141,8 @@ where
             n -= 1;
         }
     }
+
+    println!("/inplace");
 }
 
 #[cfg(test)]
@@ -140,30 +152,30 @@ mod inplace_tests {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        inplace(&mut slice);
+        inplace(&mut slice, 0 ,1);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn one() {
         let mut slice = [0];
-        inplace(&mut slice);
+        inplace(&mut slice, 0 ,1);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn two() {
         let mut slice = [1, 0];
-        inplace(&mut slice);
+        inplace(&mut slice, 0 ,2);
         assert_eq!(slice, [0, 1]);
     }
 
     #[test]
     fn multiple() {
-        let mut slice: Vec<i32> = (0..4).collect();
+        let mut slice: Vec<i32> = (0..10).collect();
         let copy = slice.clone();
         slice.reverse();
-        inplace(&mut slice);
+        inplace(&mut slice, 0, 10);
         assert_eq!(slice, copy);
     }
 }
