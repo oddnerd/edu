@@ -8,6 +8,8 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
+use crate::algorithm::merge::MergeIter;
+
 /// Sort `slice` using duplicate `auxiliary` memory.
 ///
 /// Recursively divide `slice`, sort subslices, and merge the result.
@@ -124,6 +126,10 @@ fn inplace_merge_into<T>(first: &mut [T], second: &mut [T], output: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
+    let merger = MergeIter::new(first.iter_mut(), second.iter_mut());
+
+    std::iter::zip(merger, output.iter_mut()).for_each(|(merged, output)| {(*merged, *output) = (output.clone(), merged.clone())});
+
 }
 
 fn wsort<T>(slice: &mut [T], mut begin: usize, end: usize, mut output: usize)
@@ -151,6 +157,8 @@ fn inplace_mergesort_to<T>(input: &mut [T], output: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
+    println!("wsort({:?}, {:?})", input, output);
+
     if input.len() > 1 {
         let middle = input.len() / 2;
         let (mut left, mut right) = input.split_at_mut(middle);
@@ -180,14 +188,17 @@ where
         let middle = slice.len() / 2;
         let mut output = slice.len() - middle;
 
-        // sort slice[..middle] into slice[middle..]
-        wsort(slice, 0, middle, output);
+        // sort slice[..middle] into slice[output..]
+        let (read, write) = slice.split_at_mut(middle);
+        inplace_mergesort_to(read, &mut write[output - middle..]);
 
         while output > 2 {
             let middle = output;
             output = (middle + 1) / 2;
 
             // sort slice[..quarter] into slice[quarter..middle]
+            // let (left, right) = slice.split_at_mut(output);
+            // inplace_mergesort_to(&mut right[..middle], left);
             wsort(slice, output, middle, 0);
 
             wmerge(slice, 0, middle - output, middle, slice.len(), output);
