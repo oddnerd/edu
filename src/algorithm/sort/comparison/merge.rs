@@ -177,40 +177,40 @@ where
     }
 }
 
-// #[cfg(test)]
-// mod inplace_tests {
-//     use super::*;
-//
-//     #[test]
-//     fn empty() {
-//         let mut slice: [usize; 0] = [];
-//         inplace(&mut slice, 0 ,1);
-//         assert_eq!(slice, []);
-//     }
-//
-//     #[test]
-//     fn one() {
-//         let mut slice = [0];
-//         inplace(&mut slice, 0 ,1);
-//         assert_eq!(slice, [0]);
-//     }
-//
-//     #[test]
-//     fn two() {
-//         let mut slice = [1, 0];
-//         inplace(&mut slice, 0 ,2);
-//         assert_eq!(slice, [0, 1]);
-//     }
-//
-//     #[test]
-//     fn multiple() {
-//         let mut slice: Vec<i32> = (0..10).collect();
-//         let copy = slice.clone();
-//         slice.reverse();
-//         inplace(&mut slice, 0, 10);
-//         assert_eq!(slice, copy);
-//     }
-// }
+#[cfg(test)]
+mod inplace_tests {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let mut slice: [usize; 0] = [];
+        imsort(&mut slice, 0 ,1);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn one() {
+        let mut slice = [0];
+        imsort(&mut slice, 0 ,1);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn two() {
+        let mut slice = [1, 0];
+        imsort(&mut slice, 0 ,2);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn multiple() {
+        let mut slice: Vec<i32> = (0..10).collect();
+        let copy = slice.clone();
+        slice.reverse();
+        imsort(&mut slice, 0, 10);
+        assert_eq!(slice, copy);
+    }
+}
 
 #[cfg(test)]
 mod tests {
