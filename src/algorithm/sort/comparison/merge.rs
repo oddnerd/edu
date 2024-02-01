@@ -126,11 +126,12 @@ fn wsort<T>(slice: &mut [T], mut begin: usize, end: usize, mut output: usize)
 where
     T: Ord + Clone,
 {
-    if end - begin > 1 {
-        let m = begin + (end - begin) / 2;
-        imsort(slice, begin, m);
-        imsort(slice, m, end);
-        wmerge(slice, begin, m, m, end, output);
+    let len = end - begin;
+    if len > 1 {
+        let middle = begin + len / 2;
+        imsort(slice, begin, middle);
+        imsort(slice, middle, end);
+        wmerge(slice, begin, middle, middle, end, output);
     } else {
         while begin < end {
             swap(slice, begin, output);
@@ -144,29 +145,28 @@ fn imsort<T>(slice: &mut [T], begin: usize, end: usize)
 where
     T: Ord + Clone,
 {
-    let mut m = 0;
-    let mut n = 0;
-    let mut w = 0;
-    if end - begin > 1 {
-        m = begin + (end - begin) / 2;
-        w = begin + end - m;
+    let len = end - begin;
+
+    if len > 1 {
+        let middle = begin + len / 2;
+        let mut output = begin + end - middle;
 
         // last half contains sorted elements???
-        wsort(slice, begin, m, w);
+        wsort(slice, begin, middle, output);
 
-        while w - begin > 2 {
-            n = w;
-            w = begin + (n - begin + 1) / 2;
+        while output - begin > 2 {
+            let middle = output;
+            output = begin + (middle - begin + 1) / 2;
 
             // first half of the previous working area contains sorted elements???
-            wsort(slice, w, n, begin);
+            wsort(slice, output, middle, begin);
 
-            wmerge(slice, begin, begin + n - w, n, end, w);
+            wmerge(slice, begin, begin + middle - output, middle, end, output);
         }
         // switch to insertion sort???
 
         // for (n = w; n > l; --n)
-        for n in (begin + 1..=w).rev() {
+        for n in (begin + 1..=output).rev() {
             // for (m = n; m < u && xs[m] < xs[m - 1]; ++m)
             for m in n..end {
                 if slice[m] < slice[m - 1] {
