@@ -81,44 +81,35 @@ where
     }
 }
 
-fn swap<T>(slice: &mut [T], first: usize, second: usize)
-where
-    T: Clone,
-{
-    let tmp = slice[first].clone();
-    slice[first] = slice[second].clone();
-    slice[second] = tmp;
-}
-
 fn wmerge<T>(
     slice: &mut [T],
-    mut l_begin: usize,
-    l_end: usize,
-    mut r_begin: usize,
-    r_end: usize,
+    mut left: usize,
+    left_end: usize,
+    mut right: usize,
+    right_end: usize,
     mut output: usize,
 ) where
     T: Ord + Clone,
 {
-    while l_begin < l_end && r_begin < r_end {
-        if slice[l_begin] < slice[r_begin] {
-            swap(slice, output, l_begin);
-            l_begin += 1;
+    while left < left_end && right < right_end {
+        if slice[left] < slice[right] {
+            (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
+            left += 1;
         } else {
-            swap(slice, output, r_begin);
-            r_begin += 1;
+            (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
+            right += 1;
         }
         output += 1;
     }
-    while l_begin < l_end {
-        swap(slice, output, l_begin);
+    while left < left_end {
+        (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
         output += 1;
-        l_begin += 1;
+        left += 1;
     }
-    while r_begin < r_end {
-        swap(slice, output, r_begin);
+    while right < right_end {
+        (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
         output += 1;
-        r_begin += 1;
+        right += 1;
     }
 }
 
@@ -134,7 +125,7 @@ where
         wmerge(slice, begin, middle, middle, end, output);
     } else {
         while begin < end {
-            swap(slice, begin, output);
+            (slice[begin], slice[output]) = (slice[output].clone(), slice[begin].clone());
             begin += 1;
             output += 1;
         }
@@ -170,7 +161,7 @@ where
             // for (m = n; m < u && xs[m] < xs[m - 1]; ++m)
             for m in n..end {
                 if slice[m] < slice[m - 1] {
-                    swap(slice, m, m - 1);
+                    (slice[m], slice[m - 1]) = (slice[m - 1].clone(), slice[m].clone());
                 }
             }
         }
@@ -184,21 +175,21 @@ mod inplace_tests {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        imsort(&mut slice, 0 ,1);
+        imsort(&mut slice, 0, 1);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn one() {
         let mut slice = [0];
-        imsort(&mut slice, 0 ,1);
+        imsort(&mut slice, 0, 1);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn two() {
         let mut slice = [1, 0];
-        imsort(&mut slice, 0 ,2);
+        imsort(&mut slice, 0, 2);
         assert_eq!(slice, [0, 1]);
     }
 
