@@ -100,36 +100,36 @@ fn wmerge<T>(
         &slice[output..right]
     );
 
+    println!("F ({:?}) S ({:?}) O ({:?})", left_end - left, right_end - right, right - output);
+
     while left < left_end && right < right_end {
+        println!("CURRENT: {:?} < {:?}", slice[left], slice[right]);
+
         if slice[left] < slice[right] {
+            // println!("swap({:?}, {:?})", slice[output], slice[left]);
             (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
             left += 1;
         } else {
+            // println!("swap({:?}, {:?})", slice[output], slice[right]);
             (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
             right += 1;
         }
         output += 1;
     }
     while left < left_end {
+        println!("LEFT: {:?}", slice[left]);
+        // println!("swap({:?}, {:?})", slice[output], slice[left]);
         (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
         output += 1;
         left += 1;
     }
     while right < right_end {
+        println!("RIGHT: {:?}", slice[right]);
+        // println!("swap({:?}, {:?})", slice[output], slice[right]);
         (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
         output += 1;
         right += 1;
     }
-}
-
-fn inplace_merge_into<T>(first: &mut [T], second: &mut [T], output: &mut [T])
-where
-    T: Ord + Clone + std::fmt::Debug,
-{
-    let merger = MergeIter::new(first.iter_mut(), second.iter_mut());
-
-    std::iter::zip(merger, output.iter_mut())
-        .for_each(|(merged, output)| (*merged, *output) = (output.clone(), merged.clone()));
 }
 
 fn inplace_mergesort_to<T>(input: &mut [T], output: &mut [T])
@@ -141,7 +141,10 @@ where
         let (mut left, mut right) = input.split_at_mut(middle);
         inplace(&mut left);
         inplace(&mut right);
-        inplace_merge_into(left, right, output);
+
+        let merger = MergeIter::new(left.iter_mut(), right.iter_mut());
+
+        std::iter::zip(merger, output.iter_mut()).for_each(|(smallest, output)| (*smallest, *output) = (output.clone(), smallest.clone()));
     } else {
         std::iter::zip(input.iter_mut(), output.iter_mut())
             .for_each(|(input, output)| (*input, *output) = (output.clone(), input.clone()));
@@ -177,25 +180,22 @@ where
             let (left, right) = slice.split_at_mut(output);
             inplace_mergesort_to(&mut right[..middle - output], left);
 
-            {
-                let (left, right) = slice.split_at_mut(middle);
-                let (left, center) = left.split_at_mut(middle-output);
-                let center = &mut center[output-left.len()..];
-
-                println!("INPLACE: {:?} {:?} {:?}", left, right, center);
-
-                // inplace_merge_into(left, right, center);
-            }
-
-
-            println!(
-                "WMERGE: {:?} {:?} {:?}",
-                &slice[0..middle - output],
-                &slice[middle..],
-                &slice[output..middle]
-            );
-
+            // println!(
+            //     "WMERGE: {:?} {:?} {:?}",
+            //     &slice[0..middle - output],
+            //     &slice[middle..],
+            //     &slice[output..middle]
+            // );
+            print!("\t");
             wmerge(slice, 0, middle - output, middle, slice.len(), output);
+
+            let (left, right) = slice.split_at_mut(middle);
+            let (left, center) = left.split_at_mut(middle - output);
+            let center = &mut center[output - left.len()..];
+
+            // println!("INPLACE: {:?} {:?} {:?}", left, right, center);
+            // print!("\t");
+            // inplace_merge_into(left, right, center);
         }
     }
 }
