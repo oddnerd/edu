@@ -109,7 +109,8 @@ mod mergeiter_tests {
 
 /// Merge two slices into one output slice.
 ///
-/// Peek each underlying [`Iterator`] and compare, returning the smaller without consuming the other, thereby allowing it to be quired again next.
+/// Peek each underlying [`Iterator`] and compare, returning the smaller
+/// without consuming the other, thereby allowing it to be quired again next.
 ///
 /// # Examples:
 /// ```
