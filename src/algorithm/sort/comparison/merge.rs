@@ -129,8 +129,8 @@ where
     let len = end - begin;
     if len > 1 {
         let middle = begin + len / 2;
-        imsort(&mut slice[begin..middle]);
-        imsort(&mut slice[middle..end]);
+        inplace(&mut slice[begin..middle]);
+        inplace(&mut slice[middle..end]);
         wmerge(slice, begin, middle, middle, end, output);
     } else {
         while begin < end {
@@ -141,7 +141,16 @@ where
     }
 }
 
-fn imsort<T>(slice: &mut [T])
+/// Sort a slice using in-place merge sort.
+///
+/// # Examples
+/// ```
+/// using rust::algorithm::sort::comparison::merge::inplace;
+/// let mut slice = [3,2,1];
+/// inplace(&mut slice);
+/// assert_eq!(slice, [1,2,3]);
+/// ```
+pub fn inplace<T>(slice: &mut [T])
 where
     T: Ord + Clone + std::fmt::Debug,
 {
@@ -149,14 +158,14 @@ where
         let middle = slice.len() / 2;
         let mut output = slice.len() - middle;
 
-        // sort slice[middle..]
+        // sort slice[..middle] into slice[middle..]
         wsort(slice, 0, middle, output);
 
         while output > 2 {
             let middle = output;
             output = (middle + 1) / 2;
 
-            // sort slice[..quarter]
+            // sort slice[..quarter] into slice[quarter..middle]
             wsort(slice, output, middle, 0);
 
             wmerge(slice, 0, middle - output, middle, slice.len(), output);
@@ -171,21 +180,21 @@ mod inplace_tests {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        imsort(&mut slice);
+        inplace(&mut slice);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn one() {
         let mut slice = [0];
-        imsort(&mut slice);
+        inplace(&mut slice);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn two() {
         let mut slice = [1, 0];
-        imsort(&mut slice);
+        inplace(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
@@ -194,7 +203,7 @@ mod inplace_tests {
         let mut slice: Vec<i32> = (0..10).collect();
         let copy = slice.clone();
         slice.reverse();
-        imsort(&mut slice);
+        inplace(&mut slice);
         assert_eq!(slice, copy);
     }
 }
