@@ -148,29 +148,28 @@ where
     println!("imsort({:?})", &slice[begin..end]);
 
     let slice = &mut slice[begin..end];
-    let begin = 0;
     let end = slice.len();
 
     if slice.len() > 1 {
-        let middle = begin + slice.len() / 2;
-        let mut output = begin + end - middle;
+        let middle = slice.len() / 2;
+        let mut output = end - middle;
 
         // last half contains sorted elements???
-        wsort(slice, begin, middle, output);
+        wsort(slice, 0, middle, output);
 
-        while output - begin > 2 {
+        while output > 2 {
             let middle = output;
-            output = begin + (middle - begin + 1) / 2;
+            output = (middle + 1) / 2;
 
             // first half of the previous working area contains sorted elements???
-            wsort(slice, output, middle, begin);
+            wsort(slice, output, middle, 0);
 
-            wmerge(slice, begin, begin + middle - output, middle, end, output);
+            wmerge(slice, begin, middle - output, middle, end, output);
         }
         // switch to insertion sort???
 
         // for (n = w; n > l; --n)
-        for n in (begin + 1..=output).rev() {
+        for n in (1..=output).rev() {
             // for (m = n; m < u && xs[m] < xs[m - 1]; ++m)
             for m in n..end {
                 if slice[m] < slice[m - 1] {
