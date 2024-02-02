@@ -8,8 +8,6 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
-use crate::algorithm::merge::MergeIter;
-
 /// Sort a slice via top-down merge sort.
 ///
 /// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
@@ -222,7 +220,7 @@ where
         inplace(&mut left);
         inplace(&mut right);
 
-        let merger = MergeIter::new(left.iter_mut(), right.iter_mut());
+        let merger = crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut());
 
         std::iter::zip(merger, output.iter_mut()).for_each(|(smallest, output)| {
             (*smallest, *output) = (output.clone(), smallest.clone())
