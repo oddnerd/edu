@@ -70,13 +70,15 @@ pub fn sort<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    heapify(slice);
+    if !slice.is_empty() {
+        heapify(slice);
 
-    let mut end = slice.len();
-    while end > 1 {
-        end = end - 1;
-        slice.swap(0, end);
-        sift_down(slice, 0);
+        let mut end = slice.len();
+        while end > 1 {
+            end = end - 1;
+            slice.swap(0, end);
+            sift_down(slice, 0);
+        }
     }
 }
 
