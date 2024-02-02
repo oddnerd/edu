@@ -92,4 +92,11 @@ mod test {
         sort(&mut slice);
         assert_eq!(slice, []);
     }
+
+    #[test]
+    fn one_element() {
+        let mut slice = [0];
+        sort(&mut slice);
+        assert_eq!(slice, [0]);
+    }
 }
