@@ -79,3 +79,15 @@ where
         sift_down(slice, 0);
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let mut slice: [usize; 0] = [];
+        sort(&mut slice);
+        assert_eq!(slice, []);
+    }
+}
