@@ -190,33 +190,35 @@ mod bottom_up {
 /// which are merged into [output..right_end].
 fn inplace_merge<T>(
     slice: &mut [T],
-    mut left: usize,
+    left: usize,
     left_end: usize,
-    mut right: usize,
+    right: usize,
     right_end: usize,
-    mut output: usize,
+    output: usize,
 ) where
     T: Ord + Clone,
 {
-    while left < left_end && right < right_end {
-        if slice[left] < slice[right] {
-            (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
-            left += 1;
-        } else {
-            (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
-            right += 1;
+    match (slice[..left_end].get(left), slice[..right_end].get(right)) {
+        (Some(first), Some(second)) => {
+            if first < second {
+                slice.swap(output, left);
+                inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
+            } else {
+                slice.swap(output, right);
+                inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
+            }
         }
-        output += 1;
-    }
-    while left < left_end {
-        (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
-        output += 1;
-        left += 1;
-    }
-    while right < right_end {
-        (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
-        output += 1;
-        right += 1;
+        (Some(_), None) => {
+            slice.swap(output, left);
+            inplace_merge(slice, left + 1, left_end, right, right_end, output + 1)
+        }
+        (None, Some(_)) => {
+            slice.swap(output, right);
+            inplace_merge(slice, left, left_end, right + 1, right_end, output + 1);
+        }
+        (None, None) => {
+            return;
+        }
     }
 }
 
