@@ -84,15 +84,13 @@ pub fn bottom_up<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    if !slice.is_empty() {
-        heapify(slice);
+    heapify(slice);
 
-        for end in (0..slice.len()).rev() {
-            slice.swap(0, end);
+    for end in (0..slice.len()).rev() {
+        slice.swap(0, end);
 
-            // slice[end..] is sorted
-            sift_down(&mut slice[..end], 0);
-        }
+        // slice[end..] is sorted
+        sift_down(&mut slice[..end], 0);
     }
 }
 
