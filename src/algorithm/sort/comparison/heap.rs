@@ -58,14 +58,7 @@ where
     T: Ord,
 {
     if slice.len() > 1 {
-        // parent of last element
-        let mut start = parent(slice.len() - 1) + 1;
-
-        while start > 0 {
-            // last node not in heap
-            start = start - 1;
-
-            // sift down node at `start` such that all nodes whose index is below `start` are in heap order.
+        for start in (0..=parent(slice.len() - 1)).rev() {
             sift_down(slice, start);
         }
     }
