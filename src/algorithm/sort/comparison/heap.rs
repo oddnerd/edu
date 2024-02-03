@@ -45,6 +45,8 @@ where
         if slice[root] < slice[greatest_child] {
             slice.swap(root, greatest_child);
             root = greatest_child;
+        } else {
+            return;
         }
     }
 }
@@ -104,8 +106,8 @@ mod test {
 
     #[test]
     fn sorted() {
-        let mut slice = [0, 1];
+        let mut slice = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
         sort(&mut slice);
-        assert_eq!(slice, [0, 1]);
+        assert_eq!(slice, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
 }
