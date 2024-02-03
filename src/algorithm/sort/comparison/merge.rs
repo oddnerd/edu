@@ -196,7 +196,7 @@ fn inplace_merge<T>(
     right_end: usize,
     output: usize,
 ) where
-    T: Ord + Clone,
+    T: Ord,
 {
     match (slice[..left_end].get(left), slice[..right_end].get(right)) {
         (Some(first), Some(second)) => {
