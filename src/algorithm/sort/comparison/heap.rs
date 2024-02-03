@@ -87,9 +87,7 @@ where
     if !slice.is_empty() {
         heapify(slice);
 
-        let mut end = slice.len();
-        while end > 1 {
-            end = end - 1;
+        for end in (0..slice.len()).rev() {
             slice.swap(0, end);
 
             // slice[end..] is sorted
