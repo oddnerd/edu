@@ -30,25 +30,24 @@ fn parent(index: usize) -> usize {
 /// Swap the first element (current root) with the greatest root of either
 /// the left or right child max-heap until the subtree rooted by the first
 /// element is itself a valid max-heap.
-fn sift_down<T>(slice: &mut [T], root: usize)
+fn sift_down<T>(slice: &mut [T])
 where
     T: Ord,
 {
+    let root = 0;
     if let Some(left) = slice.get(left_child(root)) {
-        let child = || -> usize {
-            if slice
-                .get(right_child(root))
-                .is_some_and(|right| left < right)
-            {
-                right_child(root)
-            } else {
-                left_child(root)
-            }
-        }();
+        let child = if slice
+            .get(right_child(root))
+            .is_some_and(|right| left < right)
+        {
+            right_child(root)
+        } else {
+            left_child(root)
+        };
 
         if slice[child] > slice[root] {
             slice.swap(root, child);
-            sift_down(&mut slice[child..], 0)
+            sift_down(&mut slice[child..])
         }
     }
 }
@@ -74,7 +73,7 @@ where
         // or subtrees already heap ordered, therefore sift it down until the
         // tree rooted at `node` is itself heap ordered.
         for node in (0..=last).rev() {
-            sift_down(slice, node);
+            sift_down(&mut slice[node..]);
         }
     }
 }
@@ -98,7 +97,7 @@ where
         slice.swap(0, end);
 
         // slice[end..] is sorted
-        sift_down(&mut slice[..end], 0);
+        sift_down(&mut slice[..end]);
     }
 }
 
