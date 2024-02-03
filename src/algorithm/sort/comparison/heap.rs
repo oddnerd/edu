@@ -28,7 +28,7 @@ fn sift_down<T>(slice: &mut [T], mut root: usize)
 where
     T: Ord,
 {
-    // while root had at least one child
+    // while root has at least one child
     while let Some(left) = slice.get(left_child(root)) {
         let greatest_child = || -> usize {
             if slice
@@ -75,12 +75,12 @@ where
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::heap::sort;
+/// use rust::algorithm::sort::comparison::heap::bottom_up;
 /// let mut slice = [1,3,2];
-/// sort(&mut slice);
+/// bottom_up(&mut slice);
 /// assert_eq!(slice, [1, 2, 3]);
 /// ```
-pub fn sort<T>(slice: &mut [T])
+pub fn bottom_up<T>(slice: &mut [T])
 where
     T: Ord,
 {
@@ -105,28 +105,28 @@ mod test {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        sort(&mut slice);
+        bottom_up(&mut slice);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn one_element() {
         let mut slice = [0];
-        sort(&mut slice);
+        bottom_up(&mut slice);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn sorted() {
         let mut slice = [0, 1];
-        sort(&mut slice);
+        bottom_up(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
     #[test]
     fn swap_necessary() {
         let mut slice = [1, 0];
-        sort(&mut slice);
+        bottom_up(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 }
