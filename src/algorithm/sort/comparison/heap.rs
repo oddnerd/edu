@@ -71,6 +71,15 @@ where
     }
 }
 
+/// Sort a slice via bottom-up heap sort.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::sort;
+/// let mut slice = [1,3,2];
+/// sort(&mut slice);
+/// assert_eq!(slice, [1, 2, 3]);
+/// ```
 pub fn sort<T>(slice: &mut [T])
 where
     T: Ord,
@@ -120,5 +129,4 @@ mod test {
         sort(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
-
 }
