@@ -222,23 +222,25 @@ fn inplace_merge<T>(
     }
 }
 
-/// Mergesort some slice in-place of another.
+/// Merge sort some slice in-place of another.
 ///
-/// `output` will contain the sorted entries of `input`
-/// whereas `input` will hold unsorted entried of `output`.
-fn inplace_with<T>(input: &mut [T], output: &mut [T])
+/// Sort the elements of `from` into the buffer `into` whilst swapping
+/// overwirrten elements from `into` over to `from` such that `into` will
+/// contain the sorted entries of `from` whereas `from` will hold unordered
+/// entried of `into`.
+fn inplace_into<T>(from: &mut [T], into: &mut [T])
 where
     T: Ord,
 {
-    if !input.is_empty() {
-        let middle = input.len() / 2;
-        let (mut left, mut right) = input.split_at_mut(middle);
+    if !from.is_empty() {
+        let middle = from.len() / 2;
+        let (mut left, mut right) = from.split_at_mut(middle);
         inplace(&mut left);
         inplace(&mut right);
 
         let merger = crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut());
 
-        std::iter::zip(merger, output.iter_mut()).for_each(|(smallest, output)| {
+        std::iter::zip(merger, into.iter_mut()).for_each(|(smallest, output)| {
             std::mem::swap(smallest, output);
         });
     }
@@ -265,7 +267,7 @@ where
 
         // sort slice[..middle] into slice[output..]
         let (read, write) = slice.split_at_mut(middle);
-        inplace_with(read, &mut write[output - middle..]);
+        inplace_into(read, &mut write[output - middle..]);
 
         while output > 2 {
             let middle = output;
@@ -273,7 +275,7 @@ where
 
             // sort slice[output..middle] into slice[..output]
             let (left, right) = slice.split_at_mut(output);
-            inplace_with(&mut right[..middle - output], left);
+            inplace_into(&mut right[..middle - output], left);
 
             inplace_merge(slice, 0, middle - output, middle, slice.len(), output);
         }
