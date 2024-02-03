@@ -52,14 +52,28 @@ where
     }
 }
 
-/// Put elements of a slice in binary heap order.
-fn heapify<T>(slice: &mut [T])
+/// Arrange elements of a slice into max heap order.
+///
+/// Interpret `slice` as a binary tree where, for each node at index i, the
+/// left child is at index (2*i+1) and the right child is at index (2*i+2).
+/// Reorder the nodes such that all children are less than their parent.
+fn max_heapify<T>(slice: &mut [T])
 where
     T: Ord,
 {
     if slice.len() > 1 {
-        for start in (0..=parent(slice.len() - 1)).rev() {
-            sift_down(slice, start);
+        // `last` is the parent of the last element hence it is the greatest
+        // index of a node in the heap which has children. Since elements
+        // within `slice[first..]` are leaves to some subtree rooted by an
+        // index in `slice[..=first]`, therefore they can be skipped because
+        // [`sift_down`] orders them when the index of their parent is reached.
+        let last = parent(slice.len() - 1);
+
+        // By going in reverse, since children of `node` will either be leaves
+        // or subtrees already heap ordered, therefore sift it down until the
+        // tree rooted at `node` is itself heap ordered.
+        for node in (0..=last).rev() {
+            sift_down(slice, node);
         }
     }
 }
@@ -69,7 +83,7 @@ where
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::heap::bottom_up;
-/// let mut slice = [1,3,2];
+/// let mut slice = [1, 3, 2];
 /// bottom_up(&mut slice);
 /// assert_eq!(slice, [1, 2, 3]);
 /// ```
@@ -77,7 +91,7 @@ pub fn bottom_up<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    heapify(slice);
+    max_heapify(slice);
 
     for end in (0..slice.len()).rev() {
         slice.swap(0, end);
