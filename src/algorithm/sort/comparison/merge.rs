@@ -56,33 +56,41 @@ mod top_down {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, []);
     }
 
     #[test]
-    fn one() {
+    fn single() {
         let mut slice = [0];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0]);
     }
 
     #[test]
-    fn two() {
-        let mut slice = [2, 1];
-        let mut auxiliary = slice.to_vec();
+    fn sorted() {
+        let mut slice = [0, 1];
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
-    fn multiple() {
-        let mut slice = [3, 2, 1];
-        let mut auxiliary = slice.to_vec();
+    fn must_swap() {
+        let mut slice = [1, 0];
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2, 3]);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn multiple_swaps() {
+        let mut slice = [2, 0, 3, 1];
+        let mut auxiliary = slice.clone();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
 
@@ -137,35 +145,41 @@ mod bottom_up {
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, []);
     }
 
     #[test]
-    fn one() {
+    fn single() {
         let mut slice = [0];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0]);
     }
 
     #[test]
-    fn two() {
-        let mut slice = [2, 1];
-        let mut auxiliary = slice.to_vec();
+    fn sorted() {
+        let mut slice = [0, 1];
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
-    fn multiple() {
-        let mut slice: Vec<i32> = (0..4).collect();
-        let copy = slice.clone();
-        slice.reverse();
-        let mut auxiliary = slice.to_vec();
+    fn must_swap() {
+        let mut slice = [1, 0];
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, copy);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn multiple_swaps() {
+        let mut slice = [2, 0, 3, 1];
+        let mut auxiliary = slice.clone();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
 
@@ -276,25 +290,30 @@ mod inplace {
     }
 
     #[test]
-    fn one() {
+    fn single() {
         let mut slice = [0];
         inplace(&mut slice);
         assert_eq!(slice, [0]);
     }
 
     #[test]
-    fn two() {
+    fn sorted() {
+        let mut slice = [0, 1];
+        inplace(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn must_swap() {
         let mut slice = [1, 0];
         inplace(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
     #[test]
-    fn multiple() {
-        let mut slice: Vec<i32> = (0..10).collect();
-        let copy = slice.clone();
-        slice.reverse();
+    fn multiple_swaps() {
+        let mut slice = [2, 0, 3, 1];
         inplace(&mut slice);
-        assert_eq!(slice, copy);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
