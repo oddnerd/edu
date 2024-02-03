@@ -228,7 +228,7 @@ fn inplace_merge<T>(
 /// whereas `input` will hold unsorted entried of `output`.
 fn inplace_with<T>(input: &mut [T], output: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord,
 {
     if !input.is_empty() {
         let middle = input.len() / 2;
@@ -239,7 +239,7 @@ where
         let merger = crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut());
 
         std::iter::zip(merger, output.iter_mut()).for_each(|(smallest, output)| {
-            (*smallest, *output) = (output.clone(), smallest.clone())
+            std::mem::swap(smallest, output);
         });
     }
 }
@@ -257,7 +257,7 @@ where
 /// ```
 pub fn inplace<T>(slice: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord,
 {
     if slice.len() > 1 {
         let middle = slice.len() / 2;
