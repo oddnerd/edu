@@ -23,19 +23,19 @@ fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
 
-/// Reorder root of a binary max-heap.
+/// Reorder root of a binary max-heap ordered slice.
 ///
 /// <div class="warning">Assumes children are valid binary max-heaps.</div>
 ///
-/// Swap the node indexed at `root` with the root of either it's left or right
-/// child until the subtree rooted by the node at index 'root' is a max-heap.
-fn sift_down<T>(slice: &mut [T], mut root: usize)
+/// Swap the first element (current root) with the greatest root of either
+/// the left or right child max-heap until the subtree rooted by the first
+/// element is itself a valid max-heap.
+fn sift_down<T>(slice: &mut [T], root: usize)
 where
     T: Ord,
 {
-    // while root has at least one child
-    while let Some(left) = slice.get(left_child(root)) {
-        let greatest_child = || -> usize {
+    if let Some(left) = slice.get(left_child(root)) {
+        let child = || -> usize {
             if slice
                 .get(right_child(root))
                 .is_some_and(|right| left < right)
@@ -46,13 +46,9 @@ where
             }
         }();
 
-        // sift the child down
-        if slice[root] < slice[greatest_child] {
-            slice.swap(root, greatest_child);
-            root = greatest_child;
-        } else {
-            // node indexed at `root` is the largest element
-            return;
+        if slice[child] > slice[root] {
+            slice.swap(root, child);
+            sift_down(&mut slice[child..], 0)
         }
     }
 }
