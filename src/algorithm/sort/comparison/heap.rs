@@ -101,4 +101,11 @@ mod test {
         sort(&mut slice);
         assert_eq!(slice, [0]);
     }
+
+    #[test]
+    fn sorted() {
+        let mut slice = [0, 1];
+        sort(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
 }
