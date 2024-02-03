@@ -91,12 +91,16 @@ pub fn bottom_up<T>(slice: &mut [T])
 where
     T: Ord,
 {
+    // reorder elements to construct an in-place binary max-heap.
     max_heapify(slice);
+    let root = 0;
 
     for end in (0..slice.len()).rev() {
-        slice.swap(0, end);
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        slice.swap(root, end);
 
-        // slice[end..] is sorted
+        // push the new root into the shrunk max-heap excluding sorted element.
         sift_down(&mut slice[..end]);
     }
 }
