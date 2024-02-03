@@ -54,15 +54,17 @@ fn heapify<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    // parent of last element
-    let mut start = parent(slice.len() - 1) + 1;
+    if slice.len() > 1 {
+        // parent of last element
+        let mut start = parent(slice.len() - 1) + 1;
 
-    while start > 0 {
-        // last node not in heap
-        start = start - 1;
+        while start > 0 {
+            // last node not in heap
+            start = start - 1;
 
-        // sift down node at `start` such that all nodes whose index is below `start` are in heap order.
-        sift_down(slice, start);
+            // sift down node at `start` such that all nodes whose index is below `start` are in heap order.
+            sift_down(slice, start);
+        }
     }
 }
 
