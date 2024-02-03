@@ -113,4 +113,12 @@ mod test {
         sort(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
+
+    #[test]
+    fn swap_necessary() {
+        let mut slice = [1, 0];
+        sort(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
 }
