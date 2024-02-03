@@ -23,7 +23,12 @@ fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
 
-/// Repair a binary heap rooted by the node at index `root`.
+/// Reorder root of a binary max-heap.
+///
+/// <div class="warning">Assumes children are valid binary max-heaps.</div>
+///
+/// Swap the node indexed at `root` with the root of either it's left or right
+/// child until the subtree rooted by the node at index 'root' is a max-heap.
 fn sift_down<T>(slice: &mut [T], mut root: usize)
 where
     T: Ord,
