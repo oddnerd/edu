@@ -51,7 +51,7 @@ where
 
 #[cfg(test)]
 mod top_down {
-    use super::*;
+    use super::top_down;
 
     #[test]
     fn empty() {
@@ -140,7 +140,7 @@ where
 
 #[cfg(test)]
 mod bottom_up {
-    use super::*;
+    use super::bottom_up;
 
     #[test]
     fn empty() {
@@ -280,7 +280,7 @@ where
 
 #[cfg(test)]
 mod inplace {
-    use super::*;
+    use super::inplace;
 
     #[test]
     fn empty() {
