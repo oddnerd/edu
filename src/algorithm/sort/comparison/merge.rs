@@ -40,49 +40,56 @@ where
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
-        let merger =
-            crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter());
-
-        std::iter::zip(slice, merger).for_each(|(old, new)| {
-            *old = new.clone();
-        });
+        crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter())
+            .zip(slice)
+            .for_each(|(new, old)| {
+                *old = new.clone();
+            });
     }
 }
 
 #[cfg(test)]
-mod top_down_tests {
-    use super::*;
+mod top_down {
+    use super::top_down;
 
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, []);
     }
 
     #[test]
-    fn one() {
+    fn single() {
         let mut slice = [0];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0]);
     }
 
     #[test]
-    fn two() {
-        let mut slice = [2, 1];
-        let mut auxiliary = slice.to_vec();
+    fn sorted() {
+        let mut slice = [0, 1];
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
-    fn multiple() {
-        let mut slice = [3, 2, 1];
-        let mut auxiliary = slice.to_vec();
+    fn must_swap() {
+        let mut slice = [1, 0];
+        let mut auxiliary = slice.clone();
         top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2, 3]);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn multiple_swaps() {
+        let mut slice = [2, 0, 3, 1];
+        let mut auxiliary = slice.clone();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
 
@@ -114,58 +121,66 @@ where
         for (slice, auxiliary) in chunks {
             let (left, right) = auxiliary.split_at(auxiliary.len() / 2);
 
-            let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
-
-            // merge from `auxiliary` into `slice`
-            std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
-                *old = new.clone();
-            });
+            crate::algorithm::merge::MergeIter::new(left.iter(), right.iter())
+                .zip(slice.iter_mut())
+                .for_each(|(new, old)| {
+                    *old = new.clone();
+                });
 
             // propagate sorted `slice` to `auxiliary` for next chunk iteration
-            std::iter::zip(auxiliary.iter_mut(), slice.iter()).for_each(|(old, new)| {
-                *old = new.clone();
-            });
+            auxiliary
+                .iter_mut()
+                .zip(slice.iter())
+                .for_each(|(old, new)| {
+                    *old = new.clone();
+                });
         }
         length *= 2;
     }
 }
 
 #[cfg(test)]
-mod bottom_up_tests {
-    use super::*;
+mod bottom_up {
+    use super::bottom_up;
 
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, []);
     }
 
     #[test]
-    fn one() {
+    fn single() {
         let mut slice = [0];
-        let mut auxiliary = slice.to_vec();
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0]);
     }
 
     #[test]
-    fn two() {
-        let mut slice = [2, 1];
-        let mut auxiliary = slice.to_vec();
+    fn sorted() {
+        let mut slice = [0, 1];
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2]);
+        assert_eq!(slice, [0, 1]);
     }
 
     #[test]
-    fn multiple() {
-        let mut slice: Vec<i32> = (0..4).collect();
-        let copy = slice.clone();
-        slice.reverse();
-        let mut auxiliary = slice.to_vec();
+    fn must_swap() {
+        let mut slice = [1, 0];
+        let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, copy);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn multiple_swaps() {
+        let mut slice = [2, 0, 3, 1];
+        let mut auxiliary = slice.clone();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
 
@@ -176,55 +191,59 @@ mod bottom_up_tests {
 /// which are merged into [output..right_end].
 fn inplace_merge<T>(
     slice: &mut [T],
-    mut left: usize,
+    left: usize,
     left_end: usize,
-    mut right: usize,
+    right: usize,
     right_end: usize,
-    mut output: usize,
+    output: usize,
 ) where
-    T: Ord + Clone,
+    T: Ord,
 {
-    while left < left_end && right < right_end {
-        if slice[left] < slice[right] {
-            (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
-            left += 1;
-        } else {
-            (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
-            right += 1;
+    match (slice[..left_end].get(left), slice[..right_end].get(right)) {
+        (Some(first), Some(second)) => {
+            if first < second {
+                slice.swap(output, left);
+                inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
+            } else {
+                slice.swap(output, right);
+                inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
+            }
         }
-        output += 1;
-    }
-    while left < left_end {
-        (slice[output], slice[left]) = (slice[left].clone(), slice[output].clone());
-        output += 1;
-        left += 1;
-    }
-    while right < right_end {
-        (slice[output], slice[right]) = (slice[right].clone(), slice[output].clone());
-        output += 1;
-        right += 1;
+        (Some(_), None) => {
+            slice.swap(output, left);
+            inplace_merge(slice, left + 1, left_end, right, right_end, output + 1)
+        }
+        (None, Some(_)) => {
+            slice.swap(output, right);
+            inplace_merge(slice, left, left_end, right + 1, right_end, output + 1);
+        }
+        (None, None) => {
+            return;
+        }
     }
 }
 
-/// Mergesort some slice in-place of another.
+/// Merge sort some slice in-place of another.
 ///
-/// `output` will contain the sorted entries of `input`
-/// whereas `input` will hold unsorted entried of `output`.
-fn inplace_with<T>(input: &mut [T], output: &mut [T])
+/// Sort the elements of `from` into the buffer `into` whilst swapping
+/// overwirrten elements from `into` over to `from` such that `into` will
+/// contain the sorted entries of `from` whereas `from` will hold unordered
+/// entried of `into`.
+fn inplace_into<T>(from: &mut [T], into: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord,
 {
-    if !input.is_empty() {
-        let middle = input.len() / 2;
-        let (mut left, mut right) = input.split_at_mut(middle);
+    if !from.is_empty() {
+        let middle = from.len() / 2;
+        let (mut left, mut right) = from.split_at_mut(middle);
         inplace(&mut left);
         inplace(&mut right);
 
-        let merger = crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut());
-
-        std::iter::zip(merger, output.iter_mut()).for_each(|(smallest, output)| {
-            (*smallest, *output) = (output.clone(), smallest.clone())
-        });
+        crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut())
+            .zip(into.iter_mut())
+            .for_each(|(smallest, output)| {
+                std::mem::swap(smallest, output);
+            });
     }
 }
 
@@ -241,7 +260,7 @@ where
 /// ```
 pub fn inplace<T>(slice: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord,
 {
     if slice.len() > 1 {
         let middle = slice.len() / 2;
@@ -249,7 +268,7 @@ where
 
         // sort slice[..middle] into slice[output..]
         let (read, write) = slice.split_at_mut(middle);
-        inplace_with(read, &mut write[output - middle..]);
+        inplace_into(read, &mut write[output - middle..]);
 
         while output > 2 {
             let middle = output;
@@ -257,7 +276,7 @@ where
 
             // sort slice[output..middle] into slice[..output]
             let (left, right) = slice.split_at_mut(output);
-            inplace_with(&mut right[..middle - output], left);
+            inplace_into(&mut right[..middle - output], left);
 
             inplace_merge(slice, 0, middle - output, middle, slice.len(), output);
         }
@@ -265,8 +284,8 @@ where
 }
 
 #[cfg(test)]
-mod inplace_tests {
-    use super::*;
+mod inplace {
+    use super::inplace;
 
     #[test]
     fn empty() {
@@ -276,25 +295,30 @@ mod inplace_tests {
     }
 
     #[test]
-    fn one() {
+    fn single() {
         let mut slice = [0];
         inplace(&mut slice);
         assert_eq!(slice, [0]);
     }
 
     #[test]
-    fn two() {
+    fn sorted() {
+        let mut slice = [0, 1];
+        inplace(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn must_swap() {
         let mut slice = [1, 0];
         inplace(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
     #[test]
-    fn multiple() {
-        let mut slice: Vec<i32> = (0..10).collect();
-        let copy = slice.clone();
-        slice.reverse();
+    fn multiple_swaps() {
+        let mut slice = [2, 0, 3, 1];
         inplace(&mut slice);
-        assert_eq!(slice, copy);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }

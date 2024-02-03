@@ -107,7 +107,7 @@ where
 
 #[cfg(test)]
 mod bottom_up {
-    use super::*;
+    use super::bottom_up;
 
     #[test]
     fn empty() {
@@ -117,7 +117,7 @@ mod bottom_up {
     }
 
     #[test]
-    fn one_element() {
+    fn single() {
         let mut slice = [0];
         bottom_up(&mut slice);
         assert_eq!(slice, [0]);
@@ -131,9 +131,16 @@ mod bottom_up {
     }
 
     #[test]
-    fn swap_necessary() {
+    fn must_swap() {
         let mut slice = [1, 0];
         bottom_up(&mut slice);
         assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn multiple_swap() {
+        let mut slice = [2, 0, 3, 1];
+        bottom_up(&mut slice);
+        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
