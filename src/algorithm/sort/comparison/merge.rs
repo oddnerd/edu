@@ -50,7 +50,7 @@ where
 }
 
 #[cfg(test)]
-mod top_down_tests {
+mod top_down {
     use super::*;
 
     #[test]
@@ -131,7 +131,7 @@ where
 }
 
 #[cfg(test)]
-mod bottom_up_tests {
+mod bottom_up {
     use super::*;
 
     #[test]
@@ -265,7 +265,7 @@ where
 }
 
 #[cfg(test)]
-mod inplace_tests {
+mod inplace {
     use super::*;
 
     #[test]
