@@ -40,12 +40,11 @@ where
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
-        let merger =
-            crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter());
-
-        std::iter::zip(slice, merger).for_each(|(old, new)| {
-            *old = new.clone();
-        });
+        crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter())
+            .zip(slice)
+            .for_each(|(new, old)| {
+                *old = new.clone();
+            });
     }
 }
 
@@ -122,17 +121,19 @@ where
         for (slice, auxiliary) in chunks {
             let (left, right) = auxiliary.split_at(auxiliary.len() / 2);
 
-            let merger = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
-
-            // merge from `auxiliary` into `slice`
-            std::iter::zip(slice.iter_mut(), merger).for_each(|(old, new)| {
-                *old = new.clone();
-            });
+            crate::algorithm::merge::MergeIter::new(left.iter(), right.iter())
+                .zip(slice.iter_mut())
+                .for_each(|(new, old)| {
+                    *old = new.clone();
+                });
 
             // propagate sorted `slice` to `auxiliary` for next chunk iteration
-            std::iter::zip(auxiliary.iter_mut(), slice.iter()).for_each(|(old, new)| {
-                *old = new.clone();
-            });
+            auxiliary
+                .iter_mut()
+                .zip(slice.iter())
+                .for_each(|(old, new)| {
+                    *old = new.clone();
+                });
         }
         length *= 2;
     }
@@ -238,11 +239,11 @@ where
         inplace(&mut left);
         inplace(&mut right);
 
-        let merger = crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut());
-
-        std::iter::zip(merger, into.iter_mut()).for_each(|(smallest, output)| {
-            std::mem::swap(smallest, output);
-        });
+        crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut())
+            .zip(into.iter_mut())
+            .for_each(|(smallest, output)| {
+                std::mem::swap(smallest, output);
+            });
     }
 }
 
