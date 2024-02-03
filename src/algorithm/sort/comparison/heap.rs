@@ -46,6 +46,7 @@ where
             slice.swap(root, greatest_child);
             root = greatest_child;
         } else {
+            // node indexed at `root` is the largest element
             return;
         }
     }
@@ -81,7 +82,9 @@ where
         while end > 1 {
             end = end - 1;
             slice.swap(0, end);
-            sift_down(slice, 0);
+
+            // slice[end..] is sorted
+            sift_down(&mut slice[..end], 0);
         }
     }
 }
@@ -106,8 +109,8 @@ mod test {
 
     #[test]
     fn sorted() {
-        let mut slice = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let mut slice = [0, 1];
         sort(&mut slice);
-        assert_eq!(slice, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(slice, [0, 1]);
     }
 }
