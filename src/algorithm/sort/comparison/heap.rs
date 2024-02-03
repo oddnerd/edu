@@ -106,7 +106,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod bottom_up {
     use super::*;
 
     #[test]
