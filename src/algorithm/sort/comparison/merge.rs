@@ -247,16 +247,17 @@ where
     }
 }
 
-/// Sort a slice using O(n log n) in-place merge sort.
+/// Sort a slice using in-place merge sort.
 ///
-/// Sort the left half into the right half swapping unsorted elements from
-/// the right half into spots sorted from the left half such that the left half
-/// contains the unsorted elements from the right half whereas the right half
-/// contains the now sorted elements from the left half. Iteratively sort the
-/// last half of the unsorted elements into the first half, then merge the
-/// now sorted first half with the original sorted right half using the space
-/// of the unsorted fraction in-between such that those unsorted elements are
-/// moved into spots from the sorted left half for the next iteration.
+/// <div class="warning">Does not preserve order of equivalent elements.</div>
+///
+/// Sort the left half into the right half so the right half is sorted and the
+/// left half is unsorted. Continuously sort the right half of the unsorted
+/// fraction into the left half of the unsorted fraction so the left half of
+/// the fraction is sorted and the right half of the fraction is unsorted, then
+/// merge the now sorted left fraction into the previously sorted right half
+/// using the unsorted right fraction so the left fraction now contains all the
+/// unsorted elements.
 ///
 /// # Examples
 /// ```
