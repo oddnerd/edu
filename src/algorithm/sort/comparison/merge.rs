@@ -206,7 +206,7 @@ fn inplace_merge<T>(
                 inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
             } else {
                 slice.swap(output, right);
-                inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
+                inplace_merge(slice, left, left_end, right + 1, right_end, output + 1);
             }
         }
         (Some(_), None) => {
