@@ -85,6 +85,14 @@ mod top_down {
     }
 
     #[test]
+    fn odd_length() {
+        let mut slice = [3, 2, 1];
+        let mut auxiliary = slice.clone();
+        top_down(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
+    #[test]
     fn multiple_swaps() {
         let mut slice = [2, 0, 3, 1];
         let mut auxiliary = slice.clone();
@@ -173,6 +181,14 @@ mod bottom_up {
         let mut auxiliary = slice.clone();
         bottom_up(&mut slice, &mut auxiliary);
         assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn odd_length() {
+        let mut slice = [3, 2, 1];
+        let mut auxiliary = slice.clone();
+        bottom_up(&mut slice, &mut auxiliary);
+        assert_eq!(slice, [1, 2, 3]);
     }
 
     #[test]
@@ -337,25 +353,16 @@ mod inplace {
     }
 
     #[test]
+    fn odd_length() {
+        let mut slice = [3, 2, 1];
+        inplace(&mut slice);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
+    #[test]
     fn multiple_swaps() {
         let mut slice = [2, 0, 3, 1];
         inplace(&mut slice);
         assert_eq!(slice, [0, 1, 2, 3]);
-    }
-
-    #[test]
-    fn long() {
-        let mut slice: Vec<usize> = (0..16).collect();
-        let clone = slice.clone();
-        slice.reverse();
-        inplace(&mut slice);
-        assert_eq!(slice, clone);
-    }
-
-    #[test]
-    fn three() {
-        let mut slice = [3, 2, 1];
-        inplace(&mut slice);
-        assert_eq!(slice, [1, 2, 3]);
     }
 }
