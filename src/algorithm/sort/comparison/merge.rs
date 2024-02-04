@@ -244,12 +244,6 @@ where
             .for_each(|(smallest, output)| {
                 std::mem::swap(smallest, output);
             });
-    } else {
-        // hmm?
-        // TODO: Consider removing.
-        for (from, into) in from.iter_mut().zip(into.iter_mut()) {
-            std::mem::swap(from, into);
-        }
     }
 }
 
