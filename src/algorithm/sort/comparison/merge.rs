@@ -287,9 +287,8 @@ where
             inplace_merge(slice, 0, middle - output, middle, slice.len(), output);
         }
 
-        // Insertion sort?
-        // TODO: Consider removing.
-        for n in (2..output).rev() {
+        // insertion sort???
+        for n in (1..=output).rev() {
             for m in n..slice.len() {
                 if slice[m] < slice[m - 1] {
                     slice.swap(m, m - 1);
