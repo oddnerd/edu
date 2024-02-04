@@ -111,7 +111,7 @@ mod top_down {
 /// ```
 pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
 where
-    T: Ord + Clone + std::fmt::Debug,
+    T: Ord + Clone,
 {
     assert!(slice == auxiliary);
     let mut length: usize = 2;
