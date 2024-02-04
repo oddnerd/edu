@@ -233,7 +233,7 @@ fn inplace_into<T>(from: &mut [T], into: &mut [T])
 where
     T: Ord,
 {
-    if !from.is_empty() {
+    if from.len() > 1 {
         let middle = from.len() / 2;
         let (mut left, mut right) = from.split_at_mut(middle);
         inplace(&mut left);
@@ -244,6 +244,12 @@ where
             .for_each(|(smallest, output)| {
                 std::mem::swap(smallest, output);
             });
+    } else {
+        // hmm?
+        // TODO: Consider removing.
+        for (from, into) in from.iter_mut().zip(into.iter_mut()) {
+            std::mem::swap(from, into);
+        }
     }
 }
 
@@ -279,6 +285,16 @@ where
             inplace_into(&mut right[..middle - output], left);
 
             inplace_merge(slice, 0, middle - output, middle, slice.len(), output);
+        }
+
+        // Insertion sort?
+        // TODO: Consider removing.
+        for n in (2..output).rev() {
+            for m in n..slice.len() {
+                if slice[m] < slice[m - 1] {
+                    slice.swap(m, m - 1);
+                }
+            }
         }
     }
 }
