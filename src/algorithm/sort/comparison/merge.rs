@@ -197,7 +197,7 @@ fn inplace_merge<T>(
     right_end: usize,
     output: usize,
 ) where
-    T: Ord,
+    T: Ord + std::fmt::Debug,
 {
     match (slice[..left_end].get(left), slice[..right_end].get(right)) {
         (Some(first), Some(second)) => {
@@ -231,7 +231,7 @@ fn inplace_merge<T>(
 /// entried of `into`.
 fn inplace_into<T>(from: &mut [T], into: &mut [T])
 where
-    T: Ord,
+    T: Ord + std::fmt::Debug,
 {
     if from.len() > 1 {
         let middle = from.len() / 2;
@@ -244,6 +244,8 @@ where
             .for_each(|(smallest, output)| {
                 std::mem::swap(smallest, output);
             });
+    } else if let (Some(mut from), Some(mut into)) = (from.first(), into.first()) {
+        std::mem::swap(&mut from, &mut into);
     }
 }
 
@@ -268,18 +270,18 @@ where
 /// ```
 pub fn inplace<T>(slice: &mut [T])
 where
-    T: Ord,
+    T: Ord + std::fmt::Debug,
 {
     if slice.len() > 1 {
-        let mut middle = slice.len() / 2;
+        let mut middle = (slice.len() + 1) / 2;
 
         // sort left half into right half
         let (left, right) = slice.split_at_mut(middle);
         inplace_into(left, right);
 
         while slice[..middle].len() > 1 {
-            let end = middle;
-            middle = (end + 1) / 2;
+            let sorted = middle;
+            middle = (sorted + 1) / 2;
 
             // sort right fraction into left fraction
             let (left, right) = slice.split_at_mut(middle);
@@ -288,7 +290,7 @@ where
             // merge sorted left fraction into original sorted right half using
             // space of unsorted elements in-between thereby causing
             // `slice[..middle]` to become the unsorted elements.
-            inplace_merge(slice, 0, middle, end, slice.len(), middle);
+            inplace_merge(slice, 0, middle, sorted, slice.len(), middle);
         }
 
         // first is the only unsorted element, swap it back until sorted
@@ -348,5 +350,12 @@ mod inplace {
         slice.reverse();
         inplace(&mut slice);
         assert_eq!(slice, clone);
+    }
+
+    #[test]
+    fn three() {
+        let mut slice = [3, 2, 1];
+        inplace(&mut slice);
+        assert_eq!(slice, [1, 2, 3]);
     }
 }
