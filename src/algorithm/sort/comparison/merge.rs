@@ -247,9 +247,16 @@ where
     }
 }
 
-/// Sort a slice using in-place merge sort.
+/// Sort a slice using O(n log n) in-place merge sort.
 ///
-/// O(n log n) based on "Practical in-place mergesort".
+/// Sort the left half into the right half swapping unsorted elements from
+/// the right half into spots sorted from the left half such that the left half
+/// contains the unsorted elements from the right half whereas the right half
+/// contains the now sorted elements from the left half. Iteratively sort the
+/// last half of the unsorted elements into the first half, then merge the
+/// now sorted first half with the original sorted right half using the space
+/// of the unsorted fraction in-between such that those unsorted elements are
+/// moved into spots from the sorted left half for the next iteration.
 ///
 /// # Examples
 /// ```
@@ -263,30 +270,32 @@ where
     T: Ord,
 {
     if slice.len() > 1 {
-        let middle = slice.len() / 2;
-        let mut output = slice.len() - middle;
+        let mut middle = slice.len() / 2;
 
-        // sort slice[..middle] into slice[output..]
-        let (read, write) = slice.split_at_mut(middle);
-        inplace_into(read, &mut write[output - middle..]);
+        // sort left half into right half
+        let (left, right) = slice.split_at_mut(middle);
+        inplace_into(left, right);
 
-        while output > 2 {
-            let middle = output;
-            output = (middle + 1) / 2;
+        while slice[..middle].len() > 1 {
+            let end = middle;
+            middle = (end + 1) / 2;
 
-            // sort slice[output..middle] into slice[..output]
-            let (left, right) = slice.split_at_mut(output);
-            inplace_into(&mut right[..middle - output], left);
+            // sort right fraction into left fraction
+            let (left, right) = slice.split_at_mut(middle);
+            inplace_into(&mut right[..middle], left);
 
-            inplace_merge(slice, 0, middle - output, middle, slice.len(), output);
+            // merge sorted left fraction into original sorted right half using
+            // space of unsorted elements in-between thereby causing
+            // `slice[..middle]` to become the unsorted elements.
+            inplace_merge(slice, 0, middle, end, slice.len(), middle);
         }
 
-        // insertion sort???
-        for n in (1..=output).rev() {
-            for m in n..slice.len() {
-                if slice[m] < slice[m - 1] {
-                    slice.swap(m, m - 1);
-                }
+        // first is the only unsorted element, swap it back until sorted
+        for index in 1..slice.len() {
+            if slice[index] < slice[index - 1] {
+                slice.swap(index, index - 1);
+            } else {
+                break;
             }
         }
     }
@@ -329,5 +338,14 @@ mod inplace {
         let mut slice = [2, 0, 3, 1];
         inplace(&mut slice);
         assert_eq!(slice, [0, 1, 2, 3]);
+    }
+
+    #[test]
+    fn long() {
+        let mut slice: Vec<usize> = (0..16).collect();
+        let clone = slice.clone();
+        slice.reverse();
+        inplace(&mut slice);
+        assert_eq!(slice, clone);
     }
 }
