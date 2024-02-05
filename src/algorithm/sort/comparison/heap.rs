@@ -173,7 +173,7 @@ mod bottom_up {
 /// ```
 pub fn bottom_up_inline<T>(slice: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord,
 {
     // start at the parent of the last element which is the greatest
     // index of a node in the heap which has children. Since elements
