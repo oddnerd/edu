@@ -52,12 +52,12 @@ where
     }
 }
 
-/// Arrange elements of a slice into max heap order.
+/// Arrange elements of a slice into max heap order in O(n log n) time.
 ///
 /// Interpret `slice` as a binary tree where, for each node at index i, the
 /// left child is at index (2*i+1) and the right child is at index (2*i+2).
 /// Reorder the nodes such that all children are less than their parent.
-fn max_heapify<T>(slice: &mut [T])
+fn bottom_up_max_heapify<T>(slice: &mut [T])
 where
     T: Ord,
 {
@@ -80,6 +80,12 @@ where
 
 /// Sort a slice via bottom-up heap sort.
 ///
+/// Create bottom order heaps with one parent and two leaves. Iteratively join
+/// these heaps by [`sift_down`] the element correcsponding to their parent in
+/// the slice until all elements are within one max-heap.Ordered elements are
+/// then popped from the heap by swapping it with a leaf then [`sift_down`] to
+/// preserve order.
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::heap::bottom_up;
@@ -92,7 +98,7 @@ where
     T: Ord,
 {
     // reorder elements to construct an in-place binary max-heap.
-    max_heapify(slice);
+    bottom_up_max_heapify(slice);
     let root = 0;
 
     for end in (0..slice.len()).rev() {
