@@ -245,3 +245,23 @@ mod bottom_up_inline {
         assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
+
+/// Sort a slice via top-down heap sort.
+///
+/// Create one max-heap at the start of the slice and then push each sucessive
+/// element into it via [`sift_up`]. Ordered elements are then popped from the
+/// heap by swapping it with a leaf then [`sift_down`] to preserve the heap.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::top_down;
+/// let mut slice = [3, 2, 1];
+/// top_down(&mut slice);
+/// assert_eq!(slice, [1, 2, 3]);
+/// ```
+pub fn top_down<T>(slice: &mut [T])
+where
+    T: Ord + Clone,
+{
+    todo!("top-down heap construction");
+}
