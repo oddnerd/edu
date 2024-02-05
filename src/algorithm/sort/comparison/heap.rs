@@ -152,9 +152,56 @@ mod bottom_up {
     }
 }
 
-pub fn inline<T>(slice: &mut [T])
+pub fn bottom_up_inline<T>(slice: &mut [T])
 where
     T: Ord + Clone,
 {
     todo!("bottom up implementation with inline expanded sift_down");
+}
+
+#[cfg(test)]
+mod bottom_up_inline {
+    use super::bottom_up_inline;
+
+    #[test]
+    fn empty() {
+        let mut slice: [usize; 0] = [];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn single() {
+        let mut slice = [0];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn sorted() {
+        let mut slice = [0, 1];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn must_swap() {
+        let mut slice = [1, 0];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn odd_length() {
+        let mut slice = [3, 2, 1];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
+    #[test]
+    fn multiple_swap() {
+        let mut slice = [2, 0, 3, 1];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0, 1, 2, 3]);
+    }
 }
