@@ -50,7 +50,7 @@ where
     }
 }
 
-/// Arrange elements of a slice into max heap order in O(n log n) time.
+/// Arrange elements of a slice into max-heap order in O(n log n) time.
 ///
 /// Interpret `slice` as a binary tree where, for each node at index i, the
 /// left child is at index (2*i+1) and the right child is at index (2*i+2).
@@ -268,6 +268,20 @@ where
                 sift_up(&mut slice[..=parent_index]);
             }
         }
+    }
+}
+
+/// Arrange elements of a slice into max-heap order in O(n) time.
+///
+/// Interpret `slice` as a binary tree where, for each node at index i, the
+/// left child is at index (2*i+1) and the right child is at index (2*i+2).
+/// Reorder the nodes such that all children are less than their parent.
+fn top_down_max_heapify<T>(slice: &mut [T])
+where
+    T: Ord,
+{
+    for end in 1..slice.len() {
+        sift_up(&mut slice[..end]);
     }
 }
 
