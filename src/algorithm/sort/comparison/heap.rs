@@ -285,8 +285,9 @@ fn top_down_max_heapify<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    for end in 1..=slice.len() {
-        sift_up(&mut slice[..end]);
+    for leaf in 1..=slice.len() {
+        // push leaf into the max-heap
+        sift_up(&mut slice[..leaf]);
     }
 }
 
