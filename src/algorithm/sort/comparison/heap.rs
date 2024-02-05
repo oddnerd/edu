@@ -280,7 +280,7 @@ fn top_down_max_heapify<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    for end in 1..slice.len() {
+    for end in 1..=slice.len() {
         sift_up(&mut slice[..end]);
     }
 }
@@ -300,9 +300,20 @@ where
 /// ```
 pub fn top_down<T>(slice: &mut [T])
 where
-    T: Ord + Clone,
+    T: Ord,
 {
-    todo!("top-down heap construction");
+    // reorder elements to construct an in-place binary max-heap.
+    top_down_max_heapify(slice);
+    let root = 0;
+
+    for end in (0..slice.len()).rev() {
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        slice.swap(root, end);
+
+        // push the new root into the shrunk max-heap excluding sorted element.
+        sift_down(&mut slice[..end]);
+    }
 }
 
 #[cfg(test)]
