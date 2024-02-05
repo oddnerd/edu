@@ -151,3 +151,97 @@ mod bottom_up {
         assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
+
+/// Sort a slice via bottom-up heap sort with inline sift-down optimization.
+///
+/// [`bottom_up`] seperates creating the max-heap and using it to iterate the
+/// elements in sorted order. In contrast, this implementation combines the two
+/// steps into one loop with a conditional. With branch prediction and inline
+/// expansion of [`sift_down`], this implementation would likely have different
+/// runtime characteristics.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::bottom_up_inline;
+/// let mut slice = [3, 2, 1];
+/// bottom_up_inline(&mut slice);
+/// assert_eq!(slice, [1, 2, 3]);
+/// ```
+pub fn bottom_up_inline<T>(slice: &mut [T])
+where
+    T: Ord + Clone,
+{
+    // start at the parent of the last element which is the greatest
+    // index of a node in the heap which has children. Since elements
+    // within `slice[heap..]` are leaves to some subtree rooted by an
+    // index in `slice[..=heap]`, therefore they can be skipped because
+    // [`sift_down`] orders them when the index of their parent is reached.
+    let mut heap = slice.len() / 2;
+
+    // slice[left_unsorted..] is sorted.
+    let mut left_unsorted = slice.len();
+
+    while left_unsorted > 1 {
+        // if the heap has yet to be constructed.
+        if heap > 0 {
+            heap -= 1;
+        }
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        else {
+            left_unsorted -= 1;
+            slice.swap(left_unsorted, 0);
+        }
+
+        // `slice[heap]` is either the next element to heapify, or the leaf
+        // swapped for the maximum element of the constructed max-heap.
+        sift_down(&mut slice[heap..left_unsorted]);
+    }
+}
+
+#[cfg(test)]
+mod bottom_up_inline {
+    use super::bottom_up_inline;
+
+    #[test]
+    fn empty() {
+        let mut slice: [usize; 0] = [];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, []);
+    }
+
+    #[test]
+    fn single() {
+        let mut slice = [0];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0]);
+    }
+
+    #[test]
+    fn sorted() {
+        let mut slice = [0, 1];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn must_swap() {
+        let mut slice = [1, 0];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0, 1]);
+    }
+
+    #[test]
+    fn odd_length() {
+        let mut slice = [3, 2, 1];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
+    #[test]
+    fn multiple_swap() {
+        let mut slice = [2, 0, 3, 1];
+        bottom_up_inline(&mut slice);
+        assert_eq!(slice, [0, 1, 2, 3]);
+    }
+}
