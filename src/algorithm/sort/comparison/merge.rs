@@ -122,29 +122,49 @@ where
     T: Ord + Clone,
 {
     assert!(slice == auxiliary);
-    let mut length: usize = 2;
-    while length <= slice.len() {
-        let chunks = std::iter::zip(slice.chunks_mut(length), auxiliary.chunks_mut(length));
+
+    // merge `from[..middle]` and `from[middle..]` into `into`
+    fn merge<T: Ord + Clone>(into: &mut [T], from: &mut [T]) {
+        let middle = (from.len() + 1) / 2;
+        let (left, right) = from.split_at_mut(middle);
+
+        // merging those two sorted subslices sorts them together
+        let merged = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
+
+        // put the result into output `slice`
+        merged.zip(into.iter_mut()).for_each(|(new, old)| {
+            *old = new.clone();
+        });
+    }
+
+    // interpret each slice as chunks (subslices) of size `length`.
+    let mut length = 2;
+
+    // if the length of `slice` is not exactly some 2^n, the full loop
+    // would exit leaving one final merge necessary so might as well
+    // exit when length implies theres only two sorted subslices left.
+    while length <= (slice.len() + 1) / 2 {
+        let chunks = slice.chunks_mut(length).zip(auxiliary.chunks_mut(length));
 
         for (slice, auxiliary) in chunks {
-            let (left, right) = auxiliary.split_at(auxiliary.len() / 2);
+            // we assume from previous iteration each chunk is split
+            // at the middle into sorted subslices.
+            merge(slice, auxiliary);
 
-            crate::algorithm::merge::MergeIter::new(left.iter(), right.iter())
-                .zip(slice.iter_mut())
+            // clone the result into `auxiliary` for next merge iteration
+            slice
+                .iter()
+                .zip(auxiliary.iter_mut())
                 .for_each(|(new, old)| {
                     *old = new.clone();
                 });
-
-            // propagate sorted `slice` to `auxiliary` for next chunk iteration
-            auxiliary
-                .iter_mut()
-                .zip(slice.iter())
-                .for_each(|(old, new)| {
-                    *old = new.clone();
-                });
         }
+
+        // next iteration can merge two subslices of the current length.
         length *= 2;
     }
+
+    merge(slice, auxiliary);
 }
 
 #[cfg(test)]
