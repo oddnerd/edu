@@ -252,6 +252,27 @@ mod bottom_up_inline {
     }
 }
 
+/// Reorder last leaf of a binary max-heap ordered slice.
+///
+/// Swap the last element (final leaf) with its parent until it is ordered
+/// within the max-heap.
+fn sift_up<T>(slice: &mut [T])
+where
+    T: Ord,
+{
+    if slice.len() > 1 {
+        let current_index = slice.len() - 1;
+        let parent_index = parent(current_index);
+
+        if let (Some(current), Some(parent)) = (slice.get(current_index), slice.get(parent_index)) {
+            if parent < current {
+                slice.swap(current_index, parent_index);
+                sift_up(&mut slice[..=parent_index]);
+            }
+        }
+    }
+}
+
 /// Sort a slice via top-down heap sort.
 ///
 /// Create one max-heap at the start of the slice and then push each sucessive
@@ -271,7 +292,6 @@ where
 {
     todo!("top-down heap construction");
 }
-
 
 #[cfg(test)]
 mod top_down {
