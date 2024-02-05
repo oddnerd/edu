@@ -151,3 +151,10 @@ mod bottom_up {
         assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
+
+pub fn inline<T>(slice: &mut [T])
+where
+    T: Ord + Clone,
+{
+    todo!("bottom up implementation with inline expanded sift_down");
+}
