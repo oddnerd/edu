@@ -177,7 +177,6 @@ where
     // index in `slice[..=heap]`, therefore they can be skipped because
     // [`sift_down`] orders them when the index of their parent is reached.
     let mut heap = slice.len() / 2;
-    // let mut heap = parent(slice.len() - 1);
 
     // slice[left_unsorted..] is sorted.
     let mut left_unsorted = slice.len();
