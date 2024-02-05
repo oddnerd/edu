@@ -156,7 +156,33 @@ pub fn bottom_up_inline<T>(slice: &mut [T])
 where
     T: Ord + Clone,
 {
-    todo!("bottom up implementation with inline expanded sift_down");
+    // start at the parent of the last element which is the greatest
+    // index of a node in the heap which has children. Since elements
+    // within `slice[heap..]` are leaves to some subtree rooted by an
+    // index in `slice[..=heap]`, therefore they can be skipped because
+    // [`sift_down`] orders them when the index of their parent is reached.
+    let mut heap = slice.len() / 2;
+    // let mut heap = parent(slice.len() - 1);
+
+    // slice[left_unsorted..] is sorted.
+    let mut left_unsorted = slice.len();
+
+    while left_unsorted > 1 {
+        // if the heap has yet to be constructed.
+        if heap > 0 {
+            heap -= 1;
+        }
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        else {
+            left_unsorted -= 1;
+            slice.swap(left_unsorted, 0);
+        }
+
+        // `slice[heap]` is either the next element to heapify, or the leaf
+        // swapped for the maximum element of the constructed max-heap.
+        sift_down(&mut slice[heap..left_unsorted]);
+    }
 }
 
 #[cfg(test)]
