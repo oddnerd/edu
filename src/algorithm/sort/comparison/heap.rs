@@ -23,9 +23,7 @@ fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
 
-/// Reorder root of a binary max-heap ordered slice.
-///
-/// <div class="warning">Assumes children are valid binary max-heaps.</div>
+/// Reorder root (first element) of a binary max-heap ordered slice.
 ///
 /// Swap the first element (current root) with the greatest root of either
 /// the left or right child max-heap until the subtree rooted by the first
