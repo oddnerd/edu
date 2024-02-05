@@ -138,6 +138,13 @@ mod bottom_up {
     }
 
     #[test]
+    fn odd_length() {
+        let mut slice = [3, 2, 1];
+        bottom_up(&mut slice);
+        assert_eq!(slice, [1, 2, 3]);
+    }
+
+    #[test]
     fn multiple_swap() {
         let mut slice = [2, 0, 3, 1];
         bottom_up(&mut slice);
