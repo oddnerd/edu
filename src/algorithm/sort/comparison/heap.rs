@@ -152,6 +152,21 @@ mod bottom_up {
     }
 }
 
+/// Sort a slice via bottom-up heap sort with inline sift-down optimization.
+///
+/// [`bottom_up`] seperates creating the max-heap and using it to iterate the
+/// elements in sorted order. In contrast, this implementation combines the two
+/// steps into one loop with a conditional. With branch prediction and inline
+/// expansion of [`sift_down`], this implementation would likely have different
+/// runtime characteristics.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::bottom_up_inline;
+/// let mut slice = [3, 2, 1];
+/// bottom_up_inline(&mut slice);
+/// assert_eq!(slice, [1, 2, 3]);
+/// ```
 pub fn bottom_up_inline<T>(slice: &mut [T])
 where
     T: Ord + Clone,
