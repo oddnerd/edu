@@ -85,21 +85,6 @@ where
     }
 }
 
-/// Sort a slice in-place which is already in max-heap order.
-fn sort_inplace_from_max_heap<T>(max_heap: &mut [T])
-where
-    T: Ord,
-{
-    for end in (0..max_heap.len()).rev() {
-        // max-heap implies the root node is the greatest in the collection,
-        // pop it from the max-heap by swapping it with the last element.
-        max_heap.swap(0, end);
-
-        // push the new root into the shrunk max-heap excluding sorted element.
-        sift_down(&mut max_heap[..end]);
-    }
-}
-
 /// Arrange elements of a slice into max-heap order in O(n log n) time.
 ///
 /// Interpret `slice` as a binary tree where, for each node at index i, the
@@ -353,7 +338,15 @@ where
     T: Ord,
 {
     top_down_max_heapify(slice);
-    sort_inplace_from_max_heap(slice);
+
+    for end in (0..slice.len()).rev() {
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        slice.swap(0, end);
+
+        // push the new root into the shrunk max-heap excluding sorted element.
+        sift_down(&mut slice[..end]);
+    }
 }
 
 #[cfg(test)]
