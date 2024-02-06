@@ -89,28 +89,47 @@ mod sift_down {
     }
 }
 
-/// Arrange elements of a slice into max-heap order in O(n log n) time.
-///
-/// Interpret `slice` as a binary tree where, for each node at index i, the
-/// left child is at index (2*i+1) and the right child is at index (2*i+2).
-/// Reorder the nodes such that all children are less than their parent.
-fn bottom_up_max_heapify<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    if slice.len() > 1 {
-        // `last` is the parent of the last element hence it is the greatest
-        // index of a node in the heap which has children. Since elements
-        // within `slice[first..]` are leaves to some subtree rooted by an
-        // index in `slice[..=first]`, therefore they can be skipped because
-        // [`sift_down`] orders them when the index of their parent is reached.
-        let last = parent(slice.len() - 1);
+mod max_heapify {
+    use super::*;
 
-        // By going in reverse, since children of `node` will either be leaves
-        // or subtrees already heap ordered, therefore sift it down until the
-        // tree rooted at `node` is itself heap ordered.
-        for node in (0..=last).rev() {
-            sift_down::top_down(&mut slice[node..]);
+    /// Arrange elements of a slice into max-heap order in O(n log n) time.
+    ///
+    /// Interpret `slice` as a binary tree where, for each node at index i, the
+    /// left child is at index (2*i+1) and the right child is at index (2*i+2).
+    /// Reorder the nodes such that all children are less than their parent.
+    pub fn bottom_up<T>(slice: &mut [T])
+    where
+        T: Ord,
+    {
+        if slice.len() > 1 {
+            // `last` is the parent of the last element hence it is the greatest
+            // index of a node in the heap which has children. Since elements
+            // within `slice[first..]` are leaves to some subtree rooted by an
+            // index in `slice[..=first]`, therefore they can be skipped because
+            // [`sift_down`] orders them when the index of their parent is reached.
+            let last = parent(slice.len() - 1);
+
+            // By going in reverse, since children of `node` will either be leaves
+            // or subtrees already heap ordered, therefore sift it down until the
+            // tree rooted at `node` is itself heap ordered.
+            for node in (0..=last).rev() {
+                sift_down::top_down(&mut slice[node..]);
+            }
+        }
+    }
+
+    /// Arrange elements of a slice into max-heap order in O(n) time.
+    ///
+    /// Interpret `slice` as a binary tree where, for each node at index i, the
+    /// left child is at index (2*i+1) and the right child is at index (2*i+2).
+    /// Reorder the nodes such that all children are less than their parent.
+    pub fn top_down<T>(slice: &mut [T])
+    where
+        T: Ord,
+    {
+        for leaf in 1..=slice.len() {
+            // push leaf into the max-heap
+            sift_up(&mut slice[..leaf]);
         }
     }
 }
@@ -134,7 +153,7 @@ pub fn bottom_up<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    bottom_up_max_heapify(slice);
+    max_heapify::bottom_up(slice);
 
     for end in (0..slice.len()).rev() {
         // max-heap implies the root node is the greatest in the collection,
@@ -309,21 +328,6 @@ where
     }
 }
 
-/// Arrange elements of a slice into max-heap order in O(n) time.
-///
-/// Interpret `slice` as a binary tree where, for each node at index i, the
-/// left child is at index (2*i+1) and the right child is at index (2*i+2).
-/// Reorder the nodes such that all children are less than their parent.
-fn top_down_max_heapify<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    for leaf in 1..=slice.len() {
-        // push leaf into the max-heap
-        sift_up(&mut slice[..leaf]);
-    }
-}
-
 /// Sort a slice via top-down heap sort.
 ///
 /// Create one max-heap at the start of the slice and then push each sucessive
@@ -341,7 +345,7 @@ pub fn top_down<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    top_down_max_heapify(slice);
+    max_heapify::top_down(slice);
 
     for end in (0..slice.len()).rev() {
         // max-heap implies the root node is the greatest in the collection,
