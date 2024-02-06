@@ -1,0 +1,88 @@
+- [structure](https://en.wikipedia.org/wiki/Data_structure)
+  - container
+    - [iterator](https://en.wikipedia.org/wiki/Iterator)
+  - collection
+    - linear
+      - [stack](https://en.wikipedia.org/wiki/Stack_(abstract_data_type))
+      - [queue](https://en.wikipedia.org/wiki/Queue_(abstract_data_type))
+        - [deque](https://en.wikipedia.org/wiki/Double-ended_queue)
+          - [priority](https://en.wikipedia.org/wiki/Double-ended_priority_queue)
+        - [priority](https://en.wikipedia.org/wiki/Priority_queue)
+      - [array](https://en.wikipedia.org/wiki/Array_(data_type))
+        - static
+        - [dynamic](https://en.wikipedia.org/wiki/Dynamic_array)
+          - [hashed array tree](https://en.wikipedia.org/wiki/Hashed_array_tree)
+        - [circular](https://en.wikipedia.org/wiki/Circular_buffer)
+      - [string](https://en.wikipedia.org/wiki/String_(computer_science))
+        - [encoding](https://en.wikipedia.org/wiki/Character_encoding)
+          - [unicode](https://en.wikipedia.org/wiki/Unicode)
+        - [search](https://en.wikipedia.org/wiki/String-searching_algorithm)
+          - [approximate](https://en.wikipedia.org/wiki/Approximate_string_matching)
+        - [regex](https://en.wikipedia.org/wiki/Regular_expression)
+      - [list](https://en.wikipedia.org/wiki/List_(abstract_data_type))
+        - [organized](https://en.wikipedia.org/wiki/Self-organizing_list)
+        - [skip](https://en.wikipedia.org/wiki/Skip_list)
+        - [linked](https://en.wikipedia.org/wiki/Linked_list)
+          - [double](https://en.wikipedia.org/wiki/Doubly_linked_list)
+            - [XOR](https://en.wikipedia.org/wiki/XOR_linked_list)
+        - [unrolled](https://en.wikipedia.org/wiki/Unrolled_linked_list)
+    - associative
+      - [map](https://en.wikipedia.org/wiki/Associative_array)
+      - [set](https://en.wikipedia.org/wiki/Set_(abstract_data_type))
+      - [fusion-tree](https://en.wikipedia.org/wiki/Fusion_tree)
+      - [hash-table](https://en.wikipedia.org/wiki/Hash_table)
+    - graph
+      - [tree](https://en.wikipedia.org/wiki/Tree_(data_structure))
+        - [heap](https://en.wikipedia.org/wiki/Heap_(data_structure))
+          - [binary](https://en.wikipedia.org/wiki/Binary_heap)
+        - [binary](https://en.wikipedia.org/wiki/Binary_tree)
+          - [cartesian](https://en.wikipedia.org/wiki/Cartesian_tree)
+          - [ball](https://en.wikipedia.org/wiki/Ball_tree)
+          - [t](https://en.wikipedia.org/wiki/T-tree)
+          - [rotation](https://en.wikipedia.org/wiki/Tree_rotation)
+          - [doubly-chained](https://en.wikipedia.org/wiki/Left-child_right-sibling_binary_tree)
+          - [search](https://en.wikipedia.org/wiki/Binary_search_tree)
+            - [treap](https://en.wikipedia.org/wiki/Treap)
+            - [tango](https://en.wikipedia.org/wiki/Tango_tree)
+          - [threaded](https://en.wikipedia.org/wiki/Threaded_binary_tree)
+          - [balancing](https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree)
+            - [Day–Stout–Warren](https://en.wikipedia.org/wiki/Day%E2%80%93Stout%E2%80%93Warren_algorithm)
+            - [splay](https://en.wikipedia.org/wiki/Splay_tree)
+            - [AVL](https://en.wikipedia.org/wiki/AVL_tree)
+            - [scapegoat](https://en.wikipedia.org/wiki/Scapegoat_tree)
+            - [weight](https://en.wikipedia.org/wiki/Weight-balanced_tree)
+            - [red-black](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
+              - [AA](https://en.wikipedia.org/wiki/AA_tree)
+        - [m-ary](https://en.wikipedia.org/wiki/M-ary_tree) 
+          - [metric](https://en.wikipedia.org/wiki/Metric_tree)
+        - [b](https://en.wikipedia.org/wiki/B-tree)
+          - [2-3](https://en.wikipedia.org/wiki/2%E2%80%933_tree)
+          - [2-3-4](https://en.wikipedia.org/wiki/2%E2%80%933%E2%80%934_tree)
+          - [b+](https://en.wikipedia.org/wiki/B%2B_tree)
+          - [UB](https://en.wikipedia.org/wiki/UB-tree)
+        - [k-d](https://en.wikipedia.org/wiki/K-d_tree)
+        - [trie](https://en.wikipedia.org/wiki/Trie)
+          - [radix](https://en.wikipedia.org/wiki/Radix_tree)
+          - [ternary-search](https://en.wikipedia.org/wiki/Ternary_search_tree)
+        - [traversal](https://en.wikipedia.org/wiki/Tree_traversal)
+
+- [cryptography](https://en.wikipedia.org/wiki/Cryptography)
+  - [hash-tree](https://en.wikipedia.org/wiki/Merkle_tree)
+  - [hash-list](https://en.wikipedia.org/wiki/Hash_list)
+  - [hash](https://en.wikipedia.org/wiki/Hash_function)
+    - [secure](https://en.wikipedia.org/wiki/Cryptographic_hash_function)
+
+- algorithm
+  - [scheduling](https://en.wikipedia.org/wiki/Scheduling_(computing))
+  - sort
+  - search
+    - [linear](https://en.wikipedia.org/wiki/Linear_search)
+    - [binary](https://en.wikipedia.org/wiki/Binary_search_algorithm)
+- math
+  - tensor
+    - matrix
+      - [sparse](https://en.wikipedia.org/wiki/Circular_buffer)
+
+
+- compression
+  - [huffman](https://en.wikipedia.org/wiki/Huffman_coding)
