@@ -23,70 +23,113 @@ fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
 
-/// Reorder root (first element) of a binary max-heap ordered slice.
-///
-/// Swap the first element (current root) with the greatest root of either
-/// the left or right child max-heap until the subtree rooted by the first
-/// element is itself a valid max-heap.
-fn sift_down<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    let root = 0;
-    if let Some(left) = slice.get(left_child(root)) {
-        let child = if slice
-            .get(right_child(root))
-            .is_some_and(|right| left < right)
-        {
-            right_child(root)
-        } else {
-            left_child(root)
-        };
+mod sift_down {
+    use super::*;
 
-        if slice[child] > slice[root] {
-            slice.swap(root, child);
-            sift_down(&mut slice[child..])
+    /// Reorder root (first element) of a binary max-heap ordered slice.
+    ///
+    /// Swap the first element (current root) with the greatest root of either
+    /// the left or right child max-heap until the subtree rooted by the first
+    /// element is itself a valid max-heap.
+    pub fn top_down<T>(slice: &mut [T])
+    where
+        T: Ord,
+    {
+        let root = 0;
+        if let Some(left) = slice.get(left_child(root)) {
+            let child = if slice
+                .get(right_child(root))
+                .is_some_and(|right| left < right)
+            {
+                right_child(root)
+            } else {
+                left_child(root)
+            };
+
+            if slice[child] > slice[root] {
+                slice.swap(root, child);
+                top_down(&mut slice[child..])
+            }
+        }
+    }
+
+    pub fn bottom_up<T>(slice: &mut [T], index: usize)
+    where
+        T: Ord,
+    {
+        fn leaf_search<T>(slice: &mut [T], mut index: usize) -> usize
+        where
+            T: Ord,
+        {
+            while right_child(index) < slice.len() {
+                if slice[right_child(index)] > slice[left_child(index)] {
+                    index = right_child(index);
+                } else {
+                    index = left_child(index);
+                }
+            }
+
+            if left_child(index) < slice.len() {
+                index = left_child(index);
+            }
+
+            return index;
+        }
+
+        if slice.len() > 0 {
+            let mut leaf = leaf_search(slice, index);
+            while slice[index] > slice[leaf] {
+                leaf = parent(leaf);
+            }
+            while leaf > index {
+                slice.swap(index, leaf);
+                leaf = parent(leaf);
+            }
         }
     }
 }
 
-/// Sort a slice in-place which is already in max-heap order.
-fn sort_inplace_from_max_heap<T>(max_heap: &mut [T])
-where
-    T: Ord,
-{
-    for end in (0..max_heap.len()).rev() {
-        // max-heap implies the root node is the greatest in the collection,
-        // pop it from the max-heap by swapping it with the last element.
-        max_heap.swap(0, end);
+mod max_heapify {
+    use super::*;
 
-        // push the new root into the shrunk max-heap excluding sorted element.
-        sift_down(&mut max_heap[..end]);
+    /// Arrange elements of a slice into max-heap order in O(n log n) time.
+    ///
+    /// Interpret `slice` as a binary tree where, for each node at index i, the
+    /// left child is at index (2*i+1) and the right child is at index (2*i+2).
+    /// Reorder the nodes such that all children are less than their parent.
+    pub fn bottom_up<T>(slice: &mut [T])
+    where
+        T: Ord,
+    {
+        if slice.len() > 1 {
+            // `last` is the parent of the last element hence it is the greatest
+            // index of a node in the heap which has children. Since elements
+            // within `slice[first..]` are leaves to some subtree rooted by an
+            // index in `slice[..=first]`, therefore they can be skipped because
+            // [`sift_down`] orders them when the index of their parent is reached.
+            let last = parent(slice.len() - 1);
+
+            // By going in reverse, since children of `node` will either be leaves
+            // or subtrees already heap ordered, therefore sift it down until the
+            // tree rooted at `node` is itself heap ordered.
+            for node in (0..=last).rev() {
+                sift_down::top_down(&mut slice[node..]);
+            }
+        }
     }
-}
 
-/// Arrange elements of a slice into max-heap order in O(n log n) time.
-///
-/// Interpret `slice` as a binary tree where, for each node at index i, the
-/// left child is at index (2*i+1) and the right child is at index (2*i+2).
-/// Reorder the nodes such that all children are less than their parent.
-fn bottom_up_max_heapify<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    if slice.len() > 1 {
-        // `last` is the parent of the last element hence it is the greatest
-        // index of a node in the heap which has children. Since elements
-        // within `slice[first..]` are leaves to some subtree rooted by an
-        // index in `slice[..=first]`, therefore they can be skipped because
-        // [`sift_down`] orders them when the index of their parent is reached.
-        let last = parent(slice.len() - 1);
-
-        // By going in reverse, since children of `node` will either be leaves
-        // or subtrees already heap ordered, therefore sift it down until the
-        // tree rooted at `node` is itself heap ordered.
-        for node in (0..=last).rev() {
-            sift_down(&mut slice[node..]);
+    /// Arrange elements of a slice into max-heap order in O(n) time.
+    ///
+    /// Interpret `slice` as a binary tree where, for each node at index i, the
+    /// left child is at index (2*i+1) and the right child is at index (2*i+2).
+    /// Reorder the nodes such that all children are less than their parent.
+    pub fn top_down<T>(slice: &mut [T])
+    where
+        T: Ord,
+    {
+        for leaf in 1..=slice.len() {
+            // push leaf into the max-heap
+            sift_up(&mut slice[..leaf]);
         }
     }
 }
@@ -110,8 +153,17 @@ pub fn bottom_up<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    bottom_up_max_heapify(slice);
-    sort_inplace_from_max_heap(slice);
+    max_heapify::bottom_up(slice);
+
+    for end in (0..slice.len()).rev() {
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        slice.swap(0, end);
+
+        // push the new root into the shrunk max-heap excluding sorted element.
+        // sift_down(&mut max_heap[..end]);
+        sift_down::bottom_up(&mut slice[..end], 0);
+    }
 }
 
 #[cfg(test)]
@@ -204,7 +256,7 @@ where
 
         // `slice[heap]` is either the next element to heapify, or the leaf
         // swapped for the maximum element of the constructed max-heap.
-        sift_down(&mut slice[heap..left_unsorted]);
+        sift_down::top_down(&mut slice[heap..left_unsorted]);
     }
 }
 
@@ -276,21 +328,6 @@ where
     }
 }
 
-/// Arrange elements of a slice into max-heap order in O(n) time.
-///
-/// Interpret `slice` as a binary tree where, for each node at index i, the
-/// left child is at index (2*i+1) and the right child is at index (2*i+2).
-/// Reorder the nodes such that all children are less than their parent.
-fn top_down_max_heapify<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    for leaf in 1..=slice.len() {
-        // push leaf into the max-heap
-        sift_up(&mut slice[..leaf]);
-    }
-}
-
 /// Sort a slice via top-down heap sort.
 ///
 /// Create one max-heap at the start of the slice and then push each sucessive
@@ -308,8 +345,16 @@ pub fn top_down<T>(slice: &mut [T])
 where
     T: Ord,
 {
-    top_down_max_heapify(slice);
-    sort_inplace_from_max_heap(slice);
+    max_heapify::top_down(slice);
+
+    for end in (0..slice.len()).rev() {
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        slice.swap(0, end);
+
+        // push the new root into the shrunk max-heap excluding sorted element.
+        sift_down::top_down(&mut slice[..end]);
+    }
 }
 
 #[cfg(test)]
