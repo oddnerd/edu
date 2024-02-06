@@ -50,6 +50,41 @@ where
     }
 }
 
+fn bottom_up_sift_down<T>(slice: &mut [T], index: usize)
+where
+    T: Ord,
+{
+    fn leaf_search<T>(slice: &mut [T], mut index: usize) -> usize
+    where
+        T: Ord,
+    {
+        while right_child(index) < slice.len() {
+            if slice[right_child(index)] > slice[left_child(index)] {
+                index = right_child(index);
+            } else {
+                index = left_child(index);
+            }
+        }
+
+        if left_child(index) < slice.len() {
+            index = left_child(index);
+        }
+
+        return index;
+    }
+
+    if slice.len() > 0 {
+        let mut leaf = leaf_search(slice, index);
+        while slice[index] > slice[leaf] {
+            leaf = parent(leaf);
+        }
+        while leaf > index {
+            slice.swap(index, leaf);
+            leaf = parent(leaf);
+        }
+    }
+}
+
 /// Sort a slice in-place which is already in max-heap order.
 fn sort_inplace_from_max_heap<T>(max_heap: &mut [T])
 where
