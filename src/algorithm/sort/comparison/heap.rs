@@ -146,7 +146,16 @@ where
     T: Ord,
 {
     bottom_up_max_heapify(slice);
-    sort_inplace_from_max_heap(slice);
+
+    for end in (0..slice.len()).rev() {
+        // max-heap implies the root node is the greatest in the collection,
+        // pop it from the max-heap by swapping it with the last element.
+        slice.swap(0, end);
+
+        // push the new root into the shrunk max-heap excluding sorted element.
+        // sift_down(&mut max_heap[..end]);
+        bottom_up_sift_down(&mut slice[..end], 0);
+    }
 }
 
 #[cfg(test)]
