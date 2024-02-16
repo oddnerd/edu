@@ -55,7 +55,7 @@ impl<T> std::iter::Iterator for IntoIter<T> {
         if self.next != self.end {
             // SAFETY:
             // * input array exists => non-null pointer
-            // * wrapping_add => pointer is aligned
+            // * `wrapping_add` => pointer is aligned
             // * next != end => pointing to initalized value
             let next = unsafe { *self.next };
             self.next = self.next.wrapping_add(1);
@@ -106,7 +106,7 @@ impl<'a, T> std::iter::Iterator for Iter<'a, T> {
         if self.next != self.end {
             // SAFETY:
             // * input array exists => non-null pointer
-            // * wrapping_add => pointer is aligned
+            // * `wrapping_add` => pointer is aligned
             // * next != end => pointing to initalized value
             // * lifetime 'a bound to input array => valid lifetime to return
             let element = unsafe { &*self.next };
@@ -148,7 +148,7 @@ impl<'a, T> std::iter::Iterator for IterMut<'a, T> {
         if self.next != self.end {
             // SAFETY:
             // * input array exists => non-null pointer
-            // * wrapping_add => pointer is aligned
+            // * `wrapping_add` => pointer is aligned
             // * next != end => pointing to initalized value
             // * lifetime 'a bound to input array => valid lifetime to return
             let element = unsafe { &mut *self.next };
