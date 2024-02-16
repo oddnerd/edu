@@ -3,7 +3,7 @@
 use super::Collection;
 
 /// A [`Collection`] whose elements are logically arranged sequentially.
-pub trait Linear<'a>: Collection<'a> {
+pub trait Linear<'a>: Collection<'a> + std::iter::IntoIterator {
     /// Iterate over the elements by immutable reference.
     fn iter() -> impl std::iter::Iterator<Item = &'a Self::Element>;
 
