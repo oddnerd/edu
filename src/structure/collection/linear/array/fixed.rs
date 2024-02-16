@@ -57,7 +57,7 @@ impl<T> std::iter::Iterator for IntoIter<T> {
             // * input array exists => non-null pointer
             // * `wrapping_add` => pointer is aligned
             // * next != end => pointing to initalized value
-            let next = unsafe { *self.next };
+            let next = unsafe { std::ptr::read(self.next) };
             self.next = self.next.wrapping_add(1);
             Some(next)
         } else {
