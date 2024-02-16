@@ -1,5 +1,7 @@
 //! [Arrays](https://en.wikipedia.org/wiki/Array_(data_type)).
 
+mod fixed;
+
 use super::Linear;
 
 /// A [`Linear`] [`Collection`] which occupies contigious memory.
