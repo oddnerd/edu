@@ -7,6 +7,7 @@ pub trait Array<'a>:
     Linear<'a>
     + std::ops::IndexMut<usize>
     + std::ops::DerefMut<Target = [Self::Element]>
+    + std::borrow::BorrowMut<[Self::Element]>
     + std::convert::AsMut<[Self::Element]>
     + std::convert::AsRef<[Self::Element]>
 {
