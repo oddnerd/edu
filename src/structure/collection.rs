@@ -4,4 +4,7 @@
 pub trait Collection {
     /// The type of the elements stored within.
     type Element;
+
+    /// Query the number of elements stored within.
+    fn count() -> usize;
 }
