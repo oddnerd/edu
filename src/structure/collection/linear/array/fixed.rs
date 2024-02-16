@@ -15,7 +15,7 @@ impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
 }
 
 // By-value [`Iterator`] over a [`Fixed`].
-struct IntoIter<T> {
+pub struct IntoIter<T> {
     /// pointer to the hypotheical next element.
     next: *mut T,
 
@@ -77,7 +77,7 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
 }
 
 /// Immutable reference [`Iterator`] over a [`Fixed`].
-struct Iter<'a, T: 'a> {
+pub struct Iter<'a, T: 'a> {
     /// pointer to the hypotheical next element.
     next: *const T,
 
@@ -119,7 +119,7 @@ impl<'a, T> std::iter::Iterator for Iter<'a, T> {
 }
 
 /// Immutable reference [`Iterator`] over a [`Fixed`].
-struct IterMut<'a, T: 'a> {
+pub struct IterMut<'a, T: 'a> {
     /// pointer to the hypotheical next element.
     next: *mut T,
 
