@@ -3,7 +3,7 @@
 /// [Dope Vector](https://en.wikipedia.org/wiki/Dope_vector) interpretation of
 /// an array using memory layout to define the structure.
 pub struct Fixed<T, const N: usize> {
-    dope: *mut T,
+    ptr: *mut T,
 }
 
 impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
@@ -27,8 +27,8 @@ impl<T> IntoIter<T> {
     /// Construct an [`IntoIter`] for some [`Fixed`].
     fn new<const N: usize>(array: Fixed<T, N>) -> Self {
         Self {
-            next: array.dope,
-            end: array.dope.wrapping_add(N),
+            next: array.ptr,
+            end: array.ptr.wrapping_add(N),
         }
     }
 }
@@ -92,8 +92,8 @@ impl<'a, T: 'a> Iter<'a, T> {
     /// Construct an [`Iter`] for some [`Fixed`].
     fn new<const N: usize>(array: &Fixed<T, N>) -> Self {
         Self {
-            next: array.dope,
-            end: array.dope.wrapping_add(N),
+            next: array.ptr,
+            end: array.ptr.wrapping_add(N),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -134,8 +134,8 @@ impl<'a, T: 'a> IterMut<'a, T> {
     /// Construct an [`IterMut`] for some [`Fixed`].
     fn new<const N: usize>(array: &mut Fixed<T, N>) -> Self {
         Self {
-            next: array.dope,
-            end: array.dope.wrapping_add(N),
+            next: array.ptr,
+            end: array.ptr.wrapping_add(N),
             lifetime: std::marker::PhantomData,
         }
     }
