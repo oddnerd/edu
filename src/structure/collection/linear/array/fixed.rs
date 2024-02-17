@@ -255,3 +255,5 @@ impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N> {
         unsafe { std::slice::from_raw_parts_mut(self.data.as_mut_ptr(), N) }
     }
 }
+
+impl<'a, T: 'a, const N: usize> super::Array<'a> for Fixed<T, N> {}
