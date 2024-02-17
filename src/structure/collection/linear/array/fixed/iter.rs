@@ -15,6 +15,9 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// Construct an [`IntoIter`] for some [`Fixed`].
     fn new(mut array: Fixed<T, N>) -> Self {
         let mut tmp = Self {
+            // SAFETY:
+            // * MaybeUninit<T> has same size as T => arrays have same size
+            // * MaybeUninit<T> has same alignment as T => elements are aligned
             data: unsafe {
                 array
                     .data
@@ -27,12 +30,18 @@ impl<T, const N: usize> IntoIter<T, N> {
             next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
         };
 
-        let start = unsafe { std::ptr::NonNull::new_unchecked(tmp.data.as_mut_ptr()) };
+        // SAFETY:
+        // * the array exists => pointers to it can't be null
+        unsafe {
+            let ptr = tmp.data.as_mut_ptr();
 
-        let end =
-            unsafe { std::ptr::NonNull::new_unchecked(tmp.data.as_mut_ptr().wrapping_add(N)) };
+            let start = std::ptr::NonNull::new_unchecked(ptr);
 
-        tmp.next = start..end;
+            let end = std::ptr::NonNull::new_unchecked(ptr.wrapping_add(N));
+
+            tmp.next = start..end;
+        }
+
         tmp
     }
 }
