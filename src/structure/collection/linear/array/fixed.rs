@@ -235,3 +235,23 @@ impl<T, const N: usize> std::borrow::BorrowMut<[T]> for Fixed<T, N> {
         unsafe { std::slice::from_raw_parts_mut(self.data.as_mut_ptr(), N) }
     }
 }
+
+impl<T, const N: usize> std::convert::AsRef<[T]> for Fixed<T, N> {
+    fn as_ref(&self) -> &[T] {
+        // SAFETY:
+        // * `data` is aligned => pointer is aligned
+        // * `data` is initalized => every element is initalized
+        // * `data` is one object => slice is over one allocated object
+        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), N) }
+    }
+}
+
+impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N> {
+    fn as_mut(&mut self) -> &mut [T] {
+        // SAFETY:
+        // * `data` is aligned => pointer is aligned
+        // * `data` is initalized => every element is initalized
+        // * `data` is one object => slice is over one allocated object
+        unsafe { std::slice::from_raw_parts_mut(self.data.as_mut_ptr(), N) }
+    }
+}
