@@ -3,25 +3,38 @@
 use super::Fixed;
 
 /// By-value [`Iterator`] over a [`Fixed`].
-pub struct IntoIter<T> {
+pub struct IntoIter<T, const N: usize> {
+    /// ownership of the underlying array.
+    data: [std::mem::MaybeUninit<T>; N],
+
     /// pointer to the hypotheical next element.
-    next: *mut T,
+    next: *mut std::mem::MaybeUninit<T>,
 
     /// pointer to a sentinal end value.
-    end: *mut T,
+    end: *mut std::mem::MaybeUninit<T>,
 }
 
-impl<T> IntoIter<T> {
+impl<T, const N: usize> IntoIter<T, N> {
     /// Construct an [`IntoIter`] for some [`Fixed`].
-    fn new<const N: usize>(mut array: Fixed<T, N>) -> Self {
-        Self {
-            next: array.data.as_mut_ptr(),
-            end: array.data.as_mut_ptr().wrapping_add(N),
-        }
+    fn new(mut array: Fixed<T, N>) -> Self {
+        let mut tmp = Self {
+            data: unsafe {
+                array
+                    .data
+                    .as_mut_ptr()
+                    .cast::<[std::mem::MaybeUninit<T>; N]>()
+                    .read()
+            },
+            next: std::ptr::null_mut(),
+            end: std::ptr::null_mut(),
+        };
+        tmp.next = tmp.data.as_mut_ptr();
+        tmp.end = tmp.next.wrapping_add(N);
+        tmp
     }
 }
 
-impl<T> std::ops::Drop for IntoIter<T> {
+impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     fn drop(&mut self) {
         while self.next != self.end {
             // SAFETY:
@@ -36,7 +49,7 @@ impl<T> std::ops::Drop for IntoIter<T> {
     }
 }
 
-impl<T> std::iter::Iterator for IntoIter<T> {
+impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -45,7 +58,7 @@ impl<T> std::iter::Iterator for IntoIter<T> {
             // * input array exists => non-null pointer
             // * `wrapping_add` => pointer is aligned
             // * next != end => pointing to initalized value
-            let next = unsafe { std::ptr::read(self.next) };
+            let next = unsafe { std::ptr::read(self.next).assume_init() };
             self.next = self.next.wrapping_add(1);
             Some(next)
         } else {
@@ -57,7 +70,7 @@ impl<T> std::iter::Iterator for IntoIter<T> {
 impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
     type Item = T;
 
-    type IntoIter = IntoIter<T>;
+    type IntoIter = IntoIter<T, N>;
 
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter::new(self)
