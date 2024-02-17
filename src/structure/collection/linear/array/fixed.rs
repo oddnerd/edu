@@ -6,6 +6,15 @@ pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
 
+impl<T, const N: usize> Fixed<T, N> {
+    /// Create a [`Fixed`] from some values.
+    pub fn new(array: [T; N]) -> Self {
+        Self {
+            data: array
+        }
+    }
+}
+
 impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
     type Element = T;
 
