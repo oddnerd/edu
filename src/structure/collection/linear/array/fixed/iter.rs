@@ -76,7 +76,7 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
             // SAFETY:
             // * input array exists => non-null pointer
             // * `wrapping_add` => pointer is aligned
-            // * next != end => pointing to initalized value
+            // * within bounds => pointing to initalized value
             let current = unsafe { self.next.start.as_ptr().read().assume_init() };
 
             let next = self.next.start.as_ptr().wrapping_add(1);
