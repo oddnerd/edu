@@ -1,13 +1,12 @@
 //! Implementation of a static (fixed size) [`Array`].
 
-/// [Dope Vector](https://en.wikipedia.org/wiki/Dope_vector) interpretation of
-/// an array using memory layout to define the structure.
+/// A fixed size array located on the stack.
 pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
 
 impl<T, const N: usize> Fixed<T, N> {
-    /// Create a [`Fixed`] from some values.
+    /// Create a [`Fixed`] from some a primitive array.
     pub fn new(array: [T; N]) -> Self {
         Self {
             data: array
@@ -23,7 +22,7 @@ impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
     }
 }
 
-// By-value [`Iterator`] over a [`Fixed`].
+/// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T> {
     /// pointer to the hypotheical next element.
     next: *mut T,
@@ -46,10 +45,10 @@ impl<T> std::ops::Drop for IntoIter<T> {
     fn drop(&mut self) {
         while self.next != self.end {
             // SAFETY:
-            // owns underlying array => valid for reads and writes
-            // `wrapping_add` => pointer is properly aligned
-            // underlying array exists => pointer is non-null
-            // element has no yet been yeilded => valid to drop
+            // * owns underlying array => valid for reads and writes
+            // * `wrapping_add` => pointer is properly aligned
+            // * underlying array exists => pointer is non-null
+            // * element has no yet been yeilded => valid to drop
             unsafe {
                 std::ptr::drop_in_place(self.next);
             }
