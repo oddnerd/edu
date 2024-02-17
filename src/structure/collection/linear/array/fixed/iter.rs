@@ -7,11 +7,8 @@ pub struct IntoIter<T, const N: usize> {
     /// ownership of the underlying array.
     data: [std::mem::MaybeUninit<T>; N],
 
-    /// pointer to the hypotheical next element.
-    next: *mut std::mem::MaybeUninit<T>,
-
-    /// pointer to a sentinal end value.
-    end: *mut std::mem::MaybeUninit<T>,
+    /// elements within the range have yet to be yeilded.
+    next: std::ops::Range<std::ptr::NonNull<std::mem::MaybeUninit<T>>>,
 }
 
 impl<T, const N: usize> IntoIter<T, N> {
@@ -25,26 +22,39 @@ impl<T, const N: usize> IntoIter<T, N> {
                     .cast::<[std::mem::MaybeUninit<T>; N]>()
                     .read()
             },
-            next: std::ptr::null_mut(),
-            end: std::ptr::null_mut(),
+
+            // careful to use pointers to the member and not the parameter.
+            next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
         };
-        tmp.next = tmp.data.as_mut_ptr();
-        tmp.end = tmp.next.wrapping_add(N);
+
+        let start = unsafe { std::ptr::NonNull::new_unchecked(tmp.data.as_mut_ptr()) };
+
+        let end =
+            unsafe { std::ptr::NonNull::new_unchecked(tmp.data.as_mut_ptr().wrapping_add(N)) };
+
+        tmp.next = start..end;
         tmp
     }
 }
 
 impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     fn drop(&mut self) {
-        while self.next != self.end {
+        while self.next.start != self.next.end {
             // SAFETY:
             // * owns underlying array => valid for reads and writes
             // * `wrapping_add` => pointer is properly aligned
             // * underlying array exists => pointer is non-null
             // * element has no yet been yeilded => valid to drop
             unsafe {
-                std::ptr::drop_in_place(self.next);
+                std::ptr::drop_in_place(self.next.start.as_ptr());
             }
+
+            let next = self.next.start.as_ptr().wrapping_add(1);
+
+            // SAFETY: the pointer wasn't null before so it still won't be.
+            let next = unsafe { std::ptr::NonNull::new_unchecked(next) };
+
+            self.next.start = next;
         }
     }
 }
@@ -53,14 +63,21 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
+        if self.next.start != self.next.end {
             // SAFETY:
             // * input array exists => non-null pointer
             // * `wrapping_add` => pointer is aligned
             // * next != end => pointing to initalized value
-            let next = unsafe { std::ptr::read(self.next).assume_init() };
-            self.next = self.next.wrapping_add(1);
-            Some(next)
+            let current = unsafe { self.next.start.as_ptr().read().assume_init() };
+
+            let next = self.next.start.as_ptr().wrapping_add(1);
+
+            // SAFETY: the pointer wasn't null before so it still won't be.
+            let next = unsafe { std::ptr::NonNull::new_unchecked(next) };
+
+            self.next.start = next;
+
+            Some(current)
         } else {
             None
         }
