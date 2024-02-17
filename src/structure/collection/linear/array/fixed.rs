@@ -3,7 +3,7 @@
 /// [Dope Vector](https://en.wikipedia.org/wiki/Dope_vector) interpretation of
 /// an array using memory layout to define the structure.
 pub struct Fixed<T, const N: usize> {
-    ptr: *mut T,
+    data: [T; N],
 }
 
 impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
@@ -25,10 +25,10 @@ pub struct IntoIter<T> {
 
 impl<T> IntoIter<T> {
     /// Construct an [`IntoIter`] for some [`Fixed`].
-    fn new<const N: usize>(array: Fixed<T, N>) -> Self {
+    fn new<const N: usize>(mut array: Fixed<T, N>) -> Self {
         Self {
-            next: array.ptr,
-            end: array.ptr.wrapping_add(N),
+            next: array.data.as_mut_ptr(),
+            end: array.data.as_mut_ptr().wrapping_add(N),
         }
     }
 }
@@ -92,8 +92,8 @@ impl<'a, T: 'a> Iter<'a, T> {
     /// Construct an [`Iter`] for some [`Fixed`].
     fn new<const N: usize>(array: &Fixed<T, N>) -> Self {
         Self {
-            next: array.ptr,
-            end: array.ptr.wrapping_add(N),
+            next: array.data.as_ptr(),
+            end: array.data.as_ptr().wrapping_add(N),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -134,8 +134,8 @@ impl<'a, T: 'a> IterMut<'a, T> {
     /// Construct an [`IterMut`] for some [`Fixed`].
     fn new<const N: usize>(array: &mut Fixed<T, N>) -> Self {
         Self {
-            next: array.ptr,
-            end: array.ptr.wrapping_add(N),
+            next: array.data.as_mut_ptr(),
+            end: array.data.as_mut_ptr().wrapping_add(N),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -167,5 +167,29 @@ impl<'a, T: 'a, const N: usize> super::Linear<'a> for Fixed<T, N> {
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
         IterMut::new(self)
+    }
+}
+
+impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        debug_assert!(index < N);
+        // SAFETY:
+        // * index is within bounds => the pointer is within bounds
+        // * `add` in alignments of T => properly aligned pointer
+        // * underlying array exists => points to initalized T
+        unsafe { &*self.data.as_ptr().add(index) }
+    }
+}
+
+impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        debug_assert!(index < N);
+        // SAFETY:
+        // * index is within bounds => the pointer is within bounds
+        // * `add` in alignments of T => properly aligned pointer
+        // * underlying array exists => points to initalized T
+        unsafe { &mut *self.data.as_mut_ptr().add(index) }
     }
 }
