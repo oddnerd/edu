@@ -132,3 +132,19 @@ mod default_tests {
         }
     }
 }
+
+impl<T: PartialEq, const N: usize> PartialEq for Fixed<T, N> {
+    fn eq(&self, other: &Self) -> bool {
+        if self.count() != other.count() {
+            return false;
+        }
+
+        for (ours, theirs) in self.iter().zip(other.iter()) {
+            if ours != theirs {
+                return false;
+            }
+        }
+
+        true
+    }
+}
