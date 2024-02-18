@@ -5,6 +5,7 @@ pub mod fixed;
 pub use fixed::Fixed;
 
 use super::Linear;
+use super::Collection;
 
 /// A [`Linear`] [`Collection`] which occupies contigious memory.
 pub trait Array<'a>:

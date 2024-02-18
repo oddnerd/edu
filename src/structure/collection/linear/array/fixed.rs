@@ -1,5 +1,9 @@
 //! Implementation of [`Fixed`].
 
+use super::Array;
+use super::Linear;
+use super::Collection;
+
 pub mod iter;
 pub mod ops;
 /// Fixed size (statically stack allocated) [`Array`].
@@ -14,7 +18,7 @@ impl<T, const N: usize> Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     type Element = T;
 
     fn count(&self) -> usize {
@@ -22,7 +26,7 @@ impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> super::Linear<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
         iter::Iter::new(self)
     }
@@ -56,7 +60,7 @@ impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> super::Array<'a> for Fixed<T, N> {}
+impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {}
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     fn default() -> Self {
@@ -78,8 +82,7 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::super::super::super::Collection;
+mod default_tests {
     use super::*;
 
     #[test]
