@@ -5,10 +5,10 @@ use super::Fixed;
 /// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T, const N: usize> {
     /// ownership of the underlying array.
-    data: [std::mem::MaybeUninit<T>; N],
+    data: [std::mem::ManuallyDrop<T>; N],
 
     /// elements within the range have yet to be yeilded.
-    next: std::ops::Range<std::ptr::NonNull<std::mem::MaybeUninit<T>>>,
+    next: std::ops::Range<std::ptr::NonNull<std::mem::ManuallyDrop<T>>>,
 }
 
 impl<T, const N: usize> IntoIter<T, N> {
@@ -16,13 +16,13 @@ impl<T, const N: usize> IntoIter<T, N> {
     fn new(mut array: Fixed<T, N>) -> Self {
         let mut tmp = Self {
             // SAFETY:
-            // * MaybeUninit<T> has same size as T => arrays have same size
-            // * MaybeUninit<T> has same alignment as T => elements are aligned
+            // * ManuallyDrop<T> has same size as T => arrays have same size
+            // * ManuallyDrop<T> has same alignment as T => elements are aligned
             data: unsafe {
                 array
                     .data
                     .as_mut_ptr()
-                    .cast::<[std::mem::MaybeUninit<T>; N]>()
+                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
                     .read()
             },
 
@@ -77,7 +77,12 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
             // * input array exists => non-null pointer
             // * `wrapping_add` => pointer is aligned
             // * within bounds => pointing to initalized value
-            let current = unsafe { self.next.start.as_ptr().read().assume_init() };
+            let current = unsafe {
+                let copy = self.next.start.as_ptr().read();
+                std::mem::ManuallyDrop::into_inner(copy)
+            };
+
+            // let current = unsafe { self.next.start.as_ptr().read().into_inner() };
 
             let next = self.next.start.as_ptr().wrapping_add(1);
 
