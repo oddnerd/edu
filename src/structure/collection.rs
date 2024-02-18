@@ -9,5 +9,5 @@ pub trait Collection<'a> {
     type Element: 'a;
 
     /// Query the number of elements stored within.
-    fn count() -> usize;
+    fn count(&self) -> usize;
 }

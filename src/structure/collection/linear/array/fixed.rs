@@ -14,10 +14,22 @@ impl<T, const N: usize> Fixed<T, N> {
     }
 }
 
+#[cfg(test)]
+mod method_tests {
+    use super::*;
+    use super::super::super::super::Collection;
+
+    #[test]
+    fn new() {
+        let array = Fixed::new([0,1,2]);
+        assert_eq!(array.count(), 3);
+    }
+}
+
 impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
     type Element = T;
 
-    fn count() -> usize {
+    fn count(&self) -> usize {
         N
     }
 }
