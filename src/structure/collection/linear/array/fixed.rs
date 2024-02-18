@@ -1,8 +1,8 @@
 //! Implementation of [`Fixed`].
 
 use super::Array;
-use super::Linear;
 use super::Collection;
+use super::Linear;
 
 pub mod iter;
 pub mod ops;
@@ -33,6 +33,31 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
         iter::IterMut::new(self)
+    }
+}
+
+#[cfg(test)]
+mod iter_tests {
+    use super::Fixed;
+
+    #[test]
+    fn immutable() {
+        let array = Fixed::<usize, 4>::new([0, 1, 2, 3]);
+        for (index, element) in array.iter().enumerate() {
+            assert_eq!(index, *element);
+        }
+    }
+
+    #[test]
+    fn mutable() {
+        let mut array: Fixed<usize, 16> = Default::default();
+        for (index, element) in array.iter_mut().enumerate() {
+            *element = index;
+        }
+
+        for (index, element) in array.iter().enumerate() {
+            assert_eq!(index, *element);
+        }
     }
 }
 
@@ -86,20 +111,20 @@ mod default_tests {
     use super::*;
 
     #[test]
-    fn default_zero_elements() {
+    fn zero_elements() {
         let array: Fixed<i32, 0> = Default::default();
         assert_eq!(array.count(), 0);
     }
 
     #[test]
-    fn default_one_elements() {
+    fn one_elements() {
         let array: Fixed<i32, 1> = Default::default();
         assert_eq!(array.count(), 1);
         assert_eq!(array[0], Default::default());
     }
 
     #[test]
-    fn default_multiple_elements() {
+    fn multiple_elements() {
         let array: Fixed<i32, 256> = Default::default();
         assert_eq!(array.count(), 256);
         for element in array {
