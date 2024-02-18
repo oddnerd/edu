@@ -169,3 +169,9 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
 }
 
 impl<T: Copy, const N: usize> Copy for Fixed<T, N> {}
+
+impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Fixed").field("data", &self.data).finish()
+    }
+}
