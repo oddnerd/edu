@@ -83,18 +83,6 @@ mod iter_tests {
     }
 }
 
-impl<T, const N: usize> std::borrow::Borrow<[T]> for Fixed<T, N> {
-    fn borrow(&self) -> &[T] {
-        self
-    }
-}
-
-impl<T, const N: usize> std::borrow::BorrowMut<[T]> for Fixed<T, N> {
-    fn borrow_mut(&mut self) -> &mut [T] {
-        self
-    }
-}
-
 impl<T, const N: usize> std::convert::AsRef<[T]> for Fixed<T, N> {
     fn as_ref(&self) -> &[T] {
         self
