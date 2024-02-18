@@ -1,8 +1,8 @@
-//! Implementation of a static (fixed size) [`Array`].
+//! Implementation of [`Fixed`].
 
 pub mod iter;
 pub mod ops;
-/// A fixed size array located on the stack.
+/// Fixed size (statically stack allocated) [`Array`].
 pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
