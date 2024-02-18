@@ -18,6 +18,17 @@ impl<T, const N: usize> Fixed<T, N> {
     }
 }
 
+#[cfg(test)]
+mod constructor_tests {
+    use super::*;
+
+    #[test]
+    fn from_primitive() {
+        let instance = Fixed::new([0, 1, 2, 3, 4]);
+        assert_eq!(instance.data, [0, 1, 2, 3, 4]);
+    }
+}
+
 impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     type Element = T;
 
