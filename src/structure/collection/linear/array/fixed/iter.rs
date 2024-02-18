@@ -17,7 +17,7 @@ impl<T, const N: usize> IntoIter<T, N> {
         let mut tmp = Self {
             // SAFETY:
             // * ManuallyDrop<T> has same size as T => arrays have same size
-            // * ManuallyDrop<T> has same alignment as T => elements are aligned
+            // * ManuallyDrop<T> has same alignment as T => elements aligned
             data: unsafe {
                 array
                     .data
@@ -30,8 +30,7 @@ impl<T, const N: usize> IntoIter<T, N> {
             next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
         };
 
-        // SAFETY:
-        // * the array exists => pointers to it can't be null
+        // SAFETY: the array exists => pointers to it can't be null
         unsafe {
             let ptr = tmp.data.as_mut_ptr();
 
@@ -81,8 +80,6 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
                 let copy = self.next.start.as_ptr().read();
                 std::mem::ManuallyDrop::into_inner(copy)
             };
-
-            // let current = unsafe { self.next.start.as_ptr().read().into_inner() };
 
             let next = self.next.start.as_ptr().wrapping_add(1);
 
