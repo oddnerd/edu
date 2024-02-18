@@ -148,3 +148,22 @@ impl<T: PartialEq, const N: usize> PartialEq for Fixed<T, N> {
         true
     }
 }
+
+impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
+    fn clone(&self) -> Self {
+        // SAFETY: the MaybeUninit it initalized even if the T isn't.
+        let mut uninitalized: [std::mem::MaybeUninit<T>; N] =
+            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+
+        for (from, to) in self.iter().zip(uninitalized.iter_mut()) {
+            to.write(from.clone());
+        }
+
+        // SAFETY:
+        // * MaybeUninit<T> has same size as T => arrays have same size
+        // * MaybeUninit<T> has same alignment as T => elements aligned
+        let initalized = unsafe { uninitalized.as_mut_ptr().cast::<[T; N]>().read() };
+
+        Self::new(initalized)
+    }
+}
