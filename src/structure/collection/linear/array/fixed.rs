@@ -167,3 +167,5 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
         Self::new(initalized)
     }
 }
+
+impl<T: Copy, const N: usize> Copy for Fixed<T, N> {}
