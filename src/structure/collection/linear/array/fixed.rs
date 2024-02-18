@@ -1,5 +1,7 @@
 //! Implementation of [`Fixed`].
 
+use std::ops::DerefMut;
+
 use super::Array;
 use super::Collection;
 use super::Linear;
@@ -89,9 +91,11 @@ impl<T, const N: usize> std::convert::AsRef<[T]> for Fixed<T, N> {
     }
 }
 
-impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N> {
+impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N> where
+    <Fixed<T, N> as std::ops::Deref>::Target: AsMut<[T]>
+{
     fn as_mut(&mut self) -> &mut [T] {
-        self
+        self.deref_mut().as_mut()
     }
 }
 
