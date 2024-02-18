@@ -14,18 +14,6 @@ impl<T, const N: usize> Fixed<T, N> {
     }
 }
 
-#[cfg(test)]
-mod method_tests {
-    use super::*;
-    use super::super::super::super::Collection;
-
-    #[test]
-    fn new() {
-        let array = Fixed::new([0,1,2]);
-        assert_eq!(array.count(), 3);
-    }
-}
-
 impl<'a, T: 'a, const N: usize> super::super::Collection<'a> for Fixed<T, N> {
     type Element = T;
 
@@ -69,3 +57,50 @@ impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N> {
 }
 
 impl<'a, T: 'a, const N: usize> super::Array<'a> for Fixed<T, N> {}
+
+impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
+    fn default() -> Self {
+        // SAFETY: the MaybeUninit it initalized even if the T isn't.
+        let mut uninitalized: [std::mem::MaybeUninit<T>; N] =
+            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+
+        for element in uninitalized.iter_mut() {
+            element.write(Default::default());
+        }
+
+        // SAFETY:
+        // * MaybeUninit<T> has same size as T => arrays have same size
+        // * MaybeUninit<T> has same alignment as T => elements aligned
+        let initalized = unsafe { uninitalized.as_mut_ptr().cast::<[T; N]>().read() };
+
+        Self::new(initalized)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::super::super::Collection;
+    use super::*;
+
+    #[test]
+    fn default_zero_elements() {
+        let array: Fixed<i32, 0> = Default::default();
+        assert_eq!(array.count(), 0);
+    }
+
+    #[test]
+    fn default_one_elements() {
+        let array: Fixed<i32, 1> = Default::default();
+        assert_eq!(array.count(), 1);
+        assert_eq!(array[0], Default::default());
+    }
+
+    #[test]
+    fn default_multiple_elements() {
+        let array: Fixed<i32, 256> = Default::default();
+        assert_eq!(array.count(), 256);
+        for element in array {
+            assert_eq!(element, Default::default());
+        }
+    }
+}
