@@ -168,6 +168,21 @@ impl<T: PartialEq, const N: usize> PartialEq for Fixed<T, N> {
     }
 }
 
+#[cfg(test)]
+mod partialeq_tests {
+    use super::*;
+
+    #[test]
+    fn equality() {
+        assert_eq!(Fixed::new([0, 1, 2]), Fixed::new([0, 1, 2]));
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(Fixed::new([0, 1, 3]), Fixed::new([0, 1, 2]));
+    }
+}
+
 impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
     fn clone(&self) -> Self {
         // SAFETY: the MaybeUninit it initalized even if the T isn't.
