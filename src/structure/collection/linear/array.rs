@@ -1,6 +1,8 @@
-//! [Arrays](https://en.wikipedia.org/wiki/Array_(data_type)).
+//! [Arrays](https://en.wikipedia.org/wiki/Array_(data_type)) are [`Linear`]
+//! [`Collection`] which store elements within a contiguous memory allocation.
 
 pub mod fixed;
+pub use fixed::Fixed;
 
 use super::Linear;
 
