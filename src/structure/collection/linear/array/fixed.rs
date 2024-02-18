@@ -37,6 +37,17 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     }
 }
 
+#[cfg(test)]
+mod collection_tests {
+    use super::*;
+
+    #[test]
+    fn count() {
+        let instance = Fixed::new([0, 1, 2, 3, 4]);
+        assert_eq!(instance.count(), 5);
+    }
+}
+
 impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
         iter::Iter::new(self)
