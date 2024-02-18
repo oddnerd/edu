@@ -1,8 +1,5 @@
 //! Implementation of [`Fixed`].
 
-// use std::ops::DerefMut;
-// use std::ops::Deref;
-
 use super::Array;
 use super::Collection;
 use super::Linear;
@@ -199,6 +196,18 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
         let initalized = unsafe { uninitalized.as_mut_ptr().cast::<[T; N]>().read() };
 
         Self::new(initalized)
+    }
+}
+
+#[cfg(test)]
+mod clone_tests {
+    use super::*;
+
+    #[test]
+    fn clone() {
+        let old = Fixed::new([0,1,2,3]);
+        let new = old.clone();
+        assert_eq!(old, new);
     }
 }
 
