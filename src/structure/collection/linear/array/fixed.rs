@@ -82,24 +82,6 @@ mod iter_tests {
     }
 }
 
-impl<T, const N: usize> std::convert::AsRef<[T]> for Fixed<T, N>
-where
-    <Fixed<T, N> as std::ops::Deref>::Target: AsRef<[T]>,
-{
-    fn as_ref(&self) -> &[T] {
-        std::ops::Deref::deref(self).as_ref()
-    }
-}
-
-impl<T, const N: usize> std::convert::AsMut<[T]> for Fixed<T, N>
-where
-    <Fixed<T, N> as std::ops::Deref>::Target: AsMut<[T]>,
-{
-    fn as_mut(&mut self) -> &mut [T] {
-        std::ops::DerefMut::deref_mut(self).as_mut()
-    }
-}
-
 impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {}
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
