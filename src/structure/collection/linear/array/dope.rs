@@ -229,3 +229,11 @@ impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
 }
 
 impl<'a, T: 'a> Array<'a> for Dope<'a, T> {}
+
+impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.iter().eq(other.iter())
+    }
+}
+
+impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
