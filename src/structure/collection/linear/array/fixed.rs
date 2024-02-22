@@ -11,10 +11,9 @@ pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
 
-impl<T, const N: usize> Fixed<T, N> {
-    /// Create a [`Fixed`] from some a primitive array.
-    pub fn new(array: [T; N]) -> Self {
-        Self { data: array }
+impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
+    fn from(value: [T; N]) -> Self {
+        Self { data: value }
     }
 }
 
@@ -24,7 +23,7 @@ mod constructor_tests {
 
     #[test]
     fn from_primitive() {
-        let instance = Fixed::new([0, 1, 2, 3, 4]);
+        let instance = Fixed::from([0, 1, 2, 3, 4]);
         assert_eq!(instance.data, [0, 1, 2, 3, 4]);
     }
 }
@@ -43,7 +42,7 @@ mod collection_tests {
 
     #[test]
     fn count() {
-        let instance = Fixed::new([0, 1, 2, 3, 4]);
+        let instance = Fixed::from([0, 1, 2, 3, 4]);
         assert_eq!(instance.count(), 5);
     }
 }
@@ -64,7 +63,7 @@ mod iter_tests {
 
     #[test]
     fn immutable() {
-        let array = Fixed::<usize, 4>::new([0, 1, 2, 3]);
+        let array = Fixed::<usize, 4>::from([0, 1, 2, 3]);
         for (index, element) in array.iter().enumerate() {
             assert_eq!(index, *element);
         }
@@ -118,7 +117,7 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
         // * MaybeUninit<T> has same alignment as T => elements aligned
         let initalized = unsafe { uninitalized.as_mut_ptr().cast::<[T; N]>().read() };
 
-        Self::new(initalized)
+        Self::from(initalized)
     }
 }
 
@@ -171,12 +170,12 @@ mod partialeq_tests {
 
     #[test]
     fn equality() {
-        assert_eq!(Fixed::new([0, 1, 2]), Fixed::new([0, 1, 2]));
+        assert_eq!(Fixed::from([0, 1, 2]), Fixed::from([0, 1, 2]));
     }
 
     #[test]
     fn inequality() {
-        assert_ne!(Fixed::new([0, 1, 3]), Fixed::new([0, 1, 2]));
+        assert_ne!(Fixed::from([0, 1, 3]), Fixed::from([0, 1, 2]));
     }
 }
 
@@ -197,7 +196,7 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
         // * MaybeUninit<T> has same alignment as T => elements aligned
         let initalized = unsafe { uninitalized.as_mut_ptr().cast::<[T; N]>().read() };
 
-        Self::new(initalized)
+        Self::from(initalized)
     }
 }
 
@@ -207,9 +206,9 @@ mod clone_tests {
 
     #[test]
     fn clone() {
-        let old = Fixed::new([0,1,2,3]);
-        let new = old.clone();
-        assert_eq!(old, new);
+        let old = Fixed::from([0,1,2,3]);
+        let from = old.clone();
+        assert_eq!(old, from);
     }
 }
 
