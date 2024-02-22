@@ -180,6 +180,8 @@ mod partialeq_tests {
     }
 }
 
+impl<T: Eq, const N: usize> std::cmp::Eq for Fixed<T, N> {}
+
 impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
     fn clone(&self) -> Self {
         // SAFETY: the MaybeUninit it initalized even if the T isn't.
