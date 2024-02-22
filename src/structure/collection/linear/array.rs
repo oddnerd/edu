@@ -1,6 +1,9 @@
 //! [Arrays](https://en.wikipedia.org/wiki/Array_(data_type)) are [`Linear`]
 //! [`Collection`] which store elements within a contiguous memory allocation.
 
+pub mod dope;
+pub use dope::Dope;
+
 pub mod fixed;
 pub use fixed::Fixed;
 
