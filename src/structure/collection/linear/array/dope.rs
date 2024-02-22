@@ -1,5 +1,6 @@
 //! Implementation of [`Dope`].
 
+use super::Array;
 use super::Collection;
 use super::Linear;
 
@@ -30,7 +31,7 @@ pub struct IntoIter<'a, T> {
     next: std::ops::Range<std::ptr::NonNull<T>>,
 }
 
-impl<'a, T> IntoIter<'a, T> {
+impl<'a, T: 'a> IntoIter<'a, T> {
     /// Construct an [`IntoIter`] for some [`Fixed`].
     fn new(dope: Dope<'a, T>) -> Self {
         let mut tmp = Self {
@@ -55,7 +56,7 @@ impl<'a, T> IntoIter<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::Iterator for IntoIter<'a, T> {
+impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -110,7 +111,7 @@ impl<'a, T: 'a> Iter<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::Iterator for Iter<'a, T> {
+impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -152,7 +153,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::Iterator for IterMut<'a, T> {
+impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -180,3 +181,51 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         IterMut::new(self)
     }
 }
+
+impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        assert!(index < self.len);
+        // SAFETY:
+        // * index is within bounds => the pointer stays within bounds
+        // * `add` in alignments of T => properly aligned pointer
+        // * underlying array exists => points to initalized T
+        unsafe { &*self.data.add(index) }
+    }
+}
+
+impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        assert!(index < self.len);
+        // SAFETY:
+        // * index is within bounds => the pointer stays within bounds
+        // * `add` in alignments of T => properly aligned pointer
+        // * underlying array exists => points to initalized T
+        unsafe { &mut *self.data.add(index) }
+    }
+}
+
+impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
+        // SAFETY:
+        // * `data` is aligned => pointer is aligned
+        // * `data` is initalized => every element is initalized
+        // * `data` is one object => slice is over one allocated object
+        unsafe { std::slice::from_raw_parts(self.data, self.len) }
+    }
+}
+
+impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        // SAFETY:
+        // * `data` is aligned => pointer is aligned
+        // * `data` is initalized => every element is initalized
+        // * `data` is one object => slice is over one allocated object
+        unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
+    }
+}
+
+impl<'a, T: 'a> Array<'a> for Dope<'a, T> {}
