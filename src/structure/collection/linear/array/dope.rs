@@ -10,23 +10,38 @@ use super::Linear;
 /// pointer and length pair leveraging compile-time type information alongside
 /// pointer arithmetic to distinguish between individual elements.
 ///
-/// [`Dope`] is equivalent to Rust's slice ([`[]`]) or C++'s span (`std::span`)
+/// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
 pub struct Dope<'a, T: 'a> {
-    data: *mut T,
+    data: std::ptr::NonNull<T>,
     len: usize,
-    lifetime: std::marker::PhantomData<&'a T>,
+    lifetime: std::marker::PhantomData<&'a mut T>,
 }
 
 impl<'a, T: 'a> Dope<'a, T> {
     /// Construct from a pointer to the start of a memory buffer and the length
     /// of that buffer in elements of `T`.
     ///
-    /// SAFETY:
+    /// # SAFETY:
+    /// * `data` must not be null.
     /// * `data` must have an address aligned for access to `T`.
     /// * `data` must point to one contigious allocated object.
     /// * `data` must point to `len` consecutive initialized instances of `T`.
-    pub unsafe fn new(data: *mut T, len: usize) -> Self {
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let raw_ptr = underlying.as_mut_ptr();
+    /// let smart_ptr = std::ptr::NonNull::new(raw_ptr).unwrap();
+    ///
+    /// let dope = unsafe { Dope::new(smart_ptr, underlying.len()) };
+    ///
+    /// assert!(underlying.iter().eq(dope.iter()));
+    /// ```
+    pub unsafe fn new(data: std::ptr::NonNull<T>, len: usize) -> Self {
         Self {
             data,
             len,
@@ -56,7 +71,7 @@ pub struct IntoIter<'a, T> {
 }
 
 impl<'a, T: 'a> IntoIter<'a, T> {
-    /// Construct an [`IntoIter`] for some [`Fixed`].
+    /// Construct from a [`Dope`].
     fn new(dope: Dope<'a, T>) -> Self {
         let mut tmp = Self {
             data: dope,
@@ -65,13 +80,11 @@ impl<'a, T: 'a> IntoIter<'a, T> {
             next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
         };
 
-        // SAFETY: `data` member exists => pointers to it can't be null
+        // SAFETY: `wrapping_add` will maintain the non-null requirement.
         unsafe {
-            let ptr = tmp.data.data;
+            let start = tmp.data.data;
 
-            let start = std::ptr::NonNull::new_unchecked(ptr);
-
-            let end = std::ptr::NonNull::new_unchecked(ptr.wrapping_add(tmp.data.len));
+            let end = std::ptr::NonNull::new_unchecked(start.as_ptr().wrapping_add(tmp.data.len));
 
             tmp.next = start..end;
         }
@@ -85,15 +98,18 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
-            // SAFETY: references are bounded by the lifetime of the [`Dope`]
+            // SAFETY:
+            // * `wrapping_add` => pointer is aligned.
+            // * next != end => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.start.as_ref() };
 
-            let next = self.next.start.as_ptr().wrapping_add(1);
+            // SAFETY: `wrapping_add` will maintain the non-null requirement.
+            self.next.start = unsafe {
+                let next = self.next.start.as_ptr().wrapping_add(1);
 
-            // SAFETY: the pointer wasn't null before so it still won't be.
-            let next = unsafe { std::ptr::NonNull::new_unchecked(next) };
-
-            self.next.start = next;
+                std::ptr::NonNull::new_unchecked(next)
+            };
 
             Some(current)
         } else {
@@ -114,22 +130,27 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
 
 /// Immutable reference [`Iterator`] over a [`Dope`].
 pub struct Iter<'a, T: 'a> {
-    /// pointer to the hypotheical next element.
-    next: *const T,
+    /// pointer to the hypothetical next element.
+    next: std::ptr::NonNull<T>,
 
-    /// pointer to a sentinal end value.
-    end: *const T,
+    /// pointer to a sentinel value when elements are exhausted.
+    end: std::ptr::NonNull<T>,
 
-    /// constrain to lifetime of the underlying [`Dope`].
+    /// constrain to lifetime of the underlying object.
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: 'a> Iter<'a, T> {
-    /// Construct an [`Iter`] for some [`Dope`].
+    /// Construct from a [`Dope`].
     pub fn new(dope: &Dope<'a, T>) -> Self {
         Self {
             next: dope.data,
-            end: dope.data.wrapping_add(dope.len),
+            // SAFETY: `wrapping_add` will maintain the non-null requirement.
+            end: unsafe {
+                let ptr = dope.data.as_ptr();
+                let sentinel = ptr.wrapping_add(dope.len);
+                std::ptr::NonNull::new_unchecked(sentinel)
+            },
             lifetime: std::marker::PhantomData,
         }
     }
@@ -141,37 +162,48 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
             // SAFETY:
-            // * input array exists => non-null pointer
-            // * `wrapping_add` => pointer is aligned
-            // * next != end => pointing to initalized value
-            // * lifetime 'a bound to input array => valid lifetime to return
-            let element = unsafe { &*self.next };
-            self.next = self.next.wrapping_add(1);
-            Some(element)
+            // * `wrapping_add` => pointer is aligned.
+            // * next != end => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
+            let current = unsafe { self.next.as_ref() };
+
+            // SAFETY: `wrapping_add` will maintain the non-null requirement.
+            self.next = unsafe {
+                let ptr = self.next.as_ptr();
+                let next = ptr.wrapping_add(1);
+                std::ptr::NonNull::new_unchecked(next)
+            };
+
+            Some(current)
         } else {
             None
         }
     }
 }
 
-/// Immutable reference [`Iterator`] over a [`Dope`].
+/// Mutable reference [`Iterator`] over a [`Dope`].
 pub struct IterMut<'a, T: 'a> {
-    /// pointer to the hypotheical next element.
-    next: *mut T,
+    /// pointer to the hypothetical next element.
+    next: std::ptr::NonNull<T>,
 
-    /// pointer to a sentinal end value.
-    end: *mut T,
+    /// pointer to a sentinel value when elements are exhausted.
+    end: std::ptr::NonNull<T>,
 
-    /// constrain to lifetime of the underlying [`Fixed`].
-    lifetime: std::marker::PhantomData<&'a mut T>,
+    /// constrain to lifetime of the underlying object.
+    lifetime: std::marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: 'a> IterMut<'a, T> {
-    /// Construct an [`IterMut`] for some [`Fixed`].
+    /// Construct from a [`Dope`].
     pub fn new(dope: &mut Dope<'a, T>) -> Self {
         Self {
             next: dope.data,
-            end: dope.data.wrapping_add(dope.len),
+            // SAFETY: `wrapping_add` will maintain the non-null requirement.
+            end: unsafe {
+                let ptr = dope.data.as_ptr();
+                let sentinel = ptr.wrapping_add(dope.len);
+                std::ptr::NonNull::new_unchecked(sentinel)
+            },
             lifetime: std::marker::PhantomData,
         }
     }
@@ -183,13 +215,19 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
             // SAFETY:
-            // * input array exists => non-null pointer
-            // * `wrapping_add` => pointer is aligned
-            // * next != end => pointing to initalized value
-            // * lifetime 'a bound to input array => valid lifetime to return
-            let element = unsafe { &mut *self.next };
-            self.next = self.next.wrapping_add(1);
-            Some(element)
+            // * `wrapping_add` => pointer is aligned.
+            // * next != end => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
+            let current = unsafe { self.next.as_mut() };
+
+            // SAFETY: `wrapping_add` will maintain the non-null requirement.
+            self.next = unsafe {
+                let ptr = self.next.as_ptr();
+                let next = ptr.wrapping_add(1);
+                std::ptr::NonNull::new_unchecked(next)
+            };
+
+            Some(current)
         } else {
             None
         }
@@ -212,10 +250,12 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     fn index(&self, index: usize) -> &Self::Output {
         assert!(index < self.len);
         // SAFETY:
-        // * index is within bounds => the pointer stays within bounds
-        // * `add` in alignments of T => properly aligned pointer
-        // * underlying array exists => points to initalized T
-        unsafe { &*self.data.add(index) }
+        // * `data` is [`NonNull`] => pointer will be non-null.
+        // * index is within bounds => `add` stays within bounds.
+        // * `add` => pointer is aligned.
+        // * underlying object is initialized => points to initialized `T`.
+        // * lifetime bound to input object => valid lifetime to return.
+        unsafe { &*self.data.as_ptr().add(index) }
     }
 }
 
@@ -223,10 +263,12 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         assert!(index < self.len);
         // SAFETY:
-        // * index is within bounds => the pointer stays within bounds
-        // * `add` in alignments of T => properly aligned pointer
-        // * underlying array exists => points to initalized T
-        unsafe { &mut *self.data.add(index) }
+        // * `data` is [`NonNull`] => pointer will be non-null.
+        // * index is within bounds => `add` stays within bounds.
+        // * `add` => pointer is aligned.
+        // * underlying object is initialized => points to initialized `T`.
+        // * lifetime bound to input object => valid lifetime to return.
+        unsafe { &mut *self.data.as_ptr().add(index) }
     }
 }
 
@@ -235,20 +277,20 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
 
     fn deref(&self) -> &Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned
-        // * `data` is initalized => every element is initalized
-        // * `data` is one object => slice is over one allocated object
-        unsafe { std::slice::from_raw_parts(self.data, self.len) }
+        // * `data` is aligned => pointer is aligned.
+        // * `data` is initialized => every element is initialized.
+        // * `data` is one object => slice is over one allocated object.
+        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
     }
 }
 
 impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned
-        // * `data` is initalized => every element is initalized
-        // * `data` is one object => slice is over one allocated object
-        unsafe { std::slice::from_raw_parts_mut(self.data, self.len) }
+        // * `data` is aligned => pointer is aligned.
+        // * `data` is initialized => every element is initialized.
+        // * `data` is one object => slice is over one allocated object.
+        unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
     }
 }
 
