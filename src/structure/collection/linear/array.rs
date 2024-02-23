@@ -1,6 +1,9 @@
 //! [Arrays](https://en.wikipedia.org/wiki/Array_(data_type)) are [`Linear`]
 //! [`Collection`] which store elements within a contiguous memory allocation.
 
+pub mod dope;
+pub use dope::Dope;
+
 pub mod fixed;
 pub use fixed::Fixed;
 
@@ -12,7 +15,5 @@ pub trait Array<'a>:
     Linear<'a>
     + std::ops::IndexMut<usize>
     + std::ops::DerefMut<Target = [Self::Element]>
-    + std::convert::AsMut<[Self::Element]>
-    + std::convert::AsRef<[Self::Element]>
 {
 }
