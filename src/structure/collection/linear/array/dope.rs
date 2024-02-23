@@ -4,10 +4,14 @@ use super::Array;
 use super::Collection;
 use super::Linear;
 
-/// [Dope Vector](https://en.wikipedia.org/wiki/Dope_vector) implementation
-/// (i.e., [Rust's slice](https://doc.rust-lang.org/std/primitive.slice.html))
-/// uses a pointer-length pair alongside type information to map an array upon
-/// an object buffer in memory.
+/// Lightweight access to a contagious buffer of memory.
+///
+/// A [Dope Vector](https://en.wikipedia.org/wiki/Dope_vector) comprises of a
+/// pointer and length pair leveraging compile-time type information alongside
+/// pointer arithmetic to distinguish between individual elements.
+///
+/// [`Dope`] is equivalent to Rust's slice ([`[]`]) or C++'s span (`std::span`)
+/// and views (`std::string_view`)
 pub struct Dope<'a, T: 'a> {
     data: *mut T,
     len: usize,
