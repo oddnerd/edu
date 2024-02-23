@@ -11,7 +11,7 @@ use super::Linear;
 /// pointer arithmetic to distinguish between individual elements.
 ///
 /// [`Dope`] is equivalent to Rust's slice ([`[]`]) or C++'s span (`std::span`)
-/// and views (`std::string_view`)
+/// and views (`std::string_view`).
 pub struct Dope<'a, T: 'a> {
     data: *mut T,
     len: usize,
@@ -23,9 +23,9 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// of that buffer in elements of `T`.
     ///
     /// SAFETY:
-    /// * `data` must have an address aligned for access to `T`
-    /// * `data` must point to one contigious allocated object
-    /// * `data` must point to `len` consecutive initialized instances of `T`
+    /// * `data` must have an address aligned for access to `T`.
+    /// * `data` must point to one contigious allocated object.
+    /// * `data` must point to `len` consecutive initialized instances of `T`.
     pub unsafe fn new(data: *mut T, len: usize) -> Self {
         Self {
             data,
@@ -44,11 +44,14 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 }
 
 /// By-value [`Iterator`] over a [`Dope`].
+///
+/// Note that because [`Dope`] is inherently non-owning over the memory buffer
+/// it spans, therefore the values this yields are themselves references.
 pub struct IntoIter<'a, T> {
-    /// ownership of the underlying array.
+    /// ownership of the values.
     data: Dope<'a, T>,
 
-    /// elements within the range have yet to be yeilded.
+    /// elements within this range have yet to be yielded.
     next: std::ops::Range<std::ptr::NonNull<T>>,
 }
 
@@ -62,7 +65,7 @@ impl<'a, T: 'a> IntoIter<'a, T> {
             next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
         };
 
-        // SAFETY: the array exists => pointers to it can't be null
+        // SAFETY: `data` member exists => pointers to it can't be null
         unsafe {
             let ptr = tmp.data.data;
 
