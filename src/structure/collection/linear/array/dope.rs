@@ -34,10 +34,8 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let raw_ptr = underlying.as_mut_ptr();
-    /// let smart_ptr = std::ptr::NonNull::new(raw_ptr).unwrap();
-    ///
-    /// let dope = unsafe { Dope::new(smart_ptr, underlying.len()) };
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
     /// assert!(underlying.iter().eq(dope.iter()));
     /// ```
@@ -72,7 +70,20 @@ pub struct IntoIter<'a, T> {
 
 impl<'a, T: 'a> IntoIter<'a, T> {
     /// Construct from a [`Dope`].
-    fn new(dope: Dope<'a, T>) -> Self {
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::dope::IntoIter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let iter = IntoIter::new(dope);
+    ///
+    /// assert!(underlying.iter().eq(iter));
+    /// ```
+    pub fn new(dope: Dope<'a, T>) -> Self {
         let mut tmp = Self {
             data: dope,
 
@@ -142,6 +153,19 @@ pub struct Iter<'a, T: 'a> {
 
 impl<'a, T: 'a> Iter<'a, T> {
     /// Construct from a [`Dope`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::dope::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let iter = Iter::new(&dope);
+    ///
+    /// assert!(underlying.iter().eq(iter));
+    /// ```
     pub fn new(dope: &Dope<'a, T>) -> Self {
         Self {
             next: dope.data,
@@ -195,6 +219,19 @@ pub struct IterMut<'a, T: 'a> {
 
 impl<'a, T: 'a> IterMut<'a, T> {
     /// Construct from a [`Dope`].
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::dope::IterMut;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let iter = IterMut::new(&mut dope);
+    ///
+    /// assert!(underlying.iter().eq(iter));
+    /// ```
     pub fn new(dope: &mut Dope<'a, T>) -> Self {
         Self {
             next: dope.data,
