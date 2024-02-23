@@ -14,6 +14,22 @@ pub struct Dope<'a, T: 'a> {
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
+impl<'a, T: 'a> Dope<'a, T> {
+    /// Construct from a pointer-length pair.
+    ///
+    /// SAFETY:
+    /// * `data` must be properly aligned
+    /// * `data` must point to `len` consecutive instances of `T`
+    /// * `data` must point to one contigious allocated object
+    pub unsafe fn new(data: *mut T, len: usize) -> Self {
+        Self {
+            data,
+            len,
+            lifetime: std::marker::PhantomData,
+        }
+    }
+}
+
 impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     type Element = T;
 
