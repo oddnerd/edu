@@ -19,12 +19,13 @@ pub struct Dope<'a, T: 'a> {
 }
 
 impl<'a, T: 'a> Dope<'a, T> {
-    /// Construct from a pointer-length pair.
+    /// Construct from a pointer to the start of a memory buffer and the length
+    /// of that buffer in elements of `T`.
     ///
     /// SAFETY:
-    /// * `data` must be properly aligned
-    /// * `data` must point to `len` consecutive instances of `T`
+    /// * `data` must have an address aligned for access to `T`
     /// * `data` must point to one contigious allocated object
+    /// * `data` must point to `len` consecutive initialized instances of `T`
     pub unsafe fn new(data: *mut T, len: usize) -> Self {
         Self {
             data,
