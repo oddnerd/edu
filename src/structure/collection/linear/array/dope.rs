@@ -13,8 +13,13 @@ use super::Linear;
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
 pub struct Dope<'a, T: 'a> {
+    /// Pointer to the start of the array.
     data: std::ptr::NonNull<T>,
+
+    /// Number of elements within the array.
     len: usize,
+
+    /// Bind lifetime to underlying memory buffer.
     lifetime: std::marker::PhantomData<&'a mut T>,
 }
 
@@ -60,7 +65,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 ///
 /// Note that because [`Dope`] is inherently non-owning over the memory buffer
 /// it spans, therefore the values this yields are themselves references.
-pub struct IntoIter<'a, T> {
+pub struct IntoIter<'a, T: 'a> {
     /// ownership of the values.
     data: Dope<'a, T>,
 
@@ -139,145 +144,15 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
     }
 }
 
-/// Immutable reference [`Iterator`] over a [`Dope`].
-pub struct Iter<'a, T: 'a> {
-    /// pointer to the hypothetical next element.
-    next: std::ptr::NonNull<T>,
-
-    /// pointer to a sentinel value when elements are exhausted.
-    end: std::ptr::NonNull<T>,
-
-    /// constrain to lifetime of the underlying object.
-    lifetime: std::marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: 'a> Iter<'a, T> {
-    /// Construct from a [`Dope`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    /// use rust::structure::collection::linear::array::dope::Iter;
-    ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
-    /// let iter = Iter::new(&dope);
-    ///
-    /// assert!(underlying.iter().eq(iter));
-    /// ```
-    pub fn new(dope: &Dope<'a, T>) -> Self {
-        Self {
-            next: dope.data,
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            end: unsafe {
-                let ptr = dope.data.as_ptr();
-                let sentinel = ptr.wrapping_add(dope.len);
-                std::ptr::NonNull::new_unchecked(sentinel)
-            },
-            lifetime: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
-            // SAFETY:
-            // * `wrapping_add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.next.as_ref() };
-
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            self.next = unsafe {
-                let ptr = self.next.as_ptr();
-                let next = ptr.wrapping_add(1);
-                std::ptr::NonNull::new_unchecked(next)
-            };
-
-            Some(current)
-        } else {
-            None
-        }
-    }
-}
-
-/// Mutable reference [`Iterator`] over a [`Dope`].
-pub struct IterMut<'a, T: 'a> {
-    /// pointer to the hypothetical next element.
-    next: std::ptr::NonNull<T>,
-
-    /// pointer to a sentinel value when elements are exhausted.
-    end: std::ptr::NonNull<T>,
-
-    /// constrain to lifetime of the underlying object.
-    lifetime: std::marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: 'a> IterMut<'a, T> {
-    /// Construct from a [`Dope`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    /// use rust::structure::collection::linear::array::dope::IterMut;
-    ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
-    /// let iter = IterMut::new(&mut dope);
-    ///
-    /// assert!(underlying.iter().eq(iter));
-    /// ```
-    pub fn new(dope: &mut Dope<'a, T>) -> Self {
-        Self {
-            next: dope.data,
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            end: unsafe {
-                let ptr = dope.data.as_ptr();
-                let sentinel = ptr.wrapping_add(dope.len);
-                std::ptr::NonNull::new_unchecked(sentinel)
-            },
-            lifetime: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
-    type Item = &'a mut T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
-            // SAFETY:
-            // * `wrapping_add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.next.as_mut() };
-
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            self.next = unsafe {
-                let ptr = self.next.as_ptr();
-                let next = ptr.wrapping_add(1);
-                std::ptr::NonNull::new_unchecked(next)
-            };
-
-            Some(current)
-        } else {
-            None
-        }
-    }
-}
-
 impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        Iter::new(self)
+        // SAFETY: requirements are already enforced by the constructor.
+        unsafe { super::iter::Iter::new(self.data, self.len) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        IterMut::new(self)
+        // SAFETY: requirements are already enforced by the constructor.
+        unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
 }
 
@@ -340,3 +215,173 @@ impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
 }
 
 impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
+
+impl<'a,T:'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn new() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(instance.data.as_ptr(), array.as_mut_ptr());
+        assert_eq!(instance.len, array.len());
+    }
+
+    #[test]
+    fn count() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(instance.len(), array.len());
+    }
+
+    #[test]
+    fn into_iter() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert!(instance.into_iter().copied().eq(array.into_iter()));
+    }
+
+    #[test]
+    fn iter() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert!(instance.iter().eq(array.iter()));
+    }
+
+    #[test]
+    fn iter_mut() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert!(instance.iter_mut().eq(array.iter_mut()));
+    }
+
+    #[test]
+    fn index() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+        assert_eq!(instance[2], 2);
+        assert_eq!(instance[3], 3);
+    }
+
+    #[test]
+    fn index_mut() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        instance[0] = 4;
+        instance[1] = 5;
+        instance[2] = 6;
+        instance[3] = 7;
+
+        assert_eq!(instance[0], 4);
+        assert_eq!(instance[1], 5);
+        assert_eq!(instance[2], 6);
+        assert_eq!(instance[3], 7);
+    }
+
+    #[test]
+    fn deref() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        use std::ops::Deref;
+        assert_eq!(*instance.deref(), *array.as_slice());
+    }
+
+    #[test]
+    fn deref_mut() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        use std::ops::DerefMut;
+        assert_eq!(*instance.deref_mut(), *array.as_slice());
+    }
+
+    #[test]
+    fn eq() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        let other = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(instance, other);
+    }
+
+    #[test]
+    fn ne() {
+        let mut array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        let mut other_array = [4,5,6,7];
+        let other = {
+            let ptr = other_array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, other_array.len()) }
+        };
+
+        assert_ne!(instance, other);
+    }
+}

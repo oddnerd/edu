@@ -1,6 +1,10 @@
 //! [Arrays](https://en.wikipedia.org/wiki/Array_(data_type)) are [`Linear`]
 //! [`Collection`] which store elements within a contiguous memory allocation.
 
+pub mod iter;
+pub use iter::Iter;
+pub use iter::IterMut;
+
 pub mod dope;
 pub use dope::Dope;
 
