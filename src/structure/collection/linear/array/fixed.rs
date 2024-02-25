@@ -34,7 +34,7 @@ pub struct IntoIter<T, const N: usize> {
     data: [std::mem::ManuallyDrop<T>; N],
 
     /// elements within the range have yet to be yielded.
-    next: std::ops::Range<std::ptr::NonNull<std::mem::ManuallyDrop<T>>>,
+    next: std::ops::Range<usize>,
 }
 
 impl<T, const N: usize> IntoIter<T, N> {
@@ -50,10 +50,10 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// let fixed = Fixed::from(underlying);
     /// let iter = IntoIter::new(fixed);
     ///
-    /// assert!(clone.iter().eq(iter));
+    /// assert!(clone.into_iter().eq(iter));
     /// ```
     pub fn new(array: Fixed<T, N>) -> Self {
-        let mut tmp = Self {
+        Self {
             // SAFETY:
             // * ManuallyDrop<T> has same size as T => arrays have same size.
             // * ManuallyDrop<T> has same alignment as T => elements aligned.
@@ -65,40 +65,23 @@ impl<T, const N: usize> IntoIter<T, N> {
                     .read()
             },
 
-            // careful to use pointers to the member and not the parameter.
-            next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
-        };
-
-        // SAFETY: `wrapping_add` will maintain the non-null requirement.
-        unsafe {
-            let start = std::ptr::NonNull::new_unchecked(tmp.data.as_mut_ptr());
-
-            let end = std::ptr::NonNull::new_unchecked(start.as_ptr().wrapping_add(N));
-
-            tmp.next = start..end;
+            next: 0..N,
         }
-
-        tmp
     }
 }
 
 impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     fn drop(&mut self) {
-        while self.next.start != self.next.end {
+        for offset in self.next.clone() {
+            let current = self.data.as_mut_ptr().wrapping_add(offset);
+
             // SAFETY:
             // * owns underlying array => valid for reads and writes.
             // * `wrapping_add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
+            // * within `self.next` => pointing to initialized value.
             unsafe {
-                std::ptr::drop_in_place(self.next.start.as_ptr());
+                std::ptr::drop_in_place(current);
             }
-
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            self.next.start = unsafe {
-                let next = self.next.start.as_ptr().wrapping_add(1);
-
-                std::ptr::NonNull::new_unchecked(next)
-            };
         }
     }
 }
@@ -111,14 +94,13 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
             // SAFETY:
             // * `wrapping_add` => pointer is aligned.
             // * next != end => pointing to initialized value.
-            let current = unsafe { self.next.start.as_ptr().read() };
-
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            self.next.start = unsafe {
-                let next = self.next.start.as_ptr().wrapping_add(1);
-
-                std::ptr::NonNull::new_unchecked(next)
+            let current = unsafe {
+                let array = self.data.as_mut_ptr();
+                let element = array.wrapping_add(self.next.start);
+                element.read()
             };
+
+            self.next.start = self.next.start.wrapping_add(1);
 
             Some(std::mem::ManuallyDrop::into_inner(current))
         } else {
