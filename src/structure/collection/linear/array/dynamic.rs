@@ -82,6 +82,14 @@ mod test {
     }
 
     #[test]
+    fn with_capacity() {
+        let instance: Dynamic<()> = Dynamic::with_capacity(4);
+
+        assert_eq!(instance.initialized, 0);
+        assert_eq!(instance.allocated, 4);
+    }
+
+    #[test]
     fn count() {
         let instance: Dynamic<()> = Dynamic::new();
 
