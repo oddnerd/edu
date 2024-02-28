@@ -33,7 +33,7 @@ impl<T> Dynamic<T> {
     /// let instance: Dynamic<()> = Dynamic::new();
     /// todo!("assert!(instance.is_empty())");
     /// assert_eq!(instance.count(), 0);
-    /// todo!("assert_eq!(instance.capacity(), 0)");
+    /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn new() -> Self {
         Self {
