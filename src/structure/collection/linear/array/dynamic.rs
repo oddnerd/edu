@@ -18,3 +18,16 @@ pub struct Dynamic<T> {
     /// The number of elements which are allocated but currently uninitialized.
     allocated: usize,
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn new() {
+        let instance: Dynamic<()> = Dynamic::new();
+
+        assert_eq!(instance.initialized, 0);
+        assert_eq!(instance.allocated, 0);
+    }
+}
