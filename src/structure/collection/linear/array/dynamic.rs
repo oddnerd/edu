@@ -19,6 +19,16 @@ pub struct Dynamic<T> {
     allocated: usize,
 }
 
+impl<T> Dynamic<T> {
+    pub fn new() -> Self {
+        Self {
+            data: std::ptr::NonNull::dangling(),
+            initialized: 0,
+            allocated: 0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
