@@ -43,6 +43,19 @@ impl<T> Dynamic<T> {
         }
     }
 
+    /// Query how many elements could be inserted without allocation.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!("make the following example work");
+    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2);
+    /// assert_eq!(instance.capacity(), 2);
+    /// instance.append(1);
+    /// instance.append(2);
+    /// assert_eq!(instance.capacity(), 0);
+    /// ```
     pub fn capacity(&self) -> usize {
         self.allocated
     }
