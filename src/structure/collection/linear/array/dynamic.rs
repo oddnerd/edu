@@ -51,4 +51,11 @@ mod test {
         assert_eq!(instance.initialized, 0);
         assert_eq!(instance.allocated, 0);
     }
+
+    #[test]
+    fn count() {
+        let instance: Dynamic<()> = Dynamic::new();
+
+        assert_eq!(instance.count(), 0);
+    }
 }
