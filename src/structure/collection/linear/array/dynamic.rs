@@ -70,4 +70,11 @@ mod test {
 
         assert_eq!(instance.count(), 0);
     }
+
+    #[test]
+    fn capacity() {
+        let instance: Dynamic<()> = Dynamic::new();
+
+        assert_eq!(instance.capacity(), 0);
+    }
 }
