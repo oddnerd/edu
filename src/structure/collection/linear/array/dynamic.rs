@@ -43,6 +43,30 @@ impl<T> Dynamic<T> {
         }
     }
 
+    pub fn with_capacity(count: usize) -> Option<Self> {
+        if let Ok(layout) = std::alloc::Layout::array::<T>(count) {
+            if layout.size() == 0 {
+                return None;
+            }
+
+            // SAFETY: `layout` has non-zero size.
+            let ptr = unsafe { std::alloc::alloc(layout) };
+
+            // SAFETY: `MaybeUninit<T>` has same layout as `T`.
+            let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+            if let Some(ptr) = std::ptr::NonNull::new(ptr) {
+                return Some(Self {
+                    data: ptr,
+                    initialized: 0,
+                    allocated: count,
+                });
+            }
+        }
+
+        None
+    }
+
     /// Query how many elements could be inserted without allocation.
     ///
     /// # Examples
