@@ -43,6 +43,17 @@ impl<T> Dynamic<T> {
         }
     }
 
+    /// Construct an instance with an allocated buffer for `count` elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let instance: Dynamic<()> = Dynamic::with_capacity(4);
+    /// todo!("assert!(instance.is_empty())");
+    /// assert_eq!(instance.count(), 0);
+    /// assert_eq!(instance.capacity(), 4);
+    /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
         if let Ok(layout) = std::alloc::Layout::array::<T>(count) {
             if layout.size() == 0 {
