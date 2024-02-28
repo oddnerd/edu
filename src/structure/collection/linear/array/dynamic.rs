@@ -1,5 +1,9 @@
 //! Implementation of a [dynamically sized array](https://en.wikipedia.org/wiki/Dynamic_array).
 
+use super::Array;
+use super::Collection;
+use super::Linear;
+
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
 /// A contigious memory buffer with sequentially laid out elements at alignment
@@ -27,9 +31,9 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance: Dynamic<()> = Dynamic::new();
-    /// // assert!(instance.is_empty());
-    /// // assert_eq!(instance.count(), 0);
-    /// // assert_eq!(instance.capacity(), 0);
+    /// todo!("assert!(instance.is_empty())");
+    /// assert_eq!(instance.count(), 0);
+    /// todo!("assert_eq!(instance.capacity(), 0)");
     /// ```
     pub fn new() -> Self {
         Self {
@@ -37,6 +41,14 @@ impl<T> Dynamic<T> {
             initialized: 0,
             allocated: 0,
         }
+    }
+}
+
+impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
+    type Element = T;
+
+    fn count(&self) -> usize {
+        self.initialized
     }
 }
 
