@@ -20,6 +20,17 @@ pub struct Dynamic<T> {
 }
 
 impl<T> Dynamic<T> {
+    /// Construct an empty instance.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let instance: Dynamic<()> = Dynamic::new();
+    /// // assert!(instance.is_empty());
+    /// // assert_eq!(instance.count(), 0);
+    /// // assert_eq!(instance.capacity(), 0);
+    /// ```
     pub fn new() -> Self {
         Self {
             data: std::ptr::NonNull::dangling(),
