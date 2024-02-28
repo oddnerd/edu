@@ -42,6 +42,10 @@ impl<T> Dynamic<T> {
             allocated: 0,
         }
     }
+
+    pub fn capacity(&self) -> usize {
+        self.allocated
+    }
 }
 
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
