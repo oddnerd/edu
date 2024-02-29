@@ -86,6 +86,9 @@ impl<T> Dynamic<T> {
 
     /// Pre-allocate memory for `count` additional elements.
     ///
+    /// Returns true if enough space exists for `count` additional elements,
+    /// false otherwise such as if memory allocation fails.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
