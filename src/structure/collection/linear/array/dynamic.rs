@@ -31,7 +31,6 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance: Dynamic<()> = Dynamic::new();
-    /// todo!("assert!(instance.is_empty())");
     /// assert_eq!(instance.count(), 0);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
@@ -50,7 +49,6 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance: Dynamic<()> = Dynamic::with_capacity(4);
-    /// todo!("assert!(instance.is_empty())");
     /// assert_eq!(instance.count(), 0);
     /// assert_eq!(instance.capacity(), 4);
     /// ```
