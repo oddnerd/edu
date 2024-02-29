@@ -57,6 +57,7 @@ impl<T> Dynamic<T> {
 
         // SAFETY: the underlying buffer has yet to be allocated.
         if unsafe { instance.alloc(count) } {
+            instance.allocated = count;
             Some(instance)
         } else {
             None
