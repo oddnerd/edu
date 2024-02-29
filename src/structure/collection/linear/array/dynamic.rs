@@ -137,7 +137,7 @@ impl<T> Dynamic<T> {
         match (old, new) {
             (Ok(old), Ok(new)) => {
                 if new.size() > 0 {
-                    // SAFETY: layout has non-zero size.
+                    // SAFETY: `layout` has non-zero size.
                     let ptr = unsafe {
                         let ptr = self.data.as_ptr() as *mut u8;
                         std::alloc::realloc(ptr, old, new.size())
