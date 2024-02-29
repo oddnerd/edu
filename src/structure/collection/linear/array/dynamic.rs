@@ -100,7 +100,8 @@ impl<T> Dynamic<T> {
                 }
             }
         } else {
-            todo!("handle initial allocation");
+            // The underlying buffer has yet to be allocated.
+            return unsafe { self.alloc(count) };
         }
 
         false
