@@ -109,12 +109,28 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity(), 8);
     /// ```
     pub fn reserve(&mut self, count: usize) -> bool {
-        if self.allocated >= count {
-            return true;
+        if self.initialized + self.allocated > 0 {
+            if count > self.allocated {
+                if unsafe { self.realloc(self.initialized + count) } {
+                    self.allocated = count;
+                    return true;
+                }
+            }
+        } else {
+            todo!("handle initial allocation");
         }
 
+        false
+    }
+
+    /// Resize the underlying buffer to hold exactly `count` elements.
+    ///
+    /// # Safety
+    /// * the underlying buffer must already be allocated, _not_ dangling.
+    /// * this method does not update member variables.
+    unsafe fn realloc(&mut self, count: usize) -> bool {
         let old = std::alloc::Layout::array::<T>(self.initialized + self.allocated);
-        let new = std::alloc::Layout::array::<T>(self.initialized + count);
+        let new = std::alloc::Layout::array::<T>(count);
 
         match (old, new) {
             (Ok(old), Ok(new)) => {
@@ -130,11 +146,9 @@ impl<T> Dynamic<T> {
 
                     if let Some(ptr) = std::ptr::NonNull::new(ptr) {
                         self.data = ptr;
-                        self.allocated = count;
                         return true;
                     }
                 } else if std::mem::size_of::<T>() == 0 {
-                    self.allocated = count;
                     return true;
                 }
             }
