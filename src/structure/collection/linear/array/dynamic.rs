@@ -53,31 +53,14 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity(), 4);
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
-        if let Ok(layout) = std::alloc::Layout::array::<T>(count) {
-            if layout.size() > 0 {
-                // SAFETY: `layout` has non-zero size.
-                let ptr = unsafe { std::alloc::alloc(layout) };
+        let mut instance = Self::new();
 
-                // SAFETY: `MaybeUninit<T>` has same layout as `T`.
-                let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
-
-                if let Some(ptr) = std::ptr::NonNull::new(ptr) {
-                    return Some(Self {
-                        data: ptr,
-                        initialized: 0,
-                        allocated: count,
-                    });
-                }
-            } else if std::mem::size_of::<T>() == 0 {
-                return Some(Self {
-                    data: std::ptr::NonNull::dangling(),
-                    initialized: 0,
-                    allocated: count,
-                });
-            }
+        // SAFETY: the underlying buffer has yet to be allocated.
+        if unsafe { instance.alloc(count) } {
+            Some(instance)
+        } else {
+            None
         }
-
-        None
     }
 
     /// Query how many elements could be inserted without allocation.
@@ -118,6 +101,34 @@ impl<T> Dynamic<T> {
             }
         } else {
             todo!("handle initial allocation");
+        }
+
+        false
+    }
+
+    /// Allocate a buffer to hold exactly `count` elements.
+    ///
+    /// Returns `true` if the allocation is successful, false otherwise.
+    ///
+    /// # Safety
+    /// * the underlying buffer must not yet be allocated.
+    /// * this method does not update member variables.
+    unsafe fn alloc(&mut self, count: usize) -> bool {
+        if let Ok(layout) = std::alloc::Layout::array::<T>(count) {
+            if layout.size() > 0 {
+                // SAFETY: `layout` has non-zero size.
+                let ptr = unsafe { std::alloc::alloc(layout) };
+
+                // SAFETY: `MaybeUninit<T>` has same layout as `T`.
+                let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+                if let Some(ptr) = std::ptr::NonNull::new(ptr) {
+                    self.data = ptr;
+                    return true;
+                }
+            } else if std::mem::size_of::<T>() == 0 {
+                return true;
+            }
         }
 
         false
