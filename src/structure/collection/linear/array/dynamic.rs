@@ -139,4 +139,15 @@ mod test {
 
         assert_eq!(instance.capacity(), 0);
     }
+
+    #[test]
+    fn reserve() {
+        let mut instance: Dynamic<()> = Dynamic::new();
+
+        assert_eq!(instance.allocated, 0);
+
+        instance.reserve(8);
+
+        assert_eq!(instance.allocated, 8);
+    }
 }
