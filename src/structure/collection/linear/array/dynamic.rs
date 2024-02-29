@@ -53,11 +53,14 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity(), 4);
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
-        let mut instance = Self::new();
+        let mut instance = Self {
+            data: std::ptr::NonNull::dangling(),
+            initialized: 0,
+            allocated: count,
+        };
 
         // SAFETY: the underlying buffer has _not_ yet been allocated.
         if unsafe { instance.alloc(count) } {
-            instance.allocated = count;
             Some(instance)
         } else {
             None
