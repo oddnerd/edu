@@ -96,6 +96,42 @@ impl<T> Dynamic<T> {
     pub fn capacity(&self) -> usize {
         self.allocated
     }
+
+    pub fn reserve(&mut self, count: usize) -> bool {
+        if self.allocated >= count {
+            return true;
+        }
+
+        let old = std::alloc::Layout::array::<T>(self.initialized + self.allocated);
+        let new = std::alloc::Layout::array::<T>(self.initialized + count);
+
+        match (old, new) {
+            (Ok(old), Ok(new)) => {
+                if new.size() > 0 {
+                    // SAFETY: layout has non-zero size.
+                    let ptr = unsafe {
+                        let ptr = self.data.as_ptr() as *mut u8;
+                        std::alloc::realloc(ptr, old, new.size())
+                    };
+
+                    // SAFETY: `MaybeUninit<T>` has same layout as `T`.
+                    let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+                    if let Some(ptr) = std::ptr::NonNull::new(ptr) {
+                        self.data = ptr;
+                        self.allocated = count;
+                        return true;
+                    }
+                } else if std::mem::size_of::<T>() == 0 {
+                    self.allocated = count;
+                    return true;
+                }
+            }
+            (_, _) => {}
+        }
+
+        false
+    }
 }
 
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
