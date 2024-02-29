@@ -101,7 +101,10 @@ impl<T> Dynamic<T> {
             }
         } else {
             // The underlying buffer has yet to be allocated.
-            return unsafe { self.alloc(count) };
+            if unsafe { self.alloc(count) } {
+                self.allocated = count;
+                return true;
+            }
         }
 
         false
