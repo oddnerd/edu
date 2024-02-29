@@ -56,19 +56,23 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
         if let Ok(layout) = std::alloc::Layout::array::<T>(count) {
-            if layout.size() == 0 {
-                return None;
-            }
+            if layout.size() > 0 {
+                // SAFETY: `layout` has non-zero size.
+                let ptr = unsafe { std::alloc::alloc(layout) };
 
-            // SAFETY: `layout` has non-zero size.
-            let ptr = unsafe { std::alloc::alloc(layout) };
+                // SAFETY: `MaybeUninit<T>` has same layout as `T`.
+                let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
 
-            // SAFETY: `MaybeUninit<T>` has same layout as `T`.
-            let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
-
-            if let Some(ptr) = std::ptr::NonNull::new(ptr) {
+                if let Some(ptr) = std::ptr::NonNull::new(ptr) {
+                    return Some(Self {
+                        data: ptr,
+                        initialized: 0,
+                        allocated: count,
+                    });
+                }
+            } else if std::mem::size_of::<T>() == 0 {
                 return Some(Self {
-                    data: ptr,
+                    data: std::ptr::NonNull::dangling(),
                     initialized: 0,
                     allocated: count,
                 });
@@ -118,7 +122,7 @@ mod test {
 
     #[test]
     fn with_capacity() {
-        let instance: Dynamic<()> = Dynamic::with_capacity(4);
+        let instance: Dynamic<()> = Dynamic::with_capacity(4).unwrap();
 
         assert_eq!(instance.initialized, 0);
         assert_eq!(instance.allocated, 4);
