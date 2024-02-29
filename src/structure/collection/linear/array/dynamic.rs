@@ -125,6 +125,8 @@ impl<T> Dynamic<T> {
 
     /// Resize the underlying buffer to hold exactly `count` elements.
     ///
+    /// Returns `true` if the allocation is successful, false otherwise.
+    ///
     /// # Safety
     /// * the underlying buffer must already be allocated, _not_ dangling.
     /// * this method does not update member variables.
