@@ -235,12 +235,21 @@ mod test {
 
         assert_eq!(instance.allocated, 0);
 
+        // reserve does initial allocation.
         instance.reserve(8);
 
         assert_eq!(instance.allocated, 8);
 
+        // reserve does reallocation.
         instance.reserve(16);
 
         assert_eq!(instance.allocated, 16);
+
+        // reserve does reallocation to shrink.
+        instance.reserve(8);
+        assert_eq!(instance.allocated, 8);
+
+        // reserve does not remove initialized elements.
+        todo!()
     }
 }
