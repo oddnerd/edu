@@ -95,8 +95,10 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance: Dynamic<()> = Dynamic::new();
     /// assert_eq!(instance.capacity(), 0);
-    /// instance.reserve(8);
+    /// instance.reserve(8); // increase capacity
     /// assert_eq!(instance.capacity(), 8);
+    /// instance.reserve(4) // decrease capacity
+    /// assert_eq!(instance.capacity(), 4);
     /// ```
     pub fn reserve(&mut self, count: usize) -> bool {
         if self.initialized + self.allocated == 0 {
