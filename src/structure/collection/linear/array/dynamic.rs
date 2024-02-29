@@ -246,4 +246,24 @@ mod test {
         // reserve does not remove initialized elements.
         todo!()
     }
+
+    #[test]
+    fn append() {
+        let mut instance: Dynamic<i32> = Dynamic::new();
+        assert_eq!(instance.count(), 0);
+
+        // append to empty instance.
+        instance.append(1);
+        assert_eq!(instance.count(), 1);
+
+        // append to instance with one element.
+        instance.append(2);
+        assert_eq!(instance.count(), 2);
+
+        // append to instance with more than one element.
+        instance.append(3);
+        assert_eq!(instance.count(), 3);
+
+        todo!("check is last element has correct value");
+    }
 }
