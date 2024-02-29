@@ -210,5 +210,9 @@ mod test {
         instance.reserve(8);
 
         assert_eq!(instance.allocated, 8);
+
+        instance.reserve(16);
+
+        assert_eq!(instance.allocated, 16);
     }
 }
