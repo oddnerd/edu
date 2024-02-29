@@ -106,15 +106,10 @@ impl<T> Dynamic<T> {
                 return true;
             }
         } else {
-            if count < self.allocated {
-                // enough space is already reserved.
+            // SAFETY: the underlying buffer has been previously allocated.
+            if unsafe { self.realloc(self.initialized + count) } {
+                self.allocated = count;
                 return true;
-            } else {
-                // SAFETY: the underlying buffer has been previously allocated.
-                if unsafe { self.realloc(self.initialized + count) } {
-                    self.allocated = count;
-                    return true;
-                }
             }
         }
 
@@ -232,17 +227,14 @@ mod test {
     #[test]
     fn reserve() {
         let mut instance: Dynamic<()> = Dynamic::new();
-
         assert_eq!(instance.allocated, 0);
 
         // reserve does initial allocation.
         instance.reserve(8);
-
         assert_eq!(instance.allocated, 8);
 
         // reserve does reallocation.
         instance.reserve(16);
-
         assert_eq!(instance.allocated, 16);
 
         // reserve does reallocation to shrink.
