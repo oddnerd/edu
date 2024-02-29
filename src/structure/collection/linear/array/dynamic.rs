@@ -97,6 +97,17 @@ impl<T> Dynamic<T> {
         self.allocated
     }
 
+    /// Pre-allocate memory for `count` additional elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance: Dynamic<()> = Dynamic::new();
+    /// assert_eq!(instance.capacity(), 0);
+    /// instance.reserve(8);
+    /// assert_eq!(instance.capacity(), 8);
+    /// ```
     pub fn reserve(&mut self, count: usize) -> bool {
         if self.allocated >= count {
             return true;
