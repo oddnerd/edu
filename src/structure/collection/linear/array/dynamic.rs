@@ -93,18 +93,22 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity(), 8);
     /// ```
     pub fn reserve(&mut self, count: usize) -> bool {
-        if self.initialized + self.allocated > 0 {
-            if count > self.allocated {
+        if self.initialized + self.allocated == 0 {
+            // SAFETY: the underlying buffer has _not_ yet been allocated.
+            if unsafe { self.alloc(count) } {
+                self.allocated = count;
+                return true;
+            }
+        } else {
+            if count < self.allocated {
+                // enough space is already reserved.
+                return true;
+            } else {
+                // SAFETY: the underlying buffer has been previously allocated.
                 if unsafe { self.realloc(self.initialized + count) } {
                     self.allocated = count;
                     return true;
                 }
-            }
-        } else {
-            // The underlying buffer has yet to be allocated.
-            if unsafe { self.alloc(count) } {
-                self.allocated = count;
-                return true;
             }
         }
 
