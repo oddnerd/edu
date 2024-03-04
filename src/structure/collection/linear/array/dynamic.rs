@@ -118,6 +118,32 @@ impl<T> Dynamic<T> {
         false
     }
 
+    pub fn append(&mut self, element: T) -> bool {
+        if self.allocated == 0 {
+            if !self.reserve(1) {
+                return false;
+            }
+        }
+
+        unsafe {
+            // SAFETY: the buffer has been allocated.
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: this points to the first allocated but uninitialized.
+            let ptr = ptr.add(self.initialized);
+
+            // SAFETY:
+            // * `ptr` is non-null.
+            // * `ptr` is aligned.
+            // * the `MaybeUninit<T>` is initialized even if the `T` isn't.
+            (*ptr).write(element);
+        };
+
+        self.initialized += 1;
+
+        return true;
+    }
+
     /// Allocate a buffer to hold exactly `count` elements.
     ///
     /// Returns `true` if the allocation is successful, false otherwise.
