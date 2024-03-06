@@ -202,7 +202,7 @@ impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     fn default() -> Self {
-        // SAFETY: the `MaybeUninit` is initialized even if the `T` isn't.
+        // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
         let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
             unsafe { std::mem::MaybeUninit::uninit().assume_init() };
 
