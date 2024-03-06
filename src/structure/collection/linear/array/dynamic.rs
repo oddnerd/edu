@@ -389,7 +389,7 @@ impl<T> Dynamic<T> {
 
 impl<T> std::ops::Drop for Dynamic<T> {
     fn drop(&mut self) {
-        if self.initialized + self.allocated == 0 {
+        if self.initialized + self.allocated == 0 || std::mem::size_of::<T>() == 0 {
             return;
         }
 
