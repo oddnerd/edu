@@ -441,7 +441,10 @@ impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
     fn from(slice: &'a [T]) -> Self {
         let mut instance = Self::with_capacity(slice.len()).unwrap_or_default();
 
-        if std::mem::size_of::<T>() != 0 {
+        if std::mem::size_of::<T>() == 0 {
+            instance.initialized = slice.len();
+            instance.allocated -= instance.initialized;
+        } else {
             for element in slice {
                 instance.append(element.clone());
             }
@@ -1148,24 +1151,44 @@ mod test {
 
     #[test]
     fn deref() {
-        let array = [0, 1, 2, 3];
-        let instance = Dynamic::from(array.as_slice());
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let instance = Dynamic::from(array.as_slice());
 
-        use std::ops::Deref;
-        assert_eq!(*instance.deref(), *array.as_slice());
+            use std::ops::Deref;
+            assert_eq!(instance.deref(), array.as_slice());
+        }
 
-        // TODO: zero-size type?
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let instance = Dynamic::from(array.as_slice());
+
+            use std::ops::Deref;
+            assert_eq!(instance.deref(), array.as_slice());
+        }
     }
 
     #[test]
     fn deref_mut() {
-        let array = [0, 1, 2, 3];
-        let mut instance = Dynamic::from(array.as_slice());
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let mut instance = Dynamic::from(array.as_slice());
 
-        use std::ops::DerefMut;
-        assert_eq!(*instance.deref_mut(), *array.as_slice());
+            use std::ops::DerefMut;
+            assert_eq!(instance.deref_mut(), array.as_slice());
+        }
 
-        // TODO: zero-size type?
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let mut instance = Dynamic::from(array.as_slice());
+
+            use std::ops::DerefMut;
+            assert_eq!(instance.deref_mut(), array.as_slice());
+        }
     }
 
     #[test]
