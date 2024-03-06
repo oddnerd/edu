@@ -146,20 +146,24 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
 
 impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        // SAFETY: requirements are already enforced by the constructor.
+        // # SAFETY:
+        // * `self.data` points to one contigious allocated object.
+        // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::Iter::new(self.data, self.len) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        // SAFETY: requirements are already enforced by the constructor.
+        // # SAFETY:
+        // * `self.data` points to one contigious allocated object.
+        // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
 
     fn first(&self) -> Option<&Self::Element> {
         if self.len > 0 {
             // SAFETY:
-            // * constructor contract => `self.data` is aligned
-            // * constructor contract => `self.data` is dereferenceable.
+            // * non-empty => within the allocated object.
+            // * constructor contract => `self.data` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
             unsafe { Some( self.data.as_ref() ) }
@@ -176,8 +180,8 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
             let ptr = unsafe { ptr.add(self.len - 1) };
 
             // SAFETY:
-            // * constructor contract => `ptr` is aligned
-            // * constructor contract => `ptr` is dereferenceable.
+            // * non-empty => within the allocated object.
+            // * constructor contract => `ptr` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
             unsafe { Some(&*ptr) }
@@ -194,7 +198,7 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
         assert!(index < self.len);
         // SAFETY:
         // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
+        // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
@@ -207,7 +211,7 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
         assert!(index < self.len);
         // SAFETY:
         // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
+        // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
