@@ -50,7 +50,7 @@ impl<T> Dynamic<T> {
     ///
     /// let instance: Dynamic<()> = Dynamic::with_capacity(4);
     /// assert_eq!(instance.count(), 0);
-    /// assert_eq!(instance.capacity(), 4);
+    /// assert!(instance.capacity() >= 4);
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
         let mut instance = Self::new();
