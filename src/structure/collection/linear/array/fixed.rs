@@ -146,9 +146,7 @@ impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
     fn index(&self, index: usize) -> &Self::Output {
         debug_assert!(index < N);
         // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
-        // * `add` => pointer is aligned.
+        // * `index` index bounds => pointer is aligned within allocated object.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
         unsafe { &*self.data.as_ptr().add(index) }
@@ -159,9 +157,7 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         debug_assert!(index < N);
         // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
-        // * `add` => pointer is aligned.
+        // * `index` index bounds => pointer is aligned within allocated object.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
         unsafe { &mut *self.data.as_mut_ptr().add(index) }
