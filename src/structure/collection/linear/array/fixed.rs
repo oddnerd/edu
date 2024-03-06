@@ -10,6 +10,7 @@ use super::Linear;
 /// smart array (`std::array`) which interprets the underlying array as being
 /// 'dumb' that eagerly decays to a pointer and wraps it in a object.
 pub struct Fixed<T, const N: usize> {
+    /// Underlying memory buffer.
     data: [T; N],
 }
 
