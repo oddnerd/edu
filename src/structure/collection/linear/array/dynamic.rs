@@ -227,7 +227,8 @@ impl<T> Dynamic<T> {
             // SAFETY: `ptr` is pointing to the last initialized element.
             unsafe { (*ptr).assume_init_drop() };
 
-            self.initialized -= 1;
+            self.allocated += self.initialized;
+            self.initialized = 0;
         }
     }
 
@@ -799,7 +800,7 @@ mod test {
 
         instance.clear();
 
-        assert_eq!(instance.allocated,  old_capacity + 5);
+        assert_eq!(instance.allocated, old_capacity + 5);
         assert_eq!(instance.initialized, 0);
     }
 
