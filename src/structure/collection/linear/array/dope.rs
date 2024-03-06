@@ -146,12 +146,16 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
 
 impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        // SAFETY: requirements are already enforced by the constructor.
+        // # SAFETY:
+        // * `self.data` points to one contigious allocated object.
+        // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::Iter::new(self.data, self.len) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        // SAFETY: requirements are already enforced by the constructor.
+        // # SAFETY:
+        // * `self.data` points to one contigious allocated object.
+        // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
 
