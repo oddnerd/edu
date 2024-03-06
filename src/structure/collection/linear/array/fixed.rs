@@ -210,8 +210,8 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
         }
 
         // SAFETY:
-        // * `MaybeUninit<T>` has same size as `T` => arrays have same size.
-        // * `MaybeUninit<T>` has same alignment as `T` => elements aligned.
+        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
+        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
         let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
 
         Self::from(initialized)
@@ -220,7 +220,7 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
 
 impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
     fn clone(&self) -> Self {
-        // SAFETY: the `MaybeUninit` is initialized even if the `T` isn't.
+        // SAFETY: the [`MaybeUninit`] is initialized even if the `T` isn't.
         let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
             unsafe { std::mem::MaybeUninit::uninit().assume_init() };
 
@@ -229,8 +229,8 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
         }
 
         // SAFETY:
-        // * `MaybeUninit<T>` has same size as `T` => arrays have same size.
-        // * `MaybeUninit<T>` has same alignment as `T` => elements aligned.
+        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
+        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
         let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
 
         Self::from(initialized)
