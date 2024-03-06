@@ -684,4 +684,35 @@ mod test {
     fn last() {
         todo!("construct from something and compare first")
     }
+
+
+    #[test]
+    fn index() {
+        todo!()
+    }
+
+    #[test]
+    fn index_mut() {
+        todo!()
+    }
+
+    #[test]
+    fn deref() {
+        todo!()
+    }
+
+    #[test]
+    fn deref_mut() {
+        todo!()
+    }
+
+    #[test]
+    fn eq() {
+        todo!()
+    }
+
+    #[test]
+    fn ne() {
+        todo!()
+    }
 }
