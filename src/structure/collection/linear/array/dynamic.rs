@@ -771,7 +771,13 @@ mod test {
 
     #[test]
     fn clear() {
-        todo!("construct from something and clear it")
+        let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
+        let old_capacity = instance.allocated;
+
+        instance.clear();
+
+        assert_eq!(instance.allocated,  old_capacity + 5);
+        assert_eq!(instance.initialized, 0);
     }
 
     #[test]
