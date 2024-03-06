@@ -276,9 +276,15 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!("let mut instance = Dynamic<i32>::from()");
-    /// instance.insert(0, 1);
-    /// assert_eq!(instance[1], 0);
+    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+    ///
+    /// instance.insert(7, 1);
+    ///
+    /// assert_eq!(instance[0], 0);
+    /// assert_eq!(instance[1], 7);
+    /// assert_eq!(instance[2], 1);
+    /// assert_eq!(instance[3], 2);
+    /// assert_eq!(instance[4], 3);
     /// ```
     pub fn insert(&mut self, element: T, index: usize) -> bool {
         if index >= self.initialized {
