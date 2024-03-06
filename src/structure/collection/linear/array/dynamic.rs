@@ -863,6 +863,15 @@ mod test {
         assert_eq!(instance[1], 1);
         assert_eq!(instance[2], 3);
         assert_eq!(instance[3], 4);
+
+        // zero-sized type
+        let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+        instance.remove(2);
+        assert_eq!(instance.initialized, 3);
+        assert_eq!(instance[0], ());
+        assert_eq!(instance[1], ());
+        assert_eq!(instance[2], ());
+        assert_eq!(instance[3], ());
     }
 
     #[test]
