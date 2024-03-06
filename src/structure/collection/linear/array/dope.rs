@@ -154,6 +154,37 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         // SAFETY: requirements are already enforced by the constructor.
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
+
+    fn first(&self) -> Option<&'a Self::Element> {
+        if self.len > 0 {
+            // SAFETY:
+            // * constructor contract => `self.data` is aligned
+            // * constructor contract => `self.data` is dereferenceable.
+            // * constructor contract => pointed to `T` is initialized.
+            // * constructor contract => valid lifetime to return.
+            unsafe { Some( self.data.as_ref() ) }
+        } else {
+            None
+        }
+    }
+
+    fn last(&self) -> Option<&'a Self::Element> {
+        if self.len > 0 {
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: remains within the one underlying allocated object.
+            let ptr = unsafe { ptr.add(self.len - 1) };
+
+            // SAFETY:
+            // * constructor contract => `ptr` is aligned
+            // * constructor contract => `ptr` is dereferenceable.
+            // * constructor contract => pointed to `T` is initialized.
+            // * constructor contract => valid lifetime to return.
+            unsafe { Some(&*ptr) }
+        } else {
+            None
+        }
+    }
 }
 
 impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
@@ -285,6 +316,30 @@ mod test {
         };
 
         assert!(instance.iter_mut().eq(array.iter_mut()));
+    }
+
+    #[test]
+    fn first() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(*instance.first().unwrap(), instance[0]);
+    }
+
+    #[test]
+    fn last() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(*instance.last().unwrap(), instance[0]);
     }
 
     #[test]

@@ -11,4 +11,10 @@ pub trait Linear<'a>: Collection<'a> + std::iter::IntoIterator {
 
     /// Iterate over the elements by mutable reference.
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element>;
+
+    /// Query the element considered to be at the front, the first element.
+    fn first(&self) -> Option<&'a Self::Element>;
+
+    /// Query the element considered to be at the end, the last element.
+    fn last(&self) -> Option<&'a Self::Element>;
 }

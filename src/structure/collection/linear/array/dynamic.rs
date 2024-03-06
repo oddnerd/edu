@@ -48,19 +48,13 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance: Dynamic<()> = Dynamic::with_capacity(4);
+    /// let instance = Dynamic<()>::with_capacity(4).expect("bad allocation");
     /// assert_eq!(instance.count(), 0);
-    /// assert_eq!(instance.capacity(), 4);
+    /// assert!(instance.capacity() >= 4);
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
-        let mut instance = Self {
-            data: std::ptr::NonNull::dangling(),
-            initialized: 0,
-            allocated: count,
-        };
-
-        // SAFETY: the underlying buffer has _not_ yet been allocated.
-        if unsafe { instance.alloc(count) } {
+        let mut instance = Self::new();
+        if instance.reserve(count) {
             Some(instance)
         } else {
             None
@@ -73,21 +67,18 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!("make the following example work");
-    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2);
-    /// assert_eq!(instance.capacity(), 2);
+    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2).unwrap();
+    /// let old_capacity = instance.capacity();
+    /// assert!(old_capacity >= 2);
     /// instance.append(1);
     /// instance.append(2);
-    /// assert_eq!(instance.capacity(), 0);
+    /// assert_eq!(instance.capacity(), old_capacity - 2);
     /// ```
     pub fn capacity(&self) -> usize {
         self.allocated
     }
 
-    /// Pre-allocate memory for `count` additional elements.
-    ///
-    /// Returns true if enough space exists for `count` additional elements,
-    /// false otherwise such as if memory allocation fails.
+    /// Attempt to allocate space for `capacity` additional elements.
     ///
     /// # Examples
     /// ```
@@ -95,53 +86,137 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance: Dynamic<()> = Dynamic::new();
     /// assert_eq!(instance.capacity(), 0);
-    /// instance.reserve(8); // increase capacity
-    /// assert_eq!(instance.capacity(), 8);
-    /// instance.reserve(4) // decrease capacity
-    /// assert_eq!(instance.capacity(), 4);
+    ///
+    /// instance.reserve(16);
+    /// assert!(instance.capacity() >= 16);
     /// ```
-    pub fn reserve(&mut self, count: usize) -> bool {
-        if self.initialized + self.allocated == 0 {
-            // SAFETY: the underlying buffer has _not_ yet been allocated.
-            if unsafe { self.alloc(count) } {
-                self.allocated = count;
-                return true;
-            }
-        } else {
-            // SAFETY: the underlying buffer has been previously allocated.
-            if unsafe { self.realloc(self.initialized + count) } {
-                self.allocated = count;
-                return true;
-            }
+    pub fn reserve(&mut self, capacity: usize) -> bool {
+        if std::mem::size_of::<T>() == 0 {
+            self.allocated = usize::MAX;
+            return true;
         }
 
-        false
+        if self.allocated > capacity || capacity == 0 {
+            return true;
+        }
+
+        // growth factor of two (2) so capacity is doubled each reallocation.
+        let size = match self.initialized.checked_add(capacity) {
+            Some(size) => size,
+            None => return false,
+        }
+        .next_power_of_two();
+
+        let layout = match std::alloc::Layout::array::<T>(size) {
+            Ok(layout) => layout,
+            Err(_) => return false,
+        };
+
+        let old_size = self.initialized + self.allocated;
+
+        let ptr = if old_size == 0 {
+            // SAFETY: non-zero-sized type => `layout` has non-zero size.
+            unsafe { std::alloc::alloc(layout) }
+        } else {
+            let new_size = layout.size();
+            let layout = match std::alloc::Layout::array::<T>(old_size) {
+                Ok(layout) => layout,
+                Err(_) => return false,
+            };
+
+            // SAFETY: non-zero-sized type => `layout` has non-zero size.
+            unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) }
+        };
+
+        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+        self.data = match std::ptr::NonNull::new(ptr) {
+            Some(ptr) => ptr,
+            None => return false,
+        };
+
+        self.allocated = size - self.initialized;
+
+        true
     }
 
-    /// Add an element positioned at the next greatest index not yet used.
-    ///
-    /// Returns true if the element was added, false otherwise such as if
-    /// allocation fails.
+    /// Attempt to shrink the capacity to exactly `capacity`, or none/zero.
     ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::new();
-    /// todo!();
+    /// let instance = Dynamic<()>::with_capacity(16);
+    /// assert!(instance.capacity() >= 16);
+    /// instance.shrink(Some(8));
+    /// assert_eq!(instance.capacity(), 8);
+    /// instance.shrink(None);
+    /// assert_eq!(instance.capacity(), 0);
+    /// ```
+    pub fn shrink(&mut self, capacity: Option<usize>) -> bool {
+        if std::mem::size_of::<T>() == 0 {
+            return true;
+        }
+
+        if capacity.is_some_and(|capacity| capacity >= self.allocated) {
+            return false;
+        }
+
+        let capacity = capacity.unwrap_or(0);
+
+        let old_size = self.initialized + self.allocated;
+        let layout = match std::alloc::Layout::array::<T>(old_size) {
+            Ok(layout) => layout,
+            Err(_) => return false,
+        };
+
+        let size = self.initialized + capacity;
+        let new_size = match std::alloc::Layout::array::<T>(capacity) {
+            Ok(layout) => layout,
+            Err(_) => return false,
+        }
+        .size();
+
+        // SAFETY: non-zero-sized type => `layout` has non-zero size.
+        let ptr = unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) };
+
+        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+        self.data = match std::ptr::NonNull::new(ptr) {
+            Some(ptr) => ptr,
+            None => return false,
+        };
+
+        self.allocated = size - self.initialized;
+
+        true
+    }
+
+    /// Attempt to add an `element` to the end, allocating if necessary.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic<i32>::new();
+    /// instance.append(1);
+    /// instance.append(2);
+    /// assert_eq!(instance.count(), 2);
+    /// assert_eq!(instance.first(), 1);
+    /// assert_eq!(instance.last(), 2);
     /// ```
     pub fn append(&mut self, element: T) -> bool {
-        if self.allocated == 0 {
-            if !self.reserve(1) {
-                return false;
-            }
+        if self.allocated == 0 && !self.reserve(1) {
+            return false;
         }
 
         unsafe {
             // SAFETY: the buffer has been allocated.
             let ptr = self.data.as_ptr();
 
-            // SAFETY: this points to the first allocated but uninitialized.
+            // SAFETY: this points to the first uninitialized element.
             let ptr = ptr.add(self.initialized);
 
             // SAFETY:
@@ -153,72 +228,7 @@ impl<T> Dynamic<T> {
 
         self.initialized += 1;
 
-        return true;
-    }
-
-    /// Allocate a buffer to hold exactly `count` elements.
-    ///
-    /// Returns `true` if the allocation is successful, false otherwise.
-    ///
-    /// # Safety
-    /// * the underlying buffer must not yet be allocated.
-    /// * this method does not update member variables.
-    unsafe fn alloc(&mut self, count: usize) -> bool {
-        if let Ok(layout) = std::alloc::Layout::array::<T>(count) {
-            if layout.size() > 0 {
-                // SAFETY: `layout` has non-zero size.
-                let ptr = unsafe { std::alloc::alloc(layout) };
-
-                // SAFETY: `MaybeUninit<T>` has same layout as `T`.
-                let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
-
-                if let Some(ptr) = std::ptr::NonNull::new(ptr) {
-                    self.data = ptr;
-                    return true;
-                }
-            } else if std::mem::size_of::<T>() == 0 {
-                return true;
-            }
-        }
-
-        false
-    }
-
-    /// Resize the underlying buffer to hold exactly `count` elements.
-    ///
-    /// Returns `true` if the allocation is successful, false otherwise.
-    ///
-    /// # Safety
-    /// * the underlying buffer must already be allocated, _not_ dangling.
-    /// * this method does not update member variables.
-    unsafe fn realloc(&mut self, count: usize) -> bool {
-        let old = std::alloc::Layout::array::<T>(self.initialized + self.allocated);
-        let new = std::alloc::Layout::array::<T>(count);
-
-        match (old, new) {
-            (Ok(old), Ok(new)) => {
-                if new.size() > 0 {
-                    // SAFETY: `layout` has non-zero size.
-                    let ptr = unsafe {
-                        let ptr = self.data.as_ptr() as *mut u8;
-                        std::alloc::realloc(ptr, old, new.size())
-                    };
-
-                    // SAFETY: `MaybeUninit<T>` has same layout as `T`.
-                    let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
-
-                    if let Some(ptr) = std::ptr::NonNull::new(ptr) {
-                        self.data = ptr;
-                        return true;
-                    }
-                } else if std::mem::size_of::<T>() == 0 {
-                    return true;
-                }
-            }
-            (_, _) => {}
-        }
-
-        false
+        true
     }
 }
 
@@ -236,7 +246,7 @@ mod test {
 
     #[test]
     fn new() {
-        let instance: Dynamic<()> = Dynamic::new();
+        let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.initialized, 0);
         assert_eq!(instance.allocated, 0);
@@ -244,64 +254,81 @@ mod test {
 
     #[test]
     fn with_capacity() {
-        let instance: Dynamic<()> = Dynamic::with_capacity(4).unwrap();
+        let instance = Dynamic::<()>::with_capacity(4).unwrap();
 
         assert_eq!(instance.initialized, 0);
-        assert_eq!(instance.allocated, 4);
+        assert!(instance.allocated >= 4);
     }
 
     #[test]
     fn count() {
-        let instance: Dynamic<()> = Dynamic::new();
+        let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.count(), 0);
     }
 
     #[test]
     fn capacity() {
-        let instance: Dynamic<()> = Dynamic::new();
+        let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.capacity(), 0);
     }
 
     #[test]
     fn reserve() {
-        let mut instance: Dynamic<()> = Dynamic::new();
+        let mut instance = Dynamic::<()>::new();
         assert_eq!(instance.allocated, 0);
 
         // reserve does initial allocation.
         instance.reserve(8);
-        assert_eq!(instance.allocated, 8);
+        assert!(instance.allocated >= 8);
 
         // reserve does reallocation.
-        instance.reserve(16);
-        assert_eq!(instance.allocated, 16);
+        instance.reserve(256);
+        assert!(instance.allocated >= 256);
 
-        // reserve does reallocation to shrink.
-        instance.reserve(8);
+        // reserve does not shrink
+        instance.reserve(0);
+        assert!(instance.allocated > 0);
+    }
+
+    #[test]
+    fn shrink() {
+        let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
+        instance.append(());
+        assert!(instance.allocated >= 15);
+
+        // reduces capacity
+        instance.shrink(Some(8));
         assert_eq!(instance.allocated, 8);
 
-        // reserve does not remove initialized elements.
-        todo!()
+        // eliminates capacity
+        instance.shrink(None);
+        assert_eq!(instance.allocated, 0);
+
+        // doesn't remove initialized elements.
+        assert_eq!(instance.initialized, 1);
     }
 
     #[test]
     fn append() {
-        let mut instance: Dynamic<i32> = Dynamic::new();
+        let mut instance = Dynamic::<i32>::new();
         assert_eq!(instance.count(), 0);
 
-        // append to empty instance.
+        // empty instance.
         instance.append(1);
         assert_eq!(instance.count(), 1);
 
-        // append to instance with one element.
+        // instance with one element.
         instance.append(2);
         assert_eq!(instance.count(), 2);
 
-        // append to instance with more than one element.
+        // instance with more than one element.
         instance.append(3);
         assert_eq!(instance.count(), 3);
 
-        todo!("check is last element has correct value");
+        // element goes to end
+        assert_eq!(instance.first(), 1);
+        assert_eq!(instance.last(), 3);
     }
 }
