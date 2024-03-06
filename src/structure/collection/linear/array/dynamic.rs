@@ -910,6 +910,10 @@ mod test {
 
     #[test]
     fn clone() {
-        todo!()
+        let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+        let clone = instance.clone();
+
+        assert_ne!(instance.data, clone.data);
+        assert_eq!(instance, clone);
     }
 }
