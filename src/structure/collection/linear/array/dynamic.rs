@@ -843,7 +843,12 @@ mod test {
 
     #[test]
     fn index() {
-        todo!()
+        let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+        assert_eq!(instance[2], 2);
+        assert_eq!(instance[3], 3);
     }
 
     #[test]
