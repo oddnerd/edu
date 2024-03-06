@@ -836,7 +836,9 @@ mod test {
 
     #[test]
     fn last() {
-        todo!("construct from something and compare first")
+        let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+        assert_eq!(*instance.last().unwrap(), instance[3]);
     }
 
     #[test]
