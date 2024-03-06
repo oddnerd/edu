@@ -324,9 +324,9 @@ mod test {
 
     #[test]
     fn first() {
-        let mut array = [0, 1, 2, 3];
-        let mut instance = {
-            let ptr = array.as_mut_ptr();
+        let array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
@@ -336,14 +336,14 @@ mod test {
 
     #[test]
     fn last() {
-        let mut array = [0, 1, 2, 3];
-        let mut instance = {
-            let ptr = array.as_mut_ptr();
+        let array = [0, 1, 2, 3];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(*instance.last().unwrap(), instance[0]);
+        assert_eq!(*instance.last().unwrap(), instance[3]);
     }
 
     #[test]
