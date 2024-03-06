@@ -253,6 +253,12 @@ impl<T> Dynamic<T> {
             return false;
         }
 
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized += 1;
+            self.allocated -= 1;
+            return true;
+        }
+
         unsafe {
             // SAFETY: the buffer has been allocated.
             let ptr = self.data.as_ptr();
