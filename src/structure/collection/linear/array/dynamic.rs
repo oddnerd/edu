@@ -175,7 +175,8 @@ impl<T> Dynamic<T> {
         let new_size = match std::alloc::Layout::array::<T>(capacity) {
             Ok(layout) => layout,
             Err(_) => return false,
-        }.size();
+        }
+        .size();
 
         // SAFETY: non-zero-sized type => `layout` has non-zero size.
         let ptr = unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) };
@@ -292,8 +293,26 @@ mod test {
     }
 
     #[test]
+    fn shrink() {
+        let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
+        instance.append(());
+        assert!(instance.allocated >= 15);
+
+        // reduces capacity
+        instance.shrink(Some(8));
+        assert_eq!(instance.allocated, 8);
+
+        // eliminates capacity
+        instance.shrink(None);
+        assert_eq!(instance.allocated, 0);
+
+        // doesn't remove initialized elements.
+        assert_eq!(instance.initialized, 1);
+    }
+
+    #[test]
     fn append() {
-        let mut instance: Dynamic<i32> = Dynamic::new();
+        let mut instance = Dynamic::<i32>::new();
         assert_eq!(instance.count(), 0);
 
         // empty instance.
@@ -309,7 +328,7 @@ mod test {
         assert_eq!(instance.count(), 3);
 
         // element goes to end
-        assert_eq!(instance.first(), 1)
-        assert_eq!(instance.last(), 3)
+        assert_eq!(instance.first(), 1);
+        assert_eq!(instance.last(), 3);
     }
 }
