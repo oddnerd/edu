@@ -198,7 +198,7 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
         assert!(index < self.len);
         // SAFETY:
         // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
+        // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
@@ -211,7 +211,7 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
         assert!(index < self.len);
         // SAFETY:
         // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
+        // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
