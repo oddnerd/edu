@@ -280,7 +280,7 @@ impl<T> Dynamic<T> {
         // * capacity is at least one.
         // * post-conditional capacity state is handled in this unsafe.
         unsafe {
-            self.shift(index, 1)
+            self.shift(index, 1);
             self.initialized += 1;
             self.allocated -= 1;
         };
@@ -301,6 +301,44 @@ impl<T> Dynamic<T> {
         true
     }
 
+    /// Drop the element at `index`, shifting following elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!("let mut instance = Dynamic<i32>::from()");
+    /// assert_eq!(instance.count(), 4);
+    /// instance.remove(2);
+    /// todo!("ensure order was preserved");
+    /// assert_eq!(instance.count(), 3);
+    /// ```
+    pub fn remove(&mut self, index: usize) {
+        if index >= self.initialized {
+            return;
+        }
+
+        // SAFETY: stays aligned within the allocated object.
+        let element = unsafe { self.data.as_ptr().add(index) };
+
+        // SAFETY: `T` has same layout as `MaybeUninit<T>.
+        let element = element.cast::<T>();
+
+        // SAFETY:
+        // * `element` is initialized.
+        // * `element` is mutably owned.
+        unsafe { (element as *mut T).drop_in_place() };
+
+        // SAFETY:
+        // * left element was dropped, making it now uninitialized.
+        // * post-conditional capacity state is handled in this unsafe.
+        unsafe {
+            self.shift(index + 1, -1);
+            self.initialized -= 1;
+            self.allocated += 1;
+        };
+    }
+
     /// Shift the elements `[index..]` by `offset` positions.
     ///
     /// # Safety
@@ -309,7 +347,6 @@ impl<T> Dynamic<T> {
     /// * caller is responsible for handling post-condition capacity state.
     unsafe fn shift(&mut self, index: usize, offset: isize) {
         for index in index..self.initialized {
-            // SAFETY: establishes and maintains alignment via `add`.
             let ptr = self.data.as_ptr();
 
             // SAFETY: stays aligned within the allocated object.
