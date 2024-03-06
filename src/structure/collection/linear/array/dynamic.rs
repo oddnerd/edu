@@ -559,6 +559,18 @@ impl<T> std::default::Default for Dynamic<T> {
     }
 }
 
+impl<T: Clone> Clone for Dynamic<T> {
+    fn clone(&self) -> Self {
+        let mut clone = Self::with_capacity(self.count()).unwrap_or_default();
+
+        for element in self.iter() {
+            clone.append(element.clone());
+        }
+
+        clone
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
