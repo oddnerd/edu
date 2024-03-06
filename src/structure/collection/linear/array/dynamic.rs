@@ -443,7 +443,7 @@ impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
 
         if std::mem::size_of::<T>() == 0 {
             instance.initialized = slice.len();
-            instance.allocated -= instance.initialized;
+            instance.allocated = usize::MAX - instance.initialized;
         } else {
             for element in slice {
                 instance.append(element.clone());
