@@ -9,7 +9,7 @@ use super::Linear;
 /// A contigious memory buffer with sequentially laid out elements at alignment
 /// divisions. The buffer is lazily heap-allocated to store some number of
 /// elements, referred to as the capacity. Elements are sequentially
-/// initialized within the buffer as they are appended reducing the capacity.
+/// initialized within the buffer as they are inserted reducing the capacity.
 /// Once the capacity has been exhausted, the buffer is reallocated to contain
 /// previously initialized elements followed by new uninitialized capacity.
 ///
