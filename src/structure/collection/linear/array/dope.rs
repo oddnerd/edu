@@ -155,7 +155,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
 
-    fn first(&self) -> Option<&'a Self::Element> {
+    fn first(&self) -> Option<&Self::Element> {
         if self.len > 0 {
             // SAFETY:
             // * constructor contract => `self.data` is aligned
@@ -168,7 +168,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         }
     }
 
-    fn last(&self) -> Option<&'a Self::Element> {
+    fn last(&self) -> Option<&Self::Element> {
         if self.len > 0 {
             let ptr = self.data.as_ptr();
 

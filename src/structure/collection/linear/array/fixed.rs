@@ -145,7 +145,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
         }
     }
 
-    fn first(&self) -> Option<&'a Self::Element> {
+    fn first(&self) -> Option<&Self::Element> {
         if N > 0 {
             Some(&self[0])
         } else {
@@ -153,7 +153,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
         }
     }
 
-    fn last(&self) -> Option<&'a Self::Element> {
+    fn last(&self) -> Option<&Self::Element> {
         if N > 0 {
             Some(&self[N - 1])
         } else {
