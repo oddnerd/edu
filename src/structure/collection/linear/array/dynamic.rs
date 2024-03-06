@@ -660,7 +660,7 @@ mod test {
 
         // element goes to end
         assert_eq!(*instance.first().unwrap(), 1);
-        assert_eq!(instance.last().unwrap(), 3);
+        assert_eq!(*instance.last().unwrap(), 3);
     }
 
     #[test]
