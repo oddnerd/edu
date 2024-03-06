@@ -353,7 +353,7 @@ impl<T> Dynamic<T> {
             let current = unsafe { ptr.add(index) };
 
             // SAFETY: stays aligned within the allocated object.
-            let next = unsafe { ptr.add(index.saturating_add_signed(offset)) } ;
+            let next = unsafe { ptr.add(index.saturating_add_signed(offset)) };
 
             // SAFETY:
             // * `current` points to an initialized element.
@@ -361,7 +361,6 @@ impl<T> Dynamic<T> {
             unsafe { next.write(current.read()) };
         }
     }
-
 }
 
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
@@ -369,6 +368,118 @@ impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
 
     fn count(&self) -> usize {
         self.initialized
+    }
+}
+
+/// By-value [`Iterator`] over a [`Dynamic`].
+pub struct IntoIter<T> {
+    /// ownership of the values.
+    data: std::ptr::NonNull<std::mem::MaybeUninit<T>>,
+
+    /// The layout `data` was allocated with.
+    layout: std::alloc::Layout,
+
+    /// elements within this range have yet to be yielded.
+    next: std::ops::Range<usize>,
+}
+
+impl<T> std::ops::Drop for IntoIter<T> {
+    fn drop(&mut self) {
+        for index in self.next.start..self.next.end {
+            // SAFETY: stays aligned within the allocated object.
+            let element = unsafe { self.data.as_ptr().add(index) };
+
+            // SAFETY:
+            // * owns underlying memory buffer => valid for reads and writes.
+            // * within `self.next` => pointing to initialized value.
+            unsafe { (*element).assume_init_drop() };
+        }
+
+        // SAFETY:
+        // * `self.data` was allocated with the global allocator.
+        // * `self.layout` was used for the allocation.
+        unsafe { std::alloc::dealloc(self.data.as_ptr().cast::<u8>(), self.layout) };
+    }
+}
+
+impl<T> std::iter::Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.next.start != self.next.end {
+            let element = {
+                // SAFETY: `T` has same layout as `MaybeUninit<T>`.
+                let ptr = self.data.as_ptr().cast::<T>();
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = unsafe { ptr.add(self.next.start) };
+
+                // SAFETY: the element is initialized.
+                unsafe { ptr.read() }
+            };
+
+            self.next.start += 1;
+
+            Some(element)
+        } else {
+            None
+        }
+    }
+}
+
+impl<T> std::iter::IntoIterator for Dynamic<T> {
+    type Item = T;
+
+    type IntoIter = IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter {
+            data: self.data,
+            layout: std::alloc::Layout::array::<T>(self.initialized + self.allocated).unwrap(),
+            next: 0..self.initialized,
+        }
+    }
+}
+
+impl<'a, T: 'a> super::Linear<'a> for Dynamic<T> {
+    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
+        // # SAFETY:
+        // * `self.data` points to one contigious allocated object.
+        // * `self.len` consecutive initialized and aligned instances.
+        unsafe { super::iter::Iter::new(self.data.cast::<T>(), self.initialized) }
+    }
+
+    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
+        // # SAFETY:
+        // * `self.data` points to one contigious allocated object.
+        // * `self.len` consecutive initialized and aligned instances.
+        unsafe { super::iter::IterMut::new(self.data.cast::<T>(), self.initialized) }
+    }
+
+    fn first(&self) -> Option<&Self::Element> {
+        if self.initialized > 0 {
+            // SAFETY:
+            // * `T` has same layout as `MaybeUninit<T>`.
+            // * points to an initialized value.
+            Some(unsafe { self.data.cast::<T>().as_ref() })
+        } else {
+            None
+        }
+    }
+
+    fn last(&self) -> Option<&Self::Element> {
+        if self.initialized > 0 {
+            // SAFETY: `T` has same layout as `MaybeUninit<T>`.
+            let element = self.data.cast::<T>().as_ptr();
+
+            // SAFETY: stays within the allocated object.
+            let element = unsafe { element.add(self.initialized - 1) };
+
+            // SAFETY: the element is initialized.
+            unsafe { element.as_ref() }
+        } else {
+            None
+        }
     }
 }
 
@@ -460,8 +571,8 @@ mod test {
         assert_eq!(instance.count(), 3);
 
         // element goes to end
-        assert_eq!(instance.first(), 1);
-        assert_eq!(instance.last(), 3);
+        assert_eq!(*instance.first().unwrap(), 1);
+        assert_eq!(instance.last().unwrap(), 3);
     }
 
     #[test]
@@ -477,5 +588,30 @@ mod test {
     #[test]
     fn clear() {
         todo!("construct from something and clear it")
+    }
+
+    #[test]
+    fn into_iter() {
+        todo!("construct from something and compare iterators")
+    }
+
+    #[test]
+    fn iter() {
+        todo!("construct from something and compare iterators")
+    }
+
+    #[test]
+    fn iter_mut() {
+        todo!("construct from something and compare iterators")
+    }
+
+    #[test]
+    fn first() {
+        todo!("construct from something and compare first")
+    }
+
+    #[test]
+    fn last() {
+        todo!("construct from something and compare first")
     }
 }
