@@ -868,12 +868,20 @@ mod test {
 
     #[test]
     fn deref() {
-        todo!()
+        let array = [0, 1, 2, 3];
+        let instance = Dynamic::from(array.as_slice());
+
+        use std::ops::Deref;
+        assert_eq!(*instance.deref(), *array.as_slice());
     }
 
     #[test]
     fn deref_mut() {
-        todo!()
+        let array = [0, 1, 2, 3];
+        let mut instance = Dynamic::from(array.as_slice());
+
+        use std::ops::DerefMut;
+        assert_eq!(*instance.deref_mut(), *array.as_slice());
     }
 
     #[test]
