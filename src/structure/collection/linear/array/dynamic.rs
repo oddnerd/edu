@@ -805,7 +805,10 @@ mod test {
 
     #[test]
     fn into_iter() {
-        todo!("construct from something and compare iterators")
+        let array = [0, 1, 2, 3];
+        let instance = Dynamic::from(array.as_slice());
+
+        assert!(instance.into_iter().eq(array.into_iter()));
     }
 
     #[test]
