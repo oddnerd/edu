@@ -1,5 +1,5 @@
 //! [Collections](https://en.wikipedia.org/wiki/Collection_(abstract_data_type))
-//! are data structures which store multiple elements of a sinlge type.
+//! are data structures which store multiple elements of a single type.
 
 pub mod linear;
 
