@@ -821,7 +821,10 @@ mod test {
 
     #[test]
     fn iter_mut() {
-        todo!("construct from something and compare iterators")
+        let mut array = [0, 1, 2, 3];
+        let mut instance = Dynamic::from(array.as_slice());
+
+        assert!(instance.iter_mut().eq(array.iter_mut()));
     }
 
     #[test]
