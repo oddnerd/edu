@@ -465,6 +465,16 @@ mod test {
     }
 
     #[test]
+    fn insert() {
+        todo!()
+    }
+
+    #[test]
+    fn remove() {
+        todo!()
+    }
+
+    #[test]
     fn clear() {
         todo!("construct from something and clear it")
     }
