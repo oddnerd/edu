@@ -734,8 +734,8 @@ mod test {
         assert_eq!(instance.initialized, 1);
         assert_eq!(instance[0], 0);
 
+        // handles zero-sized types
         {
-            // handles zero-sized types
             let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
 
             // reduces capacity of zero-sized types
@@ -773,6 +773,29 @@ mod test {
         assert_eq!(instance[0], 1);
         assert_eq!(instance[1], 2);
         assert_eq!(instance[2], 3);
+
+        // handles zero-sized types
+        {
+            let mut instance = Dynamic::<()>::new();
+            assert_eq!(instance.initialized, 0);
+
+            // empty instance.
+            instance.append(());
+            assert_eq!(instance.initialized, 1);
+
+            // instance with one element.
+            instance.append(());
+            assert_eq!(instance.initialized, 2);
+
+            // instance with more than one element.
+            instance.append(());
+            assert_eq!(instance.initialized, 3);
+
+            // element goes to end, otherwise order preserved
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+            assert_eq!(instance[2], ());
+        }
     }
 
     #[test]
