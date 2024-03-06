@@ -134,7 +134,7 @@ impl<T> Dynamic<T> {
             unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) }
         };
 
-        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        // SAFETY: [`MaybeUninit<T>`] has the same layout at `T`.
         let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
 
         self.data = match std::ptr::NonNull::new(ptr) {
@@ -189,7 +189,7 @@ impl<T> Dynamic<T> {
         // SAFETY: non-zero-sized type => `layout` has non-zero size.
         let ptr = unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) };
 
-        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        // SAFETY: [`MaybeUninit<T>`] has the same layout at `T`.
         let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
 
         self.data = match std::ptr::NonNull::new(ptr) {
@@ -261,7 +261,7 @@ impl<T> Dynamic<T> {
             // SAFETY:
             // * `ptr` is non-null.
             // * `ptr` is aligned.
-            // * the `MaybeUninit<T>` is initialized even if the `T` isn't.
+            // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
             (*ptr).write(element);
         };
 
@@ -344,7 +344,7 @@ impl<T> Dynamic<T> {
         // SAFETY: stays aligned within the allocated object.
         let element = unsafe { self.data.as_ptr().add(index) };
 
-        // SAFETY: `T` has the same layout as `MaybeUninit<T>`.
+        // SAFETY: `T` has the same layout as [`MaybeUninit<T>`].
         let element = element.cast::<T>();
 
         // SAFETY: the element is initialized.
@@ -443,7 +443,7 @@ impl<T> std::iter::Iterator for IntoIter<T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
             let element = {
-                // SAFETY: `T` has same layout as `MaybeUninit<T>`.
+                // SAFETY: `T` has same layout as [`MaybeUninit<T>`].
                 let ptr = self.data.as_ptr().cast::<T>();
 
                 // SAFETY: stays aligned within the allocated object.
@@ -494,7 +494,7 @@ impl<'a, T: 'a> super::Linear<'a> for Dynamic<T> {
     fn first(&self) -> Option<&Self::Element> {
         if self.initialized > 0 {
             // SAFETY:
-            // * `T` has same layout as `MaybeUninit<T>`.
+            // * `T` has same layout as [`MaybeUninit<T>`].
             // * points to an initialized value.
             Some(unsafe { self.data.cast::<T>().as_ref() })
         } else {
@@ -504,7 +504,7 @@ impl<'a, T: 'a> super::Linear<'a> for Dynamic<T> {
 
     fn last(&self) -> Option<&Self::Element> {
         if self.initialized > 0 {
-            // SAFETY: `T` has same layout as `MaybeUninit<T>`.
+            // SAFETY: `T` has same layout as [`MaybeUninit<T>`].
             let element = self.data.cast::<T>().as_ptr();
 
             // SAFETY: stays within the allocated object.
@@ -527,7 +527,7 @@ impl<T> std::ops::Index<usize> for Dynamic<T> {
         // * `data` is [`NonNull`] => pointer will be non-null.
         // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to self => valid lifetime to return.
         unsafe { &*self.data.as_ptr().cast::<T>().add(index) }
@@ -541,7 +541,7 @@ impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
         // * `data` is [`NonNull`] => pointer will be non-null.
         // * index is within bounds => `add` stays within bounds.
         // * `add` => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to self => valid lifetime to return.
         unsafe { &mut *self.data.as_ptr().cast::<T>().add(index) }
@@ -554,7 +554,7 @@ impl<T> std::ops::Deref for Dynamic<T> {
     fn deref(&self) -> &Self::Target {
         // SAFETY:
         // * `data` is aligned => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * `self.initialized` => every element is initialized.
         // * `data` is one object => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts(self.data.as_ptr().cast::<T>(), self.initialized) }
@@ -565,7 +565,7 @@ impl<T> std::ops::DerefMut for Dynamic<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY:
         // * `data` is aligned => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * `self.initialized` => every element is initialized.
         // * `data` is one object => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr().cast::<T>(), self.initialized) }
