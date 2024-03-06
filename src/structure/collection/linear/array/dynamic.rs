@@ -305,12 +305,14 @@ impl<T> Dynamic<T> {
             return false;
         }
 
-        if std::mem::size_of::<T>() == 0 {
-            return true;
-        }
-
         if self.allocated == 0 && !self.reserve(1) {
             return false;
+        }
+
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized += 1;
+            self.allocated -= 1;
+            return true;
         }
 
         // SAFETY:
