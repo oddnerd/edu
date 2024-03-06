@@ -249,7 +249,6 @@ mod test {
         let instance = Fixed::from(array);
 
         assert_eq!(instance.data, array);
-        assert_eq!(instance.len(), array.len());
     }
 
     #[test]
@@ -257,7 +256,7 @@ mod test {
         let array = [0, 1, 2, 3];
         let instance = Fixed::from(array);
 
-        assert_eq!(instance.len(), array.len());
+        assert_eq!(instance.count(), array.len());
     }
 
     #[test]
