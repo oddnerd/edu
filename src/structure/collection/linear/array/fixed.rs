@@ -30,10 +30,10 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
 
 /// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T, const N: usize> {
-    /// ownership of the underlying array.
+    /// Ownership of the underlying array.
     data: [std::mem::ManuallyDrop<T>; N],
 
-    /// elements within the range have yet to be yielded.
+    /// Elements within the range have yet to be yielded.
     next: std::ops::Range<usize>,
 }
 

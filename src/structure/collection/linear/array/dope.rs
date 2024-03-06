@@ -66,10 +66,10 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 /// Note that because [`Dope`] is inherently non-owning over the memory buffer
 /// it spans, therefore the values this yields are themselves references.
 pub struct IntoIter<'a, T: 'a> {
-    /// ownership of the values.
+    /// Ownership of the values.
     data: Dope<'a, T>,
 
-    /// elements within this range have yet to be yielded.
+    /// Elements within this range have yet to be yielded.
     next: std::ops::Range<std::ptr::NonNull<T>>,
 }
 

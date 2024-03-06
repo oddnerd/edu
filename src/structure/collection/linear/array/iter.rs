@@ -2,13 +2,13 @@
 
 /// Immutable reference [`Iterator`] over an [`Array`].
 pub struct Iter<'a, T: 'a> {
-    /// pointer to the hypothetical next element.
+    /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
 
-    /// pointer to a sentinel value when elements are exhausted.
+    /// Pointer to a sentinel value when elements are exhausted.
     end: std::ptr::NonNull<T>,
 
-    /// constrain to lifetime of the underlying object.
+    /// Constrain to lifetime of the underlying object.
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
@@ -74,13 +74,13 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
 /// Mutable reference [`Iterator`] over an [`Array`].
 pub struct IterMut<'a, T: 'a> {
-    /// pointer to the hypothetical next element.
+    /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
 
-    /// pointer to a sentinel value when elements are exhausted.
+    /// Pointer to a sentinel value when elements are exhausted.
     end: std::ptr::NonNull<T>,
 
-    /// constrain to lifetime of the underlying object.
+    /// Constrain to lifetime of the underlying object.
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
