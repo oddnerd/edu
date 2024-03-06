@@ -166,7 +166,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
             // * constructor contract => `self.data` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
-            unsafe { Some( self.data.as_ref() ) }
+            unsafe { Some(self.data.as_ref()) }
         } else {
             None
         }
@@ -251,7 +251,7 @@ impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
 
 impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
 
-impl<'a,T:'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
+impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
@@ -263,22 +263,22 @@ mod test {
 
     #[test]
     fn new() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(instance.data.as_ptr(), array.as_mut_ptr());
+        assert_eq!(instance.data.as_ptr(), array.as_ptr().cast_mut());
         assert_eq!(instance.len, array.len());
     }
 
     #[test]
     fn count() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
@@ -300,9 +300,9 @@ mod test {
 
     #[test]
     fn iter() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
@@ -348,9 +348,9 @@ mod test {
 
     #[test]
     fn index() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
@@ -383,9 +383,9 @@ mod test {
 
     #[test]
     fn deref() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
@@ -409,15 +409,15 @@ mod test {
 
     #[test]
     fn eq() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
 
         let other = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
@@ -427,16 +427,16 @@ mod test {
 
     #[test]
     fn ne() {
-        let mut array = [0, 1, 2, 3];
+        let array = [0, 1, 2, 3];
         let instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        let mut other_array = [4,5,6,7];
+        let other_array = [4, 5, 6, 7];
         let other = {
-            let ptr = other_array.as_mut_ptr();
+            let ptr = other_array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, other_array.len()) }
         };
