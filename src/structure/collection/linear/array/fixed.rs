@@ -36,37 +36,6 @@ pub struct IntoIter<T, const N: usize> {
     next: std::ops::Range<usize>,
 }
 
-impl<T, const N: usize> IntoIter<T, N> {
-    /// Construct from a [`Fixed`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    /// use rust::structure::collection::linear::array::fixed::IntoIter;
-    ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let clone = underlying.clone();
-    /// let fixed = Fixed::from(underlying);
-    /// let iter = IntoIter::new(fixed);
-    ///
-    /// assert!(clone.into_iter().eq(iter));
-    /// ```
-    pub fn new(array: Fixed<T, N>) -> Self {
-        Self {
-            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
-            data: unsafe {
-                array
-                    .data
-                    .as_ptr()
-                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
-                    .read()
-            },
-
-            next: 0..N,
-        }
-    }
-}
-
 impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     fn drop(&mut self) {
         for offset in self.next.clone() {
@@ -113,7 +82,18 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
     type IntoIter = IntoIter<T, N>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter::new(self)
+        IntoIter {
+            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
+            data: unsafe {
+                self
+                    .data
+                    .as_ptr()
+                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
+                    .read()
+            },
+
+            next: 0..N,
+        }
     }
 }
 
