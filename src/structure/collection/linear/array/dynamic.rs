@@ -118,6 +118,18 @@ impl<T> Dynamic<T> {
         false
     }
 
+    /// Add an element positioned at the next greatest index not yet used.
+    ///
+    /// Returns true if the element was added, false otherwise such as if
+    /// allocation fails.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::new();
+    /// todo!();
+    /// ```
     pub fn append(&mut self, element: T) -> bool {
         if self.allocated == 0 {
             if !self.reserve(1) {
