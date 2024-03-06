@@ -326,11 +326,15 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!("let mut instance = Dynamic<i32>::from()");
+    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
     /// assert_eq!(instance.count(), 4);
+    ///
     /// instance.remove(2);
-    /// todo!("ensure order was preserved");
+    ///
     /// assert_eq!(instance.count(), 3);
+    /// assert_eq!(instance[0], 0);
+    /// assert_eq!(instance[0], 1);
+    /// assert_eq!(instance[0], 3);
     /// ```
     pub fn remove(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
