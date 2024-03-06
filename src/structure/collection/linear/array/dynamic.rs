@@ -420,7 +420,7 @@ impl<T> Dynamic<T> {
                 shift(index);
             }
         } else {
-            for index in (index..self.initialized).rev() {
+            for index in (index + 1..=self.initialized).rev() {
                 shift(index);
             }
         }
@@ -957,7 +957,7 @@ mod test {
             // middle element.
             let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
             instance.remove(2);
-            assert_eq!(instance.initialized, 3);
+            assert_eq!(instance.initialized, 4);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
             assert_eq!(instance[2], 3);
@@ -986,7 +986,7 @@ mod test {
             // middle element.
             let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
             instance.remove(2);
-            assert_eq!(instance.initialized, 3);
+            assert_eq!(instance.initialized, 4);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
             assert_eq!(instance[2], ());
