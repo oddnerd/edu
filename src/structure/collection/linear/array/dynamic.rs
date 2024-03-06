@@ -742,7 +742,31 @@ mod test {
 
     #[test]
     fn remove() {
-        todo!()
+        // one element
+        let mut instance = Dynamic::from([0].as_slice());
+        instance.remove(0);
+        assert_eq!(instance.initialized, 0);
+
+        // front element
+        let mut instance = Dynamic::from([0, 1].as_slice());
+        instance.remove(0);
+        assert_eq!(instance.initialized, 1);
+        assert_eq!(instance[0], 1);
+
+        // end element
+        let mut instance = Dynamic::from([0, 1].as_slice());
+        instance.remove(1);
+        assert_eq!(instance.initialized, 1);
+        assert_eq!(instance[0], 0);
+
+        // middle element
+        let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
+        instance.remove(2);
+        assert_eq!(instance.initialized, 3);
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+        assert_eq!(instance[2], 3);
+        assert_eq!(instance[3], 4);
     }
 
     #[test]
