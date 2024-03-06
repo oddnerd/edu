@@ -141,6 +141,58 @@ impl<T> Dynamic<T> {
         true
     }
 
+    /// Attempt to shrink the capacity to exactly `capacity`, or none/zero.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let instance = Dynamic<()>::with_capacity(16);
+    /// assert!(instance.capacity() >= 16);
+    /// instance.shrink(Some(8));
+    /// assert_eq!(instance.capacity(), 8);
+    /// instance.shrink(None);
+    /// assert_eq!(instance.capacity(), 0);
+    /// ```
+    pub fn shrink(&mut self, capacity: Option<usize>) -> bool {
+        if std::mem::size_of::<T>() == 0 {
+            return true;
+        }
+
+        if capacity.is_some_and(|capacity| capacity >= self.allocated) {
+            return false;
+        }
+
+        let capacity = capacity.unwrap_or(0);
+
+        let old_size = self.initialized + self.allocated;
+        let layout = match std::alloc::Layout::array::<T>(old_size) {
+            Ok(layout) => layout,
+            Err(_) => return false,
+        };
+
+        let size = self.initialized + capacity;
+        let new_size = match std::alloc::Layout::array::<T>(capacity) {
+            Ok(layout) => layout,
+            Err(_) => return false,
+        }.size();
+
+        // SAFETY: non-zero-sized type => `layout` has non-zero size.
+        let ptr = unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) };
+
+        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+        self.data = match std::ptr::NonNull::new(ptr) {
+            Some(ptr) => ptr,
+            None => return false,
+        };
+
+        self.allocated = size - self.initialized;
+
+        true
+    }
+
     /// Attempt to add an `element` to the end, allocating if necessary.
     ///
     /// # Examples
