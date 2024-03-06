@@ -883,6 +883,17 @@ mod test {
 
         assert_eq!(instance.allocated, old_capacity + 5);
         assert_eq!(instance.initialized, 0);
+
+        // zero-sized type
+        {
+            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            let old_capacity = instance.allocated;
+
+            instance.clear();
+
+            assert_eq!(instance.allocated, old_capacity + 5);
+            assert_eq!(instance.initialized, 0);
+        }
     }
 
     #[test]
