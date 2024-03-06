@@ -85,8 +85,7 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
         IntoIter {
             // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
             data: unsafe {
-                self
-                    .data
+                self.data
                     .as_ptr()
                     .cast::<[std::mem::ManuallyDrop<T>; N]>()
                     .read()
@@ -237,6 +236,7 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
         Self::from(initialized)
     }
 }
+
 impl<T: Copy, const N: usize> Copy for Fixed<T, N> {}
 
 #[cfg(test)]
