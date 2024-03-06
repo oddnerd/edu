@@ -1,6 +1,6 @@
 //! Iterators over contigious memory buffers of consecutive elements; [`Array`].
 
-/// Immutable reference [`Iterator`] over an [`Array`]`.
+/// Immutable reference [`Iterator`] over an [`Array`].
 pub struct Iter<'a, T: 'a> {
     /// pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
