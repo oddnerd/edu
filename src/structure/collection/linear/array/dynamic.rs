@@ -902,7 +902,10 @@ mod test {
 
     #[test]
     fn default() {
-        todo!()
+        let instance: Dynamic<()> = Default::default();
+
+        assert_eq!(instance.initialized, 0);
+        assert_eq!(instance.allocated, 0);
     }
 
     #[test]
