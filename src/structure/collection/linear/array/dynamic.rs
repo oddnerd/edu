@@ -361,6 +361,17 @@ impl<T> Dynamic<T> {
             return None;
         }
 
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized -= 1;
+            self.allocated = self.allocated.saturating_add(1);
+
+            // SAFETY:
+            // * pointer is aligned.
+            // * pointer is non-null.
+            // * zero-sized type makes this special-case `read` okay.
+            return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ptr().read() });
+        }
+
         // SAFETY: stays aligned within the allocated object.
         let element = unsafe { self.data.as_ptr().add(index) };
 
@@ -924,7 +935,7 @@ mod test {
 
     #[test]
     fn remove() {
-        // zero-size type.
+        // sized type.
         {
             // one element.
             let mut instance = Dynamic::from([0].as_slice());
