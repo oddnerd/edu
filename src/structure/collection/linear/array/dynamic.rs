@@ -598,6 +598,14 @@ mod test {
     }
 
     #[test]
+    fn from_slice() {
+        let array = [0, 1, 2, 3];
+        let instance = Dynamic::from(array.as_slice());
+
+        assert!(instance.iter().eq(array.iter()));
+    }
+
+    #[test]
     fn with_capacity() {
         let instance = Dynamic::<()>::with_capacity(4).unwrap();
 
