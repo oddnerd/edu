@@ -3,11 +3,11 @@
 
 pub mod linear;
 
-/// Multiple instances of a single type grouped together.
+/// Multiple instances of a single type (elements) grouped together.
 pub trait Collection<'a> {
-    /// The type of the elements stored within.
+    /// The type of the elements.
     type Element: 'a;
 
-    /// Query the number of elements stored within.
+    /// Query the number of elements.
     fn count(&self) -> usize;
 }
