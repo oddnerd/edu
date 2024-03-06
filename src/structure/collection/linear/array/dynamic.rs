@@ -853,7 +853,17 @@ mod test {
 
     #[test]
     fn index_mut() {
-        todo!()
+        let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+        instance[0] = 4;
+        instance[1] = 5;
+        instance[2] = 6;
+        instance[3] = 7;
+
+        assert_eq!(instance[0], 4);
+        assert_eq!(instance[1], 5);
+        assert_eq!(instance[2], 6);
+        assert_eq!(instance[3], 7);
     }
 
     #[test]
