@@ -886,12 +886,18 @@ mod test {
 
     #[test]
     fn eq() {
-        todo!()
+        let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+        let other = Dynamic::from([0, 1, 2, 3].as_slice());
+
+        assert_eq!(instance, other);
     }
 
     #[test]
     fn ne() {
-        todo!()
+        let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+        let other = Dynamic::from([4, 5, 6, 7].as_slice());
+
+        assert_eq!(instance, other);
     }
 
     #[test]
