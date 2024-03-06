@@ -33,6 +33,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance: Dynamic<()> = Dynamic::new();
+    ///
     /// assert_eq!(instance.count(), 0);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
@@ -51,6 +52,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance = Dynamic<()>::with_capacity(4).expect("bad allocation");
+    ///
     /// assert_eq!(instance.count(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
@@ -70,8 +72,10 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2).unwrap();
+    ///
     /// let old_capacity = instance.capacity();
     /// assert!(old_capacity >= 2);
+    ///
     /// instance.append(1);
     /// instance.append(2);
     /// assert_eq!(instance.capacity(), old_capacity - 2);
@@ -151,8 +155,10 @@ impl<T> Dynamic<T> {
     ///
     /// let instance = Dynamic<()>::with_capacity(16);
     /// assert!(instance.capacity() >= 16);
+    ///
     /// instance.shrink(Some(8));
     /// assert_eq!(instance.capacity(), 8);
+    ///
     /// instance.shrink(None);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
@@ -205,7 +211,9 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
     /// assert_eq!(instance.count(), 4);
+    ///
     /// instance.clear();
+    ///
     /// assert_eq!(instance.count(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
@@ -230,8 +238,10 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic<i32>::new();
+    ///
     /// instance.append(1);
     /// instance.append(2);
+    ///
     /// assert_eq!(instance.count(), 2);
     /// assert_eq!(instance.first(), 1);
     /// assert_eq!(instance.last(), 2);
