@@ -1,5 +1,4 @@
-//! Iterators over contigious memory buffers of consecutive elements; arrays.
-
+//! Iterators over contigious memory buffers of consecutive elements; [`Array`].
 
 /// Immutable reference [`Iterator`] over an [`Array`]`.
 pub struct Iter<'a, T: 'a> {
