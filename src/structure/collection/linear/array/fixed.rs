@@ -53,9 +53,7 @@ impl<T, const N: usize> IntoIter<T, N> {
     /// ```
     pub fn new(array: Fixed<T, N>) -> Self {
         Self {
-            // SAFETY:
-            // * ManuallyDrop<T> has same size as T => arrays have same size.
-            // * ManuallyDrop<T> has same alignment as T => elements aligned.
+            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
             data: unsafe {
                 array
                     .data
