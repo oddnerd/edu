@@ -755,19 +755,19 @@ mod test {
     #[test]
     fn append() {
         let mut instance = Dynamic::<i32>::new();
-        assert_eq!(instance.count(), 0);
+        assert_eq!(instance.initialized, 0);
 
         // empty instance.
         instance.append(1);
-        assert_eq!(instance.count(), 1);
+        assert_eq!(instance.initialized, 1);
 
         // instance with one element.
         instance.append(2);
-        assert_eq!(instance.count(), 2);
+        assert_eq!(instance.initialized, 2);
 
         // instance with more than one element.
         instance.append(3);
-        assert_eq!(instance.count(), 3);
+        assert_eq!(instance.initialized, 3);
 
         // element goes to end, otherwise order preserved
         assert_eq!(instance[0], 1);
