@@ -290,7 +290,7 @@ impl<T> Dynamic<T> {
             let ptr = self.data.as_ptr();
 
             // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(index) };
+            let ptr = ptr.add(index);
 
             // SAFETY:
             // * `ptr` points to the uninitialized element created by `shift`.
@@ -702,7 +702,6 @@ mod test {
     fn last() {
         todo!("construct from something and compare first")
     }
-
 
     #[test]
     fn index() {
