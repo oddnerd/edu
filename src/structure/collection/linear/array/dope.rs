@@ -283,7 +283,7 @@ mod test {
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(instance.len(), array.len());
+        assert_eq!(instance.count(), array.len());
     }
 
     #[test]
