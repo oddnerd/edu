@@ -154,6 +154,37 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         // SAFETY: requirements are already enforced by the constructor.
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
+
+    fn first(&self) -> Option<&'a Self::Element> {
+        if self.len > 0 {
+            // SAFETY:
+            // * constructor contract => `self.data` is aligned
+            // * constructor contract => `self.data` is dereferenceable.
+            // * constructor contract => pointed to `T` is initialized.
+            // * constructor contract => valid lifetime to return.
+            unsafe { Some( self.data.as_ref() ) }
+        } else {
+            None
+        }
+    }
+
+    fn last(&self) -> Option<&'a Self::Element> {
+        if self.len > 0 {
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: remains within the one underlying allocated object.
+            let ptr = unsafe { ptr.add(self.len - 1) };
+
+            // SAFETY:
+            // * constructor contract => `ptr` is aligned
+            // * constructor contract => `ptr` is dereferenceable.
+            // * constructor contract => pointed to `T` is initialized.
+            // * constructor contract => valid lifetime to return.
+            unsafe { Some(&*ptr) }
+        } else {
+            None
+        }
+    }
 }
 
 impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
