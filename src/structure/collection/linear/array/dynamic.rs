@@ -388,6 +388,10 @@ impl<T> Dynamic<T> {
 
 impl<T> std::ops::Drop for Dynamic<T> {
     fn drop(&mut self) {
+        if self.initialized + self.allocated == 0 {
+            return;
+        }
+
         for index in 0..self.initialized {
             // SAFETY: stays aligned within the allocated object.
             let ptr = unsafe { self.data.as_ptr().add(index) };
