@@ -733,4 +733,14 @@ mod test {
     fn ne() {
         todo!()
     }
+
+    #[test]
+    fn default() {
+        todo!()
+    }
+
+    #[test]
+    fn clone() {
+        todo!()
+    }
 }
