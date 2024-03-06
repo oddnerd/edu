@@ -829,7 +829,9 @@ mod test {
 
     #[test]
     fn first() {
-        todo!("construct from something and compare first")
+        let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+        assert_eq!(*instance.first().unwrap(), instance[0]);
     }
 
     #[test]
