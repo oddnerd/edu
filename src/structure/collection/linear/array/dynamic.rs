@@ -652,7 +652,11 @@ mod test {
     fn from_slice() {
         let array = [0, 1, 2, 3];
         let instance = Dynamic::from(array.as_slice());
+        assert!(instance.iter().eq(array.iter()));
 
+        // zero-sized type
+        let array = [(), (), (), ()];
+        let instance = Dynamic::from(array.as_slice());
         assert!(instance.iter().eq(array.iter()));
     }
 
