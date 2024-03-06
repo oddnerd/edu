@@ -48,7 +48,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance: Dynamic<()> = Dynamic::with_capacity(4);
+    /// let instance = Dynamic<()>::with_capacity(4).expect("bad allocation");
     /// assert_eq!(instance.count(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
