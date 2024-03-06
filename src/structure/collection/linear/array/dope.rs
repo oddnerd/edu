@@ -53,6 +53,21 @@ impl<'a, T: 'a> Dope<'a, T> {
     }
 }
 
+impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dope<'a, T> {
+    fn from(slice: &'a [T]) -> Self {
+        Self {
+            data: {
+                let ptr = slice.as_ptr().cast_mut();
+
+                // SAFETY: `slice` exists => pointer is non-null.
+                unsafe { std::ptr::NonNull::new_unchecked(ptr) }
+            },
+            len: slice.len(),
+            lifetime: std::marker::PhantomData,
+        }
+    }
+}
+
 impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     type Element = T;
 
@@ -272,6 +287,15 @@ mod test {
 
         assert_eq!(instance.data.as_ptr(), array.as_ptr().cast_mut());
         assert_eq!(instance.len, array.len());
+    }
+
+    #[test]
+    fn from_slice() {
+        let array = [0, 1, 2, 3];
+        let instance = Dope::from(array.as_slice());
+
+        assert_eq!(instance.data.as_ptr(), array.as_slice().as_ptr().cast_mut());
+        assert_eq!(instance.len, array.as_slice().len());
     }
 
     #[test]
