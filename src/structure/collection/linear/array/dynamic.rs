@@ -78,10 +78,7 @@ impl<T> Dynamic<T> {
         self.allocated
     }
 
-    /// Pre-allocate memory for `count` additional elements.
-    ///
-    /// Returns true if enough space exists for `count` additional elements,
-    /// false otherwise such as if memory allocation fails.
+    /// Attempt to allocate space for `capacity` additional elements.
     ///
     /// # Examples
     /// ```
