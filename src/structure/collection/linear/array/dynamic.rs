@@ -1,4 +1,4 @@
-//! Implementation of a [dynamically sized array](https://en.wikipedia.org/wiki/Dynamic_array).
+//! Implementation of [`Dynamic`].
 
 use super::Array;
 use super::Collection;
@@ -12,6 +12,8 @@ use super::Linear;
 /// initialized within the buffer as they are appended reducing the capacity.
 /// Once the capacity has been exhausted, the buffer is reallocated to contain
 /// previously initialized elements followed by new uninitialized capacity.
+///
+/// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
     /// Underlying buffer storing initialized _and_ uninitialized elements.
     data: std::ptr::NonNull<std::mem::MaybeUninit<T>>,
