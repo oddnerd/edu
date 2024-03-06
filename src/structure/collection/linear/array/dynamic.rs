@@ -230,6 +230,32 @@ impl<T> Dynamic<T> {
 
         true
     }
+
+    /// Drop all elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let instance = Dynamic::<()>::from([0, 1, 2, 3]);
+    /// assert_eq!(instance.count(), 4);
+    /// instance.clear();
+    /// assert_eq!(instance.count(), 0);
+    /// assert!(instance.capacity() >= 4);
+    /// ```
+    pub fn clear(&mut self) {
+        while self.initialized > 0 {
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: `ptr` remains within the allocated object.
+            let ptr = unsafe { ptr.add(self.initialized - 1) };
+
+            // SAFETY: `ptr` is pointing to the last initialized element.
+            unsafe{ (*ptr).assume_init_drop() };
+
+            self.initialized -= 1;
+        }
+    }
 }
 
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
@@ -330,5 +356,10 @@ mod test {
         // element goes to end
         assert_eq!(instance.first(), 1);
         assert_eq!(instance.last(), 3);
+    }
+
+    #[test]
+    fn clear() {
+        todo!("construct from something and clear it")
     }
 }
