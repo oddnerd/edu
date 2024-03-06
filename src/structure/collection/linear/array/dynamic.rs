@@ -219,6 +219,12 @@ impl<T> Dynamic<T> {
     /// assert!(instance.capacity() >= 4);
     /// ```
     pub fn clear(&mut self) {
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized = 0;
+            self.allocated = usize::MAX;
+            return;
+        }
+
         while self.initialized > 0 {
             let ptr = self.data.as_ptr();
 
