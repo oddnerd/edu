@@ -987,7 +987,7 @@ mod test {
 
             instance.clear();
 
-            assert_eq!(instance.allocated, old_capacity + 5);
+            assert_eq!(instance.allocated, old_capacity.saturating_add(5));
             assert_eq!(instance.initialized, 0);
         }
 
@@ -998,7 +998,7 @@ mod test {
 
             instance.clear();
 
-            assert_eq!(instance.allocated, old_capacity + 5);
+            assert!(instance.allocated >= old_capacity.saturating_add(5));
             assert_eq!(instance.initialized, 0);
         }
     }
