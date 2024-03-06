@@ -313,6 +313,22 @@ mod test {
     }
 
     #[test]
+    fn first() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = Fixed::from(array);
+
+        assert_eq!(*instance.first().unwrap(), instance[0]);
+    }
+
+    #[test]
+    fn last() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = Fixed::from(array);
+
+        assert_eq!(*instance.last().unwrap(), instance[0]);
+    }
+
+    #[test]
     fn index() {
         let array = [0, 1, 2, 3];
         let instance = Fixed::from(array);
