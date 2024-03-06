@@ -245,7 +245,7 @@ mod test {
 
     #[test]
     fn new() {
-        let instance: Dynamic<()> = Dynamic::new();
+        let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.initialized, 0);
         assert_eq!(instance.allocated, 0);
@@ -253,7 +253,7 @@ mod test {
 
     #[test]
     fn with_capacity() {
-        let instance: Dynamic<()> = Dynamic::with_capacity(4).unwrap();
+        let instance = Dynamic::<()>::with_capacity(4).unwrap();
 
         assert_eq!(instance.initialized, 0);
         assert!(instance.allocated >= 4);
@@ -261,21 +261,21 @@ mod test {
 
     #[test]
     fn count() {
-        let instance: Dynamic<()> = Dynamic::new();
+        let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.count(), 0);
     }
 
     #[test]
     fn capacity() {
-        let instance: Dynamic<()> = Dynamic::new();
+        let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.capacity(), 0);
     }
 
     #[test]
     fn reserve() {
-        let mut instance: Dynamic<()> = Dynamic::new();
+        let mut instance = Dynamic::<()>::new();
         assert_eq!(instance.allocated, 0);
 
         // reserve does initial allocation.
