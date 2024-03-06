@@ -53,8 +53,7 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
             // SAFETY:
-            // * `add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
+            // * `self.next != self.end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.as_ref() };
 
@@ -126,8 +125,7 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
             // SAFETY:
-            // * `add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
+            // * `self.next != self.end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.as_mut() };
 
