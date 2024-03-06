@@ -201,8 +201,9 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::Collection;
     ///
-    /// let instance = Dynamic::<()>::from([0, 1, 2, 3]);
+    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
     /// assert_eq!(instance.count(), 4);
     /// instance.clear();
     /// assert_eq!(instance.count(), 0);
