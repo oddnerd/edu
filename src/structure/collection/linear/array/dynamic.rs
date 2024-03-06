@@ -375,7 +375,7 @@ impl<T> Dynamic<T> {
     /// * there must be capacity for `offset` elements for positive `offset`.
     /// * caller is responsible for handling post-condition capacity state.
     unsafe fn shift(&mut self, index: usize, offset: isize) {
-        for index in index..self.initialized {
+        let shift = |index: usize| {
             let ptr = self.data.as_ptr();
 
             // SAFETY: stays aligned within the allocated object.
@@ -388,6 +388,16 @@ impl<T> Dynamic<T> {
             // * `current` points to an initialized element.
             // * `next` is mutably owned.
             unsafe { next.write(current.read()) };
+        };
+
+        if offset < 0 {
+            for index in index..self.initialized {
+                shift(index);
+            }
+        } else {
+            for index in (index..self.initialized).rev() {
+                shift(index);
+            }
         }
     }
 }
@@ -420,8 +430,9 @@ impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
         let mut instance = Self::with_capacity(slice.len()).unwrap_or_default();
 
         if std::mem::size_of::<T>() != 0 {
-        for element in slice {
-            instance.append(element.clone());
+            for element in slice {
+                instance.append(element.clone());
+            }
         }
 
         instance
@@ -707,8 +718,8 @@ mod test {
 
     #[test]
     fn shrink() {
-        let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
-        instance.append(());
+        let mut instance = Dynamic::<i32>::with_capacity(16).unwrap();
+        instance.append(0);
         assert!(instance.allocated >= 15);
 
         // reduces capacity
@@ -721,6 +732,24 @@ mod test {
 
         // doesn't remove initialized elements.
         assert_eq!(instance.initialized, 1);
+        assert_eq!(instance[0], 0);
+
+        {
+            // handles zero-sized types
+            let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
+
+            // reduces capacity of zero-sized types
+            instance.shrink(Some(8));
+            assert_eq!(instance.allocated, 8);
+
+            // eliminates capacity of zero-sized types
+            instance.shrink(None);
+            assert_eq!(instance.allocated, 0);
+
+            // doesn't remove initialized zero-sized elements.
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], ());
+        }
     }
 
     #[test]
