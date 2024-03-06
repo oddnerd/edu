@@ -256,6 +256,75 @@ impl<T> Dynamic<T> {
 
         true
     }
+
+    /// Attempt to insert `element` at `index`, allocating if necessary.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!("let mut instance = Dynamic<i32>::from()");
+    /// instance.insert(0, 1);
+    /// assert_eq!(instance[1], 0);
+    /// ```
+    pub fn insert(&mut self, element: T, index: usize) -> bool {
+        if index >= self.initialized {
+            return false;
+        }
+
+        if self.allocated == 0 && !self.reserve(1) {
+            return false;
+        }
+
+        // SAFETY:
+        // * capacity is at least one.
+        // * post-conditional capacity state is handled in this unsafe.
+        unsafe {
+            self.shift(index, 1)
+            self.initialized += 1;
+            self.allocated -= 1;
+        };
+
+        unsafe {
+            // SAFETY: the buffer has been allocated.
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY:
+            // * `ptr` points to the uninitialized element created by `shift`.
+            // * `ptr` is mutably owned.
+            (*ptr).write(element);
+        };
+
+        true
+    }
+
+    /// Shift the elements `[index..]` by `offset` positions.
+    ///
+    /// # Safety
+    /// * `[index-offset..index]` must be uninitialized for negative `offset`.
+    /// * there must be capacity for `offset` elements for positive `offset`.
+    /// * caller is responsible for handling post-condition capacity state.
+    unsafe fn shift(&mut self, index: usize, offset: usize) {
+        for index in index..self.initialized {
+            // SAFETY: establishes and maintains alignment via `add`.
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: stays aligned within the allocated object.
+            let current = unsafe { ptr.add(index) };
+
+            // SAFETY: stays aligned within the allocated object.
+            let next = unsafe { ptr.add(index + offset) } ;
+
+            // SAFETY:
+            // * `current` points to an initialized element.
+            // * `next` is mutably owned.
+            unsafe { next.write(current.read()) };
+        }
+    }
+
 }
 
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
