@@ -553,6 +553,12 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Dynamic<T> {
     }
 }
 
+impl<T> std::default::Default for Dynamic<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
