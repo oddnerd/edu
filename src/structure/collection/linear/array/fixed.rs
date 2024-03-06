@@ -90,21 +90,19 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next.start != self.next.end {
-            // SAFETY:
-            // * `wrapping_add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
-            let current = unsafe {
+        match self.next.next() {
+            Some(index) => {
                 let array = self.data.as_mut_ptr();
-                let element = array.wrapping_add(self.next.start);
-                element.read()
-            };
 
-            self.next.start = self.next.start.wrapping_add(1);
+                // SAFETY: stays aligned within the allocated object.
+                let element = unsafe { array.add(index) };
 
-            Some(std::mem::ManuallyDrop::into_inner(current))
-        } else {
-            None
+                // SAFETY: within bounds => pointing to initialized value.
+                let owned = unsafe { element.read() };
+
+                Some(std::mem::ManuallyDrop::into_inner(owned))
+            }
+            None => None,
         }
     }
 }
