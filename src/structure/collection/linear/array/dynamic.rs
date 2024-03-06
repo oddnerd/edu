@@ -385,7 +385,7 @@ pub struct IntoIter<T> {
 
 impl<T> std::ops::Drop for IntoIter<T> {
     fn drop(&mut self) {
-        for index in self.next.start..self.next.end {
+        for index in self.next.clone() {
             // SAFETY: stays aligned within the allocated object.
             let element = unsafe { self.data.as_ptr().add(index) };
 
