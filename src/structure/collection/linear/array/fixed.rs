@@ -70,15 +70,18 @@ impl<T, const N: usize> IntoIter<T, N> {
 impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     fn drop(&mut self) {
         for offset in self.next.clone() {
-            let current = self.data.as_mut_ptr().wrapping_add(offset);
+            let ptr = self.data.as_mut_ptr();
+
+            // SAFETY: `T` has the same memory layout as [`ManuallyDrop<T>`].
+            let ptr = ptr.cast::<T>();
+
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(offset) };
 
             // SAFETY:
             // * owns underlying array => valid for reads and writes.
-            // * `wrapping_add` => pointer is aligned.
             // * within `self.next` => pointing to initialized value.
-            unsafe {
-                std::ptr::drop_in_place(current);
-            }
+            unsafe { ptr.drop_in_place() };
         }
     }
 }
