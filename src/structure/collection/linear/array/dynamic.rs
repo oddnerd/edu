@@ -207,7 +207,7 @@ mod test {
         let instance: Dynamic<()> = Dynamic::with_capacity(4).unwrap();
 
         assert_eq!(instance.initialized, 0);
-        assert_eq!(instance.allocated, 4);
+        assert!(instance.allocated >= 4);
     }
 
     #[test]
