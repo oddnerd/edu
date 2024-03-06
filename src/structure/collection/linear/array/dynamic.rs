@@ -67,12 +67,12 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!("make the following example work");
-    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2);
-    /// assert_eq!(instance.capacity(), 2);
+    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2).unwrap();
+    /// let old_capacity = instance.capacity();
+    /// assert!(old_capacity >= 2);
     /// instance.append(1);
     /// instance.append(2);
-    /// assert_eq!(instance.capacity(), 0);
+    /// assert_eq!(instance.capacity(), old_capacity - 2);
     /// ```
     pub fn capacity(&self) -> usize {
         self.allocated
@@ -150,8 +150,12 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::new();
-    /// todo!();
+    /// let mut instance = Dynamic<i32>::new();
+    /// instance.append(01234);
+    /// instance.append(56789);
+    /// assert_eq!(instance.count(), 2);
+    /// assert_eq!(instance.first(), 01234);
+    /// assert_eq!(instance.last(), 56789);
     /// ```
     pub fn append(&mut self, element: T) -> bool {
         if self.allocated == 0 && !self.reserve(1) {
