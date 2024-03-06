@@ -674,20 +674,25 @@ mod test {
 
     #[test]
     fn reserve() {
-        let mut instance = Dynamic::<()>::new();
+        let mut instance = Dynamic::<i32>::new();
         assert_eq!(instance.allocated, 0);
 
-        // reserve does initial allocation.
+        // initial allocation.
         instance.reserve(8);
         assert!(instance.allocated >= 8);
 
-        // reserve does reallocation.
+        // reallocation.
         instance.reserve(256);
         assert!(instance.allocated >= 256);
 
-        // reserve does not shrink
+        // does not shrink
         instance.reserve(0);
         assert!(instance.allocated > 0);
+
+        // handles zero-sized types
+        let mut instance = Dynamic::<()>::new();
+        instance.reserve(32);
+        assert!(instance.allocated >= 32);
     }
 
     #[test]
