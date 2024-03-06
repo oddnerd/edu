@@ -709,7 +709,35 @@ mod test {
 
     #[test]
     fn insert() {
-        todo!()
+        // one element
+        let mut instance = Dynamic::from([0].as_slice());
+        instance.insert(1, 0);
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+
+        // front element
+        let mut instance = Dynamic::from([1, 2].as_slice());
+        instance.insert(0, 0);
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+        assert_eq!(instance[2], 2);
+
+        // end element
+        let mut instance = Dynamic::from([0, 2].as_slice());
+        instance.insert(1, 1);
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+        assert_eq!(instance[2], 2);
+
+        // middle element
+        let mut instance = Dynamic::from([0, 1, 3, 4, 5].as_slice());
+        instance.insert(2, 2);
+        assert_eq!(instance[0], 0);
+        assert_eq!(instance[1], 1);
+        assert_eq!(instance[2], 2);
+        assert_eq!(instance[3], 3);
+        assert_eq!(instance[4], 4);
+        assert_eq!(instance[5], 5);
     }
 
     #[test]
