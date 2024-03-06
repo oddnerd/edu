@@ -365,6 +365,18 @@ impl<T> Dynamic<T> {
     }
 }
 
+impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
+    fn from(slice: &'a [T]) -> Self {
+        let mut instance = Self::with_capacity(slice.len()).unwrap_or_default();
+
+        for element in slice {
+            instance.append(element.clone());
+        }
+
+        instance
+    }
+}
+
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
     type Element = T;
 
