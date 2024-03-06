@@ -321,8 +321,11 @@ impl<T> Dynamic<T> {
         // SAFETY: stays aligned within the allocated object.
         let element = unsafe { self.data.as_ptr().add(index) };
 
+        // SAFETY: `T` has the same layout as `MaybeUninit<T>`.
+        let element = element.cast::<T>();
+
         // SAFETY: the element is initialized.
-        let element = unsafe { (*element).assume_init() };
+        let element = unsafe { element.read() };
 
         // SAFETY:
         // * left element was dropped, making it now uninitialized.
