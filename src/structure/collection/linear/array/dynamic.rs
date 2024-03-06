@@ -163,15 +163,16 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> bool {
-        if std::mem::size_of::<T>() == 0 {
-            return true;
-        }
-
         if capacity.is_some_and(|capacity| capacity >= self.allocated) {
             return false;
         }
 
         let capacity = capacity.unwrap_or(0);
+
+        if std::mem::size_of::<T>() == 0 {
+            self.allocated = capacity;
+            return true;
+        }
 
         let old_size = self.initialized + self.allocated;
         let layout = match std::alloc::Layout::array::<T>(old_size) {
