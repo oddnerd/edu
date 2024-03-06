@@ -4,12 +4,11 @@ use super::Array;
 use super::Collection;
 use super::Linear;
 
-/// Fixed size (statically stack allocated) contigious memory buffer
-/// containing `N` instances of type `T`.
+/// Fixed size (statically stack allocated) [`Array`].
 ///
 /// [`Fixed`] is equivalent to Rust's primitive array (`[T; N]`) or C++'s
-/// smart array wrapper (`std::array`) which interprets the underlying array
-/// as being 'dumb' that eagerly decays to a pointer and wraps it in a object.
+/// smart array (`std::array`) which interprets the underlying array as being
+/// 'dumb' that eagerly decays to a pointer and wraps it in a object.
 pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
