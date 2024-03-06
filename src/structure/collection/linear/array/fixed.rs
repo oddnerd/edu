@@ -169,7 +169,6 @@ impl<T, const N: usize> std::ops::Deref for Fixed<T, N> {
 
     fn deref(&self) -> &Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned.
         // * `data` is initialized => every element is initialized.
         // * `data` is one object => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts(self.data.as_ptr(), N) }
@@ -179,7 +178,6 @@ impl<T, const N: usize> std::ops::Deref for Fixed<T, N> {
 impl<T, const N: usize> std::ops::DerefMut for Fixed<T, N> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned.
         // * `data` is initialized => every element is initialized.
         // * `data` is one object => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts_mut(self.data.as_mut_ptr(), N) }
