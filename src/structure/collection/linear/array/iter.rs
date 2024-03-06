@@ -108,10 +108,11 @@ impl<'a, T: 'a> IterMut<'a, T> {
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
         Self {
             next: ptr,
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            end: unsafe {
-                let ptr = ptr.as_ptr();
-                let sentinel = ptr.wrapping_add(len);
+            end: {
+                // SAFETY: one byte past the end of the allocated object.
+                let sentinel = unsafe { ptr.as_ptr().add(len) };
+
+                // SAFETY: `add` will maintain the non-null requirement.
                 std::ptr::NonNull::new_unchecked(sentinel)
             },
             lifetime: std::marker::PhantomData,
@@ -125,16 +126,17 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
             // SAFETY:
-            // * `wrapping_add` => pointer is aligned.
+            // * `add` => pointer is aligned.
             // * next != end => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.as_mut() };
 
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
-            self.next = unsafe {
-                let ptr = self.next.as_ptr();
-                let next = ptr.wrapping_add(1);
-                std::ptr::NonNull::new_unchecked(next)
+            self.next = {
+                // SAFETY: either within the allocated object or one byte past.
+                let next = unsafe { self.next.as_ptr().add(1) };
+
+                // SAFETY: `add` will maintain the non-null requirement.
+                unsafe { std::ptr::NonNull::new_unchecked(next) }
             };
 
             Some(current)
