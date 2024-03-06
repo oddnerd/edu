@@ -293,6 +293,10 @@ impl<T> Dynamic<T> {
             return false;
         }
 
+        if std::mem::size_of::<T>() == 0 {
+            return true;
+        }
+
         if self.allocated == 0 && !self.reserve(1) {
             return false;
         }
@@ -740,8 +744,8 @@ mod test {
     #[test]
     fn insert() {
         // one element
-        let mut instance = Dynamic::from([0].as_slice());
-        instance.insert(1, 0);
+        let mut instance = Dynamic::from([1].as_slice());
+        instance.insert(0, 0);
         assert_eq!(instance[0], 0);
         assert_eq!(instance[1], 1);
 
@@ -768,6 +772,11 @@ mod test {
         assert_eq!(instance[3], 3);
         assert_eq!(instance[4], 4);
         assert_eq!(instance[5], 5);
+
+        // zero-sized type
+        let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+        instance.insert((), 2);
+        assert_eq!(instance[2], ());
     }
 
     #[test]
