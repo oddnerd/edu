@@ -1219,7 +1219,7 @@ mod test {
             let instance = Dynamic::from([0, 1, 2, 3].as_slice());
             let other = Dynamic::from([4, 5, 6, 7].as_slice());
 
-            assert_eq!(instance, other);
+            assert_ne!(instance, other);
         }
 
         // zero-size type.
@@ -1227,7 +1227,7 @@ mod test {
             let instance = Dynamic::from([(), ()].as_slice());
             let other = Dynamic::from([(), (), (), ()].as_slice());
 
-            assert_eq!(instance, other);
+            assert_ne!(instance, other);
         }
     }
 
