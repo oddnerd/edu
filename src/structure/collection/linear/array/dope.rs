@@ -319,6 +319,30 @@ mod test {
     }
 
     #[test]
+    fn first() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(*instance.first().unwrap(), instance[0]);
+    }
+
+    #[test]
+    fn last() {
+        let mut array = [0, 1, 2, 3];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(*instance.last().unwrap(), instance[0]);
+    }
+
+    #[test]
     fn index() {
         let mut array = [0, 1, 2, 3];
         let instance = {
