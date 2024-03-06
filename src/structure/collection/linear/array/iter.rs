@@ -195,3 +195,46 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn iter() {
+        // sized type.
+        {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { Iter::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+
+        // zero-sized type.
+        {
+            let mut underlying = [(), (), (), (), (), ()];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { Iter::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+    }
+
+    #[test]
+    fn iter_mut() {
+        // sized type.
+        {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { IterMut::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+
+        // zero-sized type.
+        {
+            let mut underlying = [(), (), (), (), (), ()];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { IterMut::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+    }
+}
