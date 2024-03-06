@@ -11,6 +11,9 @@ pub use dope::Dope;
 pub mod fixed;
 pub use fixed::Fixed;
 
+pub mod dynamic;
+pub use dynamic::Dynamic;
+
 use super::Linear;
 use super::Collection;
 
