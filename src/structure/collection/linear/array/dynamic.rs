@@ -386,6 +386,25 @@ impl<T> Dynamic<T> {
     }
 }
 
+impl<T> std::ops::Drop for Dynamic<T> {
+    fn drop(&mut self) {
+        for index in 0..self.initialized {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { self.data.as_ptr().add(index) };
+
+            // SAFETY: points to an initialized instance.
+            unsafe { ptr.as_mut().unwrap_unchecked().assume_init_drop() };
+        }
+
+        let layout = std::alloc::Layout::array::<T>(self.initialized + self.allocated).unwrap();
+
+        // SAFETY:
+        // * `self.data` was allocated with the global allocator.
+        // * `layout` was used for the allocation.
+        unsafe { std::alloc::dealloc(self.data.as_ptr().cast::<u8>(), layout) };
+    }
+}
+
 impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
     fn from(slice: &'a [T]) -> Self {
         let mut instance = Self::with_capacity(slice.len()).unwrap_or_default();
