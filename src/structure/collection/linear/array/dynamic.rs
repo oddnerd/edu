@@ -313,21 +313,16 @@ impl<T> Dynamic<T> {
     /// todo!("ensure order was preserved");
     /// assert_eq!(instance.count(), 3);
     /// ```
-    pub fn remove(&mut self, index: usize) {
+    pub fn remove(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
-            return;
+            return None;
         }
 
         // SAFETY: stays aligned within the allocated object.
         let element = unsafe { self.data.as_ptr().add(index) };
 
-        // SAFETY: `T` has same layout as `MaybeUninit<T>.
-        let element = element.cast::<T>();
-
-        // SAFETY:
-        // * `element` is initialized.
-        // * `element` is mutably owned.
-        unsafe { (element as *mut T).drop_in_place() };
+        // SAFETY: the element is initialized.
+        let element = unsafe { (*element).assume_init() };
 
         // SAFETY:
         // * left element was dropped, making it now uninitialized.
@@ -337,6 +332,8 @@ impl<T> Dynamic<T> {
             self.initialized -= 1;
             self.allocated += 1;
         };
+
+        Some(element)
     }
 
     /// Shift the elements `[index..]` by `offset` positions.
