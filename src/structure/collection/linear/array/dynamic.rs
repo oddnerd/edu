@@ -307,7 +307,7 @@ impl<T> Dynamic<T> {
     /// * `[index-offset..index]` must be uninitialized for negative `offset`.
     /// * there must be capacity for `offset` elements for positive `offset`.
     /// * caller is responsible for handling post-condition capacity state.
-    unsafe fn shift(&mut self, index: usize, offset: usize) {
+    unsafe fn shift(&mut self, index: usize, offset: isize) {
         for index in index..self.initialized {
             // SAFETY: establishes and maintains alignment via `add`.
             let ptr = self.data.as_ptr();
@@ -316,7 +316,7 @@ impl<T> Dynamic<T> {
             let current = unsafe { ptr.add(index) };
 
             // SAFETY: stays aligned within the allocated object.
-            let next = unsafe { ptr.add(index + offset) } ;
+            let next = unsafe { ptr.add(index.saturating_add_signed(offset)) } ;
 
             // SAFETY:
             // * `current` points to an initialized element.
