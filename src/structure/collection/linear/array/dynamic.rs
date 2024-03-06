@@ -701,9 +701,10 @@ mod test {
         instance.append(3);
         assert_eq!(instance.count(), 3);
 
-        // element goes to end
-        assert_eq!(*instance.first().unwrap(), 1);
-        assert_eq!(*instance.last().unwrap(), 3);
+        // element goes to end, otherwise order preserved
+        assert_eq!(instance[0], 1);
+        assert_eq!(instance[1], 2);
+        assert_eq!(instance[2], 3);
     }
 
     #[test]
