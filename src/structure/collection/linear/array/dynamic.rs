@@ -115,7 +115,7 @@ impl<T> Dynamic<T> {
         let old_size = self.initialized + self.allocated;
 
         let ptr = if old_size == 0 {
-            // SAFETY: `layout` has non-zero size. TODO
+            // SAFETY: non-zero-sized type => `layout` has non-zero size.
             unsafe { std::alloc::alloc(layout) }
         } else {
             let new_size = layout.size();
@@ -124,7 +124,7 @@ impl<T> Dynamic<T> {
                 Err(_) => return false,
             };
 
-            // SAFETY: `layout` has non-zero size. TODO
+            // SAFETY: non-zero-sized type => `layout` has non-zero size.
             unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) }
         };
 
