@@ -144,6 +144,22 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
             super::iter::IterMut::new(ptr, N)
         }
     }
+
+    fn first(&self) -> Option<&'a Self::Element> {
+        if N > 0 {
+            Some(&self[0])
+        } else {
+            None
+        }
+    }
+
+    fn last(&self) -> Option<&'a Self::Element> {
+        if N > 0 {
+            Some(&self[N - 1])
+        } else {
+            None
+        }
+    }
 }
 
 impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
