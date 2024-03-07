@@ -315,24 +315,28 @@ impl<T> Dynamic<T> {
             return true;
         }
 
-        // SAFETY:
-        // * capacity is at least one.
-        // * post-conditional capacity state is handled in this unsafe.
+        // shift initialized elements `[index..]` one position to the right.
         unsafe {
-            self.shift(index, 1);
+            // SAFETY: aligned within the allocated object.
+            let from = self.data.as_ptr().add(index);
+
+            // SAFETY: capacity was confirmed so this is also within the object.
+            let to = from.add(1);
+
+            // SAFETY: owned memory and no aliasing despite overlapping.
+            std::ptr::copy(from, to, self.initialized - index);
+
+            // SAFETY: update internal state to reflect shift.
             self.initialized += 1;
             self.allocated -= 1;
-        };
+        }
 
         unsafe {
-            // SAFETY: the buffer has been allocated.
-            let ptr = self.data.as_ptr();
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = ptr.add(index);
+            // SAFETY: aligned within the allocated object.
+            let ptr = self.data.as_ptr().add(index);
 
             // SAFETY:
-            // * `ptr` points to the uninitialized element created by `shift`.
+            // * `ptr` points to the uninitialized element created by shifting.
             // * `ptr` is mutably owned.
             (*ptr).write(element);
         };
@@ -368,62 +372,38 @@ impl<T> Dynamic<T> {
             // SAFETY:
             // * pointer is aligned.
             // * pointer is non-null.
-            // * zero-sized type makes this special-case `read` okay.
+            // * zero-sized type makes this special-case [`ptr::read`] okay.
             return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ptr().read() });
         }
 
-        // SAFETY: stays aligned within the allocated object.
-        let element = unsafe { self.data.as_ptr().add(index) };
+        let element = unsafe {
+            // SAFETY: stays aligned within the allocated object.
+            let element = self.data.as_ptr().add(index);
 
-        // SAFETY: `T` has the same layout as [`MaybeUninit<T>`].
-        let element = element.cast::<T>();
+            // SAFETY: `T` has the same layout as [`MaybeUninit<T>`].
+            let element = element.cast::<T>();
 
-        // SAFETY: the element is initialized.
-        let element = unsafe { element.read() };
+            // SAFETY: the element is initialized.
+            element.read()
+        };
 
-        // SAFETY:
-        // * left element was dropped, making it now uninitialized.
-        // * post-conditional capacity state is handled in this unsafe.
+        // shift initialized elements `[index + 1..]` one position to the left.
         unsafe {
-            self.shift(index + 1, -1);
+            // SAFETY: element at `index` was removed hence it is uninitialized.
+            let to = self.data.as_ptr().add(index);
+
+            // SAFETY: whereas this is the first initialized element after.
+            let from = to.add(1);
+
+            // SAFETY: owned memory and no aliasing despite overlapping.
+            std::ptr::copy(from, to, self.initialized - index);
+
+            // SAFETY: update internal state to reflect shift.
             self.initialized -= 1;
             self.allocated += 1;
-        };
+        }
 
         Some(element)
-    }
-
-    /// Shift the elements `[index..]` by `offset` positions.
-    ///
-    /// # Safety
-    /// * `[index-offset..index]` must be uninitialized for negative `offset`.
-    /// * there must be capacity for `offset` elements for positive `offset`.
-    /// * caller is responsible for handling post-condition capacity state.
-    unsafe fn shift(&mut self, index: usize, offset: isize) {
-        let shift = |index: usize| {
-            let ptr = self.data.as_ptr();
-
-            // SAFETY: stays aligned within the allocated object.
-            let current = unsafe { ptr.add(index) };
-
-            // SAFETY: stays aligned within the allocated object.
-            let next = unsafe { ptr.add(index.saturating_add_signed(offset)) };
-
-            // SAFETY:
-            // * `current` points to an initialized element.
-            // * `next` is mutably owned.
-            unsafe { next.write(current.read()) };
-        };
-
-        if offset < 0 {
-            for index in index..self.initialized {
-                shift(index);
-            }
-        } else {
-            for index in (index + 1..=self.initialized).rev() {
-                shift(index);
-            }
-        }
     }
 }
 
@@ -817,7 +797,7 @@ mod test {
 
     #[test]
     fn append() {
-        // sized type
+        // sized type.
         {
             let mut instance = Dynamic::<i32>::new();
             assert_eq!(instance.initialized, 0);
@@ -840,7 +820,7 @@ mod test {
             assert_eq!(instance[2], 3);
         }
 
-        // handles zero-size types
+        // zero-size types.
         {
             let mut instance = Dynamic::<()>::new();
             assert_eq!(instance.initialized, 0);
@@ -866,29 +846,29 @@ mod test {
 
     #[test]
     fn insert() {
-        // sized type
+        // sized type.
         {
-            // one element
+            // one element.
             let mut instance = Dynamic::from([1].as_slice());
             instance.insert(0, 0);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
 
-            // front element
+            // front element.
             let mut instance = Dynamic::from([1, 2].as_slice());
             instance.insert(0, 0);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
             assert_eq!(instance[2], 2);
 
-            // end element
+            // end element.
             let mut instance = Dynamic::from([0, 2].as_slice());
             instance.insert(1, 1);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
             assert_eq!(instance[2], 2);
 
-            // middle element
+            // middle element.
             let mut instance = Dynamic::from([0, 1, 3, 4, 5].as_slice());
             instance.insert(2, 2);
             assert_eq!(instance[0], 0);
@@ -899,29 +879,29 @@ mod test {
             assert_eq!(instance[5], 5);
         }
 
-        // zero-size type
+        // zero-size type.
         {
-            // one element
+            // one element.
             let mut instance = Dynamic::from([()].as_slice());
             instance.insert((), 0);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
 
-            // front element
+            // front element.
             let mut instance = Dynamic::from([(), ()].as_slice());
             instance.insert((), 0);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
             assert_eq!(instance[2], ());
 
-            // end element
+            // end element.
             let mut instance = Dynamic::from([(), ()].as_slice());
             instance.insert((), 1);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
             assert_eq!(instance[2], ());
 
-            // middle element
+            // middle element.
             let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
             instance.insert((), 2);
             assert_eq!(instance[0], ());
