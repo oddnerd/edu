@@ -1,4 +1,4 @@
-//! Implementation of a [dynamically sized array](https://en.wikipedia.org/wiki/Dynamic_array).
+//! Implementation of [`Dynamic`].
 
 use super::Array;
 use super::Collection;
@@ -9,9 +9,11 @@ use super::Linear;
 /// A contigious memory buffer with sequentially laid out elements at alignment
 /// divisions. The buffer is lazily heap-allocated to store some number of
 /// elements, referred to as the capacity. Elements are sequentially
-/// initialized within the buffer as they are appended reducing the capacity.
+/// initialized within the buffer as they are inserted reducing the capacity.
 /// Once the capacity has been exhausted, the buffer is reallocated to contain
 /// previously initialized elements followed by new uninitialized capacity.
+///
+/// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
     /// Underlying buffer storing initialized _and_ uninitialized elements.
     data: std::ptr::NonNull<std::mem::MaybeUninit<T>>,
@@ -30,8 +32,9 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance: Dynamic<()> = Dynamic::new();
-    /// assert_eq!(instance.count(), 0);
+    /// let instance = Dynamic::<()>::new();
+    ///
+    /// assert_eq!(instance.len(), 0);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn new() -> Self {
@@ -48,8 +51,9 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic<()>::with_capacity(4).expect("bad allocation");
-    /// assert_eq!(instance.count(), 0);
+    /// let instance = Dynamic::<()>::with_capacity(4).unwrap();
+    ///
+    /// assert_eq!(instance.len(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
@@ -67,9 +71,10 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2).unwrap();
+    /// let mut instance = Dynamic::<i32>::with_capacity(2).unwrap();
     /// let old_capacity = instance.capacity();
     /// assert!(old_capacity >= 2);
+    ///
     /// instance.append(1);
     /// instance.append(2);
     /// assert_eq!(instance.capacity(), old_capacity - 2);
@@ -115,7 +120,7 @@ impl<T> Dynamic<T> {
         let old_size = self.initialized + self.allocated;
 
         let ptr = if old_size == 0 {
-            // SAFETY: non-zero-sized type => `layout` has non-zero size.
+            // SAFETY: non-zero-size type => `layout` has non-zero size.
             unsafe { std::alloc::alloc(layout) }
         } else {
             let new_size = layout.size();
@@ -124,11 +129,11 @@ impl<T> Dynamic<T> {
                 Err(_) => return false,
             };
 
-            // SAFETY: non-zero-sized type => `layout` has non-zero size.
+            // SAFETY: non-zero-size type => `layout` has non-zero size.
             unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) }
         };
 
-        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        // SAFETY: [`MaybeUninit<T>`] has the same layout at `T`.
         let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
 
         self.data = match std::ptr::NonNull::new(ptr) {
@@ -147,23 +152,26 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic<()>::with_capacity(16);
+    /// let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
     /// assert!(instance.capacity() >= 16);
+    ///
     /// instance.shrink(Some(8));
     /// assert_eq!(instance.capacity(), 8);
+    ///
     /// instance.shrink(None);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> bool {
-        if std::mem::size_of::<T>() == 0 {
-            return true;
-        }
-
         if capacity.is_some_and(|capacity| capacity >= self.allocated) {
             return false;
         }
 
         let capacity = capacity.unwrap_or(0);
+
+        if std::mem::size_of::<T>() == 0 {
+            self.allocated = capacity;
+            return true;
+        }
 
         let old_size = self.initialized + self.allocated;
         let layout = match std::alloc::Layout::array::<T>(old_size) {
@@ -172,16 +180,16 @@ impl<T> Dynamic<T> {
         };
 
         let size = self.initialized + capacity;
-        let new_size = match std::alloc::Layout::array::<T>(capacity) {
+        let new_size = match std::alloc::Layout::array::<T>(size) {
             Ok(layout) => layout,
             Err(_) => return false,
         }
         .size();
 
-        // SAFETY: non-zero-sized type => `layout` has non-zero size.
+        // SAFETY: non-zero-size type => `layout` has non-zero size.
         let ptr = unsafe { std::alloc::realloc(self.data.cast::<u8>().as_ptr(), layout, new_size) };
 
-        // SAFETY: `std::mem::MaybeUninit<T>` has the same layout at `T`.
+        // SAFETY: [`MaybeUninit<T>`] has the same layout at `T`.
         let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
 
         self.data = match std::ptr::NonNull::new(ptr) {
@@ -189,7 +197,7 @@ impl<T> Dynamic<T> {
             None => return false,
         };
 
-        self.allocated = size - self.initialized;
+        self.allocated = capacity;
 
         true
     }
@@ -199,14 +207,23 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::Collection;
     ///
-    /// let instance = Dynamic::<()>::from([0, 1, 2, 3]);
+    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
     /// assert_eq!(instance.count(), 4);
+    ///
     /// instance.clear();
+    ///
     /// assert_eq!(instance.count(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
     pub fn clear(&mut self) {
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized = 0;
+            self.allocated = usize::MAX;
+            return;
+        }
+
         while self.initialized > 0 {
             let ptr = self.data.as_ptr();
 
@@ -216,7 +233,8 @@ impl<T> Dynamic<T> {
             // SAFETY: `ptr` is pointing to the last initialized element.
             unsafe { (*ptr).assume_init_drop() };
 
-            self.initialized -= 1;
+            self.allocated += self.initialized;
+            self.initialized = 0;
         }
     }
 
@@ -226,33 +244,38 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic<i32>::new();
+    /// let mut instance = Dynamic::<i32>::new();
+    ///
     /// instance.append(1);
     /// instance.append(2);
-    /// assert_eq!(instance.count(), 2);
-    /// assert_eq!(instance.first(), 1);
-    /// assert_eq!(instance.last(), 2);
+    ///
+    /// assert_eq!(instance.len(), 2);
+    /// assert_eq!(*instance.first().unwrap(), 1);
+    /// assert_eq!(*instance.last().unwrap(), 2);
     /// ```
     pub fn append(&mut self, element: T) -> bool {
         if self.allocated == 0 && !self.reserve(1) {
             return false;
         }
 
-        unsafe {
-            // SAFETY: the buffer has been allocated.
-            let ptr = self.data.as_ptr();
+        if std::mem::size_of::<T>() != 0 {
+            unsafe {
+                // SAFETY: the buffer has been allocated.
+                let ptr = self.data.as_ptr();
 
-            // SAFETY: this points to the first uninitialized element.
-            let ptr = ptr.add(self.initialized);
+                // SAFETY: this points to the first uninitialized element.
+                let ptr = ptr.add(self.initialized);
 
-            // SAFETY:
-            // * `ptr` is non-null.
-            // * `ptr` is aligned.
-            // * the `MaybeUninit<T>` is initialized even if the `T` isn't.
-            (*ptr).write(element);
-        };
+                // SAFETY:
+                // * `ptr` is non-null.
+                // * `ptr` is aligned.
+                // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
+                (*ptr).write(element);
+            };
+        }
 
         self.initialized += 1;
+        self.allocated -=1;
 
         true
     }
@@ -263,9 +286,15 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!("let mut instance = Dynamic<i32>::from()");
-    /// instance.insert(0, 1);
-    /// assert_eq!(instance[1], 0);
+    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+    ///
+    /// instance.insert(7, 1);
+    ///
+    /// assert_eq!(instance[0], 0);
+    /// assert_eq!(instance[1], 7);
+    /// assert_eq!(instance[2], 1);
+    /// assert_eq!(instance[3], 2);
+    /// assert_eq!(instance[4], 3);
     /// ```
     pub fn insert(&mut self, element: T, index: usize) -> bool {
         if index >= self.initialized {
@@ -276,24 +305,34 @@ impl<T> Dynamic<T> {
             return false;
         }
 
-        // SAFETY:
-        // * capacity is at least one.
-        // * post-conditional capacity state is handled in this unsafe.
-        unsafe {
-            self.shift(index, 1);
+        if std::mem::size_of::<T>() == 0 {
             self.initialized += 1;
             self.allocated -= 1;
-        };
+            return true;
+        }
+
+        // shift initialized elements `[index..]` one position to the right.
+        unsafe {
+            // SAFETY: aligned within the allocated object.
+            let from = self.data.as_ptr().add(index);
+
+            // SAFETY: capacity was confirmed so this is also within the object.
+            let to = from.add(1);
+
+            // SAFETY: owned memory and no aliasing despite overlapping.
+            std::ptr::copy(from, to, self.initialized - index);
+
+            // SAFETY: update internal state to reflect shift.
+            self.initialized += 1;
+            self.allocated -= 1;
+        }
 
         unsafe {
-            // SAFETY: the buffer has been allocated.
-            let ptr = self.data.as_ptr();
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = ptr.add(index);
+            // SAFETY: aligned within the allocated object.
+            let ptr = self.data.as_ptr().add(index);
 
             // SAFETY:
-            // * `ptr` points to the uninitialized element created by `shift`.
+            // * `ptr` points to the uninitialized element created by shifting.
             // * `ptr` is mutably owned.
             (*ptr).write(element);
         };
@@ -307,59 +346,100 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!("let mut instance = Dynamic<i32>::from()");
-    /// assert_eq!(instance.count(), 4);
+    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+    /// assert_eq!(instance.len(), 4);
+    ///
     /// instance.remove(2);
-    /// todo!("ensure order was preserved");
-    /// assert_eq!(instance.count(), 3);
+    ///
+    /// assert_eq!(instance.len(), 3);
+    /// assert_eq!(instance[0], 0);
+    /// assert_eq!(instance[1], 1);
+    /// assert_eq!(instance[2], 3);
     /// ```
     pub fn remove(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
             return None;
         }
 
-        // SAFETY: stays aligned within the allocated object.
-        let element = unsafe { self.data.as_ptr().add(index) };
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized -= 1;
+            self.allocated = self.allocated.saturating_add(1);
 
-        // SAFETY: `T` has the same layout as `MaybeUninit<T>`.
-        let element = element.cast::<T>();
+            // SAFETY:
+            // * pointer is aligned.
+            // * pointer is non-null.
+            // * zero-sized type makes this special-case [`ptr::read`] okay.
+            return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ptr().read() });
+        }
 
-        // SAFETY: the element is initialized.
-        let element = unsafe { element.read() };
+        let element = unsafe {
+            // SAFETY: stays aligned within the allocated object.
+            let element = self.data.as_ptr().add(index);
 
-        // SAFETY:
-        // * left element was dropped, making it now uninitialized.
-        // * post-conditional capacity state is handled in this unsafe.
+            // SAFETY: `T` has the same layout as [`MaybeUninit<T>`].
+            let element = element.cast::<T>();
+
+            // SAFETY: the element is initialized.
+            element.read()
+        };
+
+        // shift initialized elements `[index + 1..]` one position to the left.
         unsafe {
-            self.shift(index + 1, -1);
+            // SAFETY: element at `index` was removed hence it is uninitialized.
+            let to = self.data.as_ptr().add(index);
+
+            // SAFETY: whereas this is the first initialized element after.
+            let from = to.add(1);
+
+            // SAFETY: owned memory and no aliasing despite overlapping.
+            std::ptr::copy(from, to, self.initialized - index);
+
+            // SAFETY: update internal state to reflect shift.
             self.initialized -= 1;
             self.allocated += 1;
-        };
+        }
 
         Some(element)
     }
+}
 
-    /// Shift the elements `[index..]` by `offset` positions.
-    ///
-    /// # Safety
-    /// * `[index-offset..index]` must be uninitialized for negative `offset`.
-    /// * there must be capacity for `offset` elements for positive `offset`.
-    /// * caller is responsible for handling post-condition capacity state.
-    unsafe fn shift(&mut self, index: usize, offset: isize) {
-        for index in index..self.initialized {
-            let ptr = self.data.as_ptr();
-
-            // SAFETY: stays aligned within the allocated object.
-            let current = unsafe { ptr.add(index) };
-
-            // SAFETY: stays aligned within the allocated object.
-            let next = unsafe { ptr.add(index.saturating_add_signed(offset)) };
-
-            // SAFETY:
-            // * `current` points to an initialized element.
-            // * `next` is mutably owned.
-            unsafe { next.write(current.read()) };
+impl<T> std::ops::Drop for Dynamic<T> {
+    fn drop(&mut self) {
+        if self.initialized + self.allocated == 0 || std::mem::size_of::<T>() == 0 {
+            return;
         }
+
+        for index in 0..self.initialized {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { self.data.as_ptr().add(index) };
+
+            // SAFETY: points to an initialized instance.
+            unsafe { ptr.as_mut().unwrap_unchecked().assume_init_drop() };
+        }
+
+        let layout = std::alloc::Layout::array::<T>(self.initialized + self.allocated).unwrap();
+
+        // SAFETY:
+        // * `self.data` was allocated with the global allocator.
+        // * `layout` was used for the allocation.
+        unsafe { std::alloc::dealloc(self.data.as_ptr().cast::<u8>(), layout) };
+    }
+}
+
+impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
+    fn from(slice: &'a [T]) -> Self {
+        let mut instance = Self::with_capacity(slice.len()).unwrap_or_default();
+
+        if std::mem::size_of::<T>() == 0 {
+            instance.initialized = slice.len();
+            instance.allocated = usize::MAX - instance.initialized;
+        } else {
+            for element in slice {
+                instance.append(element.clone());
+            }
+        }
+
+        instance
     }
 }
 
@@ -385,6 +465,10 @@ pub struct IntoIter<T> {
 
 impl<T> std::ops::Drop for IntoIter<T> {
     fn drop(&mut self) {
+        if std::mem::size_of::<T>() == 0 {
+            return;
+        }
+
         for index in self.next.clone() {
             // SAFETY: stays aligned within the allocated object.
             let element = unsafe { self.data.as_ptr().add(index) };
@@ -407,15 +491,15 @@ impl<T> std::iter::Iterator for IntoIter<T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
-            let element = {
-                // SAFETY: `T` has same layout as `MaybeUninit<T>`.
+            let element = unsafe {
+                // SAFETY: `T` has same layout as [`MaybeUninit<T>`].
                 let ptr = self.data.as_ptr().cast::<T>();
 
                 // SAFETY: stays aligned within the allocated object.
-                let ptr = unsafe { ptr.add(self.next.start) };
+                let ptr = ptr.add(self.next.start);
 
                 // SAFETY: the element is initialized.
-                unsafe { ptr.read() }
+                ptr.read()
             };
 
             self.next.start += 1;
@@ -433,10 +517,13 @@ impl<T> std::iter::IntoIterator for Dynamic<T> {
     type IntoIter = IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
+        // SAFETY: double free if `self` attempts to drop `data`.
+        let input = std::mem::ManuallyDrop::new(self);
+
         IntoIter {
-            data: self.data,
-            layout: std::alloc::Layout::array::<T>(self.initialized + self.allocated).unwrap(),
-            next: 0..self.initialized,
+            data: input.data,
+            layout: std::alloc::Layout::array::<T>(input.initialized + input.allocated).unwrap(),
+            next: 0..input.initialized,
         }
     }
 }
@@ -459,7 +546,7 @@ impl<'a, T: 'a> super::Linear<'a> for Dynamic<T> {
     fn first(&self) -> Option<&Self::Element> {
         if self.initialized > 0 {
             // SAFETY:
-            // * `T` has same layout as `MaybeUninit<T>`.
+            // * `T` has same layout as [`MaybeUninit<T>`].
             // * points to an initialized value.
             Some(unsafe { self.data.cast::<T>().as_ref() })
         } else {
@@ -469,7 +556,7 @@ impl<'a, T: 'a> super::Linear<'a> for Dynamic<T> {
 
     fn last(&self) -> Option<&Self::Element> {
         if self.initialized > 0 {
-            // SAFETY: `T` has same layout as `MaybeUninit<T>`.
+            // SAFETY: `T` has same layout as [`MaybeUninit<T>`].
             let element = self.data.cast::<T>().as_ptr();
 
             // SAFETY: stays within the allocated object.
@@ -492,7 +579,7 @@ impl<T> std::ops::Index<usize> for Dynamic<T> {
         // * `data` is [`NonNull`] => pointer will be non-null.
         // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to self => valid lifetime to return.
         unsafe { &*self.data.as_ptr().cast::<T>().add(index) }
@@ -506,7 +593,7 @@ impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
         // * `data` is [`NonNull`] => pointer will be non-null.
         // * index is within bounds => `add` stays within bounds.
         // * `add` => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to self => valid lifetime to return.
         unsafe { &mut *self.data.as_ptr().cast::<T>().add(index) }
@@ -519,7 +606,7 @@ impl<T> std::ops::Deref for Dynamic<T> {
     fn deref(&self) -> &Self::Target {
         // SAFETY:
         // * `data` is aligned => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * `self.initialized` => every element is initialized.
         // * `data` is one object => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts(self.data.as_ptr().cast::<T>(), self.initialized) }
@@ -530,7 +617,7 @@ impl<T> std::ops::DerefMut for Dynamic<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY:
         // * `data` is aligned => pointer is aligned.
-        // * `T` has the same layout as `MaybeUninit<T>` => safe cast.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
         // * `self.initialized` => every element is initialized.
         // * `data` is one object => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr().cast::<T>(), self.initialized) }
@@ -584,11 +671,39 @@ mod test {
     }
 
     #[test]
-    fn with_capacity() {
-        let instance = Dynamic::<()>::with_capacity(4).unwrap();
+    fn from_slice() {
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let instance = Dynamic::from(array.as_slice());
+            assert!(instance.iter().eq(array.iter()));
+        }
 
-        assert_eq!(instance.initialized, 0);
-        assert!(instance.allocated >= 4);
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let instance = Dynamic::from(array.as_slice());
+            assert!(instance.iter().eq(array.iter()));
+        }
+    }
+
+    #[test]
+    fn with_capacity() {
+        // sized type.
+        {
+            let instance = Dynamic::<i32>::with_capacity(4).unwrap();
+
+            assert_eq!(instance.initialized, 0);
+            assert!(instance.allocated >= 4);
+        }
+
+        // zero-size type.
+        {
+            let instance = Dynamic::<()>::with_capacity(4).unwrap();
+
+            assert_eq!(instance.initialized, 0);
+            assert!(instance.allocated >= 4);
+        }
     }
 
     #[test]
@@ -607,139 +722,536 @@ mod test {
 
     #[test]
     fn reserve() {
-        let mut instance = Dynamic::<()>::new();
-        assert_eq!(instance.allocated, 0);
+        // sized type.
+        {
+            let mut instance = Dynamic::<i32>::new();
+            assert_eq!(instance.allocated, 0);
 
-        // reserve does initial allocation.
-        instance.reserve(8);
-        assert!(instance.allocated >= 8);
+            // initial allocation.
+            instance.reserve(8);
+            assert!(instance.allocated >= 8);
 
-        // reserve does reallocation.
-        instance.reserve(256);
-        assert!(instance.allocated >= 256);
+            // reallocation.
+            instance.reserve(256);
+            assert!(instance.allocated >= 256);
 
-        // reserve does not shrink
-        instance.reserve(0);
-        assert!(instance.allocated > 0);
+            // does not shrink.
+            instance.reserve(0);
+            assert!(instance.allocated > 0);
+        }
+
+        // zero-size type.
+        {
+            let mut instance = Dynamic::<()>::new();
+            assert_eq!(instance.allocated, 0);
+
+            // initial allocation.
+            instance.reserve(8);
+            assert!(instance.allocated >= 8);
+
+            // reallocation.
+            instance.reserve(256);
+            assert!(instance.allocated >= 256);
+
+            // does not shrink.
+            instance.reserve(0);
+            assert!(instance.allocated > 0);
+        }
     }
 
     #[test]
     fn shrink() {
-        let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
-        instance.append(());
-        assert!(instance.allocated >= 15);
+        // sized type.
+        {
+            let mut instance = Dynamic::<i32>::with_capacity(16).unwrap();
+            instance.append(0);
+            assert!(instance.allocated >= 15);
 
-        // reduces capacity
-        instance.shrink(Some(8));
-        assert_eq!(instance.allocated, 8);
+            // reduces capacity.
+            instance.shrink(Some(8));
+            assert_eq!(instance.allocated, 8);
 
-        // eliminates capacity
-        instance.shrink(None);
-        assert_eq!(instance.allocated, 0);
+            // eliminates capacity.
+            instance.shrink(None);
+            assert_eq!(instance.allocated, 0);
 
-        // doesn't remove initialized elements.
-        assert_eq!(instance.initialized, 1);
+            // doesn't remove initialized elements.
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], 0);
+        }
+
+        // zero-size type.
+        {
+            let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
+            instance.append(());
+            assert!(instance.allocated >= 15);
+
+            // reduces capacity.
+            instance.shrink(Some(8));
+            assert_eq!(instance.allocated, 8);
+
+            // eliminates capacity.
+            instance.shrink(None);
+            assert_eq!(instance.allocated, 0);
+
+            // doesn't remove initialized elements.
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], ());
+        }
     }
 
     #[test]
     fn append() {
-        let mut instance = Dynamic::<i32>::new();
-        assert_eq!(instance.count(), 0);
+        // sized type.
+        {
+            let mut instance = Dynamic::<i32>::new();
+            assert_eq!(instance.initialized, 0);
 
-        // empty instance.
-        instance.append(1);
-        assert_eq!(instance.count(), 1);
+            // empty instance.
+            instance.append(1);
+            assert_eq!(instance.initialized, 1);
 
-        // instance with one element.
-        instance.append(2);
-        assert_eq!(instance.count(), 2);
+            // instance with one element.
+            instance.append(2);
+            assert_eq!(instance.initialized, 2);
 
-        // instance with more than one element.
-        instance.append(3);
-        assert_eq!(instance.count(), 3);
+            // instance with more than one element.
+            instance.append(3);
+            assert_eq!(instance.initialized, 3);
 
-        // element goes to end
-        assert_eq!(*instance.first().unwrap(), 1);
-        assert_eq!(*instance.last().unwrap(), 3);
+            // element goes to end, otherwise order preserved
+            assert_eq!(instance[0], 1);
+            assert_eq!(instance[1], 2);
+            assert_eq!(instance[2], 3);
+        }
+
+        // zero-size types.
+        {
+            let mut instance = Dynamic::<()>::new();
+            assert_eq!(instance.initialized, 0);
+
+            // empty instance.
+            instance.append(());
+            assert_eq!(instance.initialized, 1);
+
+            // instance with one element.
+            instance.append(());
+            assert_eq!(instance.initialized, 2);
+
+            // instance with more than one element.
+            instance.append(());
+            assert_eq!(instance.initialized, 3);
+
+            // element goes to end, otherwise order preserved
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+            assert_eq!(instance[2], ());
+        }
     }
 
     #[test]
     fn insert() {
-        todo!()
+        // sized type.
+        {
+            // one element.
+            let mut instance = Dynamic::from([1].as_slice());
+            instance.insert(0, 0);
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+
+            // front element.
+            let mut instance = Dynamic::from([1, 2].as_slice());
+            instance.insert(0, 0);
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+            assert_eq!(instance[2], 2);
+
+            // end element.
+            let mut instance = Dynamic::from([0, 2].as_slice());
+            instance.insert(1, 1);
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+            assert_eq!(instance[2], 2);
+
+            // middle element.
+            let mut instance = Dynamic::from([0, 1, 3, 4, 5].as_slice());
+            instance.insert(2, 2);
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+            assert_eq!(instance[2], 2);
+            assert_eq!(instance[3], 3);
+            assert_eq!(instance[4], 4);
+            assert_eq!(instance[5], 5);
+        }
+
+        // zero-size type.
+        {
+            // one element.
+            let mut instance = Dynamic::from([()].as_slice());
+            instance.insert((), 0);
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+
+            // front element.
+            let mut instance = Dynamic::from([(), ()].as_slice());
+            instance.insert((), 0);
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+            assert_eq!(instance[2], ());
+
+            // end element.
+            let mut instance = Dynamic::from([(), ()].as_slice());
+            instance.insert((), 1);
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+            assert_eq!(instance[2], ());
+
+            // middle element.
+            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            instance.insert((), 2);
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+            assert_eq!(instance[2], ());
+            assert_eq!(instance[3], ());
+            assert_eq!(instance[4], ());
+            assert_eq!(instance[5], ());
+        }
     }
 
     #[test]
     fn remove() {
-        todo!()
+        // sized type.
+        {
+            // one element.
+            let mut instance = Dynamic::from([0].as_slice());
+            instance.remove(0);
+            assert_eq!(instance.initialized, 0);
+
+            // front element.
+            let mut instance = Dynamic::from([0, 1].as_slice());
+            instance.remove(0);
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], 1);
+
+            // last element.
+            let mut instance = Dynamic::from([0, 1].as_slice());
+            instance.remove(1);
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], 0);
+
+            // middle element.
+            let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
+            instance.remove(2);
+            assert_eq!(instance.initialized, 4);
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+            assert_eq!(instance[2], 3);
+            assert_eq!(instance[3], 4);
+        }
+
+        // zero-size type.
+        {
+            // one element.
+            let mut instance = Dynamic::from([()].as_slice());
+            instance.remove(0);
+            assert_eq!(instance.initialized, 0);
+
+            // front element.
+            let mut instance = Dynamic::from([(), ()].as_slice());
+            instance.remove(0);
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], ());
+
+            // last element.
+            let mut instance = Dynamic::from([(), ()].as_slice());
+            instance.remove(1);
+            assert_eq!(instance.initialized, 1);
+            assert_eq!(instance[0], ());
+
+            // middle element.
+            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            instance.remove(2);
+            assert_eq!(instance.initialized, 4);
+            assert_eq!(instance[0], ());
+            assert_eq!(instance[1], ());
+            assert_eq!(instance[2], ());
+            assert_eq!(instance[3], ());
+        }
     }
 
     #[test]
     fn clear() {
-        todo!("construct from something and clear it")
+        // sized type.
+        {
+            let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
+            let old_capacity = instance.allocated;
+
+            instance.clear();
+
+            assert_eq!(instance.allocated, old_capacity.saturating_add(5));
+            assert_eq!(instance.initialized, 0);
+        }
+
+        // zero-size type.
+        {
+            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            let old_capacity = instance.allocated;
+
+            instance.clear();
+
+            assert!(instance.allocated >= old_capacity.saturating_add(5));
+            assert_eq!(instance.initialized, 0);
+        }
     }
 
     #[test]
     fn into_iter() {
-        todo!("construct from something and compare iterators")
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let instance = Dynamic::from(array.as_slice());
+
+            assert!(instance.into_iter().eq(array.into_iter()));
+        }
+
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let instance = Dynamic::from(array.as_slice());
+
+            assert!(instance.into_iter().eq(array.into_iter()));
+        }
     }
 
     #[test]
     fn iter() {
-        todo!("construct from something and compare iterators")
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let instance = Dynamic::from(array.as_slice());
+
+            assert!(instance.iter().eq(array.iter()));
+        }
+
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let instance = Dynamic::from(array.as_slice());
+
+            assert!(instance.iter().eq(array.iter()));
+        }
     }
 
     #[test]
     fn iter_mut() {
-        todo!("construct from something and compare iterators")
+        // sized type.
+        {
+            let mut array = [0, 1, 2, 3];
+            let mut instance = Dynamic::from(array.as_slice());
+
+            assert!(instance.iter_mut().eq(array.iter_mut()));
+        }
+
+        // zero-size type.
+        {
+            let mut array = [0, 1, 2, 3];
+            let mut instance = Dynamic::from(array.as_slice());
+
+            assert!(instance.iter_mut().eq(array.iter_mut()));
+        }
     }
 
     #[test]
     fn first() {
-        todo!("construct from something and compare first")
+        // sized type.
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            assert_eq!(*instance.first().unwrap(), instance[0]);
+        }
+
+        // zero-sized type.
+        {
+            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            assert_eq!(*instance.first().unwrap(), instance[0]);
+        }
     }
 
     #[test]
     fn last() {
-        todo!("construct from something and compare first")
+        // sized type.
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            assert_eq!(*instance.last().unwrap(), instance[3]);
+        }
+
+        // zero-size type.
+        {
+            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            assert_eq!(*instance.last().unwrap(), instance[3]);
+        }
     }
 
     #[test]
     fn index() {
-        todo!()
+        // sized type.
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+            assert_eq!(instance[2], 2);
+            assert_eq!(instance[3], 3);
+        }
+
+        // zero-size type.
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+            assert_eq!(instance[0], 0);
+            assert_eq!(instance[1], 1);
+            assert_eq!(instance[2], 2);
+            assert_eq!(instance[3], 3);
+        }
     }
 
     #[test]
     fn index_mut() {
-        todo!()
+        // sized type.
+        {
+            let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+            instance[0] = 4;
+            instance[1] = 5;
+            instance[2] = 6;
+            instance[3] = 7;
+
+            assert_eq!(instance[0], 4);
+            assert_eq!(instance[1], 5);
+            assert_eq!(instance[2], 6);
+            assert_eq!(instance[3], 7);
+        }
+
+        // zero-size type.
+        {
+            let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+
+            instance[0] = 4;
+            instance[1] = 5;
+            instance[2] = 6;
+            instance[3] = 7;
+
+            assert_eq!(instance[0], 4);
+            assert_eq!(instance[1], 5);
+            assert_eq!(instance[2], 6);
+            assert_eq!(instance[3], 7);
+        }
     }
 
     #[test]
     fn deref() {
-        todo!()
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let instance = Dynamic::from(array.as_slice());
+
+            use std::ops::Deref;
+            assert_eq!(instance.deref(), array.as_slice());
+        }
+
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let instance = Dynamic::from(array.as_slice());
+
+            use std::ops::Deref;
+            assert_eq!(instance.deref(), array.as_slice());
+        }
     }
 
     #[test]
     fn deref_mut() {
-        todo!()
+        // sized type.
+        {
+            let array = [0, 1, 2, 3];
+            let mut instance = Dynamic::from(array.as_slice());
+
+            use std::ops::DerefMut;
+            assert_eq!(instance.deref_mut(), array.as_slice());
+        }
+
+        // zero-size type.
+        {
+            let array = [(), (), (), ()];
+            let mut instance = Dynamic::from(array.as_slice());
+
+            use std::ops::DerefMut;
+            assert_eq!(instance.deref_mut(), array.as_slice());
+        }
     }
 
     #[test]
     fn eq() {
-        todo!()
+        // sized type.
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let other = Dynamic::from([0, 1, 2, 3].as_slice());
+
+            assert_eq!(instance, other);
+        }
+
+        // zero-size type.
+        {
+            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            let other = Dynamic::from([(), (), (), ()].as_slice());
+
+            assert_eq!(instance, other);
+        }
     }
 
     #[test]
     fn ne() {
-        todo!()
+        // sized type.
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let other = Dynamic::from([4, 5, 6, 7].as_slice());
+
+            assert_ne!(instance, other);
+        }
+
+        // zero-size type.
+        {
+            let instance = Dynamic::from([(), ()].as_slice());
+            let other = Dynamic::from([(), (), (), ()].as_slice());
+
+            assert_ne!(instance, other);
+        }
     }
 
     #[test]
     fn default() {
-        todo!()
+        let instance: Dynamic<()> = Default::default();
+
+        assert_eq!(instance.initialized, 0);
+        assert_eq!(instance.allocated, 0);
     }
 
     #[test]
     fn clone() {
-        todo!()
+        // sized type
+        {
+            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let clone = instance.clone();
+
+            assert_ne!(instance.data, clone.data);
+            assert_eq!(instance, clone);
+        }
+
+        // zero-size type
+        {
+            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            let clone = instance.clone();
+
+            assert_eq!(instance, clone);
+        }
     }
 }

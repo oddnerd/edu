@@ -2,13 +2,13 @@
 
 /// Immutable reference [`Iterator`] over an [`Array`].
 pub struct Iter<'a, T: 'a> {
-    /// pointer to the hypothetical next element.
+    /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
 
-    /// pointer to a sentinel value when elements are exhausted.
+    /// Pointer to a sentinel value when elements are exhausted.
     end: std::ptr::NonNull<T>,
 
-    /// constrain to lifetime of the underlying object.
+    /// Constrain to lifetime of the underlying object.
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
@@ -35,7 +35,15 @@ impl<'a, T: 'a> Iter<'a, T> {
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
         Self {
             next: ptr,
-            end: {
+            end: if std::mem::size_of::<T>() == 0 {
+                // treat the pointer as any another integer counter.
+                let next = ptr.as_ptr() as usize;
+                let next = next.wrapping_add(len);
+                let next = next as *mut T;
+
+                // SAFETY: null-ness doesn't apply here.
+                unsafe { std::ptr::NonNull::new_unchecked(next) }
+            } else {
                 // SAFETY: one byte past the end of the allocated object.
                 let sentinel = unsafe { ptr.as_ptr().add(len) };
 
@@ -52,6 +60,24 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
+            if std::mem::size_of::<T>() == 0 {
+                self.next = {
+                    // treat the pointer as another integer type with counter.
+                    let next = self.next.as_ptr() as usize;
+                    let next = next.wrapping_add(1);
+                    let next = next as *mut T;
+
+                    // SAFETY: null-ness doesn't apply here.
+                    unsafe { std::ptr::NonNull::new_unchecked(next) }
+                };
+
+                // SAFETY:
+                // * pointer is aligned.
+                // * pointer is non-null.
+                // * zero-sized type makes this special-case `read` okay.
+                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ref() });
+            }
+
             // SAFETY:
             // * `self.next != self.end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
@@ -74,13 +100,13 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
 /// Mutable reference [`Iterator`] over an [`Array`].
 pub struct IterMut<'a, T: 'a> {
-    /// pointer to the hypothetical next element.
+    /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
 
-    /// pointer to a sentinel value when elements are exhausted.
+    /// Pointer to a sentinel value when elements are exhausted.
     end: std::ptr::NonNull<T>,
 
-    /// constrain to lifetime of the underlying object.
+    /// Constrain to lifetime of the underlying object.
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
@@ -107,12 +133,20 @@ impl<'a, T: 'a> IterMut<'a, T> {
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
         Self {
             next: ptr,
-            end: {
+            end: if std::mem::size_of::<T>() == 0 {
+                // treat the pointer as any another integer counter.
+                let next = ptr.as_ptr() as usize;
+                let next = next.wrapping_add(len);
+                let next = next as *mut T;
+
+                // SAFETY: null-ness doesn't apply here.
+                unsafe { std::ptr::NonNull::new_unchecked(next) }
+            } else {
                 // SAFETY: one byte past the end of the allocated object.
                 let sentinel = unsafe { ptr.as_ptr().add(len) };
 
                 // SAFETY: `add` will maintain the non-null requirement.
-                std::ptr::NonNull::new_unchecked(sentinel)
+                unsafe { std::ptr::NonNull::new_unchecked(sentinel) }
             },
             lifetime: std::marker::PhantomData,
         }
@@ -124,6 +158,24 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next != self.end {
+            if std::mem::size_of::<T>() == 0 {
+                self.next = {
+                    // treat the pointer as another integer type with counter.
+                    let next = self.next.as_ptr() as usize;
+                    let next = next.wrapping_add(1);
+                    let next = next as *mut T;
+
+                    // SAFETY: null-ness doesn't apply here.
+                    unsafe { std::ptr::NonNull::new_unchecked(next) }
+                };
+
+                // SAFETY:
+                // * pointer is aligned.
+                // * pointer is non-null.
+                // * zero-sized type makes this special-case `read` okay.
+                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_mut() });
+            }
+
             // SAFETY:
             // * `self.next != self.end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
@@ -140,6 +192,49 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
             Some(current)
         } else {
             None
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn iter() {
+        // sized type.
+        {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { Iter::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+
+        // zero-sized type.
+        {
+            let mut underlying = [(), (), (), (), (), ()];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { Iter::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+    }
+
+    #[test]
+    fn iter_mut() {
+        // sized type.
+        {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { IterMut::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
+        }
+
+        // zero-sized type.
+        {
+            let mut underlying = [(), (), (), (), (), ()];
+            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let iter = unsafe { IterMut::new(ptr, underlying.len()) };
+            assert!(underlying.iter().eq(iter));
         }
     }
 }

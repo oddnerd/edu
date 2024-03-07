@@ -10,6 +10,7 @@ use super::Linear;
 /// smart array (`std::array`) which interprets the underlying array as being
 /// 'dumb' that eagerly decays to a pointer and wraps it in a object.
 pub struct Fixed<T, const N: usize> {
+    /// Underlying memory buffer.
     data: [T; N],
 }
 
@@ -29,10 +30,10 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
 
 /// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T, const N: usize> {
-    /// ownership of the underlying array.
+    /// Ownership of the underlying array.
     data: [std::mem::ManuallyDrop<T>; N],
 
-    /// elements within the range have yet to be yielded.
+    /// Elements within the range have yet to be yielded.
     next: std::ops::Range<usize>,
 }
 
@@ -210,8 +211,8 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
         }
 
         // SAFETY:
-        // * `MaybeUninit<T>` has same size as `T` => arrays have same size.
-        // * `MaybeUninit<T>` has same alignment as `T` => elements aligned.
+        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
+        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
         let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
 
         Self::from(initialized)
@@ -220,7 +221,7 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
 
 impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
     fn clone(&self) -> Self {
-        // SAFETY: the `MaybeUninit` is initialized even if the `T` isn't.
+        // SAFETY: the [`MaybeUninit`] is initialized even if the `T` isn't.
         let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
             unsafe { std::mem::MaybeUninit::uninit().assume_init() };
 
@@ -229,8 +230,8 @@ impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
         }
 
         // SAFETY:
-        // * `MaybeUninit<T>` has same size as `T` => arrays have same size.
-        // * `MaybeUninit<T>` has same alignment as `T` => elements aligned.
+        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
+        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
         let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
 
         Self::from(initialized)
@@ -285,18 +286,18 @@ mod test {
 
     #[test]
     fn first() {
-        let mut array = [0, 1, 2, 3];
-        let mut instance = Fixed::from(array);
+        let array = [0, 1, 2, 3];
+        let instance = Fixed::from(array);
 
         assert_eq!(*instance.first().unwrap(), instance[0]);
     }
 
     #[test]
     fn last() {
-        let mut array = [0, 1, 2, 3];
-        let mut instance = Fixed::from(array);
+        let array = [0, 1, 2, 3];
+        let instance = Fixed::from(array);
 
-        assert_eq!(*instance.last().unwrap(), instance[0]);
+        assert_eq!(*instance.last().unwrap(), instance[3]);
     }
 
     #[test]
