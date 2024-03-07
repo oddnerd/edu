@@ -181,7 +181,7 @@ impl<T> Dynamic<T> {
         };
 
         let size = self.initialized + capacity;
-        let new_size = match std::alloc::Layout::array::<T>(capacity) {
+        let new_size = match std::alloc::Layout::array::<T>(size) {
             Ok(layout) => layout,
             Err(_) => return false,
         }
@@ -198,7 +198,7 @@ impl<T> Dynamic<T> {
             None => return false,
         };
 
-        self.allocated = size - self.initialized;
+        self.allocated = capacity;
 
         true
     }
