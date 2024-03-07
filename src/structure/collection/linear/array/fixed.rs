@@ -297,7 +297,7 @@ mod test {
         let array = [0, 1, 2, 3];
         let instance = Fixed::from(array);
 
-        assert_eq!(*instance.last().unwrap(), instance[0]);
+        assert_eq!(*instance.last().unwrap(), instance[3]);
     }
 
     #[test]
