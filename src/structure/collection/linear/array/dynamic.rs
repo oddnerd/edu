@@ -347,14 +347,14 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
-    /// assert_eq!(instance.count(), 4);
+    /// assert_eq!(instance.len(), 4);
     ///
     /// instance.remove(2);
     ///
-    /// assert_eq!(instance.count(), 3);
+    /// assert_eq!(instance.len(), 3);
     /// assert_eq!(instance[0], 0);
-    /// assert_eq!(instance[0], 1);
-    /// assert_eq!(instance[0], 3);
+    /// assert_eq!(instance[1], 1);
+    /// assert_eq!(instance[2], 3);
     /// ```
     pub fn remove(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
