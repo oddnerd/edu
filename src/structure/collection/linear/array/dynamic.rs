@@ -71,8 +71,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance: Dynamic<i32> = Dynamic::with_capacity(2).unwrap();
-    ///
+    /// let mut instance = Dynamic::<i32>::with_capacity(2).unwrap();
     /// let old_capacity = instance.capacity();
     /// assert!(old_capacity >= 2);
     ///
@@ -259,27 +258,24 @@ impl<T> Dynamic<T> {
             return false;
         }
 
-        if std::mem::size_of::<T>() == 0 {
-            self.initialized += 1;
-            self.allocated -= 1;
-            return true;
+        if std::mem::size_of::<T>() != 0 {
+            unsafe {
+                // SAFETY: the buffer has been allocated.
+                let ptr = self.data.as_ptr();
+
+                // SAFETY: this points to the first uninitialized element.
+                let ptr = ptr.add(self.initialized);
+
+                // SAFETY:
+                // * `ptr` is non-null.
+                // * `ptr` is aligned.
+                // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
+                (*ptr).write(element);
+            };
         }
 
-        unsafe {
-            // SAFETY: the buffer has been allocated.
-            let ptr = self.data.as_ptr();
-
-            // SAFETY: this points to the first uninitialized element.
-            let ptr = ptr.add(self.initialized);
-
-            // SAFETY:
-            // * `ptr` is non-null.
-            // * `ptr` is aligned.
-            // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
-            (*ptr).write(element);
-        };
-
         self.initialized += 1;
+        self.allocated -=1;
 
         true
     }
