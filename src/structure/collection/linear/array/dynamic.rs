@@ -32,9 +32,9 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance: Dynamic<()> = Dynamic::new();
+    /// let instance = Dynamic::<()>::new();
     ///
-    /// assert_eq!(instance.count(), 0);
+    /// assert_eq!(instance.len(), 0);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn new() -> Self {
@@ -51,9 +51,9 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic<()>::with_capacity(4).expect("bad allocation");
+    /// let instance = Dynamic::<()>::with_capacity(4).unwrap();
     ///
-    /// assert_eq!(instance.count(), 0);
+    /// assert_eq!(instance.len(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
     pub fn with_capacity(count: usize) -> Option<Self> {
