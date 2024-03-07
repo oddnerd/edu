@@ -780,6 +780,8 @@ mod test {
         // zero-size type.
         {
             let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
+            instance.append(());
+            assert!(instance.allocated >= 15);
 
             // reduces capacity.
             instance.shrink(Some(8));
