@@ -469,6 +469,10 @@ pub struct IntoIter<T> {
 
 impl<T> std::ops::Drop for IntoIter<T> {
     fn drop(&mut self) {
+        if std::mem::size_of::<T>() == 0 {
+            return;
+        }
+
         for index in self.next.clone() {
             // SAFETY: stays aligned within the allocated object.
             let element = unsafe { self.data.as_ptr().add(index) };
@@ -491,15 +495,15 @@ impl<T> std::iter::Iterator for IntoIter<T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
-            let element = {
+            let element = unsafe {
                 // SAFETY: `T` has same layout as [`MaybeUninit<T>`].
                 let ptr = self.data.as_ptr().cast::<T>();
 
                 // SAFETY: stays aligned within the allocated object.
-                let ptr = unsafe { ptr.add(self.next.start) };
+                let ptr = ptr.add(self.next.start);
 
                 // SAFETY: the element is initialized.
-                unsafe { ptr.read() }
+                ptr.read()
             };
 
             self.next.start += 1;
@@ -517,10 +521,13 @@ impl<T> std::iter::IntoIterator for Dynamic<T> {
     type IntoIter = IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
+        // SAFETY: double free if `self` attempts to drop `data`.
+        let input = std::mem::ManuallyDrop::new(self);
+
         IntoIter {
-            data: self.data,
-            layout: std::alloc::Layout::array::<T>(self.initialized + self.allocated).unwrap(),
-            next: 0..self.initialized,
+            data: input.data,
+            layout: std::alloc::Layout::array::<T>(input.initialized + input.allocated).unwrap(),
+            next: 0..input.initialized,
         }
     }
 }
