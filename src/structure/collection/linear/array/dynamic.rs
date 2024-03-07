@@ -152,7 +152,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic<()>::with_capacity(16);
+    /// let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
     /// assert!(instance.capacity() >= 16);
     ///
     /// instance.shrink(Some(8));
