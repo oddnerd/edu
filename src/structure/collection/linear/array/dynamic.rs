@@ -245,14 +245,14 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic<i32>::new();
+    /// let mut instance = Dynamic::<i32>::new();
     ///
     /// instance.append(1);
     /// instance.append(2);
     ///
-    /// assert_eq!(instance.count(), 2);
-    /// assert_eq!(instance.first(), 1);
-    /// assert_eq!(instance.last(), 2);
+    /// assert_eq!(instance.len(), 2);
+    /// assert_eq!(*instance.first().unwrap(), 1);
+    /// assert_eq!(*instance.last().unwrap(), 2);
     /// ```
     pub fn append(&mut self, element: T) -> bool {
         if self.allocated == 0 && !self.reserve(1) {
