@@ -19,6 +19,10 @@ Justify why such a feature is worth pursuing. Consider alternatives if available
 
 Outline how the proposed solution ought to be implemented. Attempt to preempt development hurdles and edge cases which require consideration.
 
+### See Also
+
+List any helpful related links.
+
 ---
 
 ### Post-Implementation/Pre-Merge Tracker
