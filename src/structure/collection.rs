@@ -10,4 +10,9 @@ pub trait Collection<'a> {
 
     /// Query the number of elements.
     fn count(&self) -> usize;
+
+    /// Query if no elements are contained.
+    fn is_empty(&self) -> bool {
+        self.count() == 0
+    }
 }
