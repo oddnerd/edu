@@ -95,7 +95,6 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
             // SAFETY:
-            // * `add` => pointer is aligned.
             // * `next` != `end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.start.as_ref() };
