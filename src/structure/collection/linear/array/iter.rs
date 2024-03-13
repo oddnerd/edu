@@ -35,21 +35,7 @@ impl<'a, T: 'a> Iter<'a, T> {
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
         Self {
             next: ptr,
-            end: if std::mem::size_of::<T>() == 0 {
-                // treat the pointer as any another integer counter.
-                let next = ptr.as_ptr() as usize;
-                let next = next.wrapping_add(len);
-                let next = next as *mut T;
-
-                // SAFETY: null-ness doesn't apply here.
-                unsafe { std::ptr::NonNull::new_unchecked(next) }
-            } else {
-                // SAFETY: one byte past the end of the allocated object.
-                let sentinel = unsafe { ptr.as_ptr().add(len) };
-
-                // SAFETY: `add` will maintain the non-null requirement.
-                unsafe { std::ptr::NonNull::new_unchecked(sentinel) }
-            },
+            end: end_of(ptr, len),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -126,21 +112,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
         Self {
             next: ptr,
-            end: if std::mem::size_of::<T>() == 0 {
-                // treat the pointer as any another integer counter.
-                let next = ptr.as_ptr() as usize;
-                let next = next.wrapping_add(len);
-                let next = next as *mut T;
-
-                // SAFETY: null-ness doesn't apply here.
-                unsafe { std::ptr::NonNull::new_unchecked(next) }
-            } else {
-                // SAFETY: one byte past the end of the allocated object.
-                let sentinel = unsafe { ptr.as_ptr().add(len) };
-
-                // SAFETY: `add` will maintain the non-null requirement.
-                unsafe { std::ptr::NonNull::new_unchecked(sentinel) }
-            },
+            end: end_of(ptr, len),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -181,6 +153,24 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
 }
 
 impl<'a, T: 'a> std::iter::ExactSizeIterator for IterMut<'a, T> {}
+
+fn end_of<T>(ptr: std::ptr::NonNull<T>, len: usize) -> std::ptr::NonNull<T> {
+    if std::mem::size_of::<T>() == 0 {
+        // treat the pointer as any another integer counter.
+        let next = ptr.as_ptr() as usize;
+        let next = next.wrapping_add(len);
+        let next = next as *mut T;
+
+        // SAFETY: null-ness doesn't apply here.
+        unsafe { std::ptr::NonNull::new_unchecked(next) }
+    } else {
+        // SAFETY: one byte past the end of the allocated object.
+        let sentinel = unsafe { ptr.as_ptr().add(len) };
+
+        // SAFETY: `add` will maintain the non-null requirement.
+        unsafe { std::ptr::NonNull::new_unchecked(sentinel) }
+    }
+}
 
 fn next<T>(
     next: &mut std::ptr::NonNull<T>,
