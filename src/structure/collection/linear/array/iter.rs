@@ -96,6 +96,26 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
             None
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if std::mem::size_of::<T>() == 0 {
+            // treat the pointer as any another integer counter.
+            let end = self.end.as_ptr() as usize;
+            let start = self.next.as_ptr() as usize;
+            let size = end.wrapping_sub(start);
+
+            (size, Some(size))
+        } else {
+            // SAFETY:
+            // * both pointers are derived from the same allocated object.
+            // * `next` is within bounds whereas `end` is one byte past the end.
+            // * both pointers are aligned for `T`.
+            // * this does not rely on wrapping logic.
+            let size = unsafe { self.end.as_ptr().offset_from(self.next.as_ptr()) } as usize;
+
+            (size, Some(size))
+        }
+    }
 }
 
 /// Mutable reference [`Iterator`] over an [`super::Array`].
@@ -194,6 +214,26 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
             None
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if std::mem::size_of::<T>() == 0 {
+            // treat the pointer as any another integer counter.
+            let end = self.end.as_ptr() as usize;
+            let start = self.next.as_ptr() as usize;
+            let size = end.wrapping_sub(start);
+
+            (size, Some(size))
+        } else {
+            // SAFETY:
+            // * both pointers are derived from the same allocated object.
+            // * `next` is within bounds whereas `end` is one byte past the end.
+            // * both pointers are aligned for `T`.
+            // * this does not rely on wrapping logic.
+            let size = unsafe { self.end.as_ptr().offset_from(self.next.as_ptr()) } as usize;
+
+            (size, Some(size))
+        }
+    }
 }
 
 #[cfg(test)]
@@ -206,8 +246,9 @@ mod test {
         {
             let underlying = [0, 1, 2, 3, 4, 5];
             let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) } ;
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             let iter = unsafe { Iter::new(ptr, underlying.len()) };
+            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
             assert!(underlying.iter().eq(iter));
         }
 
@@ -215,8 +256,9 @@ mod test {
         {
             let underlying = [(), (), (), (), (), ()];
             let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) } ;
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             let iter = unsafe { Iter::new(ptr, underlying.len()) };
+            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
             assert!(underlying.iter().eq(iter));
         }
     }
@@ -228,6 +270,7 @@ mod test {
             let mut underlying = [0, 1, 2, 3, 4, 5];
             let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
             let iter = unsafe { IterMut::new(ptr, underlying.len()) };
+            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
             assert!(underlying.iter().eq(iter));
         }
 
@@ -236,6 +279,7 @@ mod test {
             let mut underlying = [(), (), (), (), (), ()];
             let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
             let iter = unsafe { IterMut::new(ptr, underlying.len()) };
+            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
             assert!(underlying.iter().eq(iter));
         }
     }
