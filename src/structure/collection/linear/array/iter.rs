@@ -204,16 +204,18 @@ mod test {
     fn iter() {
         // sized type.
         {
-            let mut underlying = [0, 1, 2, 3, 4, 5];
-            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let underlying = [0, 1, 2, 3, 4, 5];
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) } ;
             let iter = unsafe { Iter::new(ptr, underlying.len()) };
             assert!(underlying.iter().eq(iter));
         }
 
         // zero-sized type.
         {
-            let mut underlying = [(), (), (), (), (), ()];
-            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+            let underlying = [(), (), (), (), (), ()];
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) } ;
             let iter = unsafe { Iter::new(ptr, underlying.len()) };
             assert!(underlying.iter().eq(iter));
         }
