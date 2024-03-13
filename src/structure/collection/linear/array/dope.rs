@@ -156,7 +156,6 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     fn first(&self) -> Option<&Self::Element> {
         if !self.is_empty() {
             // SAFETY:
-            // * constructor contract => `self.data` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
             unsafe { Some(self.data.as_ref()) }
@@ -173,7 +172,6 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
             let ptr = unsafe { ptr.add(self.len - 1) };
 
             // SAFETY:
-            // * constructor contract => `ptr` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
             unsafe { Some(&*ptr) }
