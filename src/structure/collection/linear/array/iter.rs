@@ -118,6 +118,47 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.next != self.end {
+            if std::mem::size_of::<T>() == 0 {
+                self.end = {
+                    // treat the pointer as another integer type with counter.
+                    let end = self.end.as_ptr() as usize;
+                    let end = end.wrapping_sub(1);
+                    let end = end as *mut T;
+
+                    // SAFETY: null-ness doesn't apply here.
+                    unsafe { std::ptr::NonNull::new_unchecked(end) }
+                };
+
+                // SAFETY:
+                // * pointer is aligned.
+                // * pointer is non-null.
+                // * zero-sized type makes this special-case `read` okay.
+                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ref() });
+            }
+
+            self.end = {
+                // SAFETY: greater than `next` so within the allocated object.
+                let end = unsafe { self.end.as_ptr().sub(1) };
+
+                // SAFETY: `sub` will maintain the non-null requirement.
+                unsafe { std::ptr::NonNull::new_unchecked(end) }
+            };
+
+            // SAFETY:
+            // * `self.next != self.end` => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
+            let current = unsafe { self.end.as_ref() };
+
+            Some(current)
+        } else {
+            None
+        }
+    }
+}
+
 /// Mutable reference [`Iterator`] over an [`super::Array`].
 pub struct IterMut<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
@@ -232,6 +273,47 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
             let size = unsafe { self.end.as_ptr().offset_from(self.next.as_ptr()) } as usize;
 
             (size, Some(size))
+        }
+    }
+}
+
+impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.next != self.end {
+            if std::mem::size_of::<T>() == 0 {
+                self.end = {
+                    // treat the pointer as another integer type with counter.
+                    let end = self.end.as_ptr() as usize;
+                    let end = end.wrapping_sub(1);
+                    let end = end as *mut T;
+
+                    // SAFETY: null-ness doesn't apply here.
+                    unsafe { std::ptr::NonNull::new_unchecked(end) }
+                };
+
+                // SAFETY:
+                // * pointer is aligned.
+                // * pointer is non-null.
+                // * zero-sized type makes this special-case `read` okay.
+                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_mut() });
+            }
+
+            self.end = {
+                // SAFETY: greater than `next` so within the allocated object.
+                let end = unsafe { self.end.as_ptr().sub(1) };
+
+                // SAFETY: `sub` will maintain the non-null requirement.
+                unsafe { std::ptr::NonNull::new_unchecked(end) }
+            };
+
+            // SAFETY:
+            // * `self.next != self.end` => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
+            let current = unsafe { self.end.as_mut() };
+
+            Some(current)
+        } else {
+            None
         }
     }
 }
