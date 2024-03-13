@@ -53,7 +53,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dope<'a, T> {
+impl<'a, T: 'a> std::convert::From<&'a [T]> for Dope<'a, T> {
     fn from(slice: &'a [T]) -> Self {
         Self {
             data: {
