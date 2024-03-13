@@ -83,46 +83,10 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 /// it spans, therefore the values this yields are themselves references.
 pub struct IntoIter<'a, T: 'a> {
     /// Ownership of the values.
-    data: Dope<'a, T>,
+    data: std::marker::PhantomData<&'a T>,
 
     /// Elements within this range have yet to be yielded.
     next: std::ops::Range<std::ptr::NonNull<T>>,
-}
-
-impl<'a, T: 'a> IntoIter<'a, T> {
-    /// Construct from a [`Dope`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    /// use rust::structure::collection::linear::array::dope::IntoIter;
-    ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
-    /// let iter = IntoIter::new(dope);
-    ///
-    /// assert!(underlying.iter().eq(iter));
-    /// ```
-    pub fn new(dope: Dope<'a, T>) -> Self {
-        let mut tmp = Self {
-            data: dope,
-
-            // careful to use pointers to the member and not the parameter.
-            next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
-        };
-
-        // SAFETY: `wrapping_add` will maintain the non-null requirement.
-        unsafe {
-            let start = tmp.data.data;
-
-            let end = std::ptr::NonNull::new_unchecked(start.as_ptr().wrapping_add(tmp.data.len));
-
-            tmp.next = start..end;
-        }
-
-        tmp
-    }
 }
 
 impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
@@ -131,15 +95,16 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
             // SAFETY:
-            // * `wrapping_add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
+            // * `add` => pointer is aligned.
+            // * `next` != `end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.start.as_ref() };
 
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
             self.next.start = unsafe {
-                let next = self.next.start.as_ptr().wrapping_add(1);
+                // SAFETY: can at most be one byte past the allocated object.
+                let next = self.next.start.as_ptr().add(1);
 
+                // SAFETY: `add` will maintain the non-null requirement.
                 std::ptr::NonNull::new_unchecked(next)
             };
 
@@ -156,7 +121,20 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
     type IntoIter = IntoIter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter::new(self)
+        Self::IntoIter {
+            next: unsafe {
+                let start = self.data;
+
+                // SAFETY: points to one byte past the allocated object.
+                let end = start.as_ptr().add(self.len);
+
+                // SAFETY: `add` maintains the non-null requirement.
+                let end = std::ptr::NonNull::new_unchecked(end);
+
+                start..end
+            },
+            data: std::marker::PhantomData,
+        }
     }
 }
 
