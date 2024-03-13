@@ -253,9 +253,7 @@ fn inplace_merge<T>(
             slice.swap(output, right);
             inplace_merge(slice, left, left_end, right + 1, right_end, output + 1);
         }
-        (None, None) => {
-            return;
-        }
+        (None, None) => {}
     }
 }
 
@@ -271,9 +269,9 @@ where
 {
     if from.len() > 1 {
         let middle = from.len() / 2;
-        let (mut left, mut right) = from.split_at_mut(middle);
-        inplace(&mut left);
-        inplace(&mut right);
+        let (left, right) = from.split_at_mut(middle);
+        inplace(left);
+        inplace(right);
 
         crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut())
             .zip(into.iter_mut())

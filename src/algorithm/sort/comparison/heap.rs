@@ -73,10 +73,10 @@ mod sift_down {
                 index = left_child(index);
             }
 
-            return index;
+            index
         }
 
-        if slice.len() > 0 {
+        if !slice.is_empty() {
             let mut leaf = leaf_search(slice, index);
             while slice[index] > slice[leaf] {
                 leaf = parent(leaf);
@@ -137,9 +137,9 @@ mod max_heapify {
 /// Sort a slice via bottom-up heap sort.
 ///
 /// Create bottom order heaps with one parent and two leaves. Iteratively join
-/// these heaps by [`sift_down`] the element correcsponding to their parent in
+/// these heaps by 'sifting down' the element corresponding to their parent in
 /// the slice until all elements are within one max-heap.Ordered elements are
-/// then popped from the heap by swapping it with a leaf then [`sift_down`] to
+/// then popped from the heap by swapping it with a leaf then 'sift down' to
 /// preserve order.
 ///
 /// # Examples
@@ -215,10 +215,10 @@ mod bottom_up {
 
 /// Sort a slice via bottom-up heap sort with inline sift-down optimization.
 ///
-/// [`bottom_up`] seperates creating the max-heap and using it to iterate the
+/// [`bottom_up`] separates creating the max-heap and using it to iterate the
 /// elements in sorted order. In contrast, this implementation combines the two
 /// steps into one loop with a conditional. With branch prediction and inline
-/// expansion of [`sift_down`], this implementation would likely have different
+/// expansion of 'sifting down', this implementation would likely have different
 /// runtime characteristics.
 ///
 /// # Examples
@@ -330,9 +330,9 @@ where
 
 /// Sort a slice via top-down heap sort.
 ///
-/// Create one max-heap at the start of the slice and then push each sucessive
-/// element into it via [`sift_up`]. Ordered elements are then popped from the
-/// heap by swapping it with a leaf then [`sift_down`] to preserve the heap.
+/// Create one max-heap at the start of the slice and then push each successive
+/// element into it by 'sifting up'. Ordered elements are then popped from the
+/// heap by swapping it with a leaf then 'sifting down' to preserve the heap.
 ///
 /// # Examples
 /// ```
