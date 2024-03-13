@@ -73,10 +73,10 @@ mod sift_down {
                 index = left_child(index);
             }
 
-            return index;
+            index
         }
 
-        if slice.len() > 0 {
+        if !slice.is_empty() {
             let mut leaf = leaf_search(slice, index);
             while slice[index] > slice[leaf] {
                 leaf = parent(leaf);
