@@ -59,13 +59,7 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match next(&mut self.next, self.end) {
-            // SAFETY:
-            // * points to an initialized element.
-            // * lifetime bound to input object => valid lifetime to return.
-            Some(ptr) => Some(unsafe { ptr.as_ref() } ),
-            None => None
-        }
+        next(&mut self.next, self.end).map(|ptr| unsafe { ptr.as_ref() })
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -91,13 +85,7 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        match next_back(self.next, &mut self.end) {
-            // SAFETY:
-            // * points to an initialized element.
-            // * lifetime bound to input object => valid lifetime to return.
-            Some(ptr) => Some(unsafe { ptr.as_ref() } ),
-            None => None
-        }
+        next_back(self.next, &mut self.end).map(|ptr| unsafe { ptr.as_ref() })
     }
 }
 
@@ -160,13 +148,7 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match next(&mut self.next, self.end) {
-            // SAFETY:
-            // * points to an initialized element.
-            // * lifetime bound to input object => valid lifetime to return.
-            Some(mut ptr) => Some(unsafe { ptr.as_mut() } ),
-            None => None
-        }
+        next(&mut self.next, self.end).map(|mut ptr| unsafe { ptr.as_mut() })
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
@@ -192,17 +174,14 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        match next_back(self.next, &mut self.end) {
-            // SAFETY:
-            // * points to an initialized element.
-            // * lifetime bound to input object => valid lifetime to return.
-            Some(mut ptr) => Some(unsafe { ptr.as_mut() } ),
-            None => None
-        }
+        next_back(self.next, &mut self.end).map(|mut ptr| unsafe { ptr.as_mut() })
     }
 }
 
-fn next<T>(next: &mut std::ptr::NonNull<T>, end: std::ptr::NonNull<T>) -> Option<std::ptr::NonNull<T>> {
+fn next<T>(
+    next: &mut std::ptr::NonNull<T>,
+    end: std::ptr::NonNull<T>,
+) -> Option<std::ptr::NonNull<T>> {
     if *next != end {
         if std::mem::size_of::<T>() == 0 {
             *next = {
@@ -239,7 +218,10 @@ fn next<T>(next: &mut std::ptr::NonNull<T>, end: std::ptr::NonNull<T>) -> Option
     }
 }
 
-fn next_back<T>(next: std::ptr::NonNull<T>, end: &mut std::ptr::NonNull<T>) -> Option<std::ptr::NonNull<T>> {
+fn next_back<T>(
+    next: std::ptr::NonNull<T>,
+    end: &mut std::ptr::NonNull<T>,
+) -> Option<std::ptr::NonNull<T>> {
     if next != *end {
         if std::mem::size_of::<T>() == 0 {
             *end = {
