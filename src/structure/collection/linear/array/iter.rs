@@ -1,6 +1,6 @@
-//! Iterators over contigious memory buffers of consecutive elements; [`Array`].
+//! Iterators over contigious memory buffers of consecutive elements; [`super::Array`].
 
-/// Immutable reference [`Iterator`] over an [`Array`].
+/// Immutable reference [`Iterator`] over an [`super::Array`].
 pub struct Iter<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
@@ -98,7 +98,7 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     }
 }
 
-/// Mutable reference [`Iterator`] over an [`Array`].
+/// Mutable reference [`Iterator`] over an [`super::Array`].
 pub struct IterMut<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
