@@ -218,9 +218,9 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
 
     fn deref(&self) -> &Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned.
-        // * `data` is initialized => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
+        // * constructor contract => `self.data` is aligned.
+        // * constructor contract => every element is initialized.
+        // * constructor contract => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
     }
 }
@@ -228,9 +228,9 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
 impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned.
-        // * `data` is initialized => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
+        // * constructor contract => `self.data` is aligned.
+        // * constructor contract => every element is initialized.
+        // * constructor contract => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
     }
 }
