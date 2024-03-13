@@ -12,7 +12,7 @@ use super::Linear;
 ///
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
-#[derive(Clone, Copy, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Dope<'a, T: 'a> {
     /// Pointer to the start of the array.
     data: std::ptr::NonNull<T>,
@@ -236,14 +236,6 @@ impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
 }
 
 impl<'a, T: 'a> Array<'a> for Dope<'a, T> {}
-
-impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().eq(other.iter())
-    }
-}
-
-impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
