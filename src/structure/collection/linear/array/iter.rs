@@ -89,6 +89,8 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T: 'a> std::iter::ExactSizeIterator for Iter<'a, T> {}
+
 /// Mutable reference [`Iterator`] over an [`super::Array`].
 pub struct IterMut<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
@@ -177,6 +179,8 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
         next_back(self.next, &mut self.end).map(|mut ptr| unsafe { ptr.as_mut() })
     }
 }
+
+impl<'a, T: 'a> std::iter::ExactSizeIterator for IterMut<'a, T> {}
 
 fn next<T>(
     next: &mut std::ptr::NonNull<T>,
