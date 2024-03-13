@@ -16,7 +16,7 @@ impl<'a, T: 'a> Iter<'a, T> {
     /// Construct from a pointer to the start of a memory buffer and the length
     /// of that buffer in elements of `T`.
     ///
-    /// # SAFETY:
+    /// # Safety
     /// * `ptr` must not be null.
     /// * `ptr` must have an address aligned for access to `T`.
     /// * `ptr` must point to one contigious allocated object.
@@ -114,7 +114,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
     /// Construct from a pointer to the start of a memory buffer and the length
     /// of that buffer in elements of `T`.
     ///
-    /// # SAFETY:
+    /// # Safety
     /// * `ptr` must not be null.
     /// * `ptr` must have an address aligned for access to `T`.
     /// * `ptr` must point to one contigious allocated object.
