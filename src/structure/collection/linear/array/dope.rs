@@ -187,26 +187,31 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
-        assert!(index < self.len);
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe {
+            assert!(index < self.len);
+            self.data.as_ptr().add(index)
+        };
+
         // SAFETY:
-        // * index is within bounds => `add` stays within the allocated object.
-        // * `add` => pointer is aligned.
-        // * underlying object is initialized => points to initialized `T`.
+        // * constructor contract => pointed to `T` is initialized.
         // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &*self.data.as_ptr().add(index) }
+        unsafe { &*ptr }
     }
 }
 
 impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        assert!(index < self.len);
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe {
+            assert!(index < self.len);
+            self.data.as_ptr().add(index)
+        };
+
         // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within the allocated object.
-        // * `add` => pointer is aligned.
-        // * underlying object is initialized => points to initialized `T`.
+        // * constructor contract => pointed to `T` is initialized.
         // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &mut *self.data.as_ptr().add(index) }
+        unsafe { &mut *ptr }
     }
 }
 
