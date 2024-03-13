@@ -82,11 +82,11 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 /// Note that because [`Dope`] is inherently non-owning over the memory buffer
 /// it spans, therefore the values this yields are themselves references.
 pub struct IntoIter<'a, T: 'a> {
-    /// Ownership of the values.
-    data: std::marker::PhantomData<&'a T>,
-
     /// Elements within this range have yet to be yielded.
     next: std::ops::Range<std::ptr::NonNull<T>>,
+
+    /// Restrict lifetime of references to underlying instance.
+    lifetime: std::marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
@@ -133,30 +133,29 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
 
                 start..end
             },
-            data: std::marker::PhantomData,
+            lifetime: std::marker::PhantomData,
         }
     }
 }
 
 impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        // # SAFETY:
+        // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::Iter::new(self.data, self.len) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        // # SAFETY:
+        // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
 
     fn first(&self) -> Option<&Self::Element> {
-        if self.len > 0 {
+        if !self.is_empty() {
             // SAFETY:
-            // * non-empty => within the allocated object.
             // * constructor contract => `self.data` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
@@ -167,14 +166,13 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 
     fn last(&self) -> Option<&Self::Element> {
-        if self.len > 0 {
+        if !self.is_empty() {
             let ptr = self.data.as_ptr();
 
-            // SAFETY: remains within the one underlying allocated object.
+            // SAFETY: points to the final element within the allocated object.
             let ptr = unsafe { ptr.add(self.len - 1) };
 
             // SAFETY:
-            // * non-empty => within the allocated object.
             // * constructor contract => `ptr` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
@@ -191,7 +189,6 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     fn index(&self, index: usize) -> &Self::Output {
         assert!(index < self.len);
         // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
         // * index is within bounds => `add` stays within the allocated object.
         // * `add` => pointer is aligned.
         // * underlying object is initialized => points to initialized `T`.
