@@ -59,41 +59,12 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
-            if std::mem::size_of::<T>() == 0 {
-                self.next = {
-                    // treat the pointer as another integer type with counter.
-                    let next = self.next.as_ptr() as usize;
-                    let next = next.wrapping_add(1);
-                    let next = next as *mut T;
-
-                    // SAFETY: null-ness doesn't apply here.
-                    unsafe { std::ptr::NonNull::new_unchecked(next) }
-                };
-
-                // SAFETY:
-                // * pointer is aligned.
-                // * pointer is non-null.
-                // * zero-sized type makes this special-case `read` okay.
-                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ref() });
-            }
-
+        match next(&mut self.next, self.end) {
             // SAFETY:
-            // * `self.next != self.end` => pointing to initialized value.
+            // * points to an initialized element.
             // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.next.as_ref() };
-
-            self.next = {
-                // SAFETY: either within the allocated object or one byte past.
-                let next = unsafe { self.next.as_ptr().add(1) };
-
-                // SAFETY: `add` will maintain the non-null requirement.
-                unsafe { std::ptr::NonNull::new_unchecked(next) }
-            };
-
-            Some(current)
-        } else {
-            None
+            Some(ptr) => Some(unsafe { ptr.as_ref() } ),
+            None => None
         }
     }
 
@@ -120,41 +91,12 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
-            if std::mem::size_of::<T>() == 0 {
-                self.end = {
-                    // treat the pointer as another integer type with counter.
-                    let end = self.end.as_ptr() as usize;
-                    let end = end.wrapping_sub(1);
-                    let end = end as *mut T;
-
-                    // SAFETY: null-ness doesn't apply here.
-                    unsafe { std::ptr::NonNull::new_unchecked(end) }
-                };
-
-                // SAFETY:
-                // * pointer is aligned.
-                // * pointer is non-null.
-                // * zero-sized type makes this special-case `read` okay.
-                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ref() });
-            }
-
-            self.end = {
-                // SAFETY: greater than `next` so within the allocated object.
-                let end = unsafe { self.end.as_ptr().sub(1) };
-
-                // SAFETY: `sub` will maintain the non-null requirement.
-                unsafe { std::ptr::NonNull::new_unchecked(end) }
-            };
-
+        match next_back(self.next, &mut self.end) {
             // SAFETY:
-            // * `self.next != self.end` => pointing to initialized value.
+            // * points to an initialized element.
             // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.end.as_ref() };
-
-            Some(current)
-        } else {
-            None
+            Some(ptr) => Some(unsafe { ptr.as_ref() } ),
+            None => None
         }
     }
 }
@@ -218,41 +160,12 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
-            if std::mem::size_of::<T>() == 0 {
-                self.next = {
-                    // treat the pointer as another integer type with counter.
-                    let next = self.next.as_ptr() as usize;
-                    let next = next.wrapping_add(1);
-                    let next = next as *mut T;
-
-                    // SAFETY: null-ness doesn't apply here.
-                    unsafe { std::ptr::NonNull::new_unchecked(next) }
-                };
-
-                // SAFETY:
-                // * pointer is aligned.
-                // * pointer is non-null.
-                // * zero-sized type makes this special-case `read` okay.
-                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_mut() });
-            }
-
+        match next(&mut self.next, self.end) {
             // SAFETY:
-            // * `self.next != self.end` => pointing to initialized value.
+            // * points to an initialized element.
             // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.next.as_mut() };
-
-            self.next = {
-                // SAFETY: either within the allocated object or one byte past.
-                let next = unsafe { self.next.as_ptr().add(1) };
-
-                // SAFETY: `add` will maintain the non-null requirement.
-                unsafe { std::ptr::NonNull::new_unchecked(next) }
-            };
-
-            Some(current)
-        } else {
-            None
+            Some(mut ptr) => Some(unsafe { ptr.as_mut() } ),
+            None => None
         }
     }
 
@@ -279,42 +192,85 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.next != self.end {
-            if std::mem::size_of::<T>() == 0 {
-                self.end = {
-                    // treat the pointer as another integer type with counter.
-                    let end = self.end.as_ptr() as usize;
-                    let end = end.wrapping_sub(1);
-                    let end = end as *mut T;
+        match next_back(self.next, &mut self.end) {
+            // SAFETY:
+            // * points to an initialized element.
+            // * lifetime bound to input object => valid lifetime to return.
+            Some(mut ptr) => Some(unsafe { ptr.as_mut() } ),
+            None => None
+        }
+    }
+}
 
-                    // SAFETY: null-ness doesn't apply here.
-                    unsafe { std::ptr::NonNull::new_unchecked(end) }
-                };
+fn next<T>(next: &mut std::ptr::NonNull<T>, end: std::ptr::NonNull<T>) -> Option<std::ptr::NonNull<T>> {
+    if *next != end {
+        if std::mem::size_of::<T>() == 0 {
+            *next = {
+                // treat the pointer address as an integer counter.
+                let next = next.as_ptr() as usize;
+                let next = next.wrapping_add(1);
+                let next = next as *mut T;
 
-                // SAFETY:
-                // * pointer is aligned.
-                // * pointer is non-null.
-                // * zero-sized type makes this special-case `read` okay.
-                return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_mut() });
-            }
+                // SAFETY: null-ness doesn't apply here.
+                unsafe { std::ptr::NonNull::new_unchecked(next) }
+            };
 
-            self.end = {
+            // SAFETY:
+            // * pointer is aligned.
+            // * pointer is non-null.
+            // * zero-sized type makes it safe to read from this special-case.
+            Some(std::ptr::NonNull::<T>::dangling())
+        } else {
+            let current = *next;
+
+            *next = {
+                // SAFETY: either within the allocated object or one byte past.
+                let next = unsafe { next.as_ptr().add(1) };
+
+                // SAFETY: `add` will maintain the non-null requirement.
+                unsafe { std::ptr::NonNull::new_unchecked(next) }
+            };
+
+            // SAFETY: `next != end` => pointing to initialized value.
+            Some(current)
+        }
+    } else {
+        None
+    }
+}
+
+fn next_back<T>(next: std::ptr::NonNull<T>, end: &mut std::ptr::NonNull<T>) -> Option<std::ptr::NonNull<T>> {
+    if next != *end {
+        if std::mem::size_of::<T>() == 0 {
+            *end = {
+                // treat the pointer as another integer type with counter.
+                let end = end.as_ptr() as usize;
+                let end = end.wrapping_sub(1);
+                let end = end as *mut T;
+
+                // SAFETY: null-ness doesn't apply here.
+                unsafe { std::ptr::NonNull::new_unchecked(end) }
+            };
+
+            // SAFETY:
+            // * pointer is aligned.
+            // * pointer is non-null.
+            // * zero-sized type makes it safe to read from this special-case.
+            Some(std::ptr::NonNull::<T>::dangling())
+        } else {
+            *end = {
                 // SAFETY: greater than `next` so within the allocated object.
-                let end = unsafe { self.end.as_ptr().sub(1) };
+                let end = unsafe { end.as_ptr().sub(1) };
 
                 // SAFETY: `sub` will maintain the non-null requirement.
                 unsafe { std::ptr::NonNull::new_unchecked(end) }
             };
 
-            // SAFETY:
-            // * `self.next != self.end` => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.end.as_mut() };
-
-            Some(current)
-        } else {
-            None
+            // SAFETY: `next != end` => pointing to initialized value.
+            Some(*end)
         }
+    } else {
+        None
     }
 }
 
