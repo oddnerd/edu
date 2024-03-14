@@ -383,18 +383,31 @@ mod test {
     }
 
     #[test]
-    fn index() {
-        let array = [0, 1, 2, 3];
+    fn index_normal_type() {
+        let array = [0, 1, 2, 3,4,5];
         let instance = {
             let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(instance[0], 0);
-        assert_eq!(instance[1], 1);
-        assert_eq!(instance[2], 2);
-        assert_eq!(instance[3], 3);
+        for (index, value) in array.iter().enumerate() {
+            assert_eq!(instance[index], *value);
+        }
+    }
+
+    #[test]
+    fn index_zero_size_type() {
+        let array = [(), (), (), (), (), ()];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        for (index, value) in array.iter().enumerate() {
+            assert_eq!(instance[index], *value);
+        }
     }
 
     #[test]
