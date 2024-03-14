@@ -9,6 +9,7 @@ use super::Linear;
 /// [`Fixed`] is equivalent to Rust's primitive array (`[T; N]`) or C++'s
 /// smart array (`std::array`) which interprets the underlying array as being
 /// 'dumb' that eagerly decays to a pointer and wraps it in a object.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Fixed<T, const N: usize> {
     /// Underlying memory buffer.
     data: [T; N],
@@ -184,21 +185,7 @@ impl<T, const N: usize> std::ops::DerefMut for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {}
-
-impl<T: PartialEq, const N: usize> PartialEq for Fixed<T, N> {
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().eq(other.iter())
-    }
-}
-
-impl<T: Eq, const N: usize> std::cmp::Eq for Fixed<T, N> {}
-
-impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
+impl<'a, T: 'a, const N: usize> super::Array<'a> for Fixed<T, N> {}
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     fn default() -> Self {
@@ -218,27 +205,6 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
         Self::from(initialized)
     }
 }
-
-impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
-    fn clone(&self) -> Self {
-        // SAFETY: the [`MaybeUninit`] is initialized even if the `T` isn't.
-        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-
-        for (from, to) in self.iter().zip(uninitialized.iter_mut()) {
-            to.write(from.clone());
-        }
-
-        // SAFETY:
-        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
-        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
-        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
-
-        Self::from(initialized)
-    }
-}
-
-impl<T: Copy, const N: usize> Copy for Fixed<T, N> {}
 
 #[cfg(test)]
 mod test {
