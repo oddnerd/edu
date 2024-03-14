@@ -140,7 +140,7 @@ mod test {
     #[test]
     fn next_normal_type() {
         let underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
+        let instance = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             unsafe { Iter::new(ptr, underlying.len()) }
@@ -152,7 +152,7 @@ mod test {
     #[test]
     fn next_zero_size_type() {
         let underlying = [(), (), (), (), (), ()];
-        let mut instance = {
+        let instance = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             unsafe { Iter::new(ptr, underlying.len()) }
@@ -164,7 +164,7 @@ mod test {
     #[test]
     fn next_back_normal_type() {
         let underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
+        let instance = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             unsafe { Iter::new(ptr, underlying.len()) }
@@ -176,7 +176,7 @@ mod test {
     #[test]
     fn next_back_zero_size_type() {
         let underlying = [(), (), (), (), (), ()];
-        let mut instance = {
+        let instance = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             unsafe { Iter::new(ptr, underlying.len()) }
