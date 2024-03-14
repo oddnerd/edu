@@ -1,162 +1,20 @@
 //! Iterators over contigious memory buffers of consecutive elements; [`super::Array`].
 
-/// Immutable reference [`Iterator`] over an [`super::Array`].
-pub struct Iter<'a, T: 'a> {
-    /// Pointer to the hypothetical next element.
-    next: std::ptr::NonNull<T>,
+mod iter;
+pub use iter::Iter;
 
-    /// Pointer to a sentinel value when elements are exhausted.
-    end: std::ptr::NonNull<T>,
+mod itermut;
+pub use itermut::IterMut;
 
-    /// Constrain to lifetime of the underlying object.
-    lifetime: std::marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: 'a> Iter<'a, T> {
-    /// Construct from a pointer to the start of a memory buffer and the length
-    /// of that buffer in elements of `T`.
-    ///
-    /// # Safety
-    /// * `ptr` must not be null.
-    /// * `ptr` must have an address aligned for access to `T`.
-    /// * `ptr` must point to one contigious allocated object.
-    /// * `ptr` must point to `len` consecutive initialized instances of `T`.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::iter::Iter;
-    ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let iter = unsafe { Iter::new(ptr, underlying.len()) };
-    ///
-    /// assert!(underlying.iter().eq(iter));
-    /// ```
-    pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
-        Self {
-            next: ptr,
-            end: end_of(ptr, len),
-            lifetime: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        next(&mut self.next, self.end).map(|ptr| unsafe { ptr.as_ref() })
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        if std::mem::size_of::<T>() == 0 {
-            // treat the pointer as any another integer counter.
-            let end = self.end.as_ptr() as usize;
-            let start = self.next.as_ptr() as usize;
-            let size = end.wrapping_sub(start);
-
-            (size, Some(size))
-        } else {
-            // SAFETY:
-            // * both pointers are derived from the same allocated object.
-            // * `next` is within bounds whereas `end` is one byte past the end.
-            // * both pointers are aligned for `T`.
-            // * this does not rely on wrapping logic.
-            let size = unsafe { self.end.as_ptr().offset_from(self.next.as_ptr()) } as usize;
-
-            (size, Some(size))
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        next_back(self.next, &mut self.end).map(|ptr| unsafe { ptr.as_ref() })
-    }
-}
-
-impl<'a, T: 'a> std::iter::ExactSizeIterator for Iter<'a, T> {}
-
-/// Mutable reference [`Iterator`] over an [`super::Array`].
-pub struct IterMut<'a, T: 'a> {
-    /// Pointer to the hypothetical next element.
-    next: std::ptr::NonNull<T>,
-
-    /// Pointer to a sentinel value when elements are exhausted.
-    end: std::ptr::NonNull<T>,
-
-    /// Constrain to lifetime of the underlying object.
-    lifetime: std::marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: 'a> IterMut<'a, T> {
-    /// Construct from a pointer to the start of a memory buffer and the length
-    /// of that buffer in elements of `T`.
-    ///
-    /// # Safety
-    /// * `ptr` must not be null.
-    /// * `ptr` must have an address aligned for access to `T`.
-    /// * `ptr` must point to one contigious allocated object.
-    /// * `ptr` must point to `len` consecutive initialized instances of `T`.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::iter::Iter;
-    ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let iter = unsafe { Iter::new(ptr, underlying.len()) };
-    ///
-    /// assert!(underlying.iter().eq(iter));
-    /// ```
-    pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
-        Self {
-            next: ptr,
-            end: end_of(ptr, len),
-            lifetime: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
-    type Item = &'a mut T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        next(&mut self.next, self.end).map(|mut ptr| unsafe { ptr.as_mut() })
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        if std::mem::size_of::<T>() == 0 {
-            // treat the pointer as any another integer counter.
-            let end = self.end.as_ptr() as usize;
-            let start = self.next.as_ptr() as usize;
-            let size = end.wrapping_sub(start);
-
-            (size, Some(size))
-        } else {
-            // SAFETY:
-            // * both pointers are derived from the same allocated object.
-            // * `next` is within bounds whereas `end` is one byte past the end.
-            // * both pointers are aligned for `T`.
-            // * this does not rely on wrapping logic.
-            let size = unsafe { self.end.as_ptr().offset_from(self.next.as_ptr()) } as usize;
-
-            (size, Some(size))
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        next_back(self.next, &mut self.end).map(|mut ptr| unsafe { ptr.as_mut() })
-    }
-}
-
-impl<'a, T: 'a> std::iter::ExactSizeIterator for IterMut<'a, T> {}
-
-fn end_of<T>(ptr: std::ptr::NonNull<T>, len: usize) -> std::ptr::NonNull<T> {
+/// Obtain a sentinel value pointer for an array at `ptr` with `len` elements.
+///
+/// # Safety
+/// `ptr` must point to `len` consecutive initialized instanced of `T` within
+/// one allocated object
+#[inline]
+unsafe fn end_of<T>(ptr: std::ptr::NonNull<T>, len: usize) -> std::ptr::NonNull<T> {
     if std::mem::size_of::<T>() == 0 {
-        // treat the pointer as any another integer counter.
+        // treat the pointer as any other integer counter.
         let next = ptr.as_ptr() as usize;
         let next = next.wrapping_add(len);
         let next = next as *mut T;
@@ -172,7 +30,14 @@ fn end_of<T>(ptr: std::ptr::NonNull<T>, len: usize) -> std::ptr::NonNull<T> {
     }
 }
 
-fn next<T>(
+/// Implement [`Iterator::next()`] via a (current, sentinel) pointer pair.
+///
+/// # Safety
+/// * `next` and `end` must be aligned for `T`.
+/// * `next` and `end` must point to the same allocated object.
+/// * `end` must be some positive offset from `next`.
+#[inline]
+unsafe fn next<T>(
     next: &mut std::ptr::NonNull<T>,
     end: std::ptr::NonNull<T>,
 ) -> Option<std::ptr::NonNull<T>> {
@@ -212,6 +77,14 @@ fn next<T>(
     }
 }
 
+/// Implement [`DoubleEndedIterator::next_back()`] via a (current, sentinel)
+/// pointer pair.
+///
+/// # Safety
+/// * `next` and `end` must be aligned for `T`.
+/// * `next` and `end` must point to the same allocated object.
+/// * `end` must be some positive offset from `next`.
+#[inline]
 fn next_back<T>(
     next: std::ptr::NonNull<T>,
     end: &mut std::ptr::NonNull<T>,
@@ -247,54 +120,5 @@ fn next_back<T>(
         }
     } else {
         None
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn iter() {
-        // sized type.
-        {
-            let underlying = [0, 1, 2, 3, 4, 5];
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            let iter = unsafe { Iter::new(ptr, underlying.len()) };
-            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
-            assert!(underlying.iter().eq(iter));
-        }
-
-        // zero-sized type.
-        {
-            let underlying = [(), (), (), (), (), ()];
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            let iter = unsafe { Iter::new(ptr, underlying.len()) };
-            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
-            assert!(underlying.iter().eq(iter));
-        }
-    }
-
-    #[test]
-    fn iter_mut() {
-        // sized type.
-        {
-            let mut underlying = [0, 1, 2, 3, 4, 5];
-            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-            let iter = unsafe { IterMut::new(ptr, underlying.len()) };
-            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
-            assert!(underlying.iter().eq(iter));
-        }
-
-        // zero-sized type.
-        {
-            let mut underlying = [(), (), (), (), (), ()];
-            let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-            let iter = unsafe { IterMut::new(ptr, underlying.len()) };
-            assert_eq!((underlying.len(), Some(underlying.len())), iter.size_hint());
-            assert!(underlying.iter().eq(iter));
-        }
     }
 }
