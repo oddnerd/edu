@@ -344,7 +344,7 @@ mod test {
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(*instance.first().unwrap(), instance[0]);
+        assert_eq!(instance.first().unwrap(), array.first().unwrap());
     }
 
     #[test]
@@ -356,7 +356,7 @@ mod test {
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(*instance.first().unwrap(), instance[0]);
+        assert_eq!(instance.first().unwrap(), array.first().unwrap());
     }
 
     #[test]
