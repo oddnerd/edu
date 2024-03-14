@@ -535,8 +535,8 @@ mod test {
     }
 
     #[test]
-    fn ne() {
-        let array = [0, 1, 2, 3];
+    fn ne_normal_type() {
+        let array = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
@@ -544,6 +544,25 @@ mod test {
         };
 
         let other_array = [4, 5, 6, 7];
+        let other = {
+            let ptr = other_array.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, other_array.len()) }
+        };
+
+        assert_ne!(instance, other);
+    }
+
+    #[test]
+    fn ne_zero_size_type() {
+        let array = [()];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        let other_array = [(), ()];
         let other = {
             let ptr = other_array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
