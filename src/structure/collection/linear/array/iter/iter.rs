@@ -4,24 +4,22 @@
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Iter<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
-    next: std::ptr::NonNull<T>,
+    ptr: std::ptr::NonNull<T>,
 
-    /// Pointer to a sentinel value when elements are exhausted.
-    end: std::ptr::NonNull<T>,
+    /// Number of elements yet to be yielded.
+    count: usize,
 
     /// Constrain to lifetime of the underlying object.
     lifetime: std::marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: 'a> Iter<'a, T> {
-    /// Construct from a pointer to the start of a memory buffer and the length
-    /// of that buffer in elements of `T`.
+    /// Construct from a pointer to an array and the number of elements.
     ///
     /// # Safety
-    /// * `ptr` must not be null.
     /// * `ptr` must have an address aligned for access to `T`.
     /// * `ptr` must point to one contigious allocated object.
-    /// * `ptr` must point to `len` consecutive initialized instances of `T`.
+    /// * `ptr` must point to `count` consecutive initialized instances of `T`.
     ///
     /// # Examples
     /// ```
@@ -33,10 +31,10 @@ impl<'a, T: 'a> Iter<'a, T> {
     ///
     /// assert!(underlying.iter().eq(iter));
     /// ```
-    pub unsafe fn new(ptr: std::ptr::NonNull<T>, len: usize) -> Self {
+    pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
-            next: ptr,
-            end: super::end_of(ptr, len),
+            ptr,
+            count,
             lifetime: std::marker::PhantomData,
         }
     }
@@ -46,30 +44,27 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // SAFETY:
-        // * valid (current, sentinel) pointer pair.
-        // * `ptr` points to initialized element.
-        unsafe { super::next(&mut self.next, self.end).map(|ptr| ptr.as_ref()) }
+        if self.count > 0 {
+            // SAFETY: points to initialized element.
+            let result = unsafe { self.ptr.as_ref() };
+
+            self.ptr = unsafe {
+                // SAFETY: either within the allocated object or one byte past.
+                let ptr = self.ptr.as_ptr().add(1);
+
+                // SAFETY: `add` maintains the non-null requirement.
+                std::ptr::NonNull::new_unchecked(ptr)
+            };
+            self.count -= 1;
+
+            Some(result)
+        } else {
+            None
+        }
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        if std::mem::size_of::<T>() == 0 {
-            // treat the pointer as any another integer counter.
-            let end = self.end.as_ptr() as usize;
-            let start = self.next.as_ptr() as usize;
-            let size = end.wrapping_sub(start);
-
-            (size, Some(size))
-        } else {
-            // SAFETY:
-            // * both pointers are derived from the same allocated object.
-            // * `next` is within bounds whereas `end` is one byte past the end.
-            // * both pointers are aligned for `T`.
-            // * this does not rely on wrapping logic.
-            let size = unsafe { self.end.as_ptr().offset_from(self.next.as_ptr()) } as usize;
-
-            (size, Some(size))
-        }
+        (self.count, Some(self.count))
     }
 }
 
@@ -79,10 +74,19 @@ impl<'a, T: 'a> std::iter::ExactSizeIterator for Iter<'a, T> {}
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        // SAFETY:
-        // * valid (current, sentinel) pointer pair.
-        // * `ptr` points to initialized element.
-        unsafe { super::next_back(self.next, &mut self.end).map(|ptr| ptr.as_ref()) }
+        if self.count > 0 {
+            self.count -= 1;
+
+            Some(unsafe {
+                // SAFETY: points to final element within the allocated object.
+                let ptr = self.ptr.as_ptr().add(self.count);
+
+                // SAFETY: points to initialized element.
+                ptr.as_ref().unwrap_unchecked()
+            })
+        } else {
+            None
+        }
     }
 }
 
