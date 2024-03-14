@@ -107,7 +107,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn size_hint_for_normal_types() {
+    fn size_hint_for_normal_types_is_exact_element_count() {
         let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = underlying.as_ptr().cast_mut();
@@ -120,20 +120,20 @@ mod test {
     }
 
     #[test]
-    fn size_hint_for_zero_size_types() {
-        let underlying = [(), (), (), (), (), ()];
+    fn size_hint_for_zero_size_types_is_constructed_count() {
+        let count = 256;
+
         let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
+            let ptr = std::ptr::NonNull::<()>::dangling();
+            unsafe { IterMut::new(ptr, count) }
         };
 
-        assert_eq!(underlying.len(), instance.size_hint().0);
-        assert_eq!(underlying.len(), instance.size_hint().1.unwrap());
+        assert_eq!(count, instance.size_hint().0);
+        assert_eq!(count, instance.size_hint().1.unwrap());
     }
 
     #[test]
-    fn len_for_normal_types() {
+    fn len_for_normal_types_is_exact_element_count() {
         let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = underlying.as_ptr().cast_mut();
@@ -145,7 +145,7 @@ mod test {
     }
 
     #[test]
-    fn len_for_zero_size_types() {
+    fn len_for_zero_size_types_is_constructed_count() {
         let underlying = [(), (), (), (), (), ()];
         let instance = {
             let ptr = underlying.as_ptr().cast_mut();
@@ -157,7 +157,31 @@ mod test {
     }
 
     #[test]
-    fn next_normal_type() {
+    fn next_yields_element_count_for_normal_types() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { IterMut::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(underlying.len(), instance.count());
+    }
+
+    #[test]
+    fn next_yields_element_count_for_zero_size_types() {
+        let underlying = [(), (), (), (), (), ()];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { IterMut::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(underlying.len(), instance.count());
+    }
+
+    #[test]
+    fn next_yields_front_element() {
         let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = underlying.as_ptr().cast_mut();
@@ -169,32 +193,34 @@ mod test {
     }
 
     #[test]
-    fn next_zero_size_type() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
-
-        assert!(underlying.iter().eq(instance));
-    }
-
-    #[test]
-    fn next_back_normal_type() {
+    fn next_back_yields_element_count_for_normal_types() {
         let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
             unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+        }
+        .rev();
 
-        assert!(underlying.iter().rev().eq(instance.rev()));
+        assert_eq!(underlying.len(), instance.count());
     }
 
     #[test]
-    fn next_back_zero_size_type() {
+    fn next_back_yields_element_count_for_zero_size_types() {
         let underlying = [(), (), (), (), (), ()];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { IterMut::new(ptr, underlying.len()) }
+        }
+        .rev();
+
+        assert_eq!(underlying.len(), instance.count());
+    }
+
+    #[test]
+    fn next_back_yields_back_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
