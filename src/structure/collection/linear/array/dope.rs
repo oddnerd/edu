@@ -222,8 +222,17 @@ mod test {
     }
 
     #[test]
-    fn from_slice() {
-        let array = [0, 1, 2, 3];
+    fn from_slice_of_normal_type() {
+        let array = [0, 1, 2, 3, 4, 5];
+        let instance = Dope::from(array.as_slice());
+
+        assert_eq!(instance.ptr.as_ptr(), array.as_slice().as_ptr().cast_mut());
+        assert_eq!(instance.count, array.as_slice().len());
+    }
+
+    #[test]
+    fn from_slice_of_zero_size_type() {
+        let array = [(), (), (), (), (), ()];
         let instance = Dope::from(array.as_slice());
 
         assert_eq!(instance.ptr.as_ptr(), array.as_slice().as_ptr().cast_mut());
