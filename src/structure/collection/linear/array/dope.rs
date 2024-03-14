@@ -196,377 +196,335 @@ mod test {
     use super::*;
 
     #[test]
-    fn new_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn new_initializes_member_variables() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.ptr.as_ptr(), array.as_ptr().cast_mut());
-        assert_eq!(instance.count, array.len());
+        assert_eq!(instance.ptr.as_ptr(), underlying.as_ptr().cast_mut());
+        assert_eq!(instance.count, underlying.len());
     }
 
     #[test]
-    fn new_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
+    fn from_slice_initializes_member_variables() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = Dope::from(underlying.as_slice());
+
+        assert_eq!(instance.ptr.as_ptr(), underlying.as_ptr().cast_mut());
+        assert_eq!(instance.count, underlying.len());
+    }
+
+    #[test]
+    fn count_for_normal_types_is_exact_element_count() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.ptr.as_ptr(), array.as_ptr().cast_mut());
-        assert_eq!(instance.count, array.len());
+        assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
-    fn from_slice_of_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
-        let instance = Dope::from(array.as_slice());
-
-        assert_eq!(instance.ptr.as_ptr(), array.as_slice().as_ptr().cast_mut());
-        assert_eq!(instance.count, array.as_slice().len());
-    }
-
-    #[test]
-    fn from_slice_of_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
-        let instance = Dope::from(array.as_slice());
-
-        assert_eq!(instance.ptr.as_ptr(), array.as_slice().as_ptr().cast_mut());
-        assert_eq!(instance.count, array.as_slice().len());
-    }
-
-    #[test]
-    fn count_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn count_for_zero_size_types_is_constructed_count() {
+        let underlying = [(), (), (), (), (), ()];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.count(), array.len());
+        assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
-    fn count_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
+    fn into_iter_yields_element_count_for_normal_types() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.count(), array.len());
+        assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
-    fn into_iter_of_normal_type() {
-        let mut array = [0, 1, 2, 3, 4, 5];
+    fn into_iter_yields_element_count_for_zero_size_types() {
+        let underlying = [(), (), (), (), (), ()];
         let instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.into_iter().copied().eq(array.into_iter()));
+        assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
-    fn into_iter_of_zero_size_type() {
-        let mut array = [(), (), (), (), (), ()];
+    fn into_iter_yields_elements() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+
         let instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.into_iter().copied().eq(array.into_iter()));
+        assert!(instance.into_iter().eq(underlying.as_slice()));
     }
 
     #[test]
-    fn iter_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn iter_yields_element_count_for_normal_types() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.iter().eq(array.iter()));
+        assert_eq!(instance.iter().count(), underlying.len());
     }
 
     #[test]
-    fn iter_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
+    fn iter_yields_element_count_for_zero_size_types() {
+        let underlying = [(), (), (), (), (), ()];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.iter().eq(array.iter()));
+        assert_eq!(instance.iter().count(), underlying.len());
     }
 
     #[test]
-    fn iter_mut_normal_type() {
-        let mut array = [0, 1, 2, 3, 4, 5];
+    fn iter_yields_elements() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert!(instance.iter().eq(underlying.as_slice()));
+    }
+
+    #[test]
+    fn iter_mut_yields_element_count_for_normal_types() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_mut_ptr();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.iter_mut().eq(array.iter_mut()));
+        assert_eq!(instance.iter_mut().count(), underlying.len());
     }
 
     #[test]
-    fn iter_mut_zero_size_type() {
-        let mut array = [(), (), (), (), (), ()];
+    fn iter_mut_yields_element_count_for_zero_size_types() {
+        let mut underlying = [(), (), (), (), (), ()];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_mut_ptr();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.iter_mut().eq(array.iter_mut()));
+        assert_eq!(instance.iter_mut().count(), underlying.len());
     }
 
     #[test]
-    fn first_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+    fn iter_mut_yields_elements() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let mut instance = {
+            let ptr = underlying.as_mut_ptr();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.first().unwrap(), array.first().unwrap());
+        assert!(instance.iter_mut().eq(underlying.as_slice()));
     }
 
     #[test]
-    fn first_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
+    fn first_yields_none_when_empty() {
+        let underlying: [(); 0] = [];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.first().unwrap(), array.first().unwrap());
+        assert_eq!(instance.first(), None);
     }
 
     #[test]
-    fn last_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn first_yields_correct_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
-        assert_eq!(instance.last().unwrap(), array.last().unwrap());
+
+        assert_eq!(instance.first(), underlying.first());
     }
 
     #[test]
-    fn last_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
+    fn last_yields_none_when_empty() {
+        let underlying: [(); 0] = [];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.last().unwrap(), array.last().unwrap());
+        assert_eq!(instance.last(), None);
     }
 
     #[test]
-    fn index_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn last_yields_correct_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        for (index, value) in array.iter().enumerate() {
-            assert_eq!(instance[index], *value);
+        assert_eq!(instance.last(), underlying.last());
+    }
+
+    #[test]
+    fn index_yields_correct_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        for (index, value) in underlying.iter().enumerate() {
+            use std::ops::Index;
+            assert_eq!(instance.index(index), value);
         }
     }
 
     #[test]
-    fn index_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
-
-        for (index, value) in array.iter().enumerate() {
-            assert_eq!(instance[index], *value);
-        }
-    }
-
-    #[test]
-    fn index_mut_normal_type() {
-        let mut array = [0, 1, 2, 3, 4, 5];
+    fn index_mut_yields_correct_element() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = underlying.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        for (index, value) in array.iter().enumerate() {
-            assert_eq!(instance[index], *value);
-
-            instance[index] = 0;
-
-            assert_eq!(instance[index], 0);
+        for (index, value) in underlying.iter().enumerate() {
+            use std::ops::IndexMut;
+            assert_eq!(instance.index_mut(index), value);
         }
     }
 
     #[test]
-    fn index_mut_zero_size_type() {
-        let mut array = [(), (), (), (), (), ()];
-        let mut instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
-
-        for (index, value) in array.iter().enumerate() {
-            assert_eq!(instance[index], *value);
-
-            instance[index] = ();
-
-            assert_eq!(instance[index], ());
-        }
-    }
-
-    #[test]
-    fn deref_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn deref_to_valid_slice() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         use std::ops::Deref;
-        assert_eq!(instance.deref(), array.as_slice());
+        assert_eq!(instance.deref(), underlying.as_slice());
     }
 
     #[test]
-    fn deref_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
-
-        use std::ops::Deref;
-        assert_eq!(instance.deref(), array.as_slice());
-    }
-
-    #[test]
-    fn deref_mut_normal_type() {
-        let mut array = [0, 1, 2, 3, 4, 5];
+    fn deref_mut_to_valid_slice() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = underlying.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         use std::ops::DerefMut;
-        assert_eq!(instance.deref_mut(), array.as_slice());
+        assert_eq!(instance.deref_mut(), underlying.as_mut_slice());
     }
 
     #[test]
-    fn deref_mut_zero_size_type() {
-        let mut array = [(), (), (), (), (), ()];
-        let mut instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
+    fn eq_for_same_underlying() {
+        let underlying = [0, 1, 2, 3, 4, 5];
 
-        use std::ops::DerefMut;
-        assert_eq!(instance.deref_mut(), array.as_slice());
-    }
-
-    #[test]
-    fn eq_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         let other = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         assert_eq!(instance, other);
     }
 
     #[test]
-    fn eq_zero_size_type() {
-        let array = [(), (), (), (), (), ()];
+    fn eq_for_same_elements() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
+        let underlying = [0, 1, 2, 3, 4, 5];
         let other = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         assert_eq!(instance, other);
     }
 
     #[test]
-    fn ne_normal_type() {
-        let array = [0, 1, 2, 3, 4, 5];
+    fn ne_for_different_count() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        let other_array = [4, 5, 6, 7];
         let other = {
-            let ptr = other_array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, other_array.len()) }
+            unsafe { Dope::new(ptr, underlying.len() - 1) }
         };
 
         assert_ne!(instance, other);
     }
 
     #[test]
-    fn ne_zero_size_type() {
-        let array = [()];
+    fn ne_for_different_elements() {
+        let underlying = [0];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        let other_array = [(), ()];
+        let underlying = [1];
         let other = {
-            let ptr = other_array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, other_array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         assert_ne!(instance, other);
