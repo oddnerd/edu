@@ -15,23 +15,22 @@ use super::Linear;
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Dope<'a, T: 'a> {
     /// Pointer to the start of the array.
-    data: std::ptr::NonNull<T>,
+    ptr: std::ptr::NonNull<T>,
 
     /// Number of elements within the array.
-    len: usize,
+    count: usize,
 
     /// Bind lifetime to underlying memory buffer.
     lifetime: std::marker::PhantomData<&'a mut T>,
 }
 
 impl<'a, T: 'a> Dope<'a, T> {
-    /// Construct from a pointer to the start of a memory buffer and the length
-    /// of that buffer in elements of `T`.
+    /// Construct from a pointer to an array and the number of elements.
     ///
     /// # Safety
-    /// * `data` must have an address aligned for access to `T`.
-    /// * `data` must point to one contigious allocated object.
-    /// * `data` must point to `len` consecutive initialized instances of `T`.
+    /// * `ptr` must have an address aligned for access to `T`.
+    /// * `ptr` must point to one contigious allocated object.
+    /// * `ptr` must point to `len` consecutive initialized instances of `T`.
     ///
     /// # Examples
     /// ```
@@ -44,10 +43,10 @@ impl<'a, T: 'a> Dope<'a, T> {
     ///
     /// assert!(underlying.iter().eq(dope.iter()));
     /// ```
-    pub unsafe fn new(data: std::ptr::NonNull<T>, len: usize) -> Self {
+    pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
-            data,
-            len,
+            ptr,
+            count,
             lifetime: std::marker::PhantomData,
         }
     }
@@ -56,13 +55,13 @@ impl<'a, T: 'a> Dope<'a, T> {
 impl<'a, T: 'a> std::convert::From<&'a [T]> for Dope<'a, T> {
     fn from(slice: &'a [T]) -> Self {
         Self {
-            data: {
+            ptr: {
                 let ptr = slice.as_ptr().cast_mut();
 
                 // SAFETY: `slice` exists => pointer is non-null.
                 unsafe { std::ptr::NonNull::new_unchecked(ptr) }
             },
-            len: slice.len(),
+            count: slice.len(),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -72,7 +71,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     type Element = T;
 
     fn count(&self) -> usize {
-        self.len
+        self.count
     }
 }
 
@@ -158,10 +157,10 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
     fn into_iter(self) -> Self::IntoIter {
         Self::IntoIter {
             next: unsafe {
-                let start = self.data;
+                let start = self.ptr;
 
                 // SAFETY: points to one byte past the allocated object.
-                let end = start.as_ptr().add(self.len);
+                let end = start.as_ptr().add(self.count);
 
                 // SAFETY: `add` maintains the non-null requirement.
                 let end = std::ptr::NonNull::new_unchecked(end);
@@ -178,14 +177,14 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::Iter::new(self.data, self.len) }
+        unsafe { super::iter::Iter::new(self.ptr, self.count) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
         // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::IterMut::new(self.data, self.len) }
+        unsafe { super::iter::IterMut::new(self.ptr, self.count) }
     }
 
     fn first(&self) -> Option<&Self::Element> {
@@ -193,7 +192,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
             // SAFETY:
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
-            unsafe { Some(self.data.as_ref()) }
+            unsafe { Some(self.ptr.as_ref()) }
         } else {
             None
         }
@@ -201,10 +200,10 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
 
     fn last(&self) -> Option<&Self::Element> {
         if !self.is_empty() {
-            let ptr = self.data.as_ptr();
+            let ptr = self.ptr.as_ptr();
 
             // SAFETY: points to the final element within the allocated object.
-            let ptr = unsafe { ptr.add(self.len - 1) };
+            let ptr = unsafe { ptr.add(self.count - 1) };
 
             // SAFETY:
             // * constructor contract => pointed to `T` is initialized.
@@ -222,8 +221,8 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     fn index(&self, index: usize) -> &Self::Output {
         // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe {
-            assert!(index < self.len);
-            self.data.as_ptr().add(index)
+            assert!(index < self.count);
+            self.ptr.as_ptr().add(index)
         };
 
         // SAFETY:
@@ -237,8 +236,8 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe {
-            assert!(index < self.len);
-            self.data.as_ptr().add(index)
+            assert!(index < self.count);
+            self.ptr.as_ptr().add(index)
         };
 
         // SAFETY:
@@ -256,7 +255,7 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
         // * constructor contract => `self.data` is aligned.
         // * constructor contract => every element is initialized.
         // * constructor contract => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
+        unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) }
     }
 }
 
@@ -266,7 +265,7 @@ impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
         // * constructor contract => `self.data` is aligned.
         // * constructor contract => every element is initialized.
         // * constructor contract => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
+        unsafe { std::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.count) }
     }
 }
 
@@ -291,8 +290,8 @@ mod test {
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        assert_eq!(instance.data.as_ptr(), array.as_ptr().cast_mut());
-        assert_eq!(instance.len, array.len());
+        assert_eq!(instance.ptr.as_ptr(), array.as_ptr().cast_mut());
+        assert_eq!(instance.count, array.len());
     }
 
     #[test]
@@ -300,8 +299,8 @@ mod test {
         let array = [0, 1, 2, 3];
         let instance = Dope::from(array.as_slice());
 
-        assert_eq!(instance.data.as_ptr(), array.as_slice().as_ptr().cast_mut());
-        assert_eq!(instance.len, array.as_slice().len());
+        assert_eq!(instance.ptr.as_ptr(), array.as_slice().as_ptr().cast_mut());
+        assert_eq!(instance.count, array.as_slice().len());
     }
 
     #[test]
