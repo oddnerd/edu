@@ -90,6 +90,14 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Iter<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // SAFETY: points to `count` initialized instance of `T`.
+        let slice = unsafe {std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
+        f.debug_list().entries(slice).finish()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
