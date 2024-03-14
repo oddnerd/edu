@@ -411,23 +411,39 @@ mod test {
     }
 
     #[test]
-    fn index_mut() {
-        let mut array = [0, 1, 2, 3];
+    fn index_mut_normal_type() {
+        let mut array = [0, 1, 2, 3,4,5];
         let mut instance = {
             let ptr = array.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, array.len()) }
         };
 
-        instance[0] = 4;
-        instance[1] = 5;
-        instance[2] = 6;
-        instance[3] = 7;
+        for (index, value) in array.iter().enumerate() {
+            assert_eq!(instance[index], *value);
 
-        assert_eq!(instance[0], 4);
-        assert_eq!(instance[1], 5);
-        assert_eq!(instance[2], 6);
-        assert_eq!(instance[3], 7);
+            instance[index] = 0;
+
+            assert_eq!(instance[index], 0);
+        }
+    }
+
+    #[test]
+    fn index_mut_zero_size_type() {
+        let mut array = [(), (), (), (),(),()];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        for (index, value) in array.iter().enumerate() {
+            assert_eq!(instance[index], *value);
+
+            instance[index] = ();
+
+            assert_eq!(instance[index], ());
+        }
     }
 
     #[test]
