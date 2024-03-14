@@ -45,7 +45,9 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.count > 0 {
-            // SAFETY: points to initialized element.
+            // SAFETY:
+            // * points to initialized element.
+            // * lifetime bound to underlying input.
             let result = unsafe { self.ptr.as_ref() };
 
             self.ptr = unsafe {
@@ -81,7 +83,9 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
                 // SAFETY: points to final element within the allocated object.
                 let ptr = self.ptr.as_ptr().add(self.count);
 
-                // SAFETY: points to initialized element.
+                // SAFETY:
+                // * points to initialized element.
+                // * lifetime bound to underlying input.
                 ptr.as_ref().unwrap_unchecked()
             })
         } else {
@@ -93,7 +97,7 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Iter<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: points to `count` initialized instance of `T`.
-        let slice = unsafe {std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
+        let slice = unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
         f.debug_list().entries(slice).finish()
     }
 }
