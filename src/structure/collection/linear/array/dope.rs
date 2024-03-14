@@ -196,8 +196,21 @@ mod test {
     use super::*;
 
     #[test]
-    fn new() {
-        let array = [0, 1, 2, 3];
+    fn new_normal_type() {
+        let array = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(instance.ptr.as_ptr(), array.as_ptr().cast_mut());
+        assert_eq!(instance.count, array.len());
+    }
+
+    #[test]
+    fn new_zero_size_type() {
+        let array = [(), (), (), (), (), ()];
         let instance = {
             let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
