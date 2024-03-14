@@ -130,6 +130,27 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
 
 impl<'a, T: 'a> std::iter::ExactSizeIterator for IntoIter<'a, T> {}
 
+impl<'a, T: 'a> std::iter::DoubleEndedIterator for IntoIter<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.next.start != self.next.end {
+            self.next.end = unsafe {
+                // SAFETY: greater than `next` so within the allocated object.
+                let next = self.next.start.as_ptr().sub(1);
+
+                // SAFETY: `sub` will maintain the non-null requirement.
+                std::ptr::NonNull::new_unchecked(next)
+            };
+
+            // SAFETY:
+            // * `next` != `end` => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
+            Some(unsafe { self.next.start.as_ref() })
+        } else {
+            None
+        }
+    }
+}
+
 impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
     type Item = &'a T;
 
