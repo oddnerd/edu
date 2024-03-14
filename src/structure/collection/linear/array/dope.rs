@@ -264,8 +264,20 @@ mod test {
     }
 
     #[test]
-    fn into_iter() {
-        let mut array = [0, 1, 2, 3];
+    fn into_iter_of_normal_type() {
+        let mut array = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert!(instance.into_iter().copied().eq(array.into_iter()));
+    }
+
+    #[test]
+    fn into_iter_of_zero_size_type() {
+        let mut array = [(), (), (), (), (), ()];
         let instance = {
             let ptr = array.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
