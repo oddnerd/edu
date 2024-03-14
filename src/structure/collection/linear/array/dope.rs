@@ -29,7 +29,6 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// of that buffer in elements of `T`.
     ///
     /// # Safety
-    /// * `data` must not be null.
     /// * `data` must have an address aligned for access to `T`.
     /// * `data` must point to one contigious allocated object.
     /// * `data` must point to `len` consecutive initialized instances of `T`.
