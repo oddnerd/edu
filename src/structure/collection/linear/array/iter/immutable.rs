@@ -1,6 +1,6 @@
 //! Implementation of [`Iter`].
 
-/// Immutable reference [`Iterator`] over an [`super::Array`].
+/// Immutable reference [`Iterator`] over an [`super::super::Array`].
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Iter<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
