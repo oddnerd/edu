@@ -312,8 +312,20 @@ mod test {
     }
 
     #[test]
-    fn iter_mut() {
-        let mut array = [0, 1, 2, 3];
+    fn iter_mut_normal_type() {
+        let mut array = [0, 1, 2, 3, 4, 5];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert!(instance.iter_mut().eq(array.iter_mut()));
+    }
+
+    #[test]
+    fn iter_mut_zero_size_type() {
+        let mut array = [(), (), (), (), (), ()];
         let mut instance = {
             let ptr = array.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
