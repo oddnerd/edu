@@ -12,7 +12,7 @@ use super::Linear;
 ///
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Hash)]
 pub struct Dope<'a, T: 'a> {
     /// Pointer to the start of the array.
     ptr: std::ptr::NonNull<T>,
@@ -102,7 +102,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 
     fn first(&self) -> Option<&Self::Element> {
-        if !self.is_empty() {
+        if self.is_empty().not() {
             // SAFETY:
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
@@ -113,7 +113,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 
     fn last(&self) -> Option<&Self::Element> {
-        if !self.is_empty() {
+        if self.is_empty().not() {
             let ptr = self.ptr.as_ptr();
 
             // SAFETY: points to the final element within the allocated object.
