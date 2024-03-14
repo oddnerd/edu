@@ -447,8 +447,8 @@ mod test {
     }
 
     #[test]
-    fn deref() {
-        let array = [0, 1, 2, 3];
+    fn deref_normal_type() {
+        let array = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
@@ -456,7 +456,20 @@ mod test {
         };
 
         use std::ops::Deref;
-        assert_eq!(*instance.deref(), *array.as_slice());
+        assert_eq!(instance.deref(), array.as_slice());
+    }
+
+    #[test]
+    fn deref_zero_size_type() {
+        let array = [(), (), (), (), (), ()];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        use std::ops::Deref;
+        assert_eq!(instance.deref(), array.as_slice());
     }
 
     #[test]
@@ -469,7 +482,7 @@ mod test {
         };
 
         use std::ops::DerefMut;
-        assert_eq!(*instance.deref_mut(), *array.as_slice());
+        assert_eq!(instance.deref_mut(), array.as_slice());
     }
 
     #[test]
