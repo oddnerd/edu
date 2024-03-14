@@ -73,6 +73,8 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
     }
 }
 
+impl<'a, T: 'a> std::iter::FusedIterator for IterMut<'a, T> {}
+
 impl<'a, T: 'a> std::iter::ExactSizeIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {

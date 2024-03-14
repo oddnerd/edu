@@ -73,6 +73,8 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
     }
 }
 
+impl<'a, T: 'a> std::iter::FusedIterator for Iter<'a, T> {}
+
 impl<'a, T: 'a> std::iter::ExactSizeIterator for Iter<'a, T> {}
 
 impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
