@@ -112,6 +112,20 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
             None
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let size = unsafe {
+            let start = self.next.start.as_ptr();
+            let end = self.next.end.as_ptr();
+
+            // SAFETY:
+            // * both pointers are within the same allocated object.
+            // * difference between pointers is an exact multiple of `T`.
+            end.offset_from(start) as usize
+        };
+
+        (size, Some(size))
+    }
 }
 
 impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
