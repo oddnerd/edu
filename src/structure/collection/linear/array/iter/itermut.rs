@@ -1,6 +1,7 @@
 //! Implementation of [`IterMut`].
 
 /// Mutable reference [`Iterator`] over an [`super::Array`].
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct IterMut<'a, T: 'a> {
     /// Pointer to the hypothetical next element.
     next: std::ptr::NonNull<T>,
