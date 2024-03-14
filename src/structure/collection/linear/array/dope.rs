@@ -102,6 +102,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 
     fn first(&self) -> Option<&Self::Element> {
+        use std::ops::Not;
         if self.is_empty().not() {
             // SAFETY:
             // * constructor contract => pointed to `T` is initialized.
@@ -113,6 +114,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 
     fn last(&self) -> Option<&Self::Element> {
+        use std::ops::Not;
         if self.is_empty().not() {
             let ptr = self.ptr.as_ptr();
 
