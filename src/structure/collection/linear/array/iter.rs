@@ -1,7 +1,7 @@
 //! Iterators over contigious memory buffers of consecutive elements; [`super::Array`].
 
-mod iter;
-pub use iter::Iter;
+mod immutable;
+pub use immutable::Iter;
 
-mod itermut;
-pub use itermut::IterMut;
+mod mutable;
+pub use mutable::IterMut;
