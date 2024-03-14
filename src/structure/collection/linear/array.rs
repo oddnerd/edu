@@ -25,4 +25,13 @@ use super::Linear;
 pub trait Array<'a>:
     Linear<'a> + std::ops::IndexMut<usize> + std::ops::DerefMut<Target = [Self::Element]>
 {
+    /// Obtain an immutable slice to the elements.
+    fn as_slice(&self) -> &[Self::Element] {
+        self.deref()
+    }
+
+    /// Obtain a mutable slice to the elements.
+    fn as_mut_slice(&mut self) -> &mut [Self::Element] {
+        self.deref_mut()
+    }
 }
