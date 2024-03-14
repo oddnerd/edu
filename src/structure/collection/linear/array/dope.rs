@@ -12,6 +12,7 @@ use super::Linear;
 ///
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Dope<'a, T: 'a> {
     /// Pointer to the start of the array.
     data: std::ptr::NonNull<T>,
@@ -53,7 +54,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dope<'a, T> {
+impl<'a, T: 'a> std::convert::From<&'a [T]> for Dope<'a, T> {
     fn from(slice: &'a [T]) -> Self {
         Self {
             data: {
@@ -81,47 +82,11 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 /// Note that because [`Dope`] is inherently non-owning over the memory buffer
 /// it spans, therefore the values this yields are themselves references.
 pub struct IntoIter<'a, T: 'a> {
-    /// Ownership of the values.
-    data: Dope<'a, T>,
-
     /// Elements within this range have yet to be yielded.
     next: std::ops::Range<std::ptr::NonNull<T>>,
-}
 
-impl<'a, T: 'a> IntoIter<'a, T> {
-    /// Construct from a [`Dope`].
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    /// use rust::structure::collection::linear::array::dope::IntoIter;
-    ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
-    /// let iter = IntoIter::new(dope);
-    ///
-    /// assert!(underlying.iter().eq(iter));
-    /// ```
-    pub fn new(dope: Dope<'a, T>) -> Self {
-        let mut tmp = Self {
-            data: dope,
-
-            // careful to use pointers to the member and not the parameter.
-            next: std::ptr::NonNull::dangling()..std::ptr::NonNull::dangling(),
-        };
-
-        // SAFETY: `wrapping_add` will maintain the non-null requirement.
-        unsafe {
-            let start = tmp.data.data;
-
-            let end = std::ptr::NonNull::new_unchecked(start.as_ptr().wrapping_add(tmp.data.len));
-
-            tmp.next = start..end;
-        }
-
-        tmp
-    }
+    /// Restrict lifetime of references to underlying instance.
+    lifetime: std::marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
@@ -130,19 +95,56 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         if self.next.start != self.next.end {
             // SAFETY:
-            // * `wrapping_add` => pointer is aligned.
-            // * next != end => pointing to initialized value.
+            // * `next` != `end` => pointing to initialized value.
             // * lifetime bound to input object => valid lifetime to return.
             let current = unsafe { self.next.start.as_ref() };
 
-            // SAFETY: `wrapping_add` will maintain the non-null requirement.
             self.next.start = unsafe {
-                let next = self.next.start.as_ptr().wrapping_add(1);
+                // SAFETY: can at most be one byte past the allocated object.
+                let next = self.next.start.as_ptr().add(1);
 
+                // SAFETY: `add` will maintain the non-null requirement.
                 std::ptr::NonNull::new_unchecked(next)
             };
 
             Some(current)
+        } else {
+            None
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let size = unsafe {
+            let start = self.next.start.as_ptr();
+            let end = self.next.end.as_ptr();
+
+            // SAFETY:
+            // * both pointers are within the same allocated object.
+            // * difference between pointers is an exact multiple of `T`.
+            end.offset_from(start) as usize
+        };
+
+        (size, Some(size))
+    }
+}
+
+impl<'a, T: 'a> std::iter::ExactSizeIterator for IntoIter<'a, T> {}
+
+impl<'a, T: 'a> std::iter::DoubleEndedIterator for IntoIter<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.next.start != self.next.end {
+            self.next.end = unsafe {
+                // SAFETY: greater than `next` so within the allocated object.
+                let next = self.next.start.as_ptr().sub(1);
+
+                // SAFETY: `sub` will maintain the non-null requirement.
+                std::ptr::NonNull::new_unchecked(next)
+            };
+
+            // SAFETY:
+            // * `next` != `end` => pointing to initialized value.
+            // * lifetime bound to input object => valid lifetime to return.
+            Some(unsafe { self.next.start.as_ref() })
         } else {
             None
         }
@@ -155,30 +157,41 @@ impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
     type IntoIter = IntoIter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter::new(self)
+        Self::IntoIter {
+            next: unsafe {
+                let start = self.data;
+
+                // SAFETY: points to one byte past the allocated object.
+                let end = start.as_ptr().add(self.len);
+
+                // SAFETY: `add` maintains the non-null requirement.
+                let end = std::ptr::NonNull::new_unchecked(end);
+
+                start..end
+            },
+            lifetime: std::marker::PhantomData,
+        }
     }
 }
 
 impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        // # SAFETY:
+        // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::Iter::new(self.data, self.len) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        // # SAFETY:
+        // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
         unsafe { super::iter::IterMut::new(self.data, self.len) }
     }
 
     fn first(&self) -> Option<&Self::Element> {
-        if self.len > 0 {
+        if !self.is_empty() {
             // SAFETY:
-            // * non-empty => within the allocated object.
-            // * constructor contract => `self.data` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
             unsafe { Some(self.data.as_ref()) }
@@ -188,15 +201,13 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 
     fn last(&self) -> Option<&Self::Element> {
-        if self.len > 0 {
+        if !self.is_empty() {
             let ptr = self.data.as_ptr();
 
-            // SAFETY: remains within the one underlying allocated object.
+            // SAFETY: points to the final element within the allocated object.
             let ptr = unsafe { ptr.add(self.len - 1) };
 
             // SAFETY:
-            // * non-empty => within the allocated object.
-            // * constructor contract => `ptr` is aligned.
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
             unsafe { Some(&*ptr) }
@@ -210,27 +221,31 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
     fn index(&self, index: usize) -> &Self::Output {
-        assert!(index < self.len);
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe {
+            assert!(index < self.len);
+            self.data.as_ptr().add(index)
+        };
+
         // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within the allocated object.
-        // * `add` => pointer is aligned.
-        // * underlying object is initialized => points to initialized `T`.
+        // * constructor contract => pointed to `T` is initialized.
         // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &*self.data.as_ptr().add(index) }
+        unsafe { &*ptr }
     }
 }
 
 impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        assert!(index < self.len);
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe {
+            assert!(index < self.len);
+            self.data.as_ptr().add(index)
+        };
+
         // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within the allocated object.
-        // * `add` => pointer is aligned.
-        // * underlying object is initialized => points to initialized `T`.
+        // * constructor contract => pointed to `T` is initialized.
         // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &mut *self.data.as_ptr().add(index) }
+        unsafe { &mut *ptr }
     }
 }
 
@@ -239,9 +254,9 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
 
     fn deref(&self) -> &Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned.
-        // * `data` is initialized => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
+        // * constructor contract => `self.data` is aligned.
+        // * constructor contract => every element is initialized.
+        // * constructor contract => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
     }
 }
@@ -249,22 +264,14 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
 impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // SAFETY:
-        // * `data` is aligned => pointer is aligned.
-        // * `data` is initialized => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
+        // * constructor contract => `self.data` is aligned.
+        // * constructor contract => every element is initialized.
+        // * constructor contract => slice is over one allocated object.
         unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
     }
 }
 
 impl<'a, T: 'a> Array<'a> for Dope<'a, T> {}
-
-impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().eq(other.iter())
-    }
-}
-
-impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
