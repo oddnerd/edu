@@ -128,6 +128,8 @@ impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
     }
 }
 
+impl<'a, T: 'a> std::iter::ExactSizeIterator for IntoIter<'a, T> {}
+
 impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
     type Item = &'a T;
 
