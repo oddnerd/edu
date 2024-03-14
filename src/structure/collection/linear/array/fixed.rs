@@ -185,7 +185,7 @@ impl<T, const N: usize> std::ops::DerefMut for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> super::Array<'a> for Fixed<T, N> {}
+impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {}
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     fn default() -> Self {
