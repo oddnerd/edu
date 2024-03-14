@@ -384,7 +384,7 @@ mod test {
 
     #[test]
     fn index_normal_type() {
-        let array = [0, 1, 2, 3,4,5];
+        let array = [0, 1, 2, 3, 4, 5];
         let instance = {
             let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
@@ -412,7 +412,7 @@ mod test {
 
     #[test]
     fn index_mut_normal_type() {
-        let mut array = [0, 1, 2, 3,4,5];
+        let mut array = [0, 1, 2, 3, 4, 5];
         let mut instance = {
             let ptr = array.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
@@ -430,7 +430,7 @@ mod test {
 
     #[test]
     fn index_mut_zero_size_type() {
-        let mut array = [(), (), (), (),(),()];
+        let mut array = [(), (), (), (), (), ()];
         let mut instance = {
             let ptr = array.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
@@ -473,8 +473,21 @@ mod test {
     }
 
     #[test]
-    fn deref_mut() {
-        let mut array = [0, 1, 2, 3];
+    fn deref_mut_normal_type() {
+        let mut array = [0, 1, 2, 3, 4, 5];
+        let mut instance = {
+            let ptr = array.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        use std::ops::DerefMut;
+        assert_eq!(instance.deref_mut(), array.as_slice());
+    }
+
+    #[test]
+    fn deref_mut_zero_size_type() {
+        let mut array = [(), (), (), (), (), ()];
         let mut instance = {
             let ptr = array.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
