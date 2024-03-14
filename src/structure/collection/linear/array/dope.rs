@@ -191,6 +191,14 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     }
 }
 
+impl<'a, T: 'a + PartialEq> std::cmp::PartialEq for Dope<'a, T> {
+    fn eq(&self, other: &Self) -> bool {
+        *self.as_slice() == *other.as_slice()
+    }
+}
+
+impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
+
 #[cfg(test)]
 mod test {
     use super::*;
