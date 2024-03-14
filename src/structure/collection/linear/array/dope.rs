@@ -75,100 +75,14 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     }
 }
 
-/// By-value [`Iterator`] over a [`Dope`].
-///
-/// Note that because [`Dope`] is inherently non-owning over the memory buffer
-/// it spans, therefore the values this yields are themselves references.
-pub struct IntoIter<'a, T: 'a> {
-    /// Elements within this range have yet to be yielded.
-    next: std::ops::Range<std::ptr::NonNull<T>>,
-
-    /// Restrict lifetime of references to underlying instance.
-    lifetime: std::marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
+impl<'a, T> std::iter::IntoIterator for Dope<'a, T> {
     type Item = &'a T;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.next.start != self.next.end {
-            // SAFETY:
-            // * `next` != `end` => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.next.start.as_ref() };
-
-            self.next.start = unsafe {
-                // SAFETY: can at most be one byte past the allocated object.
-                let next = self.next.start.as_ptr().add(1);
-
-                // SAFETY: `add` will maintain the non-null requirement.
-                std::ptr::NonNull::new_unchecked(next)
-            };
-
-            Some(current)
-        } else {
-            None
-        }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let size = unsafe {
-            let start = self.next.start.as_ptr();
-            let end = self.next.end.as_ptr();
-
-            // SAFETY:
-            // * both pointers are within the same allocated object.
-            // * difference between pointers is an exact multiple of `T`.
-            end.offset_from(start) as usize
-        };
-
-        (size, Some(size))
-    }
-}
-
-impl<'a, T: 'a> std::iter::ExactSizeIterator for IntoIter<'a, T> {}
-
-impl<'a, T: 'a> std::iter::DoubleEndedIterator for IntoIter<'a, T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        if self.next.start != self.next.end {
-            self.next.end = unsafe {
-                // SAFETY: greater than `next` so within the allocated object.
-                let next = self.next.start.as_ptr().sub(1);
-
-                // SAFETY: `sub` will maintain the non-null requirement.
-                std::ptr::NonNull::new_unchecked(next)
-            };
-
-            // SAFETY:
-            // * `next` != `end` => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            Some(unsafe { self.next.start.as_ref() })
-        } else {
-            None
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
-    type Item = &'a T;
-
-    type IntoIter = IntoIter<'a, T>;
+    type IntoIter = super::iter::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter {
-            next: unsafe {
-                let start = self.ptr;
-
-                // SAFETY: points to one byte past the allocated object.
-                let end = start.as_ptr().add(self.count);
-
-                // SAFETY: `add` maintains the non-null requirement.
-                let end = std::ptr::NonNull::new_unchecked(end);
-
-                start..end
-            },
-            lifetime: std::marker::PhantomData,
-        }
+        // SAFETY: points to `count` initialized instances of `T`.
+        unsafe { super::iter::Iter::new(self.ptr, self.count) }
     }
 }
 
