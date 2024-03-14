@@ -336,8 +336,20 @@ mod test {
     }
 
     #[test]
-    fn first() {
-        let array = [0, 1, 2, 3];
+    fn first_normal_type() {
+        let array = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = array.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, array.len()) }
+        };
+
+        assert_eq!(*instance.first().unwrap(), instance[0]);
+    }
+
+    #[test]
+    fn first_zero_size_type() {
+        let array = [(), (), (), (), (), ()];
         let instance = {
             let ptr = array.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
