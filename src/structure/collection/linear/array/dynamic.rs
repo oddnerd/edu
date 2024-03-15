@@ -5,6 +5,7 @@ use super::Collection;
 use super::Linear;
 
 /// Error type for when allocation fails.
+#[derive(Debug)]
 pub struct AllocationError;
 
 /// An [`Array`] which can store a runtime defined number of elements.
@@ -64,7 +65,7 @@ impl<T> Dynamic<T> {
         if instance.reserve(count) {
             Ok(instance)
         } else {
-            Err(AllocationError{})
+            Err(AllocationError)
         }
     }
 
@@ -258,7 +259,7 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn append(&mut self, element: T) -> Result<&mut T, AllocationError> {
         if self.allocated == 0 && !self.reserve(1) {
-            return Err(AllocationError{});
+            return Err(AllocationError);
         }
 
         self.initialized += 1;
@@ -298,11 +299,11 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn insert(&mut self, element: T, index: usize) -> Result<&mut T, AllocationError> {
         if index >= self.initialized {
-            return Err(AllocationError{});
+            return Err(AllocationError);
         }
 
         if self.allocated == 0 && !self.reserve(1) {
-            return Err(AllocationError{});
+            return Err(AllocationError);
         }
 
         // shift initialized elements `[index..]` one position to the right.
@@ -425,12 +426,12 @@ impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
 
     fn try_from(value: &'a [T]) -> Result<Self, Self::Error> {
         let mut instance = match Self::with_capacity(value.len()) {
-            Some(allocation) => allocation,
-            None => return Err(AllocationError{}),
+            Ok(allocation) => allocation,
+            Err(_) => return Err(AllocationError),
         };
 
         for element in value {
-            instance.append(element.clone());
+            instance.append(element.clone()).expect("preallocated space");
         }
 
         Ok(instance)
@@ -642,10 +643,13 @@ impl<T> std::default::Default for Dynamic<T> {
 
 impl<T: Clone> Clone for Dynamic<T> {
     fn clone(&self) -> Self {
-        let mut clone = Self::with_capacity(self.count()).unwrap_or_default();
+        let mut clone = match Self::with_capacity(self.count()) {
+            Ok(allocation) => allocation,
+            Err(_) => panic!("allocation failed")
+        };
 
         for element in self.iter() {
-            clone.append(element.clone());
+            clone.append(element.clone()).expect("preallocated space");
         }
 
         clone
