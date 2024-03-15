@@ -752,42 +752,50 @@ mod test {
     }
 
     #[test]
-    fn reserve() {
-        // sized type.
-        {
-            let mut instance = Dynamic::<i32>::new();
-            assert_eq!(instance.allocated, 0);
+    fn reserve_increases_capacity() {
+        const COUNT: usize = 256;
 
-            // initial allocation.
-            instance.reserve(8);
-            assert!(instance.allocated >= 8);
+        let mut instance = Dynamic::<()>::new();
+        instance.reserve(COUNT);
 
-            // reallocation.
-            instance.reserve(256);
-            assert!(instance.allocated >= 256);
+        assert!(instance.allocated >= COUNT);
+    }
 
-            // does not shrink.
-            instance.reserve(0);
-            assert!(instance.allocated > 0);
+    #[test]
+    fn reserve_does_not_remove_initialized_elements() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+
+        instance.reserve(2048);
+
+        assert!(instance.iter().eq(original.as_slice()));
+    }
+
+    #[test]
+    fn reserve_preallocates() {
+        const COUNT: usize = 256;
+
+        let mut instance = Dynamic::<usize>::new();
+        instance.reserve(COUNT);
+
+        let preallocated = instance.allocated;
+
+        for element in 0..COUNT {
+            instance.append(element);
         }
 
-        // zero-size type.
-        {
-            let mut instance = Dynamic::<()>::new();
-            assert_eq!(instance.allocated, 0);
+        assert_eq!(instance.allocated, preallocated - COUNT);
+    }
 
-            // initial allocation.
-            instance.reserve(8);
-            assert!(instance.allocated >= 8);
+    #[test]
+    fn reserve_does_not_shrink() {
+        const COUNT: usize = 256;
 
-            // reallocation.
-            instance.reserve(256);
-            assert!(instance.allocated >= 256);
+        let mut instance = Dynamic::<()>::with_capacity(COUNT).unwrap();
 
-            // does not shrink.
-            instance.reserve(0);
-            assert!(instance.allocated > 0);
-        }
+        instance.reserve(0);
+
+        assert!(instance.allocated >= COUNT);
     }
 
     #[test]
