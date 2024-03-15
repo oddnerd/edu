@@ -12,27 +12,25 @@ use super::Linear;
 ///
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Hash)]
 pub struct Dope<'a, T: 'a> {
     /// Pointer to the start of the array.
-    data: std::ptr::NonNull<T>,
+    ptr: std::ptr::NonNull<T>,
 
     /// Number of elements within the array.
-    len: usize,
+    count: usize,
 
     /// Bind lifetime to underlying memory buffer.
     lifetime: std::marker::PhantomData<&'a mut T>,
 }
 
 impl<'a, T: 'a> Dope<'a, T> {
-    /// Construct from a pointer to the start of a memory buffer and the length
-    /// of that buffer in elements of `T`.
+    /// Construct from a pointer to an array and the number of elements.
     ///
     /// # Safety
-    /// * `data` must not be null.
-    /// * `data` must have an address aligned for access to `T`.
-    /// * `data` must point to one contigious allocated object.
-    /// * `data` must point to `len` consecutive initialized instances of `T`.
+    /// * `ptr` must have an address aligned for access to `T`.
+    /// * `ptr` must point to one contigious allocated object.
+    /// * `ptr` must point to `len` consecutive initialized instances of `T`.
     ///
     /// # Examples
     /// ```
@@ -45,10 +43,10 @@ impl<'a, T: 'a> Dope<'a, T> {
     ///
     /// assert!(underlying.iter().eq(dope.iter()));
     /// ```
-    pub unsafe fn new(data: std::ptr::NonNull<T>, len: usize) -> Self {
+    pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
-            data,
-            len,
+            ptr,
+            count,
             lifetime: std::marker::PhantomData,
         }
     }
@@ -57,13 +55,13 @@ impl<'a, T: 'a> Dope<'a, T> {
 impl<'a, T: 'a> std::convert::From<&'a [T]> for Dope<'a, T> {
     fn from(slice: &'a [T]) -> Self {
         Self {
-            data: {
+            ptr: {
                 let ptr = slice.as_ptr().cast_mut();
 
                 // SAFETY: `slice` exists => pointer is non-null.
                 unsafe { std::ptr::NonNull::new_unchecked(ptr) }
             },
-            len: slice.len(),
+            count: slice.len(),
             lifetime: std::marker::PhantomData,
         }
     }
@@ -73,104 +71,18 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     type Element = T;
 
     fn count(&self) -> usize {
-        self.len
+        self.count
     }
 }
 
-/// By-value [`Iterator`] over a [`Dope`].
-///
-/// Note that because [`Dope`] is inherently non-owning over the memory buffer
-/// it spans, therefore the values this yields are themselves references.
-pub struct IntoIter<'a, T: 'a> {
-    /// Elements within this range have yet to be yielded.
-    next: std::ops::Range<std::ptr::NonNull<T>>,
-
-    /// Restrict lifetime of references to underlying instance.
-    lifetime: std::marker::PhantomData<&'a T>,
-}
-
-impl<'a, T: 'a> std::iter::Iterator for IntoIter<'a, T> {
+impl<'a, T> std::iter::IntoIterator for Dope<'a, T> {
     type Item = &'a T;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.next.start != self.next.end {
-            // SAFETY:
-            // * `next` != `end` => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            let current = unsafe { self.next.start.as_ref() };
-
-            self.next.start = unsafe {
-                // SAFETY: can at most be one byte past the allocated object.
-                let next = self.next.start.as_ptr().add(1);
-
-                // SAFETY: `add` will maintain the non-null requirement.
-                std::ptr::NonNull::new_unchecked(next)
-            };
-
-            Some(current)
-        } else {
-            None
-        }
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let size = unsafe {
-            let start = self.next.start.as_ptr();
-            let end = self.next.end.as_ptr();
-
-            // SAFETY:
-            // * both pointers are within the same allocated object.
-            // * difference between pointers is an exact multiple of `T`.
-            end.offset_from(start) as usize
-        };
-
-        (size, Some(size))
-    }
-}
-
-impl<'a, T: 'a> std::iter::ExactSizeIterator for IntoIter<'a, T> {}
-
-impl<'a, T: 'a> std::iter::DoubleEndedIterator for IntoIter<'a, T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        if self.next.start != self.next.end {
-            self.next.end = unsafe {
-                // SAFETY: greater than `next` so within the allocated object.
-                let next = self.next.start.as_ptr().sub(1);
-
-                // SAFETY: `sub` will maintain the non-null requirement.
-                std::ptr::NonNull::new_unchecked(next)
-            };
-
-            // SAFETY:
-            // * `next` != `end` => pointing to initialized value.
-            // * lifetime bound to input object => valid lifetime to return.
-            Some(unsafe { self.next.start.as_ref() })
-        } else {
-            None
-        }
-    }
-}
-
-impl<'a, T: 'a> std::iter::IntoIterator for Dope<'a, T> {
-    type Item = &'a T;
-
-    type IntoIter = IntoIter<'a, T>;
+    type IntoIter = super::iter::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Self::IntoIter {
-            next: unsafe {
-                let start = self.data;
-
-                // SAFETY: points to one byte past the allocated object.
-                let end = start.as_ptr().add(self.len);
-
-                // SAFETY: `add` maintains the non-null requirement.
-                let end = std::ptr::NonNull::new_unchecked(end);
-
-                start..end
-            },
-            lifetime: std::marker::PhantomData,
-        }
+        // SAFETY: points to `count` initialized instances of `T`.
+        unsafe { super::iter::Iter::new(self.ptr, self.count) }
     }
 }
 
@@ -179,33 +91,35 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::Iter::new(self.data, self.len) }
+        unsafe { super::iter::Iter::new(self.ptr, self.count) }
     }
 
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
         // SAFETY:
         // * `self.data` points to one contigious allocated object.
         // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::IterMut::new(self.data, self.len) }
+        unsafe { super::iter::IterMut::new(self.ptr, self.count) }
     }
 
     fn first(&self) -> Option<&Self::Element> {
-        if !self.is_empty() {
+        use std::ops::Not;
+        if self.is_empty().not() {
             // SAFETY:
             // * constructor contract => pointed to `T` is initialized.
             // * constructor contract => valid lifetime to return.
-            unsafe { Some(self.data.as_ref()) }
+            unsafe { Some(self.ptr.as_ref()) }
         } else {
             None
         }
     }
 
     fn last(&self) -> Option<&Self::Element> {
-        if !self.is_empty() {
-            let ptr = self.data.as_ptr();
+        use std::ops::Not;
+        if self.is_empty().not() {
+            let ptr = self.ptr.as_ptr();
 
             // SAFETY: points to the final element within the allocated object.
-            let ptr = unsafe { ptr.add(self.len - 1) };
+            let ptr = unsafe { ptr.add(self.count - 1) };
 
             // SAFETY:
             // * constructor contract => pointed to `T` is initialized.
@@ -223,8 +137,8 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     fn index(&self, index: usize) -> &Self::Output {
         // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe {
-            assert!(index < self.len);
-            self.data.as_ptr().add(index)
+            assert!(index < self.count);
+            self.ptr.as_ptr().add(index)
         };
 
         // SAFETY:
@@ -238,8 +152,8 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe {
-            assert!(index < self.len);
-            self.data.as_ptr().add(index)
+            assert!(index < self.count);
+            self.ptr.as_ptr().add(index)
         };
 
         // SAFETY:
@@ -257,7 +171,7 @@ impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
         // * constructor contract => `self.data` is aligned.
         // * constructor contract => every element is initialized.
         // * constructor contract => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), self.len) }
+        unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) }
     }
 }
 
@@ -267,7 +181,7 @@ impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
         // * constructor contract => `self.data` is aligned.
         // * constructor contract => every element is initialized.
         // * constructor contract => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr(), self.len) }
+        unsafe { std::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.count) }
     }
 }
 
@@ -279,197 +193,348 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     }
 }
 
+impl<'a, T: 'a + PartialEq> std::cmp::PartialEq for Dope<'a, T> {
+    fn eq(&self, other: &Self) -> bool {
+        *self.as_slice() == *other.as_slice()
+    }
+}
+
+impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
+
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
-    fn new() {
-        let array = [0, 1, 2, 3];
+    fn new_initializes_member_variables() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.data.as_ptr(), array.as_ptr().cast_mut());
-        assert_eq!(instance.len, array.len());
+        assert_eq!(instance.ptr.as_ptr(), underlying.as_ptr().cast_mut());
+        assert_eq!(instance.count, underlying.len());
     }
 
     #[test]
-    fn from_slice() {
-        let array = [0, 1, 2, 3];
-        let instance = Dope::from(array.as_slice());
+    fn from_slice_initializes_member_variables() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = Dope::from(underlying.as_slice());
 
-        assert_eq!(instance.data.as_ptr(), array.as_slice().as_ptr().cast_mut());
-        assert_eq!(instance.len, array.as_slice().len());
+        assert_eq!(instance.ptr.as_ptr(), underlying.as_ptr().cast_mut());
+        assert_eq!(instance.count, underlying.len());
     }
 
     #[test]
-    fn count() {
-        let array = [0, 1, 2, 3];
+    fn count_for_normal_types_is_exact_element_count() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.count(), array.len());
+        assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
-    fn into_iter() {
-        let mut array = [0, 1, 2, 3];
+    fn count_for_zero_size_types_is_constructed_count() {
+        let underlying = [(), (), (), (), (), ()];
         let instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.into_iter().copied().eq(array.into_iter()));
+        assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
-    fn iter() {
-        let array = [0, 1, 2, 3];
+    fn into_iter_yields_element_count_for_normal_types() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.iter().eq(array.iter()));
+        assert_eq!(instance.into_iter().count(), underlying.len());
     }
 
     #[test]
-    fn iter_mut() {
-        let mut array = [0, 1, 2, 3];
+    fn into_iter_yields_element_count_for_zero_size_types() {
+        let underlying = [(), (), (), (), (), ()];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.into_iter().count(), underlying.len());
+    }
+
+    #[test]
+    fn into_iter_yields_elements() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert!(instance.into_iter().eq(underlying.as_slice()));
+    }
+
+    #[test]
+    fn iter_yields_element_count_for_normal_types() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.iter().count(), underlying.len());
+    }
+
+    #[test]
+    fn iter_yields_element_count_for_zero_size_types() {
+        let underlying = [(), (), (), (), (), ()];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.iter().count(), underlying.len());
+    }
+
+    #[test]
+    fn iter_yields_elements() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert!(instance.iter().eq(underlying.as_slice()));
+    }
+
+    #[test]
+    fn iter_mut_yields_element_count_for_normal_types() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_mut_ptr();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert!(instance.iter_mut().eq(array.iter_mut()));
+        assert_eq!(instance.iter_mut().count(), underlying.len());
     }
 
     #[test]
-    fn first() {
-        let array = [0, 1, 2, 3];
-        let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
-
-        assert_eq!(*instance.first().unwrap(), instance[0]);
-    }
-
-    #[test]
-    fn last() {
-        let array = [0, 1, 2, 3];
-        let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
-
-        assert_eq!(*instance.last().unwrap(), instance[3]);
-    }
-
-    #[test]
-    fn index() {
-        let array = [0, 1, 2, 3];
-        let instance = {
-            let ptr = array.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
-        };
-
-        assert_eq!(instance[0], 0);
-        assert_eq!(instance[1], 1);
-        assert_eq!(instance[2], 2);
-        assert_eq!(instance[3], 3);
-    }
-
-    #[test]
-    fn index_mut() {
-        let mut array = [0, 1, 2, 3];
+    fn iter_mut_yields_element_count_for_zero_size_types() {
+        let mut underlying = [(), (), (), (), (), ()];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            let ptr = underlying.as_mut_ptr();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        instance[0] = 4;
-        instance[1] = 5;
-        instance[2] = 6;
-        instance[3] = 7;
-
-        assert_eq!(instance[0], 4);
-        assert_eq!(instance[1], 5);
-        assert_eq!(instance[2], 6);
-        assert_eq!(instance[3], 7);
+        assert_eq!(instance.iter_mut().count(), underlying.len());
     }
 
     #[test]
-    fn deref() {
-        let array = [0, 1, 2, 3];
+    fn iter_mut_yields_elements() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let mut instance = {
+            let ptr = underlying.as_mut_ptr();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert!(instance.iter_mut().eq(underlying.as_slice()));
+    }
+
+    #[test]
+    fn first_yields_none_when_empty() {
+        let underlying: [(); 0] = [];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.first(), None);
+    }
+
+    #[test]
+    fn first_yields_correct_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.first(), underlying.first());
+    }
+
+    #[test]
+    fn last_yields_none_when_empty() {
+        let underlying: [(); 0] = [];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.last(), None);
+    }
+
+    #[test]
+    fn last_yields_correct_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.last(), underlying.last());
+    }
+
+    #[test]
+    fn index_yields_correct_element() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        for (index, value) in underlying.iter().enumerate() {
+            use std::ops::Index;
+            assert_eq!(instance.index(index), value);
+        }
+    }
+
+    #[test]
+    fn index_mut_yields_correct_element() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let mut instance = {
+            let ptr = underlying.as_mut_ptr();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        for (index, value) in underlying.iter_mut().enumerate() {
+            use std::ops::IndexMut;
+            assert_eq!(instance.index_mut(index), value);
+        }
+    }
+
+    #[test]
+    fn deref_to_valid_slice() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         use std::ops::Deref;
-        assert_eq!(*instance.deref(), *array.as_slice());
+        assert_eq!(instance.deref(), underlying.as_slice());
     }
 
     #[test]
-    fn deref_mut() {
-        let mut array = [0, 1, 2, 3];
+    fn deref_mut_to_valid_slice() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
         let mut instance = {
-            let ptr = array.as_mut_ptr();
+            let ptr = underlying.as_mut_ptr();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         use std::ops::DerefMut;
-        assert_eq!(*instance.deref_mut(), *array.as_slice());
+        assert_eq!(instance.deref_mut(), underlying.as_mut_slice());
     }
 
     #[test]
-    fn eq() {
-        let array = [0, 1, 2, 3];
+    fn eq_for_same_underlying() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         let other = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         assert_eq!(instance, other);
     }
 
     #[test]
-    fn ne() {
-        let array = [0, 1, 2, 3];
+    fn eq_for_same_elements() {
+        let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
-            let ptr = array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        let other_array = [4, 5, 6, 7];
+        let underlying = [0, 1, 2, 3, 4, 5];
         let other = {
-            let ptr = other_array.as_ptr().cast_mut();
+            let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, other_array.len()) }
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance, other);
+    }
+
+    #[test]
+    fn ne_for_different_count() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        let other = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len() - 1) }
+        };
+
+        assert_ne!(instance, other);
+    }
+
+    #[test]
+    fn ne_for_different_elements() {
+        let underlying = [0];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        let underlying = [1];
+        let other = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
         };
 
         assert_ne!(instance, other);

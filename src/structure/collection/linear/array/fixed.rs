@@ -9,6 +9,7 @@ use super::Linear;
 /// [`Fixed`] is equivalent to Rust's primitive array (`[T; N]`) or C++'s
 /// smart array (`std::array`) which interprets the underlying array as being
 /// 'dumb' that eagerly decays to a pointer and wraps it in a object.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Fixed<T, const N: usize> {
     /// Underlying memory buffer.
     data: [T; N],
@@ -186,20 +187,6 @@ impl<T, const N: usize> std::ops::DerefMut for Fixed<T, N> {
 
 impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {}
 
-impl<T: PartialEq, const N: usize> PartialEq for Fixed<T, N> {
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().eq(other.iter())
-    }
-}
-
-impl<T: Eq, const N: usize> std::cmp::Eq for Fixed<T, N> {}
-
-impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     fn default() -> Self {
         // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
@@ -219,172 +206,174 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     }
 }
 
-impl<T: Clone, const N: usize> Clone for Fixed<T, N> {
-    fn clone(&self) -> Self {
-        // SAFETY: the [`MaybeUninit`] is initialized even if the `T` isn't.
-        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-
-        for (from, to) in self.iter().zip(uninitialized.iter_mut()) {
-            to.write(from.clone());
-        }
-
-        // SAFETY:
-        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
-        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
-        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
-
-        Self::from(initialized)
-    }
-}
-
-impl<T: Copy, const N: usize> Copy for Fixed<T, N> {}
-
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
-    fn new() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn from_array_initializes_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
 
-        assert_eq!(instance.data, array);
+        assert_eq!(instance.data, primitive);
     }
 
     #[test]
-    fn count() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn count_is_element_count() {
+        let instance = Fixed::from([(), (), (), (), (), ()]);
 
-        assert_eq!(instance.count(), array.len());
+        assert_eq!(instance.count(), instance.data.len());
     }
 
     #[test]
-    fn into_iter() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn into_iter_yields_element_count() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
 
-        assert!(instance.into_iter().eq(array.into_iter()));
+        assert_eq!(instance.into_iter().count(), primitive.len());
     }
 
     #[test]
-    fn iter() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn into_iter_yields_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
 
-        assert!(instance.iter().eq(array.iter()));
+        assert!(instance.into_iter().eq(primitive.into_iter()));
     }
 
     #[test]
-    fn iter_mut() {
-        let mut array = [0, 1, 2, 3];
-        let mut instance = Fixed::from(array);
+    fn iter_yields_element_count() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
 
-        assert!(instance.iter_mut().eq(array.iter_mut()));
+        assert_eq!(instance.iter().count(), primitive.len());
     }
 
     #[test]
-    fn first() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn iter_yields_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
 
-        assert_eq!(*instance.first().unwrap(), instance[0]);
+        assert!(instance.iter().eq(primitive.iter()));
     }
 
     #[test]
-    fn last() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn iter_mut_yields_element_count() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let mut instance = Fixed::from(primitive);
 
-        assert_eq!(*instance.last().unwrap(), instance[3]);
+        assert_eq!(instance.iter_mut().count(), primitive.len());
     }
 
     #[test]
-    fn index() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn iter_mut_yields_elements() {
+        let mut primitive = [0, 1, 2, 3, 4, 5];
+        let mut instance = Fixed::from(primitive);
 
-        assert_eq!(instance[0], 0);
-        assert_eq!(instance[1], 1);
-        assert_eq!(instance[2], 2);
-        assert_eq!(instance[3], 3);
+        assert!(instance.iter_mut().eq(primitive.iter_mut()));
     }
 
     #[test]
-    fn index_mut() {
-        let array = [0, 1, 2, 3];
-        let mut instance = Fixed::from(array);
+    fn first_yields_none_when_empty() {
+        let instance = Fixed::<(), 0>::from([]);
 
-        instance[0] = 4;
-        instance[1] = 5;
-        instance[2] = 6;
-        instance[3] = 7;
-
-        assert_eq!(instance[0], 4);
-        assert_eq!(instance[1], 5);
-        assert_eq!(instance[2], 6);
-        assert_eq!(instance[3], 7);
+        assert_eq!(instance.first(), None);
     }
 
     #[test]
-    fn deref() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
+    fn first_yields_correct_element() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
+
+        assert_eq!(instance.first(), primitive.first());
+    }
+
+    #[test]
+    fn last_yields_none_when_empty() {
+        let instance = Fixed::<(), 0>::from([]);
+
+        assert_eq!(instance.last(), None);
+    }
+
+    #[test]
+    fn last_yields_correct_element() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
+
+        assert_eq!(instance.last(), primitive.last());
+    }
+
+    #[test]
+    fn index_yields_correct_element() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
+
+        for (index, value) in primitive.iter().enumerate() {
+            use std::ops::Index;
+            assert_eq!(instance.index(index), value);
+        }
+    }
+
+    #[test]
+    fn index_mut_yields_correct_element() {
+        let mut primitive = [0, 1, 2, 3, 4, 5];
+        let mut instance = Fixed::from(primitive);
+
+        for (index, value) in primitive.iter_mut().enumerate() {
+            use std::ops::IndexMut;
+            assert_eq!(instance.index_mut(index), value);
+        }
+    }
+
+    #[test]
+    fn deref_to_valid_slice() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
 
         use std::ops::Deref;
-        assert_eq!(*instance.deref(), *array.as_slice());
+        assert_eq!(instance.deref(), primitive.as_slice());
     }
 
     #[test]
-    fn deref_mut() {
-        let array = [0, 1, 2, 3];
-        let mut instance = Fixed::from(array);
+    fn deref_mut_to_valid_slice() {
+        let mut primitive = [0, 1, 2, 3, 4, 5];
+        let mut instance = Fixed::from(primitive);
 
         use std::ops::DerefMut;
-        assert_eq!(*instance.deref_mut(), *array.as_slice());
+        assert_eq!(instance.deref_mut(), primitive.as_mut_slice());
     }
 
     #[test]
-    fn eq() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
-        let other = Fixed::from(array);
+    fn eq_for_same_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
+        let other = Fixed::from(primitive);
 
         assert_eq!(instance, other);
     }
 
     #[test]
-    fn ne() {
-        let array = [0, 1, 2, 3];
-        let instance = Fixed::from(array);
-
-        let other_array = [4, 5, 6, 7];
-        let other = Fixed::from(other_array);
+    fn ne_for_different_elements() {
+        let instance = Fixed::from([0]);
+        let other = Fixed::from([1]);
 
         assert_ne!(instance, other);
     }
 
     #[test]
-    fn default() {
-        let array: Fixed<i32, 0> = Default::default();
-        assert_eq!(array.count(), 0);
+    fn default_makes_all_elements_default() {
+        struct Value(i32);
 
-        let array: Fixed<i32, 1> = Default::default();
-        assert_eq!(array.count(), 1);
-        assert_eq!(array[0], Default::default());
-
-        let array: Fixed<i32, 256> = Default::default();
-        assert_eq!(array.count(), 256);
-        for element in array {
-            assert_eq!(element, Default::default());
+        impl std::default::Default for Value {
+            fn default() -> Self {
+                Value(12345)
+            }
         }
-    }
 
-    #[test]
-    fn clone() {
-        let old = Fixed::from([0, 1, 2, 3]);
-        let from = old.clone();
-        assert_eq!(old, from);
+        let instance: Fixed<Value, 256> = Default::default();
+
+        for value in instance {
+            assert_eq!(value.0, Value::default().0);
+        }
     }
 }
