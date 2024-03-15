@@ -828,9 +828,9 @@ mod test {
 
     #[test]
     fn append_initializes_an_element() {
-        let mut instance = Dynamic::<usize>::with_capacity(1).unwrap();
+        let mut instance = Dynamic::<()>::with_capacity(1).unwrap();
 
-        instance.append(0);
+        instance.append(());
 
         assert_eq!(instance.initialized, 1);
     }
@@ -864,72 +864,53 @@ mod test {
     }
 
     #[test]
-    fn insert() {
-        // sized type.
-        {
-            // one element.
-            let mut instance = Dynamic::try_from([1].as_slice());
-            instance.insert(0, 0);
-            assert_eq!(instance[0], 0);
-            assert_eq!(instance[1], 1);
+    fn insert_initialized_a_new_element() {
+        let mut instance = Dynamic::try_from([()].as_slice()).unwrap();
 
-            // front element.
-            let mut instance = Dynamic::try_from([1, 2].as_slice());
-            instance.insert(0, 0);
-            assert_eq!(instance[0], 0);
-            assert_eq!(instance[1], 1);
-            assert_eq!(instance[2], 2);
+        instance.insert((), 0);
 
-            // end element.
-            let mut instance = Dynamic::try_from([0, 2].as_slice());
-            instance.insert(1, 1);
-            assert_eq!(instance[0], 0);
-            assert_eq!(instance[1], 1);
-            assert_eq!(instance[2], 2);
+        assert_eq!(instance.initialized, 2);
+    }
 
-            // middle element.
-            let mut instance = Dynamic::try_from([0, 1, 3, 4, 5].as_slice());
-            instance.insert(2, 2);
-            assert_eq!(instance[0], 0);
-            assert_eq!(instance[1], 1);
-            assert_eq!(instance[2], 2);
-            assert_eq!(instance[3], 3);
-            assert_eq!(instance[4], 4);
-            assert_eq!(instance[5], 5);
+    #[test]
+    fn insert_modifies_element_value() {
+        let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
+
+        instance.insert(1, 0);
+
+        assert_eq!(*instance.first().unwrap(), 1);
+    }
+
+    #[test]
+    fn insert_only_modifies_specific_index() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+
+        for index in 0..instance.len() {
+            let mut instance = instance.clone();
+            instance.insert(256, index);
+
+            assert!(instance.as_slice()[..index].iter().eq(&original.as_slice()[..index]));
+            assert!(instance.as_slice()[index + 1..].iter().eq(&original.as_slice()[index+1..]));
         }
+    }
 
-        // zero-size type.
-        {
-            // one element.
-            let mut instance = Dynamic::try_from([()].as_slice());
-            instance.insert((), 0);
-            assert_eq!(instance[0], ());
-            assert_eq!(instance[1], ());
+    #[test]
+    fn insert_will_reallocate() {
+        let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
+        instance.shrink(None);
 
-            // front element.
-            let mut instance = Dynamic::try_from([(), ()].as_slice());
-            instance.insert((), 0);
-            assert_eq!(instance[0], ());
-            assert_eq!(instance[1], ());
-            assert_eq!(instance[2], ());
+        instance.append(0);
 
-            // end element.
-            let mut instance = Dynamic::try_from([(), ()].as_slice());
-            instance.insert((), 1);
-            assert_eq!(instance[0], ());
-            assert_eq!(instance[1], ());
-            assert_eq!(instance[2], ());
+        assert_eq!(instance.initialized, 2);
+    }
 
-            // middle element.
-            let mut instance = Dynamic::try_from([(), (), (), (), ()].as_slice());
-            instance.insert((), 2);
-            assert_eq!(instance[0], ());
-            assert_eq!(instance[1], ());
-            assert_eq!(instance[2], ());
-            assert_eq!(instance[3], ());
-            assert_eq!(instance[4], ());
-            assert_eq!(instance[5], ());
-        }
+    #[test]
+    #[should_panic]
+    fn insert_panics_when_out_of_bounds() {
+        let mut instance = Dynamic::<()>::new();
+
+        instance.insert((), 0);
     }
 
     #[test]
