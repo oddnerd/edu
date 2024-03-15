@@ -725,10 +725,19 @@ mod test {
     }
 
     #[test]
-    fn count() {
-        let instance = Dynamic::<()>::new();
+    fn count_ignores_preallocation() {
+        let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
+        instance.reserve(1024);
 
-        assert_eq!(instance.count(), 0);
+        assert_ne!(instance.count(), instance.allocated)
+    }
+
+    #[test]
+    fn count_is_element_count() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
+
+        assert_eq!(instance.count(), original.len());
     }
 
     #[test]
