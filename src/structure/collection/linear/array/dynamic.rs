@@ -663,7 +663,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn new() {
+    fn new_does_not_allocate() {
         let instance = Dynamic::<()>::new();
 
         assert_eq!(instance.initialized, 0);
