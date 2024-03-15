@@ -260,7 +260,7 @@ mod test {
             unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.count(), underlying.len());
+        assert_eq!(instance.into_iter().count(), underlying.len());
     }
 
     #[test]
@@ -272,7 +272,7 @@ mod test {
             unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        assert_eq!(instance.count(), underlying.len());
+        assert_eq!(instance.into_iter().count(), underlying.len());
     }
 
     #[test]
