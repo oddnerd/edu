@@ -432,7 +432,7 @@ mod test {
             unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        for (index, value) in underlying.iter().enumerate() {
+        for (index, value) in underlying.iter_mut().enumerate() {
             use std::ops::IndexMut;
             assert_eq!(instance.index_mut(index), value);
         }
