@@ -4,6 +4,9 @@ use super::Array;
 use super::Collection;
 use super::Linear;
 
+/// Error type for when allocation fails.
+pub struct AllocationError;
+
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
 /// A contigious memory buffer with sequentially laid out elements at alignment
@@ -209,7 +212,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::Collection;
     ///
-    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
     /// assert_eq!(instance.count(), 4);
     ///
     /// instance.clear();
@@ -286,7 +289,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
     ///
     /// instance.insert(7, 1);
     ///
@@ -346,7 +349,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
     /// assert_eq!(instance.len(), 4);
     ///
     /// instance.remove(2);
@@ -426,20 +429,21 @@ impl<T> std::ops::Drop for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a + Clone> std::convert::From<&'a [T]> for Dynamic<T> {
-    fn from(slice: &'a [T]) -> Self {
-        let mut instance = Self::with_capacity(slice.len()).unwrap_or_default();
+impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
 
-        if std::mem::size_of::<T>() == 0 {
-            instance.initialized = slice.len();
-            instance.allocated = usize::MAX - instance.initialized;
-        } else {
-            for element in slice {
-                instance.append(element.clone());
-            }
+    type Error = AllocationError;
+
+    fn try_from(value: &'a [T]) -> Result<Self, Self::Error> {
+        let mut instance = match Self::with_capacity(value.len()) {
+            Some(allocation) => allocation,
+            None => return Err(AllocationError{}),
+        };
+
+        for element in value {
+            instance.append(element.clone());
         }
 
-        instance
+        Ok(instance)
     }
 }
 
@@ -675,14 +679,14 @@ mod test {
         // sized type.
         {
             let array = [0, 1, 2, 3];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
             assert!(instance.iter().eq(array.iter()));
         }
 
         // zero-size type.
         {
             let array = [(), (), (), ()];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
             assert!(instance.iter().eq(array.iter()));
         }
     }
@@ -854,27 +858,27 @@ mod test {
         // sized type.
         {
             // one element.
-            let mut instance = Dynamic::from([1].as_slice());
+            let mut instance = Dynamic::try_from([1].as_slice());
             instance.insert(0, 0);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
 
             // front element.
-            let mut instance = Dynamic::from([1, 2].as_slice());
+            let mut instance = Dynamic::try_from([1, 2].as_slice());
             instance.insert(0, 0);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
             assert_eq!(instance[2], 2);
 
             // end element.
-            let mut instance = Dynamic::from([0, 2].as_slice());
+            let mut instance = Dynamic::try_from([0, 2].as_slice());
             instance.insert(1, 1);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
             assert_eq!(instance[2], 2);
 
             // middle element.
-            let mut instance = Dynamic::from([0, 1, 3, 4, 5].as_slice());
+            let mut instance = Dynamic::try_from([0, 1, 3, 4, 5].as_slice());
             instance.insert(2, 2);
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
@@ -887,27 +891,27 @@ mod test {
         // zero-size type.
         {
             // one element.
-            let mut instance = Dynamic::from([()].as_slice());
+            let mut instance = Dynamic::try_from([()].as_slice());
             instance.insert((), 0);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
 
             // front element.
-            let mut instance = Dynamic::from([(), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), ()].as_slice());
             instance.insert((), 0);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
             assert_eq!(instance[2], ());
 
             // end element.
-            let mut instance = Dynamic::from([(), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), ()].as_slice());
             instance.insert((), 1);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
             assert_eq!(instance[2], ());
 
             // middle element.
-            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), (), (), (), ()].as_slice());
             instance.insert((), 2);
             assert_eq!(instance[0], ());
             assert_eq!(instance[1], ());
@@ -923,24 +927,24 @@ mod test {
         // sized type.
         {
             // one element.
-            let mut instance = Dynamic::from([0].as_slice());
+            let mut instance = Dynamic::try_from([0].as_slice());
             instance.remove(0);
             assert_eq!(instance.initialized, 0);
 
             // front element.
-            let mut instance = Dynamic::from([0, 1].as_slice());
+            let mut instance = Dynamic::try_from([0, 1].as_slice());
             instance.remove(0);
             assert_eq!(instance.initialized, 1);
             assert_eq!(instance[0], 1);
 
             // last element.
-            let mut instance = Dynamic::from([0, 1].as_slice());
+            let mut instance = Dynamic::try_from([0, 1].as_slice());
             instance.remove(1);
             assert_eq!(instance.initialized, 1);
             assert_eq!(instance[0], 0);
 
             // middle element.
-            let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
+            let mut instance = Dynamic::try_from([0, 1, 2, 3, 4].as_slice());
             instance.remove(2);
             assert_eq!(instance.initialized, 4);
             assert_eq!(instance[0], 0);
@@ -952,24 +956,24 @@ mod test {
         // zero-size type.
         {
             // one element.
-            let mut instance = Dynamic::from([()].as_slice());
+            let mut instance = Dynamic::try_from([()].as_slice());
             instance.remove(0);
             assert_eq!(instance.initialized, 0);
 
             // front element.
-            let mut instance = Dynamic::from([(), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), ()].as_slice());
             instance.remove(0);
             assert_eq!(instance.initialized, 1);
             assert_eq!(instance[0], ());
 
             // last element.
-            let mut instance = Dynamic::from([(), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), ()].as_slice());
             instance.remove(1);
             assert_eq!(instance.initialized, 1);
             assert_eq!(instance[0], ());
 
             // middle element.
-            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), (), (), (), ()].as_slice());
             instance.remove(2);
             assert_eq!(instance.initialized, 4);
             assert_eq!(instance[0], ());
@@ -983,7 +987,7 @@ mod test {
     fn clear() {
         // sized type.
         {
-            let mut instance = Dynamic::from([0, 1, 2, 3, 4].as_slice());
+            let mut instance = Dynamic::try_from([0, 1, 2, 3, 4].as_slice());
             let old_capacity = instance.allocated;
 
             instance.clear();
@@ -994,7 +998,7 @@ mod test {
 
         // zero-size type.
         {
-            let mut instance = Dynamic::from([(), (), (), (), ()].as_slice());
+            let mut instance = Dynamic::try_from([(), (), (), (), ()].as_slice());
             let old_capacity = instance.allocated;
 
             instance.clear();
@@ -1009,7 +1013,7 @@ mod test {
         // sized type.
         {
             let array = [0, 1, 2, 3];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
 
             assert!(instance.into_iter().eq(array.into_iter()));
         }
@@ -1017,7 +1021,7 @@ mod test {
         // zero-size type.
         {
             let array = [(), (), (), ()];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
 
             assert!(instance.into_iter().eq(array.into_iter()));
         }
@@ -1028,7 +1032,7 @@ mod test {
         // sized type.
         {
             let array = [0, 1, 2, 3];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
 
             assert!(instance.iter().eq(array.iter()));
         }
@@ -1036,7 +1040,7 @@ mod test {
         // zero-size type.
         {
             let array = [(), (), (), ()];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
 
             assert!(instance.iter().eq(array.iter()));
         }
@@ -1047,7 +1051,7 @@ mod test {
         // sized type.
         {
             let mut array = [0, 1, 2, 3];
-            let mut instance = Dynamic::from(array.as_slice());
+            let mut instance = Dynamic::try_from(array.as_slice());
 
             assert!(instance.iter_mut().eq(array.iter_mut()));
         }
@@ -1055,7 +1059,7 @@ mod test {
         // zero-size type.
         {
             let mut array = [0, 1, 2, 3];
-            let mut instance = Dynamic::from(array.as_slice());
+            let mut instance = Dynamic::try_from(array.as_slice());
 
             assert!(instance.iter_mut().eq(array.iter_mut()));
         }
@@ -1065,13 +1069,13 @@ mod test {
     fn first() {
         // sized type.
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
             assert_eq!(*instance.first().unwrap(), instance[0]);
         }
 
         // zero-sized type.
         {
-            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            let instance = Dynamic::try_from([(), (), (), ()].as_slice());
             assert_eq!(*instance.first().unwrap(), instance[0]);
         }
     }
@@ -1080,13 +1084,13 @@ mod test {
     fn last() {
         // sized type.
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
             assert_eq!(*instance.last().unwrap(), instance[3]);
         }
 
         // zero-size type.
         {
-            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            let instance = Dynamic::try_from([(), (), (), ()].as_slice());
             assert_eq!(*instance.last().unwrap(), instance[3]);
         }
     }
@@ -1095,7 +1099,7 @@ mod test {
     fn index() {
         // sized type.
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
 
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
@@ -1105,7 +1109,7 @@ mod test {
 
         // zero-size type.
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
 
             assert_eq!(instance[0], 0);
             assert_eq!(instance[1], 1);
@@ -1118,7 +1122,7 @@ mod test {
     fn index_mut() {
         // sized type.
         {
-            let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
 
             instance[0] = 4;
             instance[1] = 5;
@@ -1133,7 +1137,7 @@ mod test {
 
         // zero-size type.
         {
-            let mut instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
 
             instance[0] = 4;
             instance[1] = 5;
@@ -1152,7 +1156,7 @@ mod test {
         // sized type.
         {
             let array = [0, 1, 2, 3];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
 
             use std::ops::Deref;
             assert_eq!(instance.deref(), array.as_slice());
@@ -1161,7 +1165,7 @@ mod test {
         // zero-size type.
         {
             let array = [(), (), (), ()];
-            let instance = Dynamic::from(array.as_slice());
+            let instance = Dynamic::try_from(array.as_slice());
 
             use std::ops::Deref;
             assert_eq!(instance.deref(), array.as_slice());
@@ -1173,7 +1177,7 @@ mod test {
         // sized type.
         {
             let array = [0, 1, 2, 3];
-            let mut instance = Dynamic::from(array.as_slice());
+            let mut instance = Dynamic::try_from(array.as_slice());
 
             use std::ops::DerefMut;
             assert_eq!(instance.deref_mut(), array.as_slice());
@@ -1182,7 +1186,7 @@ mod test {
         // zero-size type.
         {
             let array = [(), (), (), ()];
-            let mut instance = Dynamic::from(array.as_slice());
+            let mut instance = Dynamic::try_from(array.as_slice());
 
             use std::ops::DerefMut;
             assert_eq!(instance.deref_mut(), array.as_slice());
@@ -1193,16 +1197,16 @@ mod test {
     fn eq() {
         // sized type.
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
-            let other = Dynamic::from([0, 1, 2, 3].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
+            let other = Dynamic::try_from([0, 1, 2, 3].as_slice());
 
             assert_eq!(instance, other);
         }
 
         // zero-size type.
         {
-            let instance = Dynamic::from([(), (), (), ()].as_slice());
-            let other = Dynamic::from([(), (), (), ()].as_slice());
+            let instance = Dynamic::try_from([(), (), (), ()].as_slice());
+            let other = Dynamic::try_from([(), (), (), ()].as_slice());
 
             assert_eq!(instance, other);
         }
@@ -1212,16 +1216,16 @@ mod test {
     fn ne() {
         // sized type.
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
-            let other = Dynamic::from([4, 5, 6, 7].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
+            let other = Dynamic::try_from([4, 5, 6, 7].as_slice());
 
             assert_ne!(instance, other);
         }
 
         // zero-size type.
         {
-            let instance = Dynamic::from([(), ()].as_slice());
-            let other = Dynamic::from([(), (), (), ()].as_slice());
+            let instance = Dynamic::try_from([(), ()].as_slice());
+            let other = Dynamic::try_from([(), (), (), ()].as_slice());
 
             assert_ne!(instance, other);
         }
@@ -1239,7 +1243,7 @@ mod test {
     fn clone() {
         // sized type
         {
-            let instance = Dynamic::from([0, 1, 2, 3].as_slice());
+            let instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
             let clone = instance.clone();
 
             assert_ne!(instance.data, clone.data);
@@ -1248,7 +1252,7 @@ mod test {
 
         // zero-size type
         {
-            let instance = Dynamic::from([(), (), (), ()].as_slice());
+            let instance = Dynamic::try_from([(), (), (), ()].as_slice());
             let clone = instance.clone();
 
             assert_eq!(instance, clone);
