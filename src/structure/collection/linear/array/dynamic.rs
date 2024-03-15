@@ -296,22 +296,17 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance[3], 2);
     /// assert_eq!(instance[4], 3);
     /// ```
-    pub fn insert(&mut self, element: T, index: usize) -> bool {
+    pub fn insert(&mut self, element: T, index: usize) -> Result<&mut T, AllocationError> {
         if index >= self.initialized {
-            return false;
+            return Err(AllocationError{});
         }
 
         if self.allocated == 0 && !self.reserve(1) {
-            return false;
-        }
-
-        if std::mem::size_of::<T>() == 0 {
-            self.initialized += 1;
-            self.allocated -= 1;
-            return true;
+            return Err(AllocationError{});
         }
 
         // shift initialized elements `[index..]` one position to the right.
+        if std::mem::size_of::<T>() != 0 {
         unsafe {
             // SAFETY: aligned within the allocated object.
             let from = self.data.as_ptr().add(index);
@@ -321,11 +316,11 @@ impl<T> Dynamic<T> {
 
             // SAFETY: owned memory and no aliasing despite overlapping.
             std::ptr::copy(from, to, self.initialized - index);
+        }}
 
-            // SAFETY: update internal state to reflect shift.
-            self.initialized += 1;
-            self.allocated -= 1;
-        }
+        // SAFETY: update internal state to reflect shift.
+        self.initialized += 1;
+        self.allocated -= 1;
 
         unsafe {
             // SAFETY: aligned within the allocated object.
@@ -334,10 +329,8 @@ impl<T> Dynamic<T> {
             // SAFETY:
             // * `ptr` points to the uninitialized element created by shifting.
             // * `ptr` is mutably owned.
-            (*ptr).write(element);
-        };
-
-        true
+            Ok((*ptr).write(element))
+        }
     }
 
     /// Drop the element at `index`, shifting following elements.
