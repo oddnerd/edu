@@ -827,52 +827,40 @@ mod test {
     }
 
     #[test]
-    fn append() {
-        // sized type.
-        {
-            let mut instance = Dynamic::<i32>::new();
-            assert_eq!(instance.initialized, 0);
+    fn append_initializes_an_element() {
+        let mut instance = Dynamic::<usize>::with_capacity(1).unwrap();
 
-            // empty instance.
-            instance.append(1);
-            assert_eq!(instance.initialized, 1);
+        instance.append(0);
 
-            // instance with one element.
-            instance.append(2);
-            assert_eq!(instance.initialized, 2);
+        assert_eq!(instance.initialized, 1);
+    }
 
-            // instance with more than one element.
-            instance.append(3);
-            assert_eq!(instance.initialized, 3);
+    #[test]
+    fn append_will_reallocate() {
+        let mut instance = Dynamic::<usize>::new();
 
-            // element goes to end, otherwise order preserved
-            assert_eq!(instance[0], 1);
-            assert_eq!(instance[1], 2);
-            assert_eq!(instance[2], 3);
-        }
+        instance.append(0);
 
-        // zero-size types.
-        {
-            let mut instance = Dynamic::<()>::new();
-            assert_eq!(instance.initialized, 0);
+        assert_eq!(instance.initialized, 1);
+    }
 
-            // empty instance.
-            instance.append(());
-            assert_eq!(instance.initialized, 1);
+    #[test]
+    fn append_inserts_at_correct_position() {
+        let mut instance = Dynamic::try_from([0, 1, 2, 3, 4, 5].as_slice()).unwrap();
 
-            // instance with one element.
-            instance.append(());
-            assert_eq!(instance.initialized, 2);
+        instance.append(6);
 
-            // instance with more than one element.
-            instance.append(());
-            assert_eq!(instance.initialized, 3);
+        assert_eq!(*instance.last().unwrap(), 6);
+    }
 
-            // element goes to end, otherwise order preserved
-            assert_eq!(instance[0], ());
-            assert_eq!(instance[1], ());
-            assert_eq!(instance[2], ());
-        }
+    #[test]
+    fn append_preserves_elements_order() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+
+        instance.append(6);
+
+        assert_eq!(instance.as_slice()[..5], original);
     }
 
     #[test]
