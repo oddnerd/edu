@@ -263,7 +263,7 @@ impl<T> Dynamic<T> {
         }
 
         self.initialized += 1;
-        self.allocated -=1;
+        self.allocated -= 1;
 
         unsafe {
             // SAFETY: the buffer has been allocated.
@@ -278,7 +278,6 @@ impl<T> Dynamic<T> {
             // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
             Ok((*ptr).write(element))
         }
-
     }
 
     /// Attempt to insert `element` at `index`, allocating if necessary.
@@ -308,16 +307,17 @@ impl<T> Dynamic<T> {
 
         // shift initialized elements `[index..]` one position to the right.
         if std::mem::size_of::<T>() != 0 {
-        unsafe {
-            // SAFETY: aligned within the allocated object.
-            let from = self.data.as_ptr().add(index);
+            unsafe {
+                // SAFETY: aligned within the allocated object.
+                let from = self.data.as_ptr().add(index);
 
-            // SAFETY: capacity was confirmed so this is also within the object.
-            let to = from.add(1);
+                // SAFETY: capacity was confirmed so this is also within the object.
+                let to = from.add(1);
 
-            // SAFETY: owned memory and no aliasing despite overlapping.
-            std::ptr::copy(from, to, self.initialized - index);
-        }}
+                // SAFETY: owned memory and no aliasing despite overlapping.
+                std::ptr::copy(from, to, self.initialized - index);
+            }
+        }
 
         // SAFETY: update internal state to reflect shift.
         self.initialized += 1;
@@ -421,7 +421,6 @@ impl<T> std::ops::Drop for Dynamic<T> {
 }
 
 impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
-
     type Error = AllocationError;
 
     fn try_from(value: &'a [T]) -> Result<Self, Self::Error> {
@@ -431,7 +430,9 @@ impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
         };
 
         for element in value {
-            instance.append(element.clone()).expect("preallocated space");
+            instance
+                .append(element.clone())
+                .expect("preallocated space");
         }
 
         Ok(instance)
@@ -645,7 +646,7 @@ impl<T: Clone> Clone for Dynamic<T> {
     fn clone(&self) -> Self {
         let mut clone = match Self::with_capacity(self.count()) {
             Ok(allocation) => allocation,
-            Err(_) => panic!("allocation failed")
+            Err(_) => panic!("allocation failed"),
         };
 
         for element in self.iter() {
@@ -669,20 +670,28 @@ mod test {
     }
 
     #[test]
-    fn from_slice() {
-        // sized type.
-        {
-            let array = [0, 1, 2, 3];
-            let instance = Dynamic::try_from(array.as_slice());
-            assert!(instance.iter().eq(array.iter()));
-        }
+    fn from_slice_makes_separate_allocation_for_normal_types() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
-        // zero-size type.
-        {
-            let array = [(), (), (), ()];
-            let instance = Dynamic::try_from(array.as_slice());
-            assert!(instance.iter().eq(array.iter()));
-        }
+        assert_ne!(instance.data.as_ptr().cast(), original.as_ptr().cast_mut());
+    }
+
+    #[test]
+    fn from_slice_initializes_member_variables() {
+        let original = [(), (), (), (), (), ()];
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
+
+        assert_eq!(instance.initialized, original.len());
+        assert!(instance.allocated >= original.len());
+    }
+
+    #[test]
+    fn from_slice_initializes_elements() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
+
+        assert!(instance.iter().eq(original.iter()));
     }
 
     #[test]
