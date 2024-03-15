@@ -539,4 +539,18 @@ mod test {
 
         assert_ne!(instance, other);
     }
+
+    #[test]
+    fn clone_is_eq() {
+        let underlying = [0,1,2,3,4,5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        let other = instance.clone();
+
+        assert_eq!(instance, other);
+    }
 }

@@ -376,4 +376,12 @@ mod test {
             assert_eq!(value.0, Value::default().0);
         }
     }
+
+    #[test]
+    fn clone_is_eq() {
+        let instance = Fixed::from([0, 1, 2, 3, 4, 5]);
+        let other = instance.clone();
+
+        assert_eq!(instance, other);
+    }
 }
