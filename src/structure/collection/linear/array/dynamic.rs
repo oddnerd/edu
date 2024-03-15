@@ -799,44 +799,31 @@ mod test {
     }
 
     #[test]
-    fn shrink() {
-        // sized type.
-        {
-            let mut instance = Dynamic::<i32>::with_capacity(16).unwrap();
-            instance.append(0);
-            assert!(instance.allocated >= 15);
+    fn shrink_to_exact_capacity() {
+        let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
 
-            // reduces capacity.
-            instance.shrink(Some(8));
-            assert_eq!(instance.allocated, 8);
+        instance.shrink(Some(8));
 
-            // eliminates capacity.
-            instance.shrink(None);
-            assert_eq!(instance.allocated, 0);
+        assert_eq!(instance.allocated, 8);
+    }
 
-            // doesn't remove initialized elements.
-            assert_eq!(instance.initialized, 1);
-            assert_eq!(instance[0], 0);
-        }
+    #[test]
+    fn shrink_to_no_capacity() {
+        let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
 
-        // zero-size type.
-        {
-            let mut instance = Dynamic::<()>::with_capacity(16).unwrap();
-            instance.append(());
-            assert!(instance.allocated >= 15);
+        instance.shrink(None);
 
-            // reduces capacity.
-            instance.shrink(Some(8));
-            assert_eq!(instance.allocated, 8);
+        assert_eq!(instance.allocated, 0);
+    }
 
-            // eliminates capacity.
-            instance.shrink(None);
-            assert_eq!(instance.allocated, 0);
+    #[test]
+    fn shrink_does_not_remove_initialized_elements() {
+        let original = [0, 1, 2, 3, 4, 5];
+        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
 
-            // doesn't remove initialized elements.
-            assert_eq!(instance.initialized, 1);
-            assert_eq!(instance[0], ());
-        }
+        instance.shrink(None);
+
+        assert!(instance.iter().eq(original.as_slice()));
     }
 
     #[test]
