@@ -741,10 +741,14 @@ mod test {
     }
 
     #[test]
-    fn capacity() {
-        let instance = Dynamic::<()>::new();
+    fn capacity_increases_with_reservation() {
+        let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
 
-        assert_eq!(instance.capacity(), 0);
+        assert!(instance.capacity() >= 256);
+
+        instance.reserve(1024);
+
+        assert!(instance.capacity() >= 1024);
     }
 
     #[test]
