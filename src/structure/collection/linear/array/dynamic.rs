@@ -695,22 +695,33 @@ mod test {
     }
 
     #[test]
-    fn with_capacity() {
-        // sized type.
-        {
-            let instance = Dynamic::<i32>::with_capacity(4).unwrap();
+    fn with_capacity_increases_capacity() {
+        const COUNT: usize = 256;
 
-            assert_eq!(instance.initialized, 0);
-            assert!(instance.allocated >= 4);
+        let instance = Dynamic::<()>::with_capacity(COUNT).unwrap();
+
+        assert!(instance.capacity() >= COUNT);
+    }
+
+    #[test]
+    fn with_capacity_does_not_initialize_elements() {
+        let instance = Dynamic::<()>::with_capacity(256).unwrap();
+
+        assert_eq!(instance.initialized, 0);
+    }
+
+    #[test]
+    fn with_capacity_preallocates() {
+        const COUNT: usize = 256;
+
+        let mut instance = Dynamic::<usize>::with_capacity(COUNT).unwrap();
+        let preallocated = instance.allocated;
+
+        for element in 0..COUNT {
+            instance.append(element);
         }
 
-        // zero-size type.
-        {
-            let instance = Dynamic::<()>::with_capacity(4).unwrap();
-
-            assert_eq!(instance.initialized, 0);
-            assert!(instance.allocated >= 4);
-        }
+        assert_eq!(instance.allocated, preallocated - COUNT);
     }
 
     #[test]
