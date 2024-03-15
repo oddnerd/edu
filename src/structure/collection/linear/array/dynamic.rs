@@ -256,31 +256,28 @@ impl<T> Dynamic<T> {
     /// assert_eq!(*instance.first().unwrap(), 1);
     /// assert_eq!(*instance.last().unwrap(), 2);
     /// ```
-    pub fn append(&mut self, element: T) -> bool {
+    pub fn append(&mut self, element: T) -> Result<&mut T, AllocationError> {
         if self.allocated == 0 && !self.reserve(1) {
-            return false;
-        }
-
-        if std::mem::size_of::<T>() != 0 {
-            unsafe {
-                // SAFETY: the buffer has been allocated.
-                let ptr = self.data.as_ptr();
-
-                // SAFETY: this points to the first uninitialized element.
-                let ptr = ptr.add(self.initialized);
-
-                // SAFETY:
-                // * `ptr` is non-null.
-                // * `ptr` is aligned.
-                // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
-                (*ptr).write(element);
-            };
+            return Err(AllocationError{});
         }
 
         self.initialized += 1;
         self.allocated -=1;
 
-        true
+        unsafe {
+            // SAFETY: the buffer has been allocated.
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: this points to the first uninitialized element.
+            let ptr = ptr.add(self.initialized);
+
+            // SAFETY:
+            // * `ptr` is non-null.
+            // * `ptr` is aligned.
+            // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
+            Ok((*ptr).write(element))
+        }
+
     }
 
     /// Attempt to insert `element` at `index`, allocating if necessary.
