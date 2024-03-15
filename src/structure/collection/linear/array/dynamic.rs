@@ -59,12 +59,12 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.len(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
-    pub fn with_capacity(count: usize) -> Option<Self> {
+    pub fn with_capacity(count: usize) -> Result<Self, AllocationError> {
         let mut instance = Self::new();
         if instance.reserve(count) {
-            Some(instance)
+            Ok(instance)
         } else {
-            None
+            Err(AllocationError{})
         }
     }
 
