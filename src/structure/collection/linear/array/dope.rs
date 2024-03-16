@@ -385,6 +385,18 @@ mod test {
     }
 
     #[test]
+    fn first_mut_yields_none_when_empty() {
+        let underlying: [(); 0] = [];
+        let mut instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance.first_mut(), None);
+    }
+
+    #[test]
     fn last_yields_none_when_empty() {
         let underlying: [(); 0] = [];
         let instance = {
