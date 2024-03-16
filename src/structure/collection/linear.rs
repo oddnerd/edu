@@ -24,6 +24,18 @@ pub trait Linear<'a>: Collection<'a> + std::iter::IntoIterator {
     /// Query the element considered to be at the front, the first element.
     fn first(&self) -> Option<&Self::Element>;
 
-    /// Query the element considered to be at the end, the last element.
+    /// Obtain a reference to the element at the front, the first element.
+    fn first_mut(&mut self) -> Option<&mut Self::Element>;
+
+    /// Remove the element at the front, the first element.
+    fn front(&mut self) -> Option<Self::Element>;
+
+    /// Query the element considered to be at the back, the last element.
     fn last(&self) -> Option<&Self::Element>;
+
+    /// Obtain a reference to the element at the back, the last element().
+    fn last_mut(&mut self) -> Option<&mut Self::Element>;
+
+    /// Remove the element at the back, the last element.
+    fn back(&mut self) -> Option<Self::Element>;
 }
