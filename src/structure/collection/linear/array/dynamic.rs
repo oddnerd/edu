@@ -892,7 +892,7 @@ mod test {
 
     #[test]
     fn insert_returns_element() {
-        let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
+        let mut instance = Dynamic::try_from([256].as_slice()).unwrap();
 
         let result = instance.insert(1, 0);
 
