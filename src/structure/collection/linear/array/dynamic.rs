@@ -979,11 +979,10 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
-    fn remove_panics_when_out_of_bounds() {
+    fn remove_none_when_out_of_bounds() {
         let mut instance = Dynamic::<()>::new();
 
-        instance.remove(0);
+        assert_eq!(instance.remove(0), None);
     }
 
     #[test]
