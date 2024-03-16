@@ -570,7 +570,7 @@ mod test {
 
     #[test]
     fn clone_is_eq() {
-        let underlying = [0,1,2,3,4,5];
+        let underlying = [0, 1, 2, 3, 4, 5];
         let original = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();

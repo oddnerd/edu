@@ -321,7 +321,6 @@ mod test {
 
         use std::ops::Index;
         instance.index(0);
-
     }
 
     #[test]
@@ -342,7 +341,6 @@ mod test {
 
         use std::ops::IndexMut;
         instance.index_mut(0);
-
     }
 
     #[test]
