@@ -399,9 +399,9 @@ mod test {
 
     #[test]
     fn clone_is_eq() {
-        let instance = Fixed::from([0, 1, 2, 3, 4, 5]);
-        let other = instance.clone();
+        let original = Fixed::from([0, 1, 2, 3, 4, 5]);
+        let clone = original.clone();
 
-        assert_eq!(instance, other);
+        assert_eq!(clone, original);
     }
 }
