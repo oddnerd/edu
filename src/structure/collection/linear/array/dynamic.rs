@@ -262,15 +262,15 @@ impl<T> Dynamic<T> {
             return Err(AllocationError);
         }
 
-        self.initialized += 1;
-        self.allocated -= 1;
-
         unsafe {
             // SAFETY: the buffer has been allocated.
             let ptr = self.data.as_ptr();
 
             // SAFETY: this points to the first uninitialized element.
             let ptr = ptr.add(self.initialized);
+
+            self.initialized += 1;
+            self.allocated -= 1;
 
             // SAFETY:
             // * `ptr` is non-null.
