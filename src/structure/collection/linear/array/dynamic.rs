@@ -869,7 +869,7 @@ mod test {
 
         instance.append(6).expect("appended");
 
-        assert_eq!(instance.as_slice()[..5], original);
+        assert_eq!(instance.as_slice()[..original.len()], original);
     }
 
     #[test]
