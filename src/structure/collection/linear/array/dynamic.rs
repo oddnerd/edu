@@ -836,7 +836,7 @@ mod test {
     }
 
     #[test]
-    fn append_returns_reference_to_element() {
+    fn append_returns_element() {
         let mut instance = Dynamic::<usize>::new();
 
         let result = instance.append(0).unwrap();
