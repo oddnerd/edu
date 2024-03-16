@@ -836,6 +836,15 @@ mod test {
     }
 
     #[test]
+    fn append_returns_reference_to_element() {
+        let mut instance = Dynamic::<usize>::new();
+
+        let result = instance.append(0).unwrap();
+
+        assert_eq!(result, instance.first().unwrap());
+    }
+
+    #[test]
     fn append_will_reallocate() {
         let mut instance = Dynamic::<usize>::new();
 
