@@ -213,7 +213,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::Collection;
     ///
-    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice()).unwrap();
     /// assert_eq!(instance.count(), 4);
     ///
     /// instance.clear();
@@ -286,10 +286,11 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice()).unwrap();
     ///
-    /// instance.insert(7, 1);
+    /// let inserted = instance.insert(7, 1).expect("insert 7 at index 1");
     ///
+    /// assert_eq!(*inserted, 7);
     /// assert_eq!(instance[0], 0);
     /// assert_eq!(instance[1], 7);
     /// assert_eq!(instance[2], 1);
@@ -340,11 +341,12 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice()).unwrap();
     /// assert_eq!(instance.len(), 4);
     ///
-    /// instance.remove(2);
+    /// let removed = instance.remove(2).expect("remove element at index 2");
     ///
+    /// assert_eq!(removed, 2);
     /// assert_eq!(instance.len(), 3);
     /// assert_eq!(instance[0], 0);
     /// assert_eq!(instance[1], 1);
