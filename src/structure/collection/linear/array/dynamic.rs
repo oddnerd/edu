@@ -911,7 +911,8 @@ mod test {
             assert!(instance.as_slice()[..index]
                 .iter()
                 .eq(&original.as_slice()[..index]));
-            assert!(instance.as_slice()[index + 1..]
+
+            assert!(instance.as_slice()[index + 2..]
                 .iter()
                 .eq(&original.as_slice()[index + 1..]));
         }
