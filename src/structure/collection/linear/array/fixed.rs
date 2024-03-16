@@ -315,6 +315,16 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn index_panics_when_out_of_bounds() {
+        let instance = Fixed::<(), 0>::default();
+
+        use std::ops::Index;
+        instance.index(0);
+
+    }
+
+    #[test]
     fn index_mut_yields_correct_element() {
         let mut primitive = [0, 1, 2, 3, 4, 5];
         let mut instance = Fixed::from(primitive);
@@ -323,6 +333,16 @@ mod test {
             use std::ops::IndexMut;
             assert_eq!(instance.index_mut(index), value);
         }
+    }
+
+    #[test]
+    #[should_panic]
+    fn index_mut_panics_when_out_of_bounds() {
+        let mut instance = Fixed::<(), 0>::default();
+
+        use std::ops::IndexMut;
+        instance.index_mut(0);
+
     }
 
     #[test]
