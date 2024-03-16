@@ -718,7 +718,7 @@ mod test {
         let preallocated = instance.allocated;
 
         for element in 0..COUNT {
-            instance.append(element);
+            instance.append(element).expect("preallocated");
         }
 
         assert_eq!(instance.allocated, preallocated - COUNT);
@@ -781,7 +781,7 @@ mod test {
         let preallocated = instance.allocated;
 
         for element in 0..COUNT {
-            instance.append(element);
+            instance.append(element).expect("preallocated");
         }
 
         assert_eq!(instance.allocated, preallocated - COUNT);
@@ -830,7 +830,7 @@ mod test {
     fn append_initializes_an_element() {
         let mut instance = Dynamic::<()>::with_capacity(1).unwrap();
 
-        instance.append(());
+        instance.append(()).expect("appended");
 
         assert_eq!(instance.initialized, 1);
     }
@@ -848,7 +848,7 @@ mod test {
     fn append_will_reallocate() {
         let mut instance = Dynamic::<usize>::new();
 
-        instance.append(0);
+        instance.append(0).expect("appended");
 
         assert_eq!(instance.initialized, 1);
     }
@@ -857,7 +857,7 @@ mod test {
     fn append_inserts_at_correct_position() {
         let mut instance = Dynamic::try_from([0, 1, 2, 3, 4, 5].as_slice()).unwrap();
 
-        instance.append(6);
+        instance.append(6).expect("appended");
 
         assert_eq!(*instance.last().unwrap(), 6);
     }
@@ -867,7 +867,7 @@ mod test {
         let original = [0, 1, 2, 3, 4, 5];
         let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
 
-        instance.append(6);
+        instance.append(6).expect("appended");
 
         assert_eq!(instance.as_slice()[..5], original);
     }
@@ -876,7 +876,7 @@ mod test {
     fn insert_initialized_a_new_element() {
         let mut instance = Dynamic::try_from([()].as_slice()).unwrap();
 
-        instance.insert((), 0);
+        instance.insert((), 0).expect("inserted");
 
         assert_eq!(instance.initialized, 2);
     }
@@ -885,7 +885,7 @@ mod test {
     fn insert_modifies_element_value() {
         let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
 
-        instance.insert(1, 0);
+        instance.insert(1, 0).expect("inserted");
 
         assert_eq!(*instance.first().unwrap(), 1);
     }
@@ -902,11 +902,11 @@ mod test {
     #[test]
     fn insert_only_modifies_specific_index() {
         let original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         for index in 0..instance.len() {
             let mut instance = instance.clone();
-            instance.insert(256, index);
+            instance.insert(256, index).expect("inserted");
 
             assert!(instance.as_slice()[..index]
                 .iter()
@@ -922,7 +922,7 @@ mod test {
         let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
         instance.shrink(None);
 
-        instance.append(0);
+        instance.append(0).expect("inserted");
 
         assert_eq!(instance.initialized, 2);
     }
@@ -932,7 +932,7 @@ mod test {
     fn insert_panics_when_out_of_bounds() {
         let mut instance = Dynamic::<()>::new();
 
-        instance.insert((), 0);
+        instance.insert((), 0).expect("inserted");
     }
 
     #[test]
@@ -965,7 +965,7 @@ mod test {
 
     #[test]
     fn remove_keeps_other_elements() {
-        let mut original = vec![0, 1, 2, 3, 4, 5];
+        let original = vec![0, 1, 2, 3, 4, 5];
 
         for index in 0..original.len() {
             let mut original = original.clone();
@@ -1009,7 +1009,7 @@ mod test {
     #[test]
     fn into_iter_yields_element_count() {
         let original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         assert_eq!(instance.into_iter().count(), original.into_iter().count());
     }
@@ -1017,7 +1017,7 @@ mod test {
     #[test]
     fn into_iter_yields_elements() {
         let original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         assert!(instance.into_iter().eq(original.into_iter()));
     }
@@ -1025,7 +1025,7 @@ mod test {
     #[test]
     fn iter_yields_element_count() {
         let original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         assert_eq!(instance.iter().count(), original.iter().count());
     }
@@ -1033,7 +1033,7 @@ mod test {
     #[test]
     fn iter_yields_elements() {
         let original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         assert!(instance.iter().eq(original.iter()));
     }
@@ -1063,8 +1063,8 @@ mod test {
 
     #[test]
     fn first_yields_correct_element() {
-        let mut original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let original = [0, 1, 2, 3, 4, 5];
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         assert_eq!(instance.first(), original.first());
     }
@@ -1078,8 +1078,8 @@ mod test {
 
     #[test]
     fn last_yields_correct_element() {
-        let mut original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
+        let original = [0, 1, 2, 3, 4, 5];
+        let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
         assert_eq!(instance.last(), original.last());
     }
