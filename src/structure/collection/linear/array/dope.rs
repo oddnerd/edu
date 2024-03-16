@@ -424,6 +424,20 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn index_panics_when_out_of_bounds() {
+        let underlying: [(); 0] = [];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        use std::ops::Index;
+        instance.index(0);
+    }
+
+    #[test]
     fn index_mut_yields_correct_element() {
         let mut underlying = [0, 1, 2, 3, 4, 5];
         let mut instance = {
@@ -436,6 +450,20 @@ mod test {
             use std::ops::IndexMut;
             assert_eq!(instance.index_mut(index), value);
         }
+    }
+
+    #[test]
+    #[should_panic]
+    fn index_mut_panics_when_out_of_bounds() {
+        let underlying: [(); 0] = [];
+        let mut instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        use std::ops::IndexMut;
+        instance.index_mut(0);
     }
 
     #[test]
@@ -542,15 +570,15 @@ mod test {
 
     #[test]
     fn clone_is_eq() {
-        let underlying = [0,1,2,3,4,5];
-        let instance = {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let original = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
             unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        let other = instance.clone();
+        let clone = original.clone();
 
-        assert_eq!(instance, other);
+        assert_eq!(clone, original);
     }
 }
