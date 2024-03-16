@@ -891,6 +891,15 @@ mod test {
     }
 
     #[test]
+    fn insert_returns_element() {
+        let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
+
+        let result = instance.insert(1, 0);
+
+        assert_eq!(result.unwrap(), instance.first().unwrap());
+    }
+
+    #[test]
     fn insert_only_modifies_specific_index() {
         let original = [0, 1, 2, 3, 4, 5];
         let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
