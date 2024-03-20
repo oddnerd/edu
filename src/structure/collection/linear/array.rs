@@ -28,6 +28,24 @@ pub trait Array<'a>:
     + std::ops::IndexMut<usize, Output = &'a mut Self::Element>
     + std::ops::DerefMut<Target = [Self::Element]>
 {
+    // Obtain an immutable reference to the element at `index`, bounds checked.
+    fn at(&self, index: usize) -> Option<&Self::Element> {
+        if index < self.count() {
+            Some(&self[index])
+        } else {
+            None
+        }
+    }
+
+    // Obtain a mutable reference to the element at `index`, bounds checked.
+    fn at_mut(&self, index: usize) -> Option<&mut Self::Element> {
+        if index < self.count() {
+            Some(&mut self[index])
+        } else {
+            None
+        }
+    }
+
     /// Obtain an immutable slice to the elements.
     fn as_slice(&self) -> &[Self::Element] {
         self.deref()
