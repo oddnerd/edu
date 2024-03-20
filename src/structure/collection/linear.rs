@@ -14,7 +14,7 @@ use super::Collection;
 /// element(s) that can be said to be the [`Self::first`] and/or [`Self::last`]
 /// contained because they are connected to only one other element whereas all
 /// other elements are connected to exactly two.
-pub trait Linear<'a>: Collection<'a> + std::iter::IntoIterator {
+pub trait Linear<'a>: Collection<'a> + std::iter::IntoIterator<Item = Self::Element> {
     /// Iterate over the elements by immutable reference.
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element>;
 

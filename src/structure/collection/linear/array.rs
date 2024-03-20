@@ -23,7 +23,10 @@ use super::Linear;
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Array_(data_type)).
 pub trait Array<'a>:
-    Linear<'a> + std::ops::IndexMut<usize> + std::ops::DerefMut<Target = [Self::Element]>
+    Linear<'a>
+    + std::ops::Index<usize, Output = &'a Self::Element>
+    + std::ops::IndexMut<usize, Output = &'a mut Self::Element>
+    + std::ops::DerefMut<Target = [Self::Element]>
 {
     /// Obtain an immutable slice to the elements.
     fn as_slice(&self) -> &[Self::Element] {
