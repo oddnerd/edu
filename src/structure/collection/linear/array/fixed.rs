@@ -200,7 +200,7 @@ impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let iter = fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
     ///
