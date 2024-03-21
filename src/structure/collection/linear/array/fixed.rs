@@ -16,6 +16,23 @@ pub struct Fixed<T, const N: usize> {
 }
 
 impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
+    /// Construct from an existing [`array`].
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let expected = underlying.clone();
+    ///
+    /// let fixed = Fixed::from(underlying);
+    ///
+    /// assert!(dope.iter().eq(expected));
+    /// ```
     fn from(array: [T; N]) -> Self {
         Self { data: array }
     }
