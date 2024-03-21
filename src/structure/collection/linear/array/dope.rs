@@ -351,10 +351,12 @@ mod test {
 
     #[test]
     fn from_slice_initializes_member_variables() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = Dope::from(underlying.as_slice());
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let pointer = underlying.as_mut_ptr();
 
-        assert_eq!(instance.ptr.as_ptr(), underlying.as_ptr().cast_mut());
+        let instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(instance.ptr.as_ptr(), pointer);
         assert_eq!(instance.count, underlying.len());
     }
 
