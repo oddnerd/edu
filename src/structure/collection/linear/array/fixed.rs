@@ -75,11 +75,11 @@ impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(underlying.clone());
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let fixed = Fixed::from(expected.clone());
     ///
-    /// for index in 0..underlying.len() {
-    ///     assert_eq!(dope.index(index), underlying.index(index));
+    /// for index in 0..expected.len() {
+    ///     assert_eq!(dope.index(index), expected.index(index));
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
@@ -106,11 +106,11 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(underlying.clone());
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let fixed = Fixed::from(expected.clone());
     ///
     /// for index in 0..underlying.len() {
-    ///     assert_eq!(dope.index_mut(index), underlying.index_mut(index));
+    ///     assert_eq!(dope.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
