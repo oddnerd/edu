@@ -267,12 +267,40 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
 }
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
+    /// List the elements referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(format!("{dope:?}"), "[0, 1, 2, 3, 4, 5]");
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
 }
 
 impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
+    /// Display the underlying address pointed to.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(format!("{dope:P}"), format!("{:P}", underlying.as_ptr()));
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: the address of the pointer it read, not the pointer itself.
         std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
