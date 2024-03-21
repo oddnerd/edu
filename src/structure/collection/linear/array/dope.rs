@@ -222,10 +222,42 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
 }
 
 impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    ///
+    /// # Safety:
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(dope.as_ptr(), underlying.as_ptr());
+    /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
         self.ptr.as_ptr().cast_const()
     }
 
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    ///
+    /// # Safety:
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(dope.as_mut_ptr(), underlying.as_mut_ptr());
+    /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.ptr.as_ptr()
     }
