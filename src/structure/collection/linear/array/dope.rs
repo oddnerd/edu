@@ -308,6 +308,23 @@ impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
 }
 
 impl<'a, T: 'a + PartialEq> std::cmp::PartialEq for Dope<'a, T> {
+    /// Query if the elements referenced to/contained are the same as `other`.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// let underlying = underlying.clone();
+    /// let other = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(dope, other);
+    /// ```
     fn eq(&self, other: &Self) -> bool {
         *self.as_slice() == *other.as_slice()
     }
