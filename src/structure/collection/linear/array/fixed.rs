@@ -348,6 +348,21 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
 }
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
+    /// Construct with default initialized elements.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let fixed: Fixed<i32, 256> = Default::default();
+    ///
+    /// for element in fixed {
+    ///     assert_eq!(element, Default::default());
+    /// }
+    /// ```
     fn default() -> Self {
         // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
         let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
