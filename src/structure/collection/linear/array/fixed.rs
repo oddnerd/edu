@@ -230,6 +230,27 @@ impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
 impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     type Item = T;
 
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let iter = fixed::from(expected).into_iter();
+    ///
+    /// assert_eq(iter.next(), Some(0));
+    /// assert_eq(iter.next(), Some(1));
+    /// assert_eq(iter.next(), Some(2));
+    /// assert_eq(iter.next(), Some(3));
+    /// assert_eq(iter.next(), Some(4));
+    /// assert_eq(iter.next(), Some(5));
+    /// assert_eq(iter.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         match self.next.next() {
             Some(index) => {
