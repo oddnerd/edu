@@ -124,6 +124,23 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
 }
 
 impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
+    /// Immutably iterate the elements in order.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let fixed = fixed::from(expected.clone());
+    ///
+    /// for (actual, expected) in fixed.iter().zip(expected.iter()) {
+    ///     assert_eq!(actual, expected);
+    /// }
+    /// ```
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
         unsafe {
             // SAFETY: will never be written to.
@@ -136,6 +153,23 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
         }
     }
 
+    /// Mutably iterate the elements in order.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let fixed = fixed::from(expected.clone());
+    ///
+    /// for (actual, expected) in fixed.iter_mut().zip(expected.iter_mut()) {
+    ///     assert_eq!(actual, expected);
+    /// }
+    /// ```
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
         unsafe {
             let ptr = self.data.as_mut_ptr();
