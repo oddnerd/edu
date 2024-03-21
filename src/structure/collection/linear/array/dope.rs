@@ -66,7 +66,7 @@ impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
     /// assert!(dope.iter().eq(underlying));
