@@ -26,10 +26,8 @@ impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let expected = underlying.clone();
-    ///
-    /// let fixed = Fixed::from(underlying);
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let fixed = Fixed::from(expected.clone());
     ///
     /// assert!(dope.iter().eq(expected));
     /// ```
@@ -51,12 +49,10 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let expected = underlying.len();
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let fixed = Fixed::from(underlying.clone());
     ///
-    /// let fixed = Fixed::from(underlying);
-    ///
-    /// assert_eq!(fixed.count(), expected);
+    /// assert_eq!(fixed.count(), expected.len());
     /// ```
     fn count(&self) -> usize {
         N
