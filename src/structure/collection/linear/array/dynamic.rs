@@ -55,6 +55,9 @@ impl<T> Dynamic<T> {
 
     /// Construct an instance with an allocated buffer for `count` elements.
     ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
