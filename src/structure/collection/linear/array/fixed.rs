@@ -182,6 +182,53 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     }
 }
 
+impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    ///
+    /// # Safety
+    /// * `self` must outlive the resultant pointer.
+    /// * Cannot write to resultant pointer or any pointer derived from it.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
+    ///
+    /// std::slice::from_raw_parts(fixed.as_ptr(), fixed.count());
+    ///
+    /// assert!(slice.iter().eq(fixed.iter()));
+    /// ```
+    unsafe fn as_ptr(&self) -> *const Self::Element {
+        self.data.as_ptr()
+    }
+
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    ///
+    /// # Safety
+    /// * `self` must outlive the resultant pointer.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
+    ///
+    /// std::slice::from_raw_parts_mut(fixed.as_mut_ptr(), fixed.count());
+    ///
+    /// assert!(slice.iter_mut().eq(fixed.iter_mut()));
+    /// ```
+    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+        self.data.as_mut_ptr()
+    }
+}
+
 /// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T, const N: usize> {
     /// Ownership of the underlying array.
@@ -304,49 +351,6 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
-    /// Obtain an immutable pointer to the underlying contigious memory buffer.
-    ///
-    /// # Safety
-    /// * `self` must outlive the resultant pointer.
-    /// * Cannot write to resultant pointer or any pointer derived from it.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
-    ///
-    /// std::slice::from_raw_parts(fixed.as_ptr(), fixed.count());
-    /// ```
-    unsafe fn as_ptr(&self) -> *const Self::Element {
-        self.data.as_ptr()
-    }
-
-    /// Obtain an immutable pointer to the underlying contigious memory buffer.
-    ///
-    /// # Safety
-    /// * `self` must outlive the resultant pointer.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
-    ///
-    /// std::slice::from_raw_parts_mut(fixed.as_mut_ptr(), fixed.count());
-    /// ```
-    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
-        self.data.as_mut_ptr()
-    }
-}
-
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     /// Construct with default initialized elements.
     ///
@@ -398,54 +402,6 @@ mod test {
         let instance = Fixed::from([(), (), (), (), (), ()]);
 
         assert_eq!(instance.count(), instance.data.len());
-    }
-
-    #[test]
-    fn into_iter_yields_element_count() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert_eq!(instance.into_iter().count(), primitive.len());
-    }
-
-    #[test]
-    fn into_iter_yields_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert!(instance.into_iter().eq(primitive.into_iter()));
-    }
-
-    #[test]
-    fn iter_yields_element_count() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert_eq!(instance.iter().count(), primitive.len());
-    }
-
-    #[test]
-    fn iter_yields_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert!(instance.iter().eq(primitive.iter()));
-    }
-
-    #[test]
-    fn iter_mut_yields_element_count() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let mut instance = Fixed::from(primitive);
-
-        assert_eq!(instance.iter_mut().count(), primitive.len());
-    }
-
-    #[test]
-    fn iter_mut_yields_elements() {
-        let mut primitive = [0, 1, 2, 3, 4, 5];
-        let mut instance = Fixed::from(primitive);
-
-        assert!(instance.iter_mut().eq(primitive.iter_mut()));
     }
 
     #[test]
@@ -503,6 +459,22 @@ mod test {
         let other = Fixed::from([1]);
 
         assert_ne!(instance, other);
+    }
+
+    #[test]
+    fn into_iter_yields_element_count() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
+
+        assert_eq!(instance.into_iter().count(), primitive.len());
+    }
+
+    #[test]
+    fn into_iter_yields_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive);
+
+        assert!(instance.into_iter().eq(primitive.into_iter()));
     }
 
     #[test]
