@@ -96,7 +96,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let underlying = [0, 1, 2, 3, 4, 5];

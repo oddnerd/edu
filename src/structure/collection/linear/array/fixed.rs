@@ -46,7 +46,7 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
