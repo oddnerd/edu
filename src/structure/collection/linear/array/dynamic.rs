@@ -241,34 +241,20 @@ impl<T> Dynamic<T> {
             return;
         }
 
-        while self.initialized > 0 {
-            let ptr = self.data.as_ptr();
-
-            // SAFETY: `ptr` remains within the allocated object.
-            let ptr = unsafe { ptr.add(self.initialized - 1) };
-
-            // SAFETY: `ptr` is pointing to the last initialized element.
-            unsafe { (*ptr).assume_init_drop() };
-
-            self.allocated += self.initialized;
-            self.initialized = 0;
-        }
-    }
-
-    /// Attempt to add an `element` to the end, allocating if necessary.
+impl<T> std::ops::Drop for Dynamic<T> {
+    /// Drops the elements that are initialized and deallocate memory.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<i32>::new();
+    /// let instance = Dynamic::from([0, 1, 2, 3, 4, 5]);
     ///
-    /// instance.append(1);
-    /// instance.append(2);
-    ///
-    /// assert_eq!(instance.len(), 2);
-    /// assert_eq!(*instance.first().unwrap(), 1);
-    /// assert_eq!(*instance.last().unwrap(), 2);
+    /// std::mem::drop(instance);
     /// ```
     pub fn append(&mut self, element: T) -> Result<&mut T, AllocationError> {
         if self.allocated == 0 && !self.reserve(1) {
