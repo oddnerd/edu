@@ -55,8 +55,23 @@ impl<'a, T: 'a> Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::convert::From<&'a [T]> for Dope<'a, T> {
-    fn from(slice: &'a [T]) -> Self {
+impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
+    /// Construct from an existing [`slice`].
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert!(dope.iter().eq(underlying));
+    /// ```
+    fn from(slice: &'a mut [T]) -> Self {
         Self {
             ptr: {
                 let ptr = slice.as_ptr().cast_mut();
