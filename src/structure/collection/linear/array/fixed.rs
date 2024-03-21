@@ -62,6 +62,26 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
 impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
     type Output = T;
 
+    /// Query the element `index` positions from the start.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let fixed = Fixed::from(underlying.clone());
+    ///
+    /// for index in 0..underlying.len() {
+    ///     assert_eq!(dope.index(index), underlying.index(index));
+    /// }
+    /// ```
     fn index(&self, index: usize) -> &Self::Output {
         debug_assert!(index < N);
         // SAFETY:
@@ -73,6 +93,26 @@ impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
 }
 
 impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
+    /// Obtain a reference to the element `index` positions from the start.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let fixed = Fixed::from(underlying.clone());
+    ///
+    /// for index in 0..underlying.len() {
+    ///     assert_eq!(dope.index_mut(index), underlying.index_mut(index));
+    /// }
+    /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         debug_assert!(index < N);
         // SAFETY:
