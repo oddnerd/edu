@@ -336,7 +336,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
     ///
