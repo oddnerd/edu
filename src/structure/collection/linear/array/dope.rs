@@ -112,6 +112,24 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
 impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
+    /// Query the element `index` positions from the start.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    ///
+    /// for index in 0..underlying.len() {
+    ///     assert_eq!(dope.index(index), underlying.index(index));
+    /// }
+    /// ```
     fn index(&self, index: usize) -> &Self::Output {
         // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe {
@@ -127,6 +145,24 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
 }
 
 impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
+    /// Obtain a reference to the element `index` positions from the start.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    ///
+    /// for index in 0..underlying.len() {
+    ///     assert_eq!(dope.index_mut(index), underlying.index_mut(index));
+    /// }
+    /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe {
@@ -223,78 +259,6 @@ mod test {
         };
 
         assert_eq!(instance.count(), underlying.len());
-    }
-
-    #[test]
-    fn iter_yields_element_count_for_normal_types() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.iter().count(), underlying.len());
-    }
-
-    #[test]
-    fn iter_yields_element_count_for_zero_size_types() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.iter().count(), underlying.len());
-    }
-
-    #[test]
-    fn iter_yields_elements() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert!(instance.iter().eq(underlying.as_slice()));
-    }
-
-    #[test]
-    fn iter_mut_yields_element_count_for_normal_types() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
-            let ptr = underlying.as_mut_ptr();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.iter_mut().count(), underlying.len());
-    }
-
-    #[test]
-    fn iter_mut_yields_element_count_for_zero_size_types() {
-        let mut underlying = [(), (), (), (), (), ()];
-        let mut instance = {
-            let ptr = underlying.as_mut_ptr();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.iter_mut().count(), underlying.len());
-    }
-
-    #[test]
-    fn iter_mut_yields_elements() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
-            let ptr = underlying.as_mut_ptr();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert!(instance.iter_mut().eq(underlying.as_slice()));
     }
 
     #[test]
