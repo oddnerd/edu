@@ -96,6 +96,12 @@ impl<T> Dynamic<T> {
 
     /// Attempt to allocate space for `capacity` additional elements.
     ///
+    /// # Panics
+    /// Rust runtime might panic if allocation fails.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
