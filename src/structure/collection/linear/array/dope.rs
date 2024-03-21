@@ -88,6 +88,21 @@ impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
 impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     type Element = T;
 
+    /// Query how many elements are referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(dope.count(), underlying.len());
+    /// ```
     fn count(&self) -> usize {
         self.count
     }
