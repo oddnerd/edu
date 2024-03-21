@@ -33,6 +33,9 @@ pub struct Dynamic<T> {
 impl<T> Dynamic<T> {
     /// Construct an empty instance.
     ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
