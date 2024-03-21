@@ -470,7 +470,7 @@ mod test {
             unsafe { Dope::new(ptr, underlying.len()) }
         };
 
-        let underlying = [0, 1, 2, 3, 4, 5];
+        let underlying = underlying.clone();
         let other = {
             let ptr = underlying.as_ptr().cast_mut();
             let ptr = std::ptr::NonNull::new(ptr).unwrap();
