@@ -445,6 +445,30 @@ mod test {
     }
 
     #[test]
+    fn as_ptr_is_valid_to_read_all_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let instance = Fixed::from(primitive.clone());
+
+        let slice = unsafe{ std::slice::from_raw_parts(instance.as_ptr(), instance.count()) };
+
+        assert_eq!(slice, primitive.as_slice());
+    }
+
+    #[test]
+    fn as_mut_ptr_is_valid_to_write_all_elements() {
+        let primitive = [0, 1, 2, 3, 4, 5];
+        let mut instance = Fixed::from(primitive.clone());
+
+        let slice = unsafe{ std::slice::from_raw_parts_mut(instance.as_mut_ptr(), instance.count()) };
+
+        for (expected, actual) in slice.iter_mut().zip(primitive) {
+            assert_eq!(*expected, actual);
+
+            *expected = 0;
+        }
+    }
+
+    #[test]
     fn eq_for_same_elements() {
         let primitive = [0, 1, 2, 3, 4, 5];
         let instance = Fixed::from(primitive);
