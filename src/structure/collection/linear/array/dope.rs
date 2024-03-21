@@ -394,12 +394,8 @@ mod test {
     #[test]
     #[should_panic]
     fn index_panics_when_out_of_bounds() {
-        let underlying: [(); 0] = [];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying: [(); 0] = [];
+        let instance = Dope::from(underlying.as_mut_slice());
 
         use std::ops::Index;
         instance.index(0);
@@ -423,12 +419,8 @@ mod test {
     #[test]
     #[should_panic]
     fn index_mut_panics_when_out_of_bounds() {
-        let underlying: [(); 0] = [];
-        let mut instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying: [(); 0] = [];
+        let mut instance = Dope::from(underlying.as_mut_slice());
 
         use std::ops::IndexMut;
         instance.index_mut(0);
