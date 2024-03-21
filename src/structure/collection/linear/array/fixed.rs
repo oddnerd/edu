@@ -274,6 +274,21 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
 
     type IntoIter = IntoIter<T, N>;
 
+    /// Obtain an iterator that yields ownership of elements by value.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let fixed = fixed::from(expected.clone());
+    ///
+    /// assert!(fixed.into_iter().eq(expected.into_iter()));
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
             // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
