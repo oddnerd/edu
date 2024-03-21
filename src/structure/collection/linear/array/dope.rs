@@ -32,6 +32,9 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// * `ptr` must point to one contigious allocated object.
     /// * `ptr` must point to `len` consecutive initialized instances of `T`.
     ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::Linear;
