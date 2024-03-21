@@ -41,6 +41,23 @@ impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
 impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     type Element = T;
 
+    /// Query how many elements are contained.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let expected = underlying.len();
+    ///
+    /// let fixed = Fixed::from(underlying);
+    ///
+    /// assert_eq!(fixed.count(), expected);
+    /// ```
     fn count(&self) -> usize {
         N
     }
