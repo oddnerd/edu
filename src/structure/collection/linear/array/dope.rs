@@ -4,7 +4,7 @@ use super::Array;
 use super::Collection;
 use super::Linear;
 
-/// Lightweight access to a contagious buffer of memory.
+/// Lightweight access to a contigious buffer of memory.
 ///
 /// A [Dope Vector](https://en.wikipedia.org/wiki/Dope_vector) comprises of a
 /// pointer and length pair leveraging compile-time type information alongside
