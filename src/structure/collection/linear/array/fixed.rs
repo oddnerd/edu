@@ -50,7 +50,7 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(underlying.clone());
+    /// let fixed = Fixed::from(expected.clone());
     ///
     /// assert_eq!(fixed.count(), expected.len());
     /// ```
