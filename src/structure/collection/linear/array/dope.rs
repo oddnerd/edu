@@ -269,6 +269,13 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     }
 }
 
+impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // SAFETY: the address of the pointer it read, not the pointer itself.
+        std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
+    }
+}
+
 impl<'a, T: 'a + PartialEq> std::cmp::PartialEq for Dope<'a, T> {
     fn eq(&self, other: &Self) -> bool {
         *self.as_slice() == *other.as_slice()
