@@ -31,6 +31,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// * `ptr` must have an address aligned for access to `T`.
     /// * `ptr` must point to one contigious allocated object.
     /// * `ptr` must point to `len` consecutive initialized instances of `T`.
+    /// * Cannot use this object to modify immutable underlying memory.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory for the result.
