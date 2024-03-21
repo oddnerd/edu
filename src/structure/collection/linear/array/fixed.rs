@@ -305,10 +305,43 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
 }
 
 impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    ///
+    /// # Safety
+    /// * `self` must outlive the resultant pointer.
+    /// * Cannot write to resultant pointer or any pointer derived from it.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
+    ///
+    /// std::slice::from_raw_parts(fixed.as_ptr(), fixed.count());
+    /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
         self.data.as_ptr()
     }
 
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    ///
+    /// # Safety
+    /// * `self` must outlive the resultant pointer.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
+    ///
+    /// std::slice::from_raw_parts_mut(fixed.as_mut_ptr(), fixed.count());
+    /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.data.as_mut_ptr()
     }
