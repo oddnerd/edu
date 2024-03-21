@@ -501,31 +501,19 @@ mod test {
 
     #[test]
     fn ne_for_different_elements() {
-        let underlying = [0];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying = [0];
+        let instance = Dope::from(underlying.as_mut_slice());
 
-        let underlying = [1];
-        let other = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying = [1];
+        let other = Dope::from(underlying.as_mut_slice());
 
         assert_ne!(instance, other);
     }
 
     #[test]
     fn clone_is_eq() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let original = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let original = Dope::from(underlying.as_mut_slice());
 
         let clone = original.clone();
 
