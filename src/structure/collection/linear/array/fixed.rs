@@ -243,13 +243,13 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     /// let expected = [0, 1, 2, 3, 4, 5];
     /// let iter = fixed::from(expected).into_iter();
     ///
-    /// assert_eq(iter.next(), Some(0));
-    /// assert_eq(iter.next(), Some(1));
-    /// assert_eq(iter.next(), Some(2));
-    /// assert_eq(iter.next(), Some(3));
-    /// assert_eq(iter.next(), Some(4));
-    /// assert_eq(iter.next(), Some(5));
-    /// assert_eq(iter.next(), None);
+    /// assert_eq!(iter.next(), Some(0));
+    /// assert_eq!(iter.next(), Some(1));
+    /// assert_eq!(iter.next(), Some(2));
+    /// assert_eq!(iter.next(), Some(3));
+    /// assert_eq!(iter.next(), Some(4));
+    /// assert_eq!(iter.next(), Some(5));
+    /// assert_eq!(iter.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         match self.next.next() {
