@@ -78,6 +78,9 @@ impl<T> Dynamic<T> {
 
     /// Query how many elements could be inserted without allocation.
     ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
