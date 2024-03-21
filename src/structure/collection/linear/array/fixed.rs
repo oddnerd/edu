@@ -192,6 +192,23 @@ pub struct IntoIter<T, const N: usize> {
 }
 
 impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
+    /// Drops the elements that have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let iter = fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// iter.next();      // Consumes the element with value `0`.
+    /// iter.next_back(); // Consumes the element with value `5`.
+    ///
+    /// std::mem::drop(iter); // Drops the elements with values `[1, 2, 3, 4]`.
+    /// ```
     fn drop(&mut self) {
         for offset in self.next.clone() {
             let ptr = self.data.as_mut_ptr();
