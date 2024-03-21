@@ -427,6 +427,22 @@ mod test {
     }
 
     #[test]
+    fn as_ptr_points_to_underlying() {
+        let mut underlying: [(); 0] = [];
+        let instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(unsafe { instance.as_ptr() }, underlying.as_ptr());
+    }
+
+    #[test]
+    fn as_mut_ptr_points_to_underlying() {
+        let mut underlying: [(); 0] = [];
+        let mut instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(unsafe { instance.as_mut_ptr() }, underlying.as_mut_ptr());
+    }
+
+    #[test]
     fn eq_for_same_underlying() {
         let underlying = [0, 1, 2, 3, 4, 5];
 
