@@ -44,7 +44,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
     /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
-    /// assert!(underlying.iter().eq(dope.iter()));
+    /// assert!(dope.iter().eq(underlying));
     /// ```
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
