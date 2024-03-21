@@ -29,6 +29,55 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     }
 }
 
+impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        debug_assert!(index < N);
+        // SAFETY:
+        // * `index` index bounds => pointer is aligned within allocated object.
+        // * underlying object is initialized => points to initialized `T`.
+        // * lifetime bound to input object => valid lifetime to return.
+        unsafe { &*self.data.as_ptr().add(index) }
+    }
+}
+
+impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        debug_assert!(index < N);
+        // SAFETY:
+        // * `index` index bounds => pointer is aligned within allocated object.
+        // * underlying object is initialized => points to initialized `T`.
+        // * lifetime bound to input object => valid lifetime to return.
+        unsafe { &mut *self.data.as_mut_ptr().add(index) }
+    }
+}
+
+impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
+    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
+        unsafe {
+            // SAFETY: will never be written to.
+            let ptr = self.data.as_ptr().cast_mut();
+
+            // SAFETY: `data` exists => `ptr` is non-null.
+            let ptr = std::ptr::NonNull::new_unchecked(ptr);
+
+            super::Iter::new(ptr, N)
+        }
+    }
+
+    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
+        unsafe {
+            let ptr = self.data.as_mut_ptr();
+
+            // SAFETY: `data` exists => `ptr` is non-null.
+            let ptr = std::ptr::NonNull::new_unchecked(ptr);
+
+            super::IterMut::new(ptr, N)
+        }
+    }
+}
+
 /// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T, const N: usize> {
     /// Ownership of the underlying array.
@@ -98,94 +147,15 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
-    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        unsafe {
-            // SAFETY: will be consumed by immutable iterator despite cast.
-            let ptr = self.data.as_ptr().cast_mut();
-
-            // SAFETY: `data` exists => pointer will be non-null.
-            let ptr = std::ptr::NonNull::new_unchecked(ptr);
-
-            // SAFETY: requirements enforced by underlying array.
-            super::iter::Iter::new(ptr, N)
-        }
+impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
+    unsafe fn as_ptr(&self) -> *const Self::Element {
+        self.data.as_ptr()
     }
 
-    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        unsafe {
-            let ptr = self.data.as_mut_ptr();
-
-            // SAFETY: `data` exists => pointer will be non-null.
-            let ptr = std::ptr::NonNull::new_unchecked(ptr);
-
-            // SAFETY: requirements enforced by underlying array.
-            super::iter::IterMut::new(ptr, N)
-        }
-    }
-
-    fn first(&self) -> Option<&Self::Element> {
-        if N > 0 {
-            Some(&self[0])
-        } else {
-            None
-        }
-    }
-
-    fn last(&self) -> Option<&Self::Element> {
-        if N > 0 {
-            Some(&self[N - 1])
-        } else {
-            None
-        }
+    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+        self.data.as_mut_ptr()
     }
 }
-
-impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
-    type Output = T;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        debug_assert!(index < N);
-        // SAFETY:
-        // * `index` index bounds => pointer is aligned within allocated object.
-        // * underlying object is initialized => points to initialized `T`.
-        // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &*self.data.as_ptr().add(index) }
-    }
-}
-
-impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        debug_assert!(index < N);
-        // SAFETY:
-        // * `index` index bounds => pointer is aligned within allocated object.
-        // * underlying object is initialized => points to initialized `T`.
-        // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &mut *self.data.as_mut_ptr().add(index) }
-    }
-}
-
-impl<T, const N: usize> std::ops::Deref for Fixed<T, N> {
-    type Target = [T];
-
-    fn deref(&self) -> &Self::Target {
-        // SAFETY:
-        // * `data` is initialized => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts(self.data.as_ptr(), N) }
-    }
-}
-
-impl<T, const N: usize> std::ops::DerefMut for Fixed<T, N> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        // SAFETY:
-        // * `data` is initialized => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts_mut(self.data.as_mut_ptr(), N) }
-    }
-}
-
-impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {}
 
 impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     fn default() -> Self {
@@ -274,36 +244,6 @@ mod test {
     }
 
     #[test]
-    fn first_yields_none_when_empty() {
-        let instance = Fixed::<(), 0>::from([]);
-
-        assert_eq!(instance.first(), None);
-    }
-
-    #[test]
-    fn first_yields_correct_element() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert_eq!(instance.first(), primitive.first());
-    }
-
-    #[test]
-    fn last_yields_none_when_empty() {
-        let instance = Fixed::<(), 0>::from([]);
-
-        assert_eq!(instance.last(), None);
-    }
-
-    #[test]
-    fn last_yields_correct_element() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert_eq!(instance.last(), primitive.last());
-    }
-
-    #[test]
     fn index_yields_correct_element() {
         let primitive = [0, 1, 2, 3, 4, 5];
         let instance = Fixed::from(primitive);
@@ -341,24 +281,6 @@ mod test {
 
         use std::ops::IndexMut;
         instance.index_mut(0);
-    }
-
-    #[test]
-    fn deref_to_valid_slice() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        use std::ops::Deref;
-        assert_eq!(instance.deref(), primitive.as_slice());
-    }
-
-    #[test]
-    fn deref_mut_to_valid_slice() {
-        let mut primitive = [0, 1, 2, 3, 4, 5];
-        let mut instance = Fixed::from(primitive);
-
-        use std::ops::DerefMut;
-        assert_eq!(instance.deref_mut(), primitive.as_mut_slice());
     }
 
     #[test]

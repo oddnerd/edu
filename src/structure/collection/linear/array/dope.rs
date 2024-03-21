@@ -75,62 +75,6 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::IntoIterator for Dope<'a, T> {
-    type Item = &'a T;
-
-    type IntoIter = super::iter::Iter<'a, T>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        // SAFETY: points to `count` initialized instances of `T`.
-        unsafe { super::iter::Iter::new(self.ptr, self.count) }
-    }
-}
-
-impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
-    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        // SAFETY:
-        // * `self.data` points to one contigious allocated object.
-        // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::Iter::new(self.ptr, self.count) }
-    }
-
-    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        // SAFETY:
-        // * `self.data` points to one contigious allocated object.
-        // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::IterMut::new(self.ptr, self.count) }
-    }
-
-    fn first(&self) -> Option<&Self::Element> {
-        use std::ops::Not;
-        if self.is_empty().not() {
-            // SAFETY:
-            // * constructor contract => pointed to `T` is initialized.
-            // * constructor contract => valid lifetime to return.
-            unsafe { Some(self.ptr.as_ref()) }
-        } else {
-            None
-        }
-    }
-
-    fn last(&self) -> Option<&Self::Element> {
-        use std::ops::Not;
-        if self.is_empty().not() {
-            let ptr = self.ptr.as_ptr();
-
-            // SAFETY: points to the final element within the allocated object.
-            let ptr = unsafe { ptr.add(self.count - 1) };
-
-            // SAFETY:
-            // * constructor contract => pointed to `T` is initialized.
-            // * constructor contract => valid lifetime to return.
-            unsafe { Some(&*ptr) }
-        } else {
-            None
-        }
-    }
-}
-
 impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
@@ -163,29 +107,25 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::ops::Deref for Dope<'a, T> {
-    type Target = [T];
+impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
+    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
+        unsafe { super::Iter::new(self.ptr, self.count) }
+    }
 
-    fn deref(&self) -> &Self::Target {
-        // SAFETY:
-        // * constructor contract => `self.data` is aligned.
-        // * constructor contract => every element is initialized.
-        // * constructor contract => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) }
+    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
+        unsafe { super::IterMut::new(self.ptr, self.count) }
     }
 }
 
-impl<'a, T: 'a> std::ops::DerefMut for Dope<'a, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        // SAFETY:
-        // * constructor contract => `self.data` is aligned.
-        // * constructor contract => every element is initialized.
-        // * constructor contract => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.count) }
+impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
+    unsafe fn as_ptr(&self) -> *const Self::Element {
+        self.ptr.as_ptr().cast_const()
+    }
+
+    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+        self.ptr.as_ptr()
     }
 }
-
-impl<'a, T: 'a> Array<'a> for Dope<'a, T> {}
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -249,43 +189,6 @@ mod test {
         };
 
         assert_eq!(instance.count(), underlying.len());
-    }
-
-    #[test]
-    fn into_iter_yields_element_count_for_normal_types() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.into_iter().count(), underlying.len());
-    }
-
-    #[test]
-    fn into_iter_yields_element_count_for_zero_size_types() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.into_iter().count(), underlying.len());
-    }
-
-    #[test]
-    fn into_iter_yields_elements() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert!(instance.into_iter().eq(underlying.as_slice()));
     }
 
     #[test]
@@ -361,102 +264,6 @@ mod test {
     }
 
     #[test]
-    fn first_yields_none_when_empty() {
-        let underlying: [(); 0] = [];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.first(), None);
-    }
-
-    #[test]
-    fn first_yields_correct_element() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.first(), underlying.first());
-    }
-
-    #[test]
-    fn first_mut_yields_none_when_empty() {
-        let underlying: [(); 0] = [];
-        let mut instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.first_mut(), None);
-    }
-
-    #[test]
-    fn first_mut_yields_correct_element() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.first_mut(), underlying.first_mut());
-    }
-
-    #[test]
-    fn last_yields_none_when_empty() {
-        let underlying: [(); 0] = [];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.last(), None);
-    }
-
-    #[test]
-    fn last_yields_correct_element() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.last(), underlying.last());
-    }
-
-    #[test]
-    fn last_mut_yields_none_when_empty() {
-        let underlying: [(); 0] = [];
-        let mut instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.last_mut(), None);
-    }
-
-    #[test]
-    fn last_mut_yields_correct_element() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(instance.last_mut(), underlying.last_mut());
-    }
-
-    #[test]
     fn index_yields_correct_element() {
         let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
@@ -512,32 +319,6 @@ mod test {
 
         use std::ops::IndexMut;
         instance.index_mut(0);
-    }
-
-    #[test]
-    fn deref_to_valid_slice() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        use std::ops::Deref;
-        assert_eq!(instance.deref(), underlying.as_slice());
-    }
-
-    #[test]
-    fn deref_mut_to_valid_slice() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
-            let ptr = underlying.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        use std::ops::DerefMut;
-        assert_eq!(instance.deref_mut(), underlying.as_mut_slice());
     }
 
     #[test]

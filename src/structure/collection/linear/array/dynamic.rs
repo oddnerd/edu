@@ -3,6 +3,7 @@
 use super::Array;
 use super::Collection;
 use super::Linear;
+use super::LinearMut;
 
 /// Error type for when allocation fails.
 #[derive(Debug)]
@@ -279,122 +280,6 @@ impl<T> Dynamic<T> {
             Ok((*ptr).write(element))
         }
     }
-
-    /// Attempt to insert `element` at `index`, allocating if necessary.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
-    ///
-    /// instance.insert(7, 1);
-    ///
-    /// assert_eq!(instance[0], 0);
-    /// assert_eq!(instance[1], 7);
-    /// assert_eq!(instance[2], 1);
-    /// assert_eq!(instance[3], 2);
-    /// assert_eq!(instance[4], 3);
-    /// ```
-    pub fn insert(&mut self, element: T, index: usize) -> Result<&mut T, AllocationError> {
-        if index >= self.initialized {
-            return Err(AllocationError);
-        }
-
-        if self.allocated == 0 && !self.reserve(1) {
-            return Err(AllocationError);
-        }
-
-        // shift initialized elements `[index..]` one position to the right.
-        if std::mem::size_of::<T>() != 0 {
-            unsafe {
-                // SAFETY: aligned within the allocated object.
-                let from = self.data.as_ptr().add(index);
-
-                // SAFETY: capacity was confirmed so this is also within the object.
-                let to = from.add(1);
-
-                // SAFETY: owned memory and no aliasing despite overlapping.
-                std::ptr::copy(from, to, self.initialized - index);
-            }
-        }
-
-        // SAFETY: update internal state to reflect shift.
-        self.initialized += 1;
-        self.allocated -= 1;
-
-        unsafe {
-            // SAFETY: aligned within the allocated object.
-            let ptr = self.data.as_ptr().add(index);
-
-            // SAFETY:
-            // * `ptr` points to the uninitialized element created by shifting.
-            // * `ptr` is mutably owned.
-            Ok((*ptr).write(element))
-        }
-    }
-
-    /// Drop the element at `index`, shifting following elements.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
-    /// assert_eq!(instance.len(), 4);
-    ///
-    /// instance.remove(2);
-    ///
-    /// assert_eq!(instance.len(), 3);
-    /// assert_eq!(instance[0], 0);
-    /// assert_eq!(instance[1], 1);
-    /// assert_eq!(instance[2], 3);
-    /// ```
-    pub fn remove(&mut self, index: usize) -> Option<T> {
-        if index >= self.initialized {
-            return None;
-        }
-
-        if std::mem::size_of::<T>() == 0 {
-            self.initialized -= 1;
-            self.allocated = self.allocated.saturating_add(1);
-
-            // SAFETY:
-            // * pointer is aligned.
-            // * pointer is non-null.
-            // * zero-sized type makes this special-case [`ptr::read`] okay.
-            return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ptr().read() });
-        }
-
-        let element = unsafe {
-            // SAFETY: stays aligned within the allocated object.
-            let element = self.data.as_ptr().add(index);
-
-            // SAFETY: `T` has the same layout as [`MaybeUninit<T>`].
-            let element = element.cast::<T>();
-
-            // SAFETY: the element is initialized.
-            element.read()
-        };
-
-        // shift initialized elements `[index + 1..]` one position to the left.
-        unsafe {
-            // SAFETY: element at `index` was removed hence it is uninitialized.
-            let to = self.data.as_ptr().add(index);
-
-            // SAFETY: whereas this is the first initialized element after.
-            let from = to.add(1);
-
-            // SAFETY: owned memory and no aliasing despite overlapping.
-            std::ptr::copy(from, to, self.initialized - index);
-
-            // SAFETY: update internal state to reflect shift.
-            self.initialized -= 1;
-            self.allocated += 1;
-        }
-
-        Some(element)
-    }
 }
 
 impl<T> std::ops::Drop for Dynamic<T> {
@@ -444,6 +329,60 @@ impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
 
     fn count(&self) -> usize {
         self.initialized
+    }
+}
+
+impl<T> std::ops::Index<usize> for Dynamic<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        assert!(index < self.initialized);
+        // SAFETY:
+        // * `data` is [`NonNull`] => pointer will be non-null.
+        // * index is within bounds => `add` stays within the allocated object.
+        // * `add` => pointer is aligned.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
+        // * underlying object is initialized => points to initialized `T`.
+        // * lifetime bound to self => valid lifetime to return.
+        unsafe { &*self.data.as_ptr().cast::<T>().add(index) }
+    }
+}
+
+impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        assert!(index < self.initialized);
+        // SAFETY:
+        // * `data` is [`NonNull`] => pointer will be non-null.
+        // * index is within bounds => `add` stays within bounds.
+        // * `add` => pointer is aligned.
+        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
+        // * underlying object is initialized => points to initialized `T`.
+        // * lifetime bound to self => valid lifetime to return.
+        unsafe { &mut *self.data.as_ptr().cast::<T>().add(index) }
+    }
+}
+
+impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
+    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
+        unsafe {
+            // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
+            let ptr = self.data.cast::<T>();
+
+            // SAFETY: `ptr` is dangling if and only if no elements have been
+            // initialized, in which case the pointer will not be read.
+            super::Iter::new(ptr, self.initialized)
+        }
+    }
+
+    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
+        unsafe {
+            // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
+            let ptr = self.data.cast::<T>();
+
+            // SAFETY: `ptr` is dangling if and only if no elements have been
+            // initialized, in which case the pointer will not be read.
+            super::IterMut::new(ptr, self.initialized)
+        }
     }
 }
 
@@ -524,103 +463,111 @@ impl<T> std::iter::IntoIterator for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> super::Linear<'a> for Dynamic<T> {
-    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
-        // # SAFETY:
-        // * `self.data` points to one contigious allocated object.
-        // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::Iter::new(self.data.cast::<T>(), self.initialized) }
-    }
+impl<'a, T: 'a> LinearMut<'a> for Dynamic<T> {
+    fn insert(&mut self, index: usize, element: Self::Element) -> Result<&mut T, Self::Element> {
+        if index >= self.initialized {
+            return Err(element);
+        }
 
-    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
-        // # SAFETY:
-        // * `self.data` points to one contigious allocated object.
-        // * `self.len` consecutive initialized and aligned instances.
-        unsafe { super::iter::IterMut::new(self.data.cast::<T>(), self.initialized) }
-    }
+        if self.allocated == 0 && !self.reserve(1) {
+            return Err(element);
+        }
 
-    fn first(&self) -> Option<&Self::Element> {
-        if self.initialized > 0 {
+        // shift initialized elements `[index..]` one position to the right.
+        if std::mem::size_of::<T>() != 0 {
+            unsafe {
+                // SAFETY: aligned within the allocated object.
+                let from = self.data.as_ptr().add(index);
+
+                // SAFETY: capacity was confirmed so this is also within the object.
+                let to = from.add(1);
+
+                // SAFETY: owned memory and no aliasing despite overlapping.
+                std::ptr::copy(from, to, self.initialized - index);
+            }
+        }
+
+        // SAFETY: update internal state to reflect shift.
+        self.initialized += 1;
+        self.allocated -= 1;
+
+        unsafe {
+            // SAFETY: aligned within the allocated object.
+            let ptr = self.data.as_ptr().add(index);
+
             // SAFETY:
-            // * `T` has same layout as [`MaybeUninit<T>`].
-            // * points to an initialized value.
-            Some(unsafe { self.data.cast::<T>().as_ref() })
-        } else {
-            None
+            // * `ptr` points to the uninitialized element created by shifting.
+            // * `ptr` is mutably owned.
+            Ok((*ptr).write(element))
         }
     }
 
-    fn last(&self) -> Option<&Self::Element> {
-        if self.initialized > 0 {
-            // SAFETY: `T` has same layout as [`MaybeUninit<T>`].
-            let element = self.data.cast::<T>().as_ptr();
+    fn remove(&mut self, index: usize) -> Option<Self::Element> {
+        if index >= self.initialized {
+            return None;
+        }
 
-            // SAFETY: stays within the allocated object.
-            let element = unsafe { element.add(self.initialized - 1) };
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized -= 1;
+            self.allocated = self.allocated.saturating_add(1);
+
+            // SAFETY:
+            // * pointer is aligned.
+            // * pointer is non-null.
+            // * zero-sized type makes this special-case [`ptr::read`] okay.
+            return Some(unsafe { std::ptr::NonNull::<T>::dangling().as_ptr().read() });
+        }
+
+        let element = unsafe {
+            // SAFETY: stays aligned within the allocated object.
+            let element = self.data.as_ptr().add(index);
+
+            // SAFETY: `T` has the same layout as [`MaybeUninit<T>`].
+            let element = element.cast::<T>();
 
             // SAFETY: the element is initialized.
-            unsafe { element.as_ref() }
+            element.read()
+        };
+
+        // shift initialized elements `[index + 1..]` one position to the left.
+        unsafe {
+            // SAFETY: element at `index` was removed hence it is uninitialized.
+            let to = self.data.as_ptr().add(index);
+
+            // SAFETY: whereas this is the first initialized element after.
+            let from = to.add(1);
+
+            // SAFETY: owned memory and no aliasing despite overlapping.
+            std::ptr::copy(from, to, self.initialized - index);
+
+            // SAFETY: update internal state to reflect shift.
+            self.initialized -= 1;
+            self.allocated += 1;
+        }
+
+        Some(element)
+    }
+}
+
+impl<'a, T: 'a> Array<'a> for Dynamic<T> {
+    unsafe fn as_ptr(&self) -> *const Self::Element {
+        if self.initialized + self.allocated == 0 {
+            std::ptr::null()
         } else {
-            None
+            // SAFETY: `MaybeUninit<T>` has same memory layout as `T`.
+            self.data.cast::<T>().as_ptr().cast_const()
+        }
+    }
+
+    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+        if self.initialized + self.allocated == 0 {
+            std::ptr::null_mut()
+        } else {
+            // SAFETY: `MaybeUninit<T>` has same memory layout as `T`.
+            self.data.cast::<T>().as_ptr()
         }
     }
 }
-
-impl<T> std::ops::Index<usize> for Dynamic<T> {
-    type Output = T;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        assert!(index < self.initialized);
-        // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within the allocated object.
-        // * `add` => pointer is aligned.
-        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
-        // * underlying object is initialized => points to initialized `T`.
-        // * lifetime bound to self => valid lifetime to return.
-        unsafe { &*self.data.as_ptr().cast::<T>().add(index) }
-    }
-}
-
-impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        assert!(index < self.initialized);
-        // SAFETY:
-        // * `data` is [`NonNull`] => pointer will be non-null.
-        // * index is within bounds => `add` stays within bounds.
-        // * `add` => pointer is aligned.
-        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
-        // * underlying object is initialized => points to initialized `T`.
-        // * lifetime bound to self => valid lifetime to return.
-        unsafe { &mut *self.data.as_ptr().cast::<T>().add(index) }
-    }
-}
-
-impl<T> std::ops::Deref for Dynamic<T> {
-    type Target = [T];
-
-    fn deref(&self) -> &Self::Target {
-        // SAFETY:
-        // * `data` is aligned => pointer is aligned.
-        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
-        // * `self.initialized` => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts(self.data.as_ptr().cast::<T>(), self.initialized) }
-    }
-}
-
-impl<T> std::ops::DerefMut for Dynamic<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        // SAFETY:
-        // * `data` is aligned => pointer is aligned.
-        // * `T` has the same layout as [`MaybeUninit<T>`] => safe cast.
-        // * `self.initialized` => every element is initialized.
-        // * `data` is one object => slice is over one allocated object.
-        unsafe { std::slice::from_raw_parts_mut(self.data.as_ptr().cast::<T>(), self.initialized) }
-    }
-}
-
-impl<'a, T: 'a> Array<'a> for Dynamic<T> {}
 
 impl<T: PartialEq> PartialEq for Dynamic<T> {
     fn eq(&self, other: &Self) -> bool {
@@ -876,7 +823,7 @@ mod test {
     fn insert_initialized_a_new_element() {
         let mut instance = Dynamic::try_from([()].as_slice()).unwrap();
 
-        instance.insert((), 0).expect("inserted");
+        instance.insert(0, ()).expect("inserted");
 
         assert_eq!(instance.initialized, 2);
     }
@@ -885,7 +832,7 @@ mod test {
     fn insert_modifies_element_value() {
         let mut instance = Dynamic::try_from([0].as_slice()).unwrap();
 
-        instance.insert(1, 0).expect("inserted");
+        instance.insert(0, 1).expect("inserted");
 
         assert_eq!(*instance.first().unwrap(), 1);
     }
@@ -904,7 +851,7 @@ mod test {
         let original = [0, 1, 2, 3, 4, 5];
         let instance = Dynamic::try_from(original.as_slice()).unwrap();
 
-        for index in 0..instance.len() {
+        for index in 0..instance.count() {
             let mut instance = instance.clone();
             instance.insert(256, index).expect("inserted");
 
@@ -933,7 +880,7 @@ mod test {
     fn insert_panics_when_out_of_bounds() {
         let mut instance = Dynamic::<()>::new();
 
-        instance.insert((), 0).expect("inserted");
+        instance.insert(0, ()).expect("inserted");
     }
 
     #[test]
@@ -1055,36 +1002,6 @@ mod test {
     }
 
     #[test]
-    fn first_yields_none_when_empty() {
-        let instance = Dynamic::<()>::new();
-
-        assert_eq!(instance.first(), None);
-    }
-
-    #[test]
-    fn first_yields_correct_element() {
-        let original = [0, 1, 2, 3, 4, 5];
-        let instance = Dynamic::try_from(original.as_slice()).unwrap();
-
-        assert_eq!(instance.first(), original.first());
-    }
-
-    #[test]
-    fn last_yields_none_when_empty() {
-        let instance = Dynamic::<()>::new();
-
-        assert_eq!(instance.last(), None);
-    }
-
-    #[test]
-    fn last_yields_correct_element() {
-        let original = [0, 1, 2, 3, 4, 5];
-        let instance = Dynamic::try_from(original.as_slice()).unwrap();
-
-        assert_eq!(instance.last(), original.last());
-    }
-
-    #[test]
     fn index_yields_correct_element() {
         let original = [0, 1, 2, 3, 4, 5];
         let instance = Dynamic::try_from(original.as_slice()).unwrap();
@@ -1122,24 +1039,6 @@ mod test {
 
         use std::ops::IndexMut;
         instance.index_mut(0);
-    }
-
-    #[test]
-    fn deref_to_valid_slice() {
-        let original = [0, 1, 2, 3, 4, 5];
-        let instance = Dynamic::try_from(original.as_slice()).unwrap();
-
-        use std::ops::Deref;
-        assert_eq!(instance.deref(), original.as_slice());
-    }
-
-    #[test]
-    fn deref_mut_to_valid_slice() {
-        let original = [0, 1, 2, 3, 4, 5];
-        let mut instance = Dynamic::try_from(original.as_slice()).unwrap();
-
-        use std::ops::DerefMut;
-        assert_eq!(instance.deref_mut(), original.as_slice());
     }
 
     #[test]
