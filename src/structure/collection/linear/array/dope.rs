@@ -224,7 +224,9 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
 impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
-    /// # Safety:
+    /// # Safety
+    /// * `self` must outlive the resultant pointer.
+    /// * Cannot write to resultant pointer or any pointer derived from it.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -244,7 +246,8 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
 
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
-    /// # Safety:
+    /// # Safety
+    /// * `self` must outlive the resultant pointer.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
