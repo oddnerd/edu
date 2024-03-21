@@ -114,6 +114,9 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
 
     /// Query the element `index` positions from the start.
     ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
     ///
@@ -146,6 +149,9 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
 
 impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     /// Obtain a reference to the element `index` positions from the start.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
