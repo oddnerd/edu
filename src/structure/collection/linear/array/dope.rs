@@ -362,24 +362,16 @@ mod test {
 
     #[test]
     fn count_for_normal_types_is_exact_element_count() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let instance = Dope::from(underlying.as_mut_slice());
 
         assert_eq!(instance.count(), underlying.len());
     }
 
     #[test]
     fn count_for_zero_size_types_is_constructed_count() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        let mut underlying = [(), (), (), (), (), ()];
+        let instance = Dope::from(underlying.as_mut_slice());
 
         assert_eq!(instance.count(), underlying.len());
     }
