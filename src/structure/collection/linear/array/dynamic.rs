@@ -56,7 +56,7 @@ impl<T> Dynamic<T> {
     /// Construct an instance with an allocated buffer for `count` elements.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// This methods takes O(1) time and consumes O(N) memory.
     ///
     /// # Examples
     /// ```
@@ -67,12 +67,12 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.len(), 0);
     /// assert!(instance.capacity() >= 4);
     /// ```
-    pub fn with_capacity(count: usize) -> Result<Self, AllocationError> {
+    pub fn with_capacity(count: usize) -> Result<Self, ()> {
         let mut instance = Self::new();
         if instance.reserve(count) {
             Ok(instance)
         } else {
-            Err(AllocationError)
+            Err(())
         }
     }
 
