@@ -972,7 +972,7 @@ mod test {
         fn allocated_zero_size_types() {
             const COUNT: usize = 256;
 
-            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
 
             assert_eq!(actual.post_capacity, COUNT);
         }
