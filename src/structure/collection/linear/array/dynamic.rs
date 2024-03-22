@@ -680,7 +680,12 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Dynamic<T> {
 
 impl<T> std::default::Default for Dynamic<T> {
     fn default() -> Self {
-        Self::new()
+        Self {
+            ptr: std::ptr::NonNull::dangling(),
+            pre_capacity: 0,
+            initialized: 0,
+            post_capacity: 0,
+        }
     }
 }
 
