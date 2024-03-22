@@ -938,7 +938,9 @@ mod test {
 
         #[test]
         fn does_not_offset_buffer() {
-            todo!()
+            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+
+            assert_eq!(actual.pre_capacity, 0)
         }
 
         #[test]
@@ -1438,14 +1440,35 @@ mod test {
     mod array {
         use super::*;
 
-        #[test]
-        fn as_ptr() {
-            todo!()
+        mod as_ptr {
+            use super::*;
+
+            #[test]
+            fn correct_address() {
+                todo!()
+            }
+
+            #[test]
+            #[should_panic]
+            fn panics_if_empty() {
+                todo!()
+            }
         }
 
-        #[test]
-        fn as_mut_ptr() {
-            todo!()
+        mod as_mut_ptr {
+            use super::*;
+
+            #[test]
+            fn correct_address() {
+                todo!()
+            }
+
+            #[test]
+            #[should_panic]
+            fn panics_if_empty() {
+                todo!()
+            }
         }
+
     }
 }
