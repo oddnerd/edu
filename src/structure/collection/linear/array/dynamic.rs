@@ -787,7 +787,13 @@ impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let instance = Dynamic::from_iter(expected.clone());
+    ///
+    /// assert_eq!(Collection::count(&instance), expected.len());
     /// ```
     fn count(&self) -> usize {
         self.initialized
