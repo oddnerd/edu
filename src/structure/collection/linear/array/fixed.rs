@@ -293,16 +293,15 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let mut iter = Fixed::from(expected).into_iter();
+    /// let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
     ///
-    /// assert_eq!(iter.next(), Some(0));
-    /// assert_eq!(iter.next(), Some(1));
-    /// assert_eq!(iter.next(), Some(2));
-    /// assert_eq!(iter.next(), Some(3));
-    /// assert_eq!(iter.next(), Some(4));
-    /// assert_eq!(iter.next(), Some(5));
-    /// assert_eq!(iter.next(), None);
+    /// assert_eq!(actual.next(), Some(0));
+    /// assert_eq!(actual.next(), Some(1));
+    /// assert_eq!(actual.next(), Some(2));
+    /// assert_eq!(actual.next(), Some(3));
+    /// assert_eq!(actual.next(), Some(4));
+    /// assert_eq!(actual.next(), Some(5));
+    /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         match self.next.next() {
@@ -333,16 +332,15 @@ impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let mut iter = Fixed::from(expected).into_iter();
+    /// let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
     ///
-    /// assert_eq!(iter.next_back(), Some(5));
-    /// assert_eq!(iter.next_back(), Some(4));
-    /// assert_eq!(iter.next_back(), Some(3));
-    /// assert_eq!(iter.next_back(), Some(2));
-    /// assert_eq!(iter.next_back(), Some(1));
-    /// assert_eq!(iter.next_back(), Some(0));
-    /// assert_eq!(iter.next_back(), None);
+    /// assert_eq!(actual.next_back(), Some(5));
+    /// assert_eq!(actual.next_back(), Some(4));
+    /// assert_eq!(actual.next_back(), Some(3));
+    /// assert_eq!(actual.next_back(), Some(2));
+    /// assert_eq!(actual.next_back(), Some(1));
+    /// assert_eq!(actual.next_back(), Some(0));
+    /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         match self.next.next_back() {
