@@ -621,6 +621,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
         let mut iter = iter.into_iter();
 
+        // SAFETY: `size_hint` can _NOT_ be trusted to exact size.
         let count = {
             let (min, max) = iter.size_hint();
             max.unwrap_or(min)
