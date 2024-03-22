@@ -8,16 +8,19 @@ use super::Linear;
 ///
 /// Contigious memory is heap-allocated with alignment and size to store
 /// elements of type `T`, referred to as the buffer. Said buffer is either:
-/// explicitly allocated via [`with_capacity`] or [`reserve`]; or lazily
-/// allocated as elements are added via [`prepend`], [`append`], and [`insert`].
+/// explicitly allocated via [`Self::with_capacity`] or [`Self::reserve`]; or
+/// lazily allocated as elements are added via [`Self::prepend`],
+/// [`Self::append`], and [`Self::insert`].
 ///
 /// The elements are arranged such that the beginning of the buffer potentially
-/// contains uninitialized memory produced by removing elements via [`front`] or
-/// [`remove`] which will be reclaimed when reallocating or adding to the front.
-/// Immediately following are all initialized elements ([`count`] many) in the
-/// order they were added. The rest of the buffer contains uninitialized memory
-/// to hold [`capacity`] elements. The capacity may be reduced via [`shrink`]
-/// to reduce the allocation size, or even deallocate an empty buffer.
+/// contains uninitialized memory produced by removing elements via
+/// [`Self::front`] or [`Self::remove`] which will be reclaimed when
+/// reallocating or adding to the front. Immediately following are all
+/// initialized elements ([`Self::count`] many) in the order they were added.
+/// The rest of the buffer contains uninitialized memory to hold
+/// [`Self::capacity`] elements. The capacity may be reduced via
+/// [`Self::shrink`] to reduce the allocation size, or even deallocate an empty
+/// buffer.
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
@@ -48,8 +51,8 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// match Dynamic::<i32>::with_capacity(256) {
-    ///     Some(instance) => {
-    ///         assert_eq!(instance.count(), 0);
+    ///     Ok(instance) => {
+    ///         assert_eq!(instance.len(), 0);
     ///         assert_eq!(instance.capacity(), 256);
     ///     },
     ///     Err(_) => {
