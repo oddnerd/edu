@@ -236,10 +236,12 @@ impl<T> Dynamic<T> {
                         None => return Err(()),
                     };
 
-                    match std::alloc::Layout::array::<T>(elements) {
+                    let layout = match std::alloc::Layout::array::<T>(elements) {
                         Ok(layout) => layout,
                         Err(_) => return Err(()),
-                    }
+                    };
+
+                    layout
                 };
 
                 unsafe {
@@ -306,8 +308,10 @@ impl<T> std::ops::Drop for Dynamic<T> {
     fn drop(&mut self) {
         for index in 0..self.initialized {
             unsafe {
+                let ptr = self.buffer.as_ptr().add(self.pre_capacity);
+
                 // SAFETY: stays aligned within the allocated object.
-                let ptr = self.buffer.as_ptr().add(index);
+                let ptr = ptr.add(index);
 
                 // SAFETY:
                 // * The `MaybeUninit<T>` is initialized => safe deref.
@@ -602,7 +606,17 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let original = vec![0, 1, 2, 3, 4, 5];
+    ///
+    /// let mut expected = std::vec::Vec::from_iter(original.clone());
+    /// let mut actual = Dynamic::from_iter(original.clone());
+    ///
+    /// expected.extend(original.clone());
+    /// actual.extend(original.clone());
+    ///
+    /// assert!(actual.eq(expected))
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
         let mut iter = iter.into_iter();
@@ -615,10 +629,16 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
         self.reserve(count).expect("successful allocation");
 
         while let Some(element) = iter.next() {
+            if self.capacity() == 0 {
+                self.reserve(1).expect("successful allocation");
+            }
+
             let ptr = self.buffer.as_ptr();
 
+            let offset = self.pre_capacity + self.initialized;
+
             // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(self.pre_capacity + self.initialized) };
+            let ptr = unsafe { ptr.add(offset) };
 
             // SAFETY:
             // * `self.buffer` is non-null => `ptr` is non-null.
@@ -626,24 +646,8 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
             unsafe { (*ptr).write(element) };
 
             self.initialized += 1;
+            self.post_capacity -= 1;
         }
-    }
-}
-
-impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
-    type Element = T;
-
-    /// Query the number of initialized elements contained.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// todo!()
-    /// ```
-    fn count(&self) -> usize {
-        self.initialized
     }
 }
 
@@ -686,6 +690,23 @@ impl<T: Clone> Clone for Dynamic<T> {
         clone.extend(self.iter().cloned());
 
         clone
+    }
+}
+
+impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
+    type Element = T;
+
+    /// Query the number of initialized elements contained.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    fn count(&self) -> usize {
+        self.initialized
     }
 }
 
