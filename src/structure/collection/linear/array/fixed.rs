@@ -27,9 +27,9 @@ impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(expected.clone());
+    /// let actual = Fixed::from(expected.clone());
     ///
-    /// assert!(dope.iter().eq(expected));
+    /// assert!(actual.iter().eq(expected.iter()));
     /// ```
     fn from(array: [T; N]) -> Self {
         Self { data: array }
@@ -50,9 +50,9 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(expected.clone());
+    /// let actual = Fixed::from(expected.clone());
     ///
-    /// assert_eq!(fixed.count(), expected.len());
+    /// assert_eq!(actual.count(), expected.len());
     /// ```
     fn count(&self) -> usize {
         N
@@ -76,10 +76,11 @@ impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(expected.clone());
+    /// let actual = Fixed::from(expected.clone());
     ///
     /// for index in 0..expected.len() {
-    ///     assert_eq!(dope.index(index), expected.index(index));
+    /// use std::ops::Index;
+    ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
@@ -107,10 +108,11 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = Fixed::from(expected.clone());
+    /// let mut actual = Fixed::from(expected.clone());
     ///
-    /// for index in 0..underlying.len() {
-    ///     assert_eq!(dope.index_mut(index), expected.index_mut(index));
+    /// for index in 0..expected.len() {
+    ///     use std::ops::IndexMut;
+    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
@@ -132,12 +134,12 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = fixed::from(expected.clone());
+    /// let actual = Fixed::from(expected.clone());
     ///
-    /// for (actual, expected) in fixed.iter().zip(expected.iter()) {
+    /// for (actual, expected) in actual.iter().zip(expected.iter()) {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
@@ -161,12 +163,12 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Dope;
+    /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let fixed = fixed::from(expected.clone());
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = Fixed::from(expected.clone());
     ///
-    /// for (actual, expected) in fixed.iter_mut().zip(expected.iter_mut()) {
+    /// for (actual, expected) in actual.iter_mut().zip(expected.iter_mut()) {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
@@ -194,13 +196,15 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
+    /// let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
+    /// let actual = unsafe { std::slice::from_raw_parts(expected.as_ptr(), expected.count()) };
     ///
-    /// std::slice::from_raw_parts(fixed.as_ptr(), fixed.count());
-    ///
-    /// assert!(slice.iter().eq(fixed.iter()));
+    /// assert!(actual.iter().eq(expected.iter()));
     /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
         self.data.as_ptr()
@@ -216,13 +220,15 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let fixed = Fixed::from([0, 1, 2, 3, 4, 5]);
+    /// let mut expected = Fixed::from([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = unsafe { std::slice::from_raw_parts_mut(expected.as_mut_ptr(), expected.count()) };
     ///
-    /// std::slice::from_raw_parts_mut(fixed.as_mut_ptr(), fixed.count());
-    ///
-    /// assert!(slice.iter_mut().eq(fixed.iter_mut()));
+    /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.data.as_mut_ptr()
@@ -249,7 +255,7 @@ impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let iter = fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
+    /// let mut iter = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
     ///
     /// iter.next();      // Consumes the element with value `0`.
     /// iter.next_back(); // Consumes the element with value `5`.
@@ -288,7 +294,7 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let iter = fixed::from(expected).into_iter();
+    /// let mut iter = Fixed::from(expected).into_iter();
     ///
     /// assert_eq!(iter.next(), Some(0));
     /// assert_eq!(iter.next(), Some(1));
@@ -316,6 +322,48 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     }
 }
 
+impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N> {
+    /// Obtain the final element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let mut iter = Fixed::from(expected).into_iter();
+    ///
+    /// assert_eq!(iter.next_back(), Some(5));
+    /// assert_eq!(iter.next_back(), Some(4));
+    /// assert_eq!(iter.next_back(), Some(3));
+    /// assert_eq!(iter.next_back(), Some(2));
+    /// assert_eq!(iter.next_back(), Some(1));
+    /// assert_eq!(iter.next_back(), Some(0));
+    /// assert_eq!(iter.next_back(), None);
+    /// ```
+    fn next_back(&mut self) -> Option<Self::Item> {
+        match self.next.next_back() {
+            Some(index) => {
+                let array = self.data.as_mut_ptr();
+
+                // SAFETY: stays aligned within the allocated object.
+                let element = unsafe { array.add(index) };
+
+                // SAFETY: within bounds => pointing to initialized value.
+                Some(std::mem::ManuallyDrop::into_inner(unsafe { element.read() }))
+            }
+            None => None,
+        }
+    }
+}
+
+impl<'a, T: 'a, const N: usize> std::iter::ExactSizeIterator for IntoIter<T, N> {}
+
+impl<'a, T: 'a, const N: usize> std::iter::FusedIterator for IntoIter<T, N> {}
+
 impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
     type Item = T;
 
@@ -332,9 +380,9 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let fixed = fixed::from(expected.clone());
+    /// let actual = Fixed::from(expected.clone());
     ///
-    /// assert!(fixed.into_iter().eq(expected.into_iter()));
+    /// assert!(actual.into_iter().eq(expected.into_iter()));
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
@@ -361,10 +409,10 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
     /// ```
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let fixed: Fixed<i32, 256> = Default::default();
+    /// let actual: Fixed<i32, 256> = Default::default();
     ///
-    /// for element in fixed {
-    ///     assert_eq!(element, Default::default());
+    /// for actual in actual {
+    ///     assert_eq!(actual, Default::default());
     /// }
     /// ```
     fn default() -> Self {
