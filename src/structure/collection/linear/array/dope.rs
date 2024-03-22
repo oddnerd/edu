@@ -250,10 +250,10 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
-    /// assert_eq!(Collection::count(dope), underlying.len());
+    /// assert_eq!(Collection::count(&dope), underlying.len());
     /// ```
     fn count(&self) -> usize {
         self.count
