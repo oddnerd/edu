@@ -55,6 +55,8 @@ impl<T> Dynamic<T> {
 
     /// Construct an instance with an allocated buffer for `count` elements.
     ///
+    /// This may allocate more capacity than requested.
+    ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(N) memory.
     ///
@@ -98,6 +100,9 @@ impl<T> Dynamic<T> {
     }
 
     /// Attempt to allocate space for `capacity` additional elements.
+    ///
+    /// This may allocate more capacity than requested, in which case the
+    /// result yields the actual capacity reserved.
     ///
     /// # Panics
     /// Rust runtime might panic if allocation fails.
