@@ -568,7 +568,12 @@ impl<'a, T: 'a + Clone> std::iter::FromIterator<T> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = Dynamic::from_iter(expected.clone());
+    ///
+    /// assert!(actual.eq(expected))
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
         let iter = iter.into_iter();
