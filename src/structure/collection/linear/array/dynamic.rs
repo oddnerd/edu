@@ -990,12 +990,18 @@ mod test {
 
         #[test]
         fn is_reserved_element_count() {
-            todo!()
+            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+            assert_eq!(actual.capacity(), actual.post_capacity);
         }
 
         #[test]
         fn does_not_count_pre_capacity() {
-            todo!()
+            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+            std::mem::swap(&mut actual.pre_capacity, &mut actual.post_capacity);
+
+            assert_eq!(actual.capacity(), actual.post_capacity);
         }
 
         #[test]
