@@ -92,7 +92,15 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// todo!();
+    ///
+    /// const CAPACITY = 256;
+    ///
+    /// let instance = Dynamic::<()>::default();
+    /// instance.reserve(CAPACITY);
+    ///
+    /// for _ in 0..CAPACITY {
+    ///     instance.append(()).expect("no reallocation!");
+    /// }
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         // There is already enough capacity.
@@ -126,7 +134,14 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// todo!();
+    ///
+    /// let mut instance = Dynamic::<()>::with_capacity(256).expect("allocation");
+    ///
+    /// instance.shrink(Some(128));
+    /// assert_eq!(instance.capacity(), 128);
+    ///
+    /// instance.shrink(None);
+    /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         if capacity.is_some_and(|capacity| capacity > self.post_capacity) {
