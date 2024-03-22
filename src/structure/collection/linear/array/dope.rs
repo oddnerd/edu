@@ -473,6 +473,66 @@ mod test {
     }
 
     #[test]
+    fn eq_is_symmetric() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        let underlying = underlying.clone();
+        let other = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance, other);
+        assert_eq!(other, instance);
+    }
+
+    #[test]
+    fn eq_is_transitive() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        let underlying = underlying.clone();
+        let other = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        let underlying = underlying.clone();
+        let another = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance, other);
+        assert_eq!(instance, another);
+        assert_eq!(other, another);
+    }
+
+    #[test]
+    fn eq_is_reflexive() {
+        let underlying = [0, 1, 2, 3, 4, 5];
+        let instance = {
+            let ptr = underlying.as_ptr().cast_mut();
+            let ptr = std::ptr::NonNull::new(ptr).unwrap();
+            unsafe { Dope::new(ptr, underlying.len()) }
+        };
+
+        assert_eq!(instance, instance);
+    }
+
+    #[test]
     fn ne_for_different_count() {
         let underlying = [0, 1, 2, 3, 4, 5];
 
