@@ -41,11 +41,11 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// assert!(dope.iter().eq(underlying.iter()));
+    /// assert!(actual.iter().eq(expected.iter()));
     /// ```
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
@@ -67,11 +67,11 @@ impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// assert!(dope.iter().eq(underlying.iter()));
+    /// assert!(actual.iter().eq(expected.iter()));
     /// ```
     fn from(slice: &'a mut [T]) -> Self {
         Self {
@@ -103,13 +103,13 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// for index in 0..underlying.len() {
+    /// for index in 0..expected.len() {
     ///     use std::ops::Index;
-    ///     assert_eq!(dope.index(index), underlying.index(index));
+    ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
@@ -140,13 +140,13 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// for index in 0..underlying.len() {
+    /// for index in 0..expected.len() {
     ///     use std::ops::IndexMut;
-    ///     assert_eq!(dope.index_mut(index), underlying.index_mut(index));
+    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
@@ -173,13 +173,13 @@ impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let mut clone = underlying.clone();
+    /// let mut left = [0, 1, 2, 3, 4, 5];
+    /// let mut right = left.clone();
     ///
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
-    /// let other = unsafe { Dope::from(clone.as_mut_slice()) };
+    /// let left = unsafe { Dope::from(left.as_mut_slice()) };
+    /// let right = unsafe { Dope::from(right.as_mut_slice()) };
     ///
-    /// assert_eq!(dope, other);
+    /// assert_eq!(left, right);
     /// ```
     fn eq(&self, other: &Self) -> bool {
         if self.count != other.count {
@@ -208,11 +208,11 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let mut clone = underlying.clone();
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// assert_eq!(format!("{dope:?}"), format!("{clone:?}"));
+    /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
@@ -229,10 +229,10 @@ impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = unsafe { Dope::from(expected.as_mut_slice()) };
     ///
-    /// assert_eq!(format!("{dope:p}"), format!("{:p}", underlying.as_ptr()));
+    /// assert_eq!(format!("{actual:p}"), format!("{:p}", expected.as_ptr()));
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: the address of the pointer it read, not the pointer itself.
@@ -253,10 +253,10 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = unsafe { Dope::from(expected.as_mut_slice()) };
     ///
-    /// assert_eq!(Collection::count(&dope), underlying.len());
+    /// assert_eq!(Collection::count(&actual), expected.len());
     /// ```
     fn count(&self) -> usize {
         self.count
@@ -274,11 +274,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// for (actual, expected) in dope.iter().zip(underlying.iter()) {
+    /// for (actual, expected) in actual.iter().zip(expected.iter()) {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
@@ -296,11 +296,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
-    /// for (actual, expected) in dope.iter_mut().zip(underlying.iter_mut()) {
+    /// for (actual, expected) in actual.iter_mut().zip(expected.iter_mut()) {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
@@ -324,10 +324,10 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = unsafe { Dope::from(expected.as_mut_slice()) };
     ///
-    /// assert_eq!(unsafe { dope.as_ptr() }, underlying.as_ptr());
+    /// assert_eq!(unsafe { actual.as_ptr() }, expected.as_ptr());
     /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
         self.ptr.as_ptr().cast_const()
@@ -346,10 +346,10 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let mut dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = unsafe { Dope::from(expected.as_mut_slice()) };
     ///
-    /// assert_eq!(unsafe { dope.as_mut_ptr() }, underlying.as_mut_ptr());
+    /// assert_eq!(unsafe { actual.as_mut_ptr() }, expected.as_mut_ptr());
     /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.ptr.as_ptr()
