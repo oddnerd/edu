@@ -700,6 +700,79 @@ impl<T: Clone> Clone for Dynamic<T> {
     }
 }
 
+impl<T: std::cmp::PartialEq> std::cmp::PartialEq for Dynamic<T> {
+    /// Query if the elements referenced to/contained are the same as `other`.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let left = [0, 1, 2, 3, 4, 5];
+    /// let right = left.clone();
+    ///
+    /// let left = Dynamic::from_iter(left);
+    /// let right = Dynamic::from_iter(right);
+    ///
+    /// assert_eq!(left, right);
+    /// ```
+    fn eq(&self, other: &Self) -> bool {
+        if self.initialized != other.initialized {
+            return false;
+        }
+
+        for index in 0..self.count() {
+            if self[index] != other[index] {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for Dynamic<T> {
+    /// List the elements referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Dynamic::from_iter(expected.iter());
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+
+impl<T> std::fmt::Pointer for Dynamic<T> {
+    /// Display the underlying address pointed to.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(format!("{instance:p}"), format!("{:p}", std::ptr::from_ref(&instance[0])));
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // SAFETY: the address of the pointer it read, not the pointer itself.
+        std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
+    }
+}
+
 impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
     type Element = T;
 
