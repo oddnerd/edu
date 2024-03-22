@@ -108,6 +108,7 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
     /// for index in 0..underlying.len() {
+    ///     use std::ops::Index;
     ///     assert_eq!(dope.index(index), underlying.index(index));
     /// }
     /// ```
@@ -141,9 +142,10 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     ///
     /// let mut underlying = [0, 1, 2, 3, 4, 5];
     /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
-    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
+    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
     /// for index in 0..underlying.len() {
+    ///     use std::ops::IndexMut;
     ///     assert_eq!(dope.index_mut(index), underlying.index_mut(index));
     /// }
     /// ```
