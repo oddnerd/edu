@@ -31,7 +31,7 @@ pub struct Dynamic<T> {
 }
 
 impl<T> Dynamic<T> {
-    /// Construct an empty instance.
+    /// Construct an empty instance without any allocation.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory for the result.
