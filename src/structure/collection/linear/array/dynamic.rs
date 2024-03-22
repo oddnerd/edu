@@ -979,7 +979,9 @@ mod test {
 
         #[test]
         fn does_not_allocate_when_zero() {
-            todo!()
+            let actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, 0);
         }
     }
 
