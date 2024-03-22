@@ -1006,7 +1006,9 @@ mod test {
 
         #[test]
         fn specific_for_zero_size_types() {
-            todo!()
+            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+
+            assert_eq!(actual.capacity(), actual.post_capacity);
         }
     }
 
