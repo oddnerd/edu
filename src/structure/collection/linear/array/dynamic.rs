@@ -598,6 +598,8 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
             // * `self.buffer` is non-null => `ptr` is non-null.
             // * the `MaybeUninit<T>` element is initialized.
             unsafe { (*ptr).write(element) };
+
+            self.initialized += 1;
         }
     }
 }
