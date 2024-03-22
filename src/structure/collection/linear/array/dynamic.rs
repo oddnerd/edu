@@ -115,18 +115,22 @@ impl<T> Dynamic<T> {
     /// instance.reserve(16);
     /// assert!(instance.capacity() >= 16);
     /// ```
-    pub fn reserve(&mut self, capacity: usize) -> bool {
+    pub fn reserve(&mut self, capacity: usize) -> Result<usize, AllocationError> {
         if std::mem::size_of::<T>() == 0 {
             self.allocated = usize::MAX;
             return true;
         }
 
         if self.allocated > capacity || capacity == 0 {
-            return true;
+            return Ok(self.allocated);
         }
 
         // growth factor of two (2) so capacity is doubled each reallocation.
-        let size = match self.initialized.checked_add(capacity) {
+        let size = match self
+            .initialized
+            .checked_add(capacity)
+            .and_then(|size: usize| size.checked_next_power_of_two())
+        {
             Some(size) => size,
             None => return false,
         }
@@ -134,7 +138,7 @@ impl<T> Dynamic<T> {
 
         let layout = match std::alloc::Layout::array::<T>(size) {
             Ok(layout) => layout,
-            Err(_) => return false,
+            Err(_) => return Err(AllocationError),
         };
 
         let old_size = self.initialized + self.allocated;
@@ -146,7 +150,7 @@ impl<T> Dynamic<T> {
             let new_size = layout.size();
             let layout = match std::alloc::Layout::array::<T>(old_size) {
                 Ok(layout) => layout,
-                Err(_) => return false,
+                Err(_) => return Err(AllocationError),
             };
 
             // SAFETY: non-zero-size type => `layout` has non-zero size.
@@ -158,12 +162,12 @@ impl<T> Dynamic<T> {
 
         self.data = match std::ptr::NonNull::new(ptr) {
             Some(ptr) => ptr,
-            None => return false,
+            None => return Err(AllocationError),
         };
 
         self.allocated = size - self.initialized;
 
-        true
+        Ok(self.allocated)
     }
 
     /// Attempt to shrink the capacity to exactly `capacity`, or none/zero.
