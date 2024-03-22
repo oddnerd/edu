@@ -15,7 +15,6 @@ pub use dynamic::Dynamic;
 
 use super::Collection;
 use super::Linear;
-use super::LinearMut;
 
 /// A [`Linear`] [`Collection`] which occupies contigious memory.
 ///
