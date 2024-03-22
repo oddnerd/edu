@@ -885,7 +885,15 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let expected = std::ptr::from_ref(&instance[0]);
+    /// let actual = unsafe { instance.as_ptr() };
+    ///
+    /// assert_eq!(actual, expected);
     /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
@@ -905,7 +913,15 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let expected = std::ptr::from_ref(&instance[0]).cast_mut();
+    /// let actual = unsafe { instance.as_mut_ptr() };
+    ///
+    /// assert_eq!(actual, expected);
     /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
