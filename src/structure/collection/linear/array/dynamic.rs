@@ -952,7 +952,20 @@ mod test {
 
         #[test]
         fn allocates_capacity() {
-            todo!()
+            const COUNT: usize = 256;
+
+            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+            for index in 0..COUNT {
+                unsafe {
+                    let ptr = actual.buffer.as_ptr().add(index);
+
+                    // Ideally, this will seg-fault if we don't own the memory.
+                    (*ptr).write(index);
+                }
+            }
+
+            assert_eq!(actual.post_capacity, COUNT);
         }
 
         #[test]
