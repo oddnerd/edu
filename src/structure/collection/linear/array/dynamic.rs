@@ -385,7 +385,13 @@ impl<T> std::ops::Index<usize> for Dynamic<T> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!()
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Dynamic::from_iter(expected.iter().copied());
+    ///
+    /// for index in 0..expected.len() {
+    ///     use std::ops::Index;
+    ///     assert_eq!(actual.index(index), expected.index(index));
+    /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
         assert!(index < self.initialized);
@@ -419,7 +425,13 @@ impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
     /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!()
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = Dynamic::from_iter(expected.iter().copied());
+    ///
+    /// for index in 0..expected.len() {
+    ///     use std::ops::IndexMut;
+    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
+    /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         assert!(index < self.initialized);
