@@ -938,16 +938,16 @@ mod test {
 
         #[test]
         fn does_not_offset_buffer() {
-            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
             assert_eq!(actual.pre_capacity, 0)
         }
 
         #[test]
         fn does_not_initialize_elements() {
-            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-            assert_eq!(actual.initialized, 0)
+            assert_eq!(actual.pre_capacity, 0)
         }
 
         #[test]
