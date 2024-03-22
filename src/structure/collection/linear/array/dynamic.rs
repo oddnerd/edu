@@ -689,7 +689,11 @@ impl<T: Clone> Clone for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(expected.clone(), expected)
     /// ```
     fn clone(&self) -> Self {
         let mut clone = Self::with_capacity(self.count()).expect("successful allocation");
