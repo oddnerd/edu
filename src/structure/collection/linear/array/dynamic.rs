@@ -241,7 +241,7 @@ impl<T> Dynamic<T> {
                         // * `existing_layout` is currently allocated at `ptr`.
                         // * `new_layout` has non-zero size.
                         // * `Layout` guarantees `new_size.size() <= isize::MAX`.
-                        unsafe { std::alloc::dealloc(ptr, existing_layout) };
+                        std::alloc::dealloc(ptr, existing_layout);
 
                         // SAFETY: empty state => pointer will not read/write.
                         std::ptr::NonNull::<T>::dangling().as_ptr()
