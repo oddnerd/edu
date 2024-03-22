@@ -50,7 +50,7 @@ pub trait List<'a>:
 
     /// Insert an element such that is becomes the last.
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
-        self.insert(self.count(), element)
+        self.insert(self.len(), element)
     }
 
     /// Drop all elements.
