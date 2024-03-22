@@ -196,7 +196,6 @@ impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
     }
 }
 
-/// TODO(oddnerd): see if doc test works here
 impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::Eq for Dope<'a, T> {}
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
@@ -386,22 +385,6 @@ mod test {
     }
 
     #[test]
-    fn count_for_normal_types_is_exact_element_count() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(instance.count(), underlying.len());
-    }
-
-    #[test]
-    fn count_for_zero_size_types_is_constructed_count() {
-        let mut underlying = [(), (), (), (), (), ()];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(instance.count(), underlying.len());
-    }
-
-    #[test]
     fn index_yields_correct_element() {
         let underlying = [0, 1, 2, 3, 4, 5];
         let instance = {
@@ -449,22 +432,6 @@ mod test {
 
         use std::ops::IndexMut;
         instance.index_mut(0);
-    }
-
-    #[test]
-    fn as_ptr_points_to_underlying() {
-        let mut underlying: [(); 0] = [];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(unsafe { instance.as_ptr() }, underlying.as_ptr());
-    }
-
-    #[test]
-    fn as_mut_ptr_points_to_underlying() {
-        let mut underlying: [(); 0] = [];
-        let mut instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(unsafe { instance.as_mut_ptr() }, underlying.as_mut_ptr());
     }
 
     #[test]
@@ -544,4 +511,37 @@ mod test {
 
         assert_eq!(clone, original);
     }
+
+    #[test]
+    fn count_for_normal_types_is_exact_element_count() {
+        let mut underlying = [0, 1, 2, 3, 4, 5];
+        let instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(instance.count(), underlying.len());
+    }
+
+    #[test]
+    fn count_for_zero_size_types_is_constructed_count() {
+        let mut underlying = [(), (), (), (), (), ()];
+        let instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(instance.count(), underlying.len());
+    }
+
+    #[test]
+    fn as_ptr_points_to_underlying() {
+        let mut underlying: [(); 0] = [];
+        let instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(unsafe { instance.as_ptr() }, underlying.as_ptr());
+    }
+
+    #[test]
+    fn as_mut_ptr_points_to_underlying() {
+        let mut underlying: [(); 0] = [];
+        let mut instance = Dope::from(underlying.as_mut_slice());
+
+        assert_eq!(unsafe { instance.as_mut_ptr() }, underlying.as_mut_ptr());
+    }
+
 }
