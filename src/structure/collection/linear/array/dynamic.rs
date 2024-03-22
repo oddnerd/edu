@@ -177,6 +177,12 @@ impl<T> Dynamic<T> {
 
     /// Attempt to shrink the capacity to exactly `capacity`, or none/zero.
     ///
+    /// # Panics
+    /// Rust runtime might panic if allocation fails.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
