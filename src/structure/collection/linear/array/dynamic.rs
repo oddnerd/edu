@@ -660,7 +660,13 @@ impl<T> std::default::Default for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let instance = Dynamic::<()>::default();
+    ///
+    /// assert_eq!(Collection::count(&instance), 0);
+    /// assert_eq!(instance.capacity(), 0);
     /// ```
     fn default() -> Self {
         Self {
