@@ -68,9 +68,10 @@ impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
-    /// assert!(dope.iter().eq(underlying));
+    /// assert!(dope.iter().eq(underlying.iter()));
     /// ```
     fn from(slice: &'a mut [T]) -> Self {
         Self {
