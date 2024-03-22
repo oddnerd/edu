@@ -86,29 +86,6 @@ impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
-    type Element = T;
-
-    /// Query how many elements are referenced to/contained.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::Collection;
-    /// use rust::structure::collection::linear::array::Dope;
-    ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
-    ///
-    /// assert_eq!(dope.count(), underlying.len());
-    /// ```
-    fn count(&self) -> usize {
-        self.count
-    }
-}
-
 impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
@@ -180,6 +157,106 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
         // * constructor contract => pointed to `T` is initialized.
         // * lifetime bound to input object => valid lifetime to return.
         unsafe { &mut *ptr }
+    }
+}
+
+impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
+    /// Query if the elements referenced to/contained are the same as `other`.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// let underlying = underlying.clone();
+    /// let other = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(dope, other);
+    /// ```
+    fn eq(&self, other: &Self) -> bool {
+        if self.count != other.count {
+            return false;
+        }
+
+        for index in 0..self.count() {
+            if self[index] != other[index] {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+/// TODO(oddnerd): see if doc test works here
+impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::Eq for Dope<'a, T> {}
+
+impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
+    /// List the elements referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(format!("{dope:?}"), "[0, 1, 2, 3, 4, 5]");
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+
+impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
+    /// Display the underlying address pointed to.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(format!("{dope:P}"), format!("{:P}", underlying.as_ptr()));
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // SAFETY: the address of the pointer it read, not the pointer itself.
+        std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
+    }
+}
+
+impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
+    type Element = T;
+
+    /// Query how many elements are referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    ///
+    /// assert_eq!(dope.count(), underlying.len());
+    /// ```
+    fn count(&self) -> usize {
+        self.count
     }
 }
 
@@ -271,72 +348,6 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
         self.ptr.as_ptr()
     }
 }
-
-impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
-    /// List the elements referenced to/contained.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
-    ///
-    /// assert_eq!(format!("{dope:?}"), "[0, 1, 2, 3, 4, 5]");
-    /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-
-impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
-    /// Display the underlying address pointed to.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
-    ///
-    /// assert_eq!(format!("{dope:P}"), format!("{:P}", underlying.as_ptr()));
-    /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // SAFETY: the address of the pointer it read, not the pointer itself.
-        std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
-    }
-}
-
-impl<'a, T: 'a + PartialEq> std::cmp::PartialEq for Dope<'a, T> {
-    /// Query if the elements referenced to/contained are the same as `other`.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
-    ///
-    /// let underlying = underlying.clone();
-    /// let other = unsafe { Dope::from(underlying.as_mut_slice()) };
-    ///
-    /// assert_eq!(dope, other);
-    /// ```
-    fn eq(&self, other: &Self) -> bool {
-        *self.as_slice() == *other.as_slice()
-    }
-}
-
-impl<'a, T: 'a + Eq> std::cmp::Eq for Dope<'a, T> {}
 
 #[cfg(test)]
 mod test {
