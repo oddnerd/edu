@@ -276,7 +276,8 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
     /// for (actual, expected) in dope.iter().zip(underlying.iter()) {
     ///     assert_eq!(actual, expected);
@@ -296,8 +297,9 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
     /// for (actual, expected) in dope.iter_mut().zip(underlying.iter_mut()) {
     ///     assert_eq!(actual, expected);
