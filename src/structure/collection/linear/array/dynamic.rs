@@ -307,7 +307,7 @@ impl<T> std::ops::Drop for Dynamic<T> {
         self.post_capacity += self.pre_capacity;
         self.pre_capacity = 0;
 
-        self.resize(0);
+        self.resize(0).expect("deallocation cannot fail");
     }
 }
 
