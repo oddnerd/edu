@@ -932,4 +932,520 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    mod with_capacity {
+        use super::*;
+
+        #[test]
+        fn does_not_offset_buffer() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_initialize_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn allocates_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn allocated_zero_size_types() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_allocate_when_zero() {
+            todo!()
+        }
+    }
+
+    mod capacity {
+        use super::*;
+
+        #[test]
+        fn is_reserved_element_count() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_count_pre_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn specific_for_zero_size_types() {
+            todo!()
+        }
+    }
+
+    mod reserve {
+        use super::*;
+
+        #[test]
+        fn does_not_initialize_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn increases_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn allocates_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn allocates_capacity_zero_size_types() {
+            todo!()
+        }
+
+        #[test]
+        fn reallocates_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn reallocates_capacity_zero_size_types() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_modify_initialized_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_decrease_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn zero_capacity() {
+            todo!()
+        }
+    }
+
+    mod shrink {
+        use super::*;
+
+        #[test]
+        fn does_not_initialize_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn decreases_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn reallocates_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn reallocated_capacity_for_zero_size_types() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_modify_initialized_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_increase_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn zero_capacity() {
+            todo!()
+        }
+    }
+
+    mod resize {
+        use super::*;
+
+        #[test]
+        fn does_not_initialize_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn increases_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn increases_capacity_for_zero_size_types() {
+            todo!()
+        }
+
+        #[test]
+        fn decreases_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn decreases_capacity_for_zero_size_types() {
+            todo!()
+        }
+
+        #[test]
+        fn allocates_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn reallocates_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_modify_initialized_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn existing_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn zero_capacity() {
+            todo!()
+        }
+    }
+
+    mod drop {
+        use super::*;
+
+        #[test]
+        fn zero_size_type() {
+            todo!()
+        }
+
+        #[test]
+        fn empty() {
+            todo!()
+        }
+
+        #[test]
+        fn all_initialized() {
+            todo!()
+        }
+
+        #[test]
+        fn all_post_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn all_pre_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn all() {
+            todo!()
+        }
+    }
+
+    mod try_from {
+        use super::*;
+
+        #[test]
+        fn allocates() {
+            todo!()
+        }
+
+        #[test]
+        fn initializes_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn initializes_state() {
+            todo!()
+        }
+    }
+
+    mod index {
+        use super::*;
+        use std::ops::Index;
+
+        #[test]
+        fn correct_element() {
+            todo!()
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_when_out_of_bounds() {
+            todo!()
+        }
+    }
+
+    mod index_mut {
+        use super::*;
+        use std::ops::IndexMut;
+
+        #[test]
+        fn correct_element() {
+            todo!()
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_when_out_of_bounds() {
+            todo!()
+        }
+    }
+
+    mod iterator {
+        use super::*;
+
+        #[test]
+        fn count() {
+            todo!()
+        }
+
+        #[test]
+        fn is_front_element() {
+            todo!()
+        }
+
+        mod double_ended {
+            use super::*;
+
+            #[test]
+            fn count() {
+                todo!()
+            }
+
+            #[test]
+            fn is_back_element() {
+                todo!()
+            }
+        }
+
+        mod exact_size {
+            use super::*;
+
+            #[test]
+            fn hint() {
+                todo!()
+            }
+
+            #[test]
+            fn len() {
+                todo!()
+            }
+        }
+
+        mod fused {
+            use super::*;
+
+            #[test]
+            fn empty() {
+                todo!()
+            }
+
+            #[test]
+            fn exhausted() {
+                todo!()
+            }
+        }
+
+        mod from {
+            use super::*;
+
+            #[test]
+            fn allocates() {
+                todo!()
+            }
+
+            #[test]
+            fn initializes_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn initializes_state() {
+                todo!()
+            }
+        }
+
+        mod extend {
+            use super::*;
+
+            #[test]
+            fn allocates() {
+                todo!()
+            }
+
+            #[test]
+            fn reallocates() {
+                todo!()
+            }
+
+            #[test]
+            fn initializes_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn initializes_state() {
+                todo!()
+            }
+        }
+    }
+
+    mod default {
+        use super::*;
+
+        #[test]
+        fn does_not_offset_buffer() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_initialize_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_allocate() {
+            todo!()
+        }
+
+        #[test]
+        fn does_not_allocate_when_zero() {
+            todo!()
+        }
+    }
+
+    mod equality {
+        use super::*;
+
+        #[test]
+        fn eq_when_same_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn ne_when_different_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn ignores_different_pre_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn ignores_different_post_capacity() {
+            todo!()
+        }
+
+        #[test]
+        fn symmetric() {
+            todo!()
+        }
+
+        #[test]
+        fn transitive() {
+            todo!()
+        }
+
+        #[test]
+        fn reflexive() {
+            todo!()
+        }
+    }
+
+    mod collection {
+        use super::*;
+
+        mod count {
+            use super::*;
+
+            #[test]
+            fn initialized() {
+                todo!()
+            }
+
+            #[test]
+            fn zero_size_types() {
+                todo!()
+            }
+
+            #[test]
+            fn zero_when_empty() {
+                todo!()
+            }
+
+            #[test]
+            fn ignores_pre_capacity() {
+                todo!()
+            }
+
+            #[test]
+            fn ignores_post_capacity() {
+                todo!()
+            }
+        }
+    }
+
+    mod linear {
+        use super::*;
+
+        mod iter {
+            use super::*;
+
+            #[test]
+            fn count() {
+                todo!()
+            }
+
+            #[test]
+            fn in_order() {
+                todo!()
+            }
+        }
+
+        mod iter_mut {
+            use super::*;
+
+            #[test]
+            fn count() {
+                todo!()
+            }
+
+            #[test]
+            fn in_order() {
+                todo!()
+            }
+        }
+    }
+
+    mod array {
+        use super::*;
+
+        #[test]
+        fn as_ptr() {
+            todo!()
+        }
+
+        #[test]
+        fn as_mut_ptr() {
+            todo!()
+        }
+    }
 }
