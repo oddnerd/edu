@@ -45,7 +45,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
     /// let dope = unsafe { Dope::new(ptr, underlying.len()) };
     ///
-    /// assert!(dope.iter().eq(underlying));
+    /// assert!(dope.iter().eq(underlying.iter()));
     /// ```
     pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
@@ -271,7 +271,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
     /// for (actual, expected) in dope.iter().zip(underlying.iter()) {
