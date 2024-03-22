@@ -209,10 +209,11 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut clone = underlying.clone();
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
-    /// assert_eq!(format!("{dope:?}"), "[0, 1, 2, 3, 4, 5]");
+    /// assert_eq!(format!("{dope:?}"), format!("{clone:?}"));
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
@@ -229,10 +230,10 @@ impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
-    /// assert_eq!(format!("{dope:P}"), format!("{:P}", underlying.as_ptr()));
+    /// assert_eq!(format!("{dope:p}"), format!("{:p}", underlying.as_ptr()));
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: the address of the pointer it read, not the pointer itself.
