@@ -296,9 +296,12 @@ impl<T> std::ops::Drop for Dynamic<T> {
     /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic::from([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// std::mem::drop(instance);
+    /// instance.next();      // Consumes the element with value `0`.
+    /// instance.next_back(); // Consumes the element with value `5`.
+    ///
+    /// std::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
         for index in 0..self.initialized {
