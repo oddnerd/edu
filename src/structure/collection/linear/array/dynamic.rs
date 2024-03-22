@@ -563,6 +563,85 @@ impl<'a, T: 'a> LinearMut<'a> for Dynamic<T> {
 
         Some(element)
     }
+
+    // TODO(oddnerd): documentations
+    fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        todo!()
+    }
+
+    /// Attempt to add an `element` to the end, allocating if necessary.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::<i32>::new();
+    ///
+    /// instance.append(1);
+    /// instance.append(2);
+    ///
+    /// assert_eq!(instance.len(), 2);
+    /// assert_eq!(*instance.first().unwrap(), 1);
+    /// assert_eq!(*instance.last().unwrap(), 2);
+    /// ```
+    fn append(&mut self, element: T) -> Result<&mut Self::Element, Self::Element> {
+        if self.allocated == 0 && !self.reserve(1) {
+            return Err(element);
+        }
+
+        unsafe {
+            // SAFETY: the buffer has been allocated.
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: this points to the first uninitialized element.
+            let ptr = ptr.add(self.initialized);
+
+            self.initialized += 1;
+            self.allocated -= 1;
+
+            // SAFETY:
+            // * `ptr` is non-null.
+            // * `ptr` is aligned.
+            // * the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
+            Ok((*ptr).write(element))
+        }
+    }
+
+    /// Drop all elements.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::Collection;
+    ///
+    /// let mut instance = Dynamic::try_from([0, 1, 2, 3].as_slice());
+    /// assert_eq!(instance.count(), 4);
+    ///
+    /// instance.clear();
+    ///
+    /// assert_eq!(instance.count(), 0);
+    /// assert!(instance.capacity() >= 4);
+    /// ```
+    fn clear(&mut self) {
+        if std::mem::size_of::<T>() == 0 {
+            self.initialized = 0;
+            self.allocated = usize::MAX;
+            return;
+        }
+
+        while self.initialized > 0 {
+            let ptr = self.data.as_ptr();
+
+            // SAFETY: `ptr` remains within the allocated object.
+            let ptr = unsafe { ptr.add(self.initialized - 1) };
+
+            // SAFETY: `ptr` is pointing to the last initialized element.
+            unsafe { (*ptr).assume_init_drop() };
+
+            self.allocated += self.initialized;
+            self.initialized = 0;
+        }
+    }
 }
 
 impl<'a, T: 'a> Array<'a> for Dynamic<T> {
