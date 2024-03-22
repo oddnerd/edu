@@ -76,7 +76,10 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// todo!();
+    ///
+    /// let instance = Dynamic::<()>::default();
+    ///
+    /// assert_eq!(instance.capacity(), 0);
     /// ```
     pub fn capacity(&self) -> usize {
         self.post_capacity
