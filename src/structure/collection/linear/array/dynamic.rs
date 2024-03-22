@@ -808,7 +808,15 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Dynamic::from_iter(expected.clone());
+    ///
+    /// for (actual, expected) in actual.iter().zip(expected.iter()) {
+    ///     assert_eq!(actual, expected);
+    /// }
     /// ```
     fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
         unsafe {
@@ -834,7 +842,15 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = Dynamic::from_iter(expected.clone());
+    ///
+    /// for (actual, expected) in actual.iter_mut().zip(expected.iter_mut()) {
+    ///     assert_eq!(actual, expected);
+    /// }
     /// ```
     fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
         unsafe {
