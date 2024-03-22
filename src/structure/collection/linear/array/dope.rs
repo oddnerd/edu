@@ -173,11 +173,11 @@ impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut clone = underlying.clone();
     ///
-    /// let underlying = underlying.clone();
-    /// let other = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let other = unsafe { Dope::from(clone.as_mut_slice()) };
     ///
     /// assert_eq!(dope, other);
     /// ```
