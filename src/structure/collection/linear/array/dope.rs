@@ -253,7 +253,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     /// let underlying = [0, 1, 2, 3, 4, 5];
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
-    /// assert_eq!(dope.count(), underlying.len());
+    /// assert_eq!(Collection::count(dope), underlying.len());
     /// ```
     fn count(&self) -> usize {
         self.count
@@ -316,12 +316,13 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
     /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
-    /// assert_eq!(dope.as_ptr(), underlying.as_ptr());
+    /// assert_eq!(unsafe { dope.as_ptr() }, underlying.as_ptr());
     /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
         self.ptr.as_ptr().cast_const()
@@ -337,12 +338,13 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::linear::array::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
-    /// let underlying = [0, 1, 2, 3, 4, 5];
-    /// let dope = unsafe { Dope::from(underlying.as_mut_slice()) };
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let mut dope = unsafe { Dope::from(underlying.as_mut_slice()) };
     ///
-    /// assert_eq!(dope.as_mut_ptr(), underlying.as_mut_ptr());
+    /// assert_eq!(unsafe { dope.as_mut_ptr() }, underlying.as_mut_ptr());
     /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.ptr.as_ptr()
