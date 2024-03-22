@@ -339,7 +339,12 @@ impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+    ///
+    /// assert!(actual.eq(expected));
     /// ```
     fn try_from(value: &'a [T]) -> Result<Self, Self::Error> {
         let mut instance = Self::with_capacity(value.len())?;
