@@ -169,11 +169,6 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// todo!()
-    /// ```
     fn resize(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
