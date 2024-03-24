@@ -1165,7 +1165,16 @@ mod test {
 
         #[test]
         fn does_not_modify_initialized_elements() {
-            todo!()
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let mut actual: Dynamic<usize> = expected.iter().copied().collect();
+            actual.reserve(expected.len() * 16).expect("successful allocation");
+
+            actual.shrink(None).expect("successful reallocation");
+
+            for index in 0..expected.len() {
+                assert_eq!(actual[index], expected[index]);
+            }
         }
 
         #[test]
