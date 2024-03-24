@@ -1118,7 +1118,9 @@ mod test {
 
         #[test]
         fn zero_capacity() {
-            todo!()
+            let mut actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
+
+            actual.reserve(0).expect("this should be a no-op");
         }
     }
 
