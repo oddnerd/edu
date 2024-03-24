@@ -1308,7 +1308,7 @@ mod test {
 
         #[test]
         fn zero_size_type() {
-            todo!()
+            Dynamic::<()>::default();
         }
 
         #[test]
