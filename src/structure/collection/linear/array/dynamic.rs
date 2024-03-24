@@ -1199,7 +1199,11 @@ mod test {
 
         #[test]
         fn does_not_initialize_elements() {
-            todo!()
+            let mut actual = Dynamic::<usize>::default();
+
+            actual.resize(256).expect("successful allocation");
+
+            assert_eq!(actual.initialized, 0);
         }
 
         #[test]
