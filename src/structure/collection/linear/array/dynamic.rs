@@ -1290,7 +1290,9 @@ mod test {
 
         #[test]
         fn existing_capacity() {
-            todo!()
+            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+            actual.resize(actual.capacity()).expect("already that size");
         }
 
         #[test]
