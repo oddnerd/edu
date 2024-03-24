@@ -1348,7 +1348,18 @@ mod test {
 
         #[test]
         fn allocates() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+
+            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+
+            for index in 0..expected.len() {
+                unsafe {
+                    let ptr = actual.buffer.as_ptr().add(index);
+
+                    // Ideally, this will seg-fault if we don't own the memory.
+                    (*ptr).write(index);
+                }
+            }
         }
 
         #[test]
