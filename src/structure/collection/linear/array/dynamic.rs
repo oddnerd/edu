@@ -1364,7 +1364,13 @@ mod test {
 
         #[test]
         fn initializes_elements() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+
+            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+
+            for index in 0..expected.len() {
+                assert_eq!(actual[index], expected[index]);
+            }
         }
 
         #[test]
