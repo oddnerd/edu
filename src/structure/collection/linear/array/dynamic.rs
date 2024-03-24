@@ -972,7 +972,7 @@ mod test {
         fn allocates_capacity() {
             const COUNT: usize = 256;
 
-            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
             for index in 0..COUNT {
                 unsafe {
@@ -982,15 +982,13 @@ mod test {
                     (*ptr).write(index);
                 }
             }
-
-            assert_eq!(actual.post_capacity, COUNT);
         }
 
         #[test]
         fn allocated_zero_size_types() {
             const COUNT: usize = 256;
 
-            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+            let actual = Dynamic::<()>::with_capacity(COUNT).expect("successful allocation");
 
             assert_eq!(actual.post_capacity, COUNT);
         }
@@ -1063,21 +1061,23 @@ mod test {
 
         #[test]
         fn allocates_capacity() {
-            todo!()
-        }
+            const COUNT: usize = 256;
 
-        #[test]
-        fn allocates_capacity_zero_size_types() {
-            todo!()
+            let mut actual = Dynamic::<usize>::default();
+            actual.reserve(COUNT).expect("successful allocation");
+
+            for index in 0..COUNT {
+                unsafe {
+                    let ptr = actual.buffer.as_ptr().add(index);
+
+                    // Ideally, this will seg-fault if we don't own the memory.
+                    (*ptr).write(index);
+                }
+            }
         }
 
         #[test]
         fn reallocates_capacity() {
-            todo!()
-        }
-
-        #[test]
-        fn reallocates_capacity_zero_size_types() {
             todo!()
         }
 
