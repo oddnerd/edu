@@ -1179,7 +1179,11 @@ mod test {
 
         #[test]
         fn does_not_increase_capacity() {
-            todo!()
+            let mut actual: Dynamic<usize> = [0,1,2,3,4,5].into_iter().collect();
+
+            actual.shrink(Some(256)).expect("already small enough");
+
+            assert!(actual.post_capacity < 256);
         }
 
         #[test]
