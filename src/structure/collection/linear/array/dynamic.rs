@@ -1389,7 +1389,12 @@ mod test {
 
         #[test]
         fn correct_element() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+            let actual = Dynamic::from_iter(expected);
+
+            for (index, expected) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), expected);
+            }
         }
 
         #[test]
