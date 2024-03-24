@@ -1217,7 +1217,11 @@ mod test {
 
         #[test]
         fn increases_capacity_for_zero_size_types() {
-            todo!()
+            let mut actual = Dynamic::<()>::default();
+
+            actual.resize(77).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, 77);
         }
 
         #[test]
