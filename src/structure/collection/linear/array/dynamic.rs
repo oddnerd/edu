@@ -145,7 +145,7 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         if capacity.is_some_and(|capacity| capacity > self.post_capacity) {
-            return Err(());
+            return Ok(self);
         }
 
         let capacity = capacity.unwrap_or(0);
