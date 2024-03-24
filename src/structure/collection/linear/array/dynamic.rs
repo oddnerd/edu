@@ -1329,7 +1329,10 @@ mod test {
 
         #[test]
         fn all_pre_capacity() {
-            todo!()
+            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+            actual.pre_capacity = actual.post_capacity;
+            actual.post_capacity = 0;
         }
 
         #[test]
