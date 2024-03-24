@@ -1318,7 +1318,8 @@ mod test {
 
         #[test]
         fn all_initialized() {
-            todo!()
+            let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
+            instance.shrink(None).expect("successful reallocation");
         }
 
         #[test]
