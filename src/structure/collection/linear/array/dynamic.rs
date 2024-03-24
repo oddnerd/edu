@@ -1035,7 +1035,7 @@ mod test {
 
         #[test]
         fn does_not_initialize_elements() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            let mut actual = Dynamic::<usize>::default();
             actual.reserve(256).expect("successful allocation");
 
             assert_eq!(actual.initialized, 0);
@@ -1045,7 +1045,7 @@ mod test {
         fn increases_capacity() {
             const COUNT: usize = 256;
 
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+            let mut actual = Dynamic::<usize>::default();
             actual.reserve(COUNT).expect("successful allocation");
 
             assert_eq!(actual.post_capacity, COUNT);
@@ -1055,7 +1055,7 @@ mod test {
         fn increases_capacity_for_zero_size_types() {
             const COUNT: usize = 256;
 
-            let mut actual = Dynamic::<()>::with_capacity(COUNT).expect("successful allocation");
+            let mut actual = Dynamic::<usize>::default();
             actual.reserve(COUNT).expect("successful allocation");
 
             assert_eq!(actual.post_capacity, COUNT);
