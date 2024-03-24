@@ -17,7 +17,7 @@ pub trait List<'a>:
 {
     /// Insert an element at `index`.
     ///
-    /// The elements `[..index]` remain unmodified, whereas elements `[index..]`
+    /// The elements `[..index]` remain unmodified whereas elements `[index..]`
     /// are shifted to the right such that they become `[index + 1..]`, and the
     /// element at `index` is the `element` being inserted.
     fn insert(
