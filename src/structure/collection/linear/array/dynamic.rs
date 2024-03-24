@@ -951,6 +951,24 @@ mod test {
         }
 
         #[test]
+        fn increases_capacity() {
+            const COUNT: usize = 256;
+
+            let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, COUNT);
+        }
+
+        #[test]
+        fn increases_capacity_for_zero_size_types() {
+            const COUNT: usize = 256;
+
+            let actual = Dynamic::<()>::with_capacity(COUNT).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, COUNT);
+        }
+
+        #[test]
         fn allocates_capacity() {
             const COUNT: usize = 256;
 
