@@ -1324,7 +1324,7 @@ mod test {
 
         #[test]
         fn all_post_capacity() {
-            todo!()
+            Dynamic::<usize>::with_capacity(256).expect("successful allocation");
         }
 
         #[test]
