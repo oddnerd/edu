@@ -1017,7 +1017,8 @@ mod test {
 
         #[test]
         fn does_not_initialize_elements() {
-            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            actual.reserve(256).expect("successful allocation");
 
             assert_eq!(actual.initialized, 0);
         }
