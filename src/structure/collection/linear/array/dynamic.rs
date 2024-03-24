@@ -1375,7 +1375,11 @@ mod test {
 
         #[test]
         fn initializes_state() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+
+            assert_eq!(actual.pre_capacity, 0);
+            assert_eq!(actual.initialized, expected.len());
         }
     }
 
