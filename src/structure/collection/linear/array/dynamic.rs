@@ -1260,7 +1260,20 @@ mod test {
 
         #[test]
         fn reallocates_capacity() {
-            todo!()
+            const COUNT: usize = 256;
+
+            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+            actual.resize(COUNT/2).expect("successful reallocation");
+
+            for index in 0..(COUNT/2) {
+                unsafe {
+                    let ptr = actual.buffer.as_ptr().add(index);
+
+                    // Ideally, this will seg-fault if we don't own the memory.
+                    (*ptr).write(index);
+                }
+            }
         }
 
         #[test]
