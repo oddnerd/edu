@@ -1025,7 +1025,12 @@ mod test {
 
         #[test]
         fn increases_capacity() {
-            todo!()
+            const COUNT: usize = 256;
+
+            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+            actual.reserve(COUNT).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, COUNT);
         }
 
         #[test]
