@@ -1188,7 +1188,9 @@ mod test {
 
         #[test]
         fn zero_capacity() {
-            todo!()
+            let mut actual = Dynamic::<usize>::default();
+
+            actual.shrink(None).expect("this should be a no-op");
         }
     }
 
