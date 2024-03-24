@@ -1313,7 +1313,7 @@ mod test {
 
         #[test]
         fn empty() {
-            todo!()
+            Dynamic::<usize>::default();
         }
 
         #[test]
