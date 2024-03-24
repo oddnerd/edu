@@ -1337,7 +1337,9 @@ mod test {
 
         #[test]
         fn all() {
-            todo!()
+            let mut actual = Dynamic::<usize>::from_iter([0,1,2,3,4,5]);
+
+            todo!("need a way to remove front elements");
         }
     }
 
