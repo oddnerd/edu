@@ -1423,7 +1423,9 @@ mod test {
         #[test]
         #[should_panic]
         fn panics_when_out_of_bounds() {
-            todo!()
+            let mut instance = Dynamic::<()>::default();
+
+            instance.index_mut(0);
         }
     }
 
