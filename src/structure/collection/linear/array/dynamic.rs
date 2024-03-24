@@ -1400,7 +1400,9 @@ mod test {
         #[test]
         #[should_panic]
         fn panics_when_out_of_bounds() {
-            todo!()
+            let instance = Dynamic::<()>::default();
+
+            instance.index(0);
         }
     }
 
