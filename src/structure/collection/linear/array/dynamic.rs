@@ -1107,7 +1107,13 @@ mod test {
 
         #[test]
         fn does_not_decrease_capacity() {
-            todo!()
+            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+            actual.reserve(128).expect("successful allocation");
+            assert_ne!(actual.post_capacity, 128);
+
+            actual.reserve(0).expect("successful allocation");
+            assert_ne!(actual.post_capacity, 0);
         }
 
         #[test]
