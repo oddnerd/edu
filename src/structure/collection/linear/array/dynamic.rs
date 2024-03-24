@@ -1434,7 +1434,10 @@ mod test {
 
         #[test]
         fn count() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+            let actual = Dynamic::from_iter(expected.iter().copied());
+
+            assert_eq!(actual.iter().count(), expected.len());
         }
 
         #[test]
