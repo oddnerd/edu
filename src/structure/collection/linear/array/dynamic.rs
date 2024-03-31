@@ -1406,6 +1406,22 @@ mod test {
         use super::*;
 
         #[test]
+        fn does_not_offset_buffer() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+
+            assert_eq!(actual.pre_capacity, 0);
+        }
+
+        #[test]
+        fn has_elements() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+
+            assert_eq!(actual.initialized, expected.len());
+        }
+
+        #[test]
         fn allocates() {
             let expected = [0, 1, 2, 3, 4, 5];
 
@@ -1430,15 +1446,6 @@ mod test {
             for index in 0..expected.len() {
                 assert_eq!(actual[index], expected[index]);
             }
-        }
-
-        #[test]
-        fn initializes_state() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
-
-            assert_eq!(actual.pre_capacity, 0);
-            assert_eq!(actual.initialized, expected.len());
         }
     }
 
