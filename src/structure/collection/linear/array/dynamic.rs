@@ -1656,7 +1656,9 @@ mod test {
 
         #[test]
         fn does_not_initialize_elements() {
-            todo!()
+            let actual = Dynamic::<()>::default();
+
+            assert_eq!(actual.initialized, 0);
         }
 
         #[test]
