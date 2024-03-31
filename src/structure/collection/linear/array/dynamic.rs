@@ -880,6 +880,12 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     /// * The pointer must never be written to.
     /// * Modifying `self` might invalidate the pointer.
     ///
+    /// # Panics
+    /// Will panic if there exists no allocation hence the pointer would be
+    /// dangling and nothing meaningful can be derived from it. Note that a
+    /// dangling (but nevertheless entirely useable in generic code) pointer
+    /// _WILL_ be yielded for zero-size types.
+    ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
     ///
@@ -907,6 +913,12 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     /// # Safety
     /// * `self` must outlive the pointer.
     /// * Modifying `self` might invalidate the pointer.
+    ///
+    /// # Panics
+    /// Will panic if there exists no allocation hence the pointer would be
+    /// dangling and nothing meaningful can be derived from it. Note that a
+    /// dangling (but nevertheless entirely useable in generic code) pointer
+    /// _WILL_ be yielded for zero-size types.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1994,7 +2006,7 @@ mod test {
 
             #[test]
             #[should_panic]
-            fn panics_if_empty() {
+            fn panics_if_no_allocation() {
                 todo!()
             }
         }
@@ -2009,7 +2021,7 @@ mod test {
 
             #[test]
             #[should_panic]
-            fn panics_if_empty() {
+            fn panics_if_no_allocation() {
                 todo!()
             }
         }
