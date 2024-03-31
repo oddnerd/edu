@@ -1630,6 +1630,36 @@ mod test {
                 assert_eq!(actual.initialized, 0);
                 assert_eq!(actual.post_capacity, 0);
             }
+
+            struct Iter<I> {
+                data: std::iter::Copied<I>,
+            }
+
+            impl<'a, T: 'a + Copy, I> Iterator for Iter<I>
+            where
+                I: Iterator<Item = &'a T>,
+            {
+                type Item = T;
+                fn next(&mut self) -> Option<Self::Item> {
+                    self.data.next()
+                }
+
+                fn size_hint(&self) -> (usize, Option<usize>) {
+                    (isize::MAX as usize, Some(isize::MAX as usize))
+                }
+            }
+
+            #[test]
+            fn does_not_trust_size_hint() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                // Ideally, this will panic if it uses the invalid size.
+                let actual = Dynamic::from_iter(Iter {
+                    data: expected.iter().copied(),
+                });
+
+                assert!(actual.into_iter().eq(expected.into_iter()));
+            }
         }
 
         mod extend {
