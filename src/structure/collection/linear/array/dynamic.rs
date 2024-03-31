@@ -1663,12 +1663,9 @@ mod test {
 
         #[test]
         fn does_not_allocate() {
-            todo!()
-        }
+            let actual = Dynamic::<()>::default();
 
-        #[test]
-        fn does_not_allocate_when_zero() {
-            todo!()
+            assert_eq!(actual.post_capacity, 0);
         }
     }
 
