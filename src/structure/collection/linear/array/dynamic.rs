@@ -2001,13 +2001,17 @@ mod test {
 
             #[test]
             fn correct_address() {
-                todo!()
+                let actual = Dynamic::<i32>::from_iter([0,1,2,3,4,5]);
+
+                assert_eq!(unsafe { actual.as_ptr() }, actual.buffer.as_ptr().cast::<i32>().cast_const());
             }
 
             #[test]
             #[should_panic]
             fn panics_if_no_allocation() {
-                todo!()
+                let actual = Dynamic::<()>::default();
+
+                unsafe { actual.as_ptr() };
             }
         }
 
@@ -2016,13 +2020,17 @@ mod test {
 
             #[test]
             fn correct_address() {
-                todo!()
+                let mut actual = Dynamic::<i32>::from_iter([0,1,2,3,4,5]);
+
+                assert_eq!(unsafe { actual.as_mut_ptr() }, actual.buffer.as_ptr().cast::<i32>());
             }
 
             #[test]
             #[should_panic]
             fn panics_if_no_allocation() {
-                todo!()
+                let mut actual = Dynamic::<()>::default();
+
+                unsafe { actual.as_mut_ptr() };
             }
         }
 
