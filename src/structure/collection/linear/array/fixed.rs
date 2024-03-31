@@ -445,16 +445,21 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
 mod test {
     use super::*;
 
-    mod from_array {
+    mod from {
         use super::*;
 
-        #[test]
-        fn initializes_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Fixed::from(expected.clone());
+        mod primitive_array {
+            use super::*;
 
-            assert_eq!(actual.data, expected);
+            #[test]
+            fn initializes_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert_eq!(actual.data, expected);
+            }
         }
+
     }
 
     mod index {
