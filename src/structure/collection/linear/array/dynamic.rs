@@ -1827,7 +1827,6 @@ mod test {
             let second = Dynamic::from_iter(expected.iter().copied());
             let third = Dynamic::from_iter(expected.iter().copied());
 
-            // A == B && B == C => A == C
             // `first == second && second == third` => `first == third`
             assert_eq!(first, second);
             assert_eq!(second, third);
