@@ -964,401 +964,415 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
 mod test {
     use super::*;
 
-    mod with_capacity {
+    mod method {
         use super::*;
 
-        #[test]
-        fn does_not_offset_buffer() {
-            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+        mod with_capacity {
+            use super::*;
 
-            assert_eq!(actual.pre_capacity, 0);
-        }
+            #[test]
+            fn does_not_offset_buffer() {
+                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-        #[test]
-        fn does_not_initialize_elements() {
-            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+                assert_eq!(actual.pre_capacity, 0);
+            }
 
-            assert_eq!(actual.initialized, 0);
-        }
+            #[test]
+            fn does_not_initialize_elements() {
+                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-        #[test]
-        fn increases_capacity() {
-            const COUNT: usize = 256;
+                assert_eq!(actual.initialized, 0);
+            }
 
-            let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+            #[test]
+            fn increases_capacity() {
+                const COUNT: usize = 256;
 
-            assert_eq!(actual.post_capacity, COUNT);
-        }
+                let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
-        #[test]
-        fn increases_capacity_for_zero_size_types() {
-            const COUNT: usize = 256;
+                assert_eq!(actual.post_capacity, COUNT);
+            }
 
-            let actual = Dynamic::<()>::with_capacity(COUNT).expect("successful allocation");
+            #[test]
+            fn increases_capacity_for_zero_size_types() {
+                const COUNT: usize = 256;
 
-            assert_eq!(actual.post_capacity, COUNT);
-        }
+                let actual = Dynamic::<()>::with_capacity(COUNT).expect("successful allocation");
 
-        #[test]
-        fn allocates_capacity() {
-            const COUNT: usize = 256;
+                assert_eq!(actual.post_capacity, COUNT);
+            }
 
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+            #[test]
+            fn allocates_capacity() {
+                const COUNT: usize = 256;
 
-            for index in 0..COUNT {
-                unsafe {
-                    let ptr = actual.as_mut_ptr().add(index);
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
-                    // Ideally, this will seg-fault if we don't own the memory.
-                    ptr.write(index);
+                for index in 0..COUNT {
+                    unsafe {
+                        let ptr = actual.as_mut_ptr().add(index);
+
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        ptr.write(index);
+                    }
                 }
             }
+
+            #[test]
+            fn does_not_allocate_when_zero() {
+                let actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
+
+                assert_eq!(actual.post_capacity, 0);
+            }
         }
 
-        #[test]
-        fn does_not_allocate_when_zero() {
-            let actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
+        mod capacity {
+            use super::*;
 
-            assert_eq!(actual.post_capacity, 0);
-        }
-    }
+            #[test]
+            fn is_reserved_element_count() {
+                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-    mod capacity {
-        use super::*;
+                assert_eq!(actual.capacity(), actual.post_capacity);
+            }
 
-        #[test]
-        fn is_reserved_element_count() {
-            let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            #[test]
+            fn does_not_count_pre_capacity() {
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-            assert_eq!(actual.capacity(), actual.post_capacity);
-        }
+                std::mem::swap(&mut actual.pre_capacity, &mut actual.post_capacity);
 
-        #[test]
-        fn does_not_count_pre_capacity() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+                assert_eq!(actual.capacity(), actual.post_capacity);
+            }
 
-            std::mem::swap(&mut actual.pre_capacity, &mut actual.post_capacity);
+            #[test]
+            fn specific_for_zero_size_types() {
+                let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
 
-            assert_eq!(actual.capacity(), actual.post_capacity);
-        }
-
-        #[test]
-        fn specific_for_zero_size_types() {
-            let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
-
-            assert_eq!(actual.capacity(), actual.post_capacity);
-        }
-    }
-
-    mod reserve {
-        use super::*;
-
-        #[test]
-        fn does_not_initialize_elements() {
-            let mut actual = Dynamic::<usize>::default();
-            actual.reserve(256).expect("successful allocation");
-
-            assert_eq!(actual.initialized, 0);
+                assert_eq!(actual.capacity(), actual.post_capacity);
+            }
         }
 
-        #[test]
-        fn increases_capacity() {
-            const COUNT: usize = 256;
+        mod reserve {
+            use super::*;
 
-            let mut actual = Dynamic::<usize>::default();
-            actual.reserve(COUNT).expect("successful allocation");
+            #[test]
+            fn does_not_initialize_elements() {
+                let mut actual = Dynamic::<usize>::default();
+                actual.reserve(256).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, COUNT);
-        }
+                assert_eq!(actual.initialized, 0);
+            }
 
-        #[test]
-        fn increases_capacity_for_zero_size_types() {
-            const COUNT: usize = 256;
+            #[test]
+            fn increases_capacity() {
+                const COUNT: usize = 256;
 
-            let mut actual = Dynamic::<usize>::default();
-            actual.reserve(COUNT).expect("successful allocation");
+                let mut actual = Dynamic::<usize>::default();
+                actual.reserve(COUNT).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, COUNT);
-        }
+                assert_eq!(actual.post_capacity, COUNT);
+            }
 
-        #[test]
-        fn allocates_capacity() {
-            const COUNT: usize = 256;
+            #[test]
+            fn increases_capacity_for_zero_size_types() {
+                const COUNT: usize = 256;
 
-            let mut actual = Dynamic::<usize>::default();
-            actual.reserve(COUNT).expect("successful allocation");
+                let mut actual = Dynamic::<usize>::default();
+                actual.reserve(COUNT).expect("successful allocation");
 
-            for index in 0..COUNT {
-                unsafe {
-                    let ptr = actual.as_mut_ptr().add(index);
+                assert_eq!(actual.post_capacity, COUNT);
+            }
 
-                    // Ideally, this will seg-fault if we don't own the memory.
-                    ptr.write(index);
+            #[test]
+            fn allocates_capacity() {
+                const COUNT: usize = 256;
+
+                let mut actual = Dynamic::<usize>::default();
+                actual.reserve(COUNT).expect("successful allocation");
+
+                for index in 0..COUNT {
+                    unsafe {
+                        let ptr = actual.as_mut_ptr().add(index);
+
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        ptr.write(index);
+                    }
                 }
             }
-        }
 
-        #[test]
-        fn reallocates_capacity() {
-            const COUNT: usize = 256;
+            #[test]
+            fn reallocates_capacity() {
+                const COUNT: usize = 256;
 
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-            actual.reserve(COUNT * 2).expect("successful allocation");
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+                actual.reserve(COUNT * 2).expect("successful allocation");
 
-            for index in 0..(COUNT * 2) {
-                unsafe {
-                    let ptr = actual.as_mut_ptr().add(index);
+                for index in 0..(COUNT * 2) {
+                    unsafe {
+                        let ptr = actual.as_mut_ptr().add(index);
 
-                    // Ideally, this will seg-fault if we don't own the memory.
-                    ptr.write(index);
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        ptr.write(index);
+                    }
                 }
             }
-        }
 
-        #[test]
-        fn does_not_modify_initialized_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
 
-            let mut actual = Dynamic::<usize>::from_iter(expected.iter().copied());
-            actual
-                .reserve(actual.len() * 16)
-                .expect("successful allocation");
+                let mut actual = Dynamic::<usize>::from_iter(expected.iter().copied());
+                actual
+                    .reserve(actual.len() * 16)
+                    .expect("successful allocation");
 
-            for index in 0..expected.len() {
-                assert_eq!(actual[index], expected[index]);
-            }
-        }
-
-        #[test]
-        fn does_not_decrease_capacity() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
-
-            actual.reserve(128).expect("already big enough");
-            assert_ne!(actual.post_capacity, 128);
-
-            actual.reserve(0).expect("already big enough");
-            assert_ne!(actual.post_capacity, 0);
-        }
-
-        #[test]
-        fn does_nothing_when_zero_capacity() {
-            let mut actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
-
-            actual.reserve(0).expect("this should be a no-op");
-        }
-    }
-
-    mod shrink {
-        use super::*;
-
-        #[test]
-        fn does_not_initialize_elements() {
-            const COUNT: usize = 256;
-
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-
-            actual
-                .shrink(Some(COUNT / 2))
-                .expect("successful reallocation");
-
-            assert_eq!(actual.initialized, 0);
-        }
-
-        #[test]
-        fn decreases_capacity() {
-            const COUNT: usize = 256;
-
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-
-            actual
-                .shrink(Some(COUNT / 2))
-                .expect("successful reallocation");
-
-            assert_eq!(actual.post_capacity, 128);
-        }
-
-        #[test]
-        fn reallocates_capacity() {
-            const COUNT: usize = 256;
-
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-
-            actual
-                .shrink(Some(COUNT / 2))
-                .expect("successful reallocation");
-
-            for index in 0..(COUNT / 2) {
-                unsafe {
-                    let ptr = actual.as_mut_ptr().add(index);
-
-                    // Ideally, this will seg-fault if we don't own the memory.
-                    ptr.write(index);
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
                 }
             }
-        }
 
-        #[test]
-        fn does_not_modify_initialized_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
+            #[test]
+            fn does_not_decrease_capacity() {
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-            let mut actual: Dynamic<usize> = expected.iter().copied().collect();
-            actual
-                .reserve(expected.len() * 2)
-                .expect("successful allocation");
+                actual.reserve(128).expect("already big enough");
+                assert_ne!(actual.post_capacity, 128);
 
-            actual.shrink(None).expect("successful reallocation");
+                actual.reserve(0).expect("already big enough");
+                assert_ne!(actual.post_capacity, 0);
+            }
 
-            for index in 0..expected.len() {
-                assert_eq!(actual[index], expected[index]);
+            #[test]
+            fn does_nothing_when_zero_capacity() {
+                let mut actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
+
+                actual.reserve(0).expect("this should be a no-op");
             }
         }
 
-        #[test]
-        fn does_not_increase_capacity() {
-            let mut actual: Dynamic<usize> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+        mod shrink {
+            use super::*;
 
-            actual
-                .shrink(Some(actual.len() * 2))
-                .expect("already small enough");
+            #[test]
+            fn does_not_initialize_elements() {
+                const COUNT: usize = 256;
 
-            assert!(actual.post_capacity < 256);
-        }
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
-        #[test]
-        fn does_nothing_when_zero_capacity() {
-            let mut actual = Dynamic::<()>::default();
+                actual
+                    .shrink(Some(COUNT / 2))
+                    .expect("successful reallocation");
 
-            actual.shrink(None).expect("this should be a no-op");
-        }
+                assert_eq!(actual.initialized, 0);
+            }
 
-        #[test]
-        fn deallocates_when_empty() {
-            todo!()
-        }
-    }
+            #[test]
+            fn decreases_capacity() {
+                const COUNT: usize = 256;
 
-    mod resize {
-        use super::*;
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
-        #[test]
-        fn does_not_initialize_elements() {
-            let mut actual = Dynamic::<usize>::default();
+                actual
+                    .shrink(Some(COUNT / 2))
+                    .expect("successful reallocation");
 
-            actual.resize(256).expect("successful allocation");
+                assert_eq!(actual.post_capacity, 128);
+            }
 
-            assert_eq!(actual.initialized, 0);
-        }
+            #[test]
+            fn reallocates_capacity() {
+                const COUNT: usize = 256;
 
-        #[test]
-        fn increases_capacity() {
-            const COUNT: usize = 77;
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
-            let mut actual = Dynamic::<usize>::default();
+                actual
+                    .shrink(Some(COUNT / 2))
+                    .expect("successful reallocation");
 
-            actual.resize(COUNT).expect("successful allocation");
+                for index in 0..(COUNT / 2) {
+                    unsafe {
+                        let ptr = actual.as_mut_ptr().add(index);
 
-            assert_eq!(actual.post_capacity, COUNT);
-        }
-
-        #[test]
-        fn increases_capacity_for_zero_size_types() {
-            const COUNT: usize = 77;
-
-            let mut actual = Dynamic::<()>::default();
-
-            actual.resize(COUNT).expect("successful allocation");
-
-            assert_eq!(actual.post_capacity, COUNT);
-        }
-
-        #[test]
-        fn decreases_capacity() {
-            const COUNT: usize = 256;
-
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-
-            actual.resize(COUNT / 2).expect("successful allocation");
-
-            assert_eq!(actual.post_capacity, COUNT / 2);
-        }
-
-        #[test]
-        fn decreases_capacity_for_zero_size_types() {
-            const COUNT: usize = 256;
-
-            let mut actual =
-                Dynamic::<()>::with_capacity(COUNT / 2).expect("successful allocation");
-
-            actual.resize(COUNT / 2).expect("successful allocation");
-
-            assert_eq!(actual.post_capacity, COUNT / 2);
-        }
-
-        #[test]
-        fn allocates_capacity() {
-            const COUNT: usize = 256;
-
-            let mut actual = Dynamic::<usize>::default();
-
-            actual.resize(COUNT).expect("successful reallocation");
-
-            for index in 0..COUNT {
-                unsafe {
-                    let ptr = actual.as_mut_ptr().add(index);
-
-                    // Ideally, this will seg-fault if we don't own the memory.
-                    ptr.write(index);
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        ptr.write(index);
+                    }
                 }
             }
-        }
 
-        #[test]
-        fn reallocates_capacity() {
-            const COUNT: usize = 256;
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
 
-            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+                let mut actual: Dynamic<usize> = expected.iter().copied().collect();
+                actual
+                    .reserve(expected.len() * 2)
+                    .expect("successful allocation");
 
-            actual.resize(COUNT / 2).expect("successful reallocation");
+                actual.shrink(None).expect("successful reallocation");
 
-            for index in 0..(COUNT / 2) {
-                unsafe {
-                    let ptr = actual.as_mut_ptr().add(index);
-
-                    // Ideally, this will seg-fault if we don't own the memory.
-                    ptr.write(index);
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
                 }
             }
-        }
 
-        #[test]
-        fn does_not_modify_initialized_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let mut actual = Dynamic::from_iter(expected.iter().copied());
+            #[test]
+            fn does_not_increase_capacity() {
+                let mut actual: Dynamic<usize> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
-            actual.resize(0).expect("successful allocation");
+                actual
+                    .shrink(Some(actual.len() * 2))
+                    .expect("already small enough");
 
-            for index in 0..expected.len() {
-                assert_eq!(actual[index], expected[index]);
+                assert!(actual.post_capacity < 256);
+            }
+
+            #[test]
+            fn does_nothing_when_zero_capacity() {
+                let mut actual = Dynamic::<()>::default();
+
+                actual.shrink(None).expect("this should be a no-op");
+            }
+
+            #[test]
+            fn deallocates_when_empty() {
+                todo!()
             }
         }
 
-        #[test]
-        fn does_nothing_when_existing_capacity() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+        mod resize {
+            use super::*;
 
-            actual.resize(actual.capacity()).expect("already that size");
-        }
+            #[test]
+            fn does_not_initialize_elements() {
+                let mut actual = Dynamic::<usize>::default();
 
-        #[test]
-        fn does_nothing_when_zero_capacity() {
-            let mut actual = Dynamic::<usize>::default();
+                actual.resize(256).expect("successful allocation");
 
-            actual.resize(0).expect("this should be a no-op");
-        }
+                assert_eq!(actual.initialized, 0);
+            }
 
-        #[test]
-        fn deallocates_when_empty() {
-            todo!()
+            #[test]
+            fn increases_capacity() {
+                const COUNT: usize = 77;
+
+                let mut actual = Dynamic::<usize>::default();
+
+                actual.resize(COUNT).expect("successful allocation");
+
+                assert_eq!(actual.post_capacity, COUNT);
+            }
+
+            #[test]
+            fn increases_capacity_for_zero_size_types() {
+                const COUNT: usize = 77;
+
+                let mut actual = Dynamic::<()>::default();
+
+                actual.resize(COUNT).expect("successful allocation");
+
+                assert_eq!(actual.post_capacity, COUNT);
+            }
+
+            #[test]
+            fn decreases_capacity() {
+                const COUNT: usize = 256;
+
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+                actual.resize(COUNT / 2).expect("successful allocation");
+
+                assert_eq!(actual.post_capacity, COUNT / 2);
+            }
+
+            #[test]
+            fn decreases_capacity_for_zero_size_types() {
+                const COUNT: usize = 256;
+
+                let mut actual =
+                    Dynamic::<()>::with_capacity(COUNT / 2).expect("successful allocation");
+
+                actual.resize(COUNT / 2).expect("successful allocation");
+
+                assert_eq!(actual.post_capacity, COUNT / 2);
+            }
+
+            #[test]
+            fn allocates_capacity() {
+                const COUNT: usize = 256;
+
+                let mut actual = Dynamic::<usize>::default();
+
+                actual.resize(COUNT).expect("successful reallocation");
+
+                for index in 0..COUNT {
+                    unsafe {
+                        let ptr = actual.as_mut_ptr().add(index);
+
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        ptr.write(index);
+                    }
+                }
+            }
+
+            #[test]
+            fn reallocates_capacity() {
+                const COUNT: usize = 256;
+
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+                actual.resize(COUNT / 2).expect("successful reallocation");
+
+                for index in 0..(COUNT / 2) {
+                    unsafe {
+                        let ptr = actual.as_mut_ptr().add(index);
+
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        ptr.write(index);
+                    }
+                }
+            }
+
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.resize(0).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn does_nothing_when_existing_capacity() {
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                actual.resize(actual.capacity()).expect("already that size");
+            }
+
+            #[test]
+            fn does_nothing_when_zero_capacity() {
+                let mut actual = Dynamic::<usize>::default();
+
+                actual.resize(0).expect("this should be a no-op");
+            }
+
+            #[test]
+            fn deallocates_when_empty() {
+                todo!()
+            }
         }
     }
 
@@ -1764,6 +1778,37 @@ mod test {
             let actual = Dynamic::<()>::default();
 
             assert_eq!(actual.post_capacity, 0);
+        }
+    }
+
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn does_not_offset_buffer() {
+            let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            assert_eq!(actual.pre_capacity, 0);
+        }
+
+        #[test]
+        fn has_elements() {
+            let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            assert_eq!(actual.initialized, expected.len());
+        }
+
+        #[test]
+        fn is_equivalent() {
+            let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            assert_eq!(actual, expected);
         }
     }
 
