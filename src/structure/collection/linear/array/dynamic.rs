@@ -1478,10 +1478,10 @@ mod test {
 
         #[test]
         fn correct_element() {
-            let expected = [0, 1, 2, 3, 4, 5];
+            let mut expected = [0, 1, 2, 3, 4, 5];
             let mut actual = Dynamic::from_iter(expected);
 
-            for (index, expected) in expected.iter().enumerate() {
+            for (index, expected) in expected.iter_mut().enumerate() {
                 assert_eq!(actual.index_mut(index), expected);
             }
         }
