@@ -1709,20 +1709,36 @@ mod test {
 
         #[test]
         fn symmetric() {
-            // A == B <=> B == A
-            todo!("A == B <=> B == A")
+            let expected = [0,1,2,3,4,5];
+
+            let first = Dynamic::from_iter(expected.iter().copied());
+            let second = Dynamic::from_iter(expected.iter().copied());
+
+            // `first == second` <=> `second == first`
+            assert_eq!(first, second);
+            assert_eq!(second, first);
         }
 
         #[test]
         fn transitive() {
+            let expected = [0,1,2,3,4,5];
+
+            let first = Dynamic::from_iter(expected.iter().copied());
+            let second = Dynamic::from_iter(expected.iter().copied());
+            let third = Dynamic::from_iter(expected.iter().copied());
+
             // A == B && B == C => A == C
-            todo!("A == B && B == C => A == C")
+            // `first == second && second == third` => `first == third`
+            assert_eq!(first, second);
+            assert_eq!(second, third);
+            assert_eq!(third, first);
         }
 
         #[test]
         fn reflexive() {
-            // A == A
-            todo!("A == A")
+            let actual = Dynamic::<()>::default();
+
+            assert_eq!(actual, actual);
         }
     }
 
