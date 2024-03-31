@@ -1473,12 +1473,18 @@ mod test {
 
             #[test]
             fn hint() {
-                todo!()
+                let expected = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert_eq!(actual.iter().size_hint(), (expected.len(), Some(expected.len())));
             }
 
             #[test]
             fn len() {
-                todo!()
+                let expected = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert_eq!(actual.iter().len(), expected.len());
             }
         }
 
