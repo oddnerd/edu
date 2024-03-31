@@ -588,7 +588,10 @@ impl<'a, T: 'a + Clone> std::iter::FromIterator<T> for Dynamic<T> {
             max.unwrap_or(min)
         };
 
-        let mut instance = Dynamic::<T>::with_capacity(count).expect("successful allocation");
+        // Iterators may provide erroneous hints, so a smaller successful
+        // allocation can occur later when inserting actual elements, otherwise
+        // the error will be propagated once a necessary allocation fails.
+        let mut instance = Dynamic::<T>::with_capacity(count).unwrap_or_default();
 
         instance.extend(iter);
 
