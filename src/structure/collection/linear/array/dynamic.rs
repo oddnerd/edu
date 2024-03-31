@@ -1808,7 +1808,7 @@ mod test {
         }
 
         #[test]
-        fn symmetric() {
+        fn is_symmetric() {
             let expected = [0, 1, 2, 3, 4, 5];
 
             let first = Dynamic::from_iter(expected.iter().copied());
@@ -1820,7 +1820,7 @@ mod test {
         }
 
         #[test]
-        fn transitive() {
+        fn is_transitive() {
             let expected = [0, 1, 2, 3, 4, 5];
 
             let first = Dynamic::from_iter(expected.iter().copied());
@@ -1835,7 +1835,7 @@ mod test {
         }
 
         #[test]
-        fn reflexive() {
+        fn is_reflexive() {
             let actual = Dynamic::<()>::default();
 
             assert_eq!(actual, actual);
