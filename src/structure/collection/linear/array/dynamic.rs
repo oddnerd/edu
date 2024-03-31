@@ -1343,14 +1343,14 @@ mod test {
         }
 
         #[test]
-        fn existing_capacity() {
+        fn does_nothing_when_existing_capacity() {
             let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
             actual.resize(actual.capacity()).expect("already that size");
         }
 
         #[test]
-        fn zero_capacity() {
+        fn does_nothing_when_zero_capacity() {
             let mut actual = Dynamic::<usize>::default();
 
             actual.resize(0).expect("this should be a no-op");
