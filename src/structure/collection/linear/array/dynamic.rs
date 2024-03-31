@@ -1749,18 +1749,19 @@ mod test {
             use super::*;
 
             #[test]
-            fn initialized() {
-                todo!()
-            }
+            fn initialized_elements() {
+                let expected  = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
 
-            #[test]
-            fn zero_size_types() {
-                todo!()
+                assert_eq!(actual.initialized, expected.len());
+                assert_eq!(Collection::count(&actual), expected.len());
             }
 
             #[test]
             fn zero_when_empty() {
-                todo!()
+                let actual = Dynamic::<()>::default();
+
+                assert_eq!(Collection::count(&actual), 0);
             }
 
             #[test]
@@ -1770,7 +1771,11 @@ mod test {
 
             #[test]
             fn ignores_post_capacity() {
-                todo!()
+                let mut actual = Dynamic::<()>::default();
+
+                actual.reserve(256).expect("successful allocation");
+
+                assert_eq!(Collection::count(&actual), 0);
             }
         }
     }
