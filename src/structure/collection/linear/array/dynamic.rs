@@ -1730,7 +1730,7 @@ mod test {
             }
 
             #[test]
-            fn empty() {
+            fn does_nothing_if_empty_iterator() {
                 let mut actual = Dynamic::<()>::default();
 
                 actual.extend(std::iter::empty());
