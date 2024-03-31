@@ -351,12 +351,12 @@ impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
     ///
     /// assert!(actual.eq(expected));
     /// ```
-    fn try_from(value: &'a [T]) -> Result<Self, Self::Error> {
-        let mut instance = Self::with_capacity(value.len())?;
+    fn try_from(slice: &'a [T]) -> Result<Self, Self::Error> {
+        let mut instance = Self::with_capacity(slice.len())?;
 
         unsafe {
             // SAFETY: valid for reads up to `value.len()` elements.
-            let source = value.as_ptr();
+            let source = slice.as_ptr();
 
             // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
             let destination = instance.buffer.cast::<T>().as_ptr();
@@ -365,10 +365,10 @@ impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
             // * owned memory => destination valid for writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(source, destination, value.len());
+            std::ptr::copy(source, destination, slice.len());
         }
 
-        instance.initialized = value.len();
+        instance.initialized = slice.len();
 
         Ok(instance)
     }
