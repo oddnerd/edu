@@ -1,6 +1,7 @@
 //! Implementations of [`Linear`].
 
 pub mod array;
+pub mod list;
 
 use super::Collection;
 
@@ -14,16 +15,48 @@ use super::Collection;
 /// element(s) that can be said to be the [`Self::first`] and/or [`Self::last`]
 /// contained because they are connected to only one other element whereas all
 /// other elements are connected to exactly two.
-pub trait Linear<'a>: Collection<'a> + std::iter::IntoIterator {
+pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
-    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element>;
+    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
-    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element>;
+    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator;
+
+    /// Obtain an immutable reference to the element at `index`, bounds checked.
+    fn at(&self, index: usize) -> Option<&Self::Element> {
+        if index < self.count() {
+            Some(&self[index])
+        } else {
+            None
+        }
+    }
+
+    /// Obtain a mutable reference to the element at `index`, bounds checked.
+    fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
+        if index < self.count() {
+            Some(&mut self[index])
+        } else {
+            None
+        }
+    }
 
     /// Query the element considered to be at the front, the first element.
-    fn first(&self) -> Option<&Self::Element>;
+    fn first(&self) -> Option<&Self::Element> {
+        self.at(0)
+    }
 
-    /// Query the element considered to be at the end, the last element.
-    fn last(&self) -> Option<&Self::Element>;
+    /// Query the element considered to be at the back, the last element.
+    fn last(&self) -> Option<&Self::Element> {
+        self.at(self.count() - 1)
+    }
+
+    /// Obtain a reference to the element at the front, the first element.
+    fn first_mut(&mut self) -> Option<&mut Self::Element> {
+        self.at_mut(0)
+    }
+
+    /// Obtain a reference to the element at the back, the last element().
+    fn last_mut(&mut self) -> Option<&mut Self::Element> {
+        self.at_mut(self.count() - 1)
+    }
 }
