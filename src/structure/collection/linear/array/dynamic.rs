@@ -1697,7 +1697,14 @@ mod test {
 
         #[test]
         fn ignores_different_post_capacity() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+
+            let first = Dynamic::from_iter(expected.iter().copied());
+            let mut second = Dynamic::from_iter(expected.iter().copied());
+
+            second.reserve(expected.len() * 2).expect("successful allocation");
+
+            assert_eq!(first, second);
         }
 
         #[test]
