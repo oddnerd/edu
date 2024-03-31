@@ -1532,6 +1532,14 @@ mod test {
             use super::*;
 
             #[test]
+            fn does_not_offset_buffer() {
+                let expected = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert_eq!(actual.pre_capacity, 0);
+            }
+
+            #[test]
             fn allocates() {
                 let expected = [0,1,2,3,4,5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
@@ -1548,11 +1556,6 @@ mod test {
 
             #[test]
             fn initializes_elements() {
-                todo!()
-            }
-
-            #[test]
-            fn initializes_state() {
                 todo!()
             }
         }
