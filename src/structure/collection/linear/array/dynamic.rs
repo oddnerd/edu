@@ -1674,7 +1674,12 @@ mod test {
 
         #[test]
         fn eq_when_same_elements() {
-            todo!()
+            let expected = [0,1,2,3,4,5];
+
+            let first = Dynamic::from_iter(expected.iter().copied());
+            let second = Dynamic::from_iter(expected.iter().copied());
+
+            assert_eq!(first, second);
         }
 
         #[test]
