@@ -1570,6 +1570,15 @@ mod test {
                     assert_eq!(actual[index], expected[index]);
                 }
             }
+
+            #[test]
+            fn empty() {
+                let actual = Dynamic::from_iter(std::iter::empty());
+
+                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.initialized, 0);
+                assert_eq!(actual.post_capacity, 0);
+            }
         }
 
         mod extend {
