@@ -1493,7 +1493,16 @@ mod test {
 
             #[test]
             fn empty() {
-                todo!()
+                let actual = Dynamic::<()>::default();
+                let mut actual = actual.iter();
+
+                // Yields `None` at least once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
             }
 
             #[test]
