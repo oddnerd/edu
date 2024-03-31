@@ -104,7 +104,7 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         // There is already enough capacity.
-        if capacity < self.post_capacity {
+        if capacity <= self.post_capacity {
             return Ok(self);
         }
 
