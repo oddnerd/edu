@@ -1649,7 +1649,9 @@ mod test {
 
         #[test]
         fn does_not_offset_buffer() {
-            todo!()
+            let actual = Dynamic::<()>::default();
+
+            assert_eq!(actual.pre_capacity, 0);
         }
 
         #[test]
