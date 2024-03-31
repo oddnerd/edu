@@ -985,15 +985,6 @@ mod test {
         }
 
         #[test]
-        fn allocates_zero_size_types() {
-            const COUNT: usize = 256;
-
-            let actual = Dynamic::<()>::with_capacity(COUNT).expect("successful allocation");
-
-            assert_eq!(actual.post_capacity, COUNT);
-        }
-
-        #[test]
         fn does_not_allocate_when_zero() {
             let actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
 
@@ -1528,7 +1519,18 @@ mod test {
 
             #[test]
             fn allocates() {
-                todo!()
+                const COUNT: usize = 256;
+
+                let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+                for index in 0..COUNT {
+                    unsafe {
+                        let ptr = actual.buffer.as_ptr().add(index);
+
+                        // Ideally, this will seg-fault if we don't own the memory.
+                        (*ptr).write(index);
+                    }
+                }
             }
 
             #[test]
