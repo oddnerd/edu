@@ -1684,7 +1684,10 @@ mod test {
 
         #[test]
         fn ne_when_different_elements() {
-            todo!()
+            let first = Dynamic::from_iter([0]);
+            let second = Dynamic::from_iter([1]);
+
+            assert_ne!(first, second);
         }
 
         #[test]
