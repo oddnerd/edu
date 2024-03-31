@@ -562,7 +562,7 @@ impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a + Clone> std::iter::FromIterator<T> for Dynamic<T> {
+impl<'a, T: 'a> std::iter::FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
     ///
     /// # Panics
@@ -957,6 +957,48 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
 
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
         self.buffer.cast::<T>().as_ptr()
+    }
+}
+
+impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic<T> {
+    /// TODO
+    ///
+    /// # Panics
+    /// TODO
+    ///
+    /// # Performance
+    /// TODO
+    ///
+    /// # Examples
+    /// TODO
+    fn insert(
+        &mut self,
+        index: usize,
+        element: Self::Element,
+    ) -> Result<&mut Self::Element, Self::Element> {
+        todo!("insert the element at index");
+    }
+
+    /// TODO
+    ///
+    /// # Performance
+    /// TODO
+    ///
+    /// # Examples
+    /// TODO
+    fn remove(&mut self, index: usize) -> Option<Self::Element> {
+        todo!("remove the element at index");
+    }
+
+    /// TODO
+    ///
+    /// # Performance
+    /// TODO
+    ///
+    /// # Examples
+    /// TODO
+    fn clear(&mut self) {
+        todo!("drop all elements");
     }
 }
 
@@ -2169,6 +2211,22 @@ mod test {
 
                 unsafe { actual.as_mut_ptr() };
             }
+        }
+    }
+
+    mod list {
+        use super::*;
+
+        mod insert {
+            use super::*;
+        }
+
+        mod remove {
+            use super::*;
+        }
+
+        mod clear {
+            use super::*;
         }
     }
 }
