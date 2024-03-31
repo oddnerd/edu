@@ -1437,6 +1437,102 @@ mod test {
     mod iterator {
         use super::*;
 
+        mod into {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let expected = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert_eq!(actual.into_iter().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let expected = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert!(actual.into_iter().eq(expected.into_iter()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let expected = [0,1,2,3,4,5];
+                    let actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(actual.into_iter().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let expected = [0,1,2,3,4,5];
+                    let actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0,1,2,3,4,5];
+                    let actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(actual.into_iter().size_hint(), (expected.len(), Some(expected.len())));
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0,1,2,3,4,5];
+                    let actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(actual.into_iter().len(), expected.len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let actual = Dynamic::<()>::default();
+                    let mut actual = actual.into_iter();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let actual = Dynamic::from_iter([()].iter());
+                    let mut actual = actual.into_iter();
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+
+        }
+
         mod from {
             use super::*;
 
