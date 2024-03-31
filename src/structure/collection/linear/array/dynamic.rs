@@ -1533,10 +1533,17 @@ mod test {
 
             #[test]
             fn does_not_offset_buffer() {
+                let actual = Dynamic::from_iter([0,1,2,3,4,5].iter().copied());
+
+                assert_eq!(actual.pre_capacity, 0);
+            }
+
+            #[test]
+            fn has_elements() {
                 let expected = [0,1,2,3,4,5];
                 let actual = Dynamic::from_iter(expected.iter().copied());
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.initialized, expected.len());
             }
 
             #[test]
