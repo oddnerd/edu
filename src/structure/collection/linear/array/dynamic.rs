@@ -902,6 +902,9 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     /// assert_eq!(actual, expected);
     /// ```
     unsafe fn as_ptr(&self) -> *const Self::Element {
+        // If no allocation then the pointer is dangling and meaningless.
+        assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
+
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
         self.buffer.cast::<T>().as_ptr().cast_const()
     }
@@ -936,6 +939,9 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     /// assert_eq!(actual, expected);
     /// ```
     unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+        // If no allocation then the pointer is dangling and meaningless.
+        assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
+
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
         self.buffer.cast::<T>().as_ptr()
     }
