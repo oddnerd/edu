@@ -1141,7 +1141,7 @@ mod test {
         }
 
         #[test]
-        fn zero_capacity() {
+        fn does_nothing_when_zero_capacity() {
             let mut actual = Dynamic::<usize>::with_capacity(0).expect("successful allocation");
 
             actual.reserve(0).expect("this should be a no-op");
@@ -1225,8 +1225,8 @@ mod test {
         }
 
         #[test]
-        fn zero_capacity() {
-            let mut actual = Dynamic::<usize>::default();
+        fn does_nothing_when_zero_capacity() {
+            let mut actual = Dynamic::<()>::default();
 
             actual.shrink(None).expect("this should be a no-op");
         }
