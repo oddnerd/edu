@@ -282,7 +282,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> {
+    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
         unsafe { super::Iter::new(self.ptr, self.count) }
     }
 
@@ -304,7 +304,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> {
+    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
         unsafe { super::IterMut::new(self.ptr, self.count) }
     }
 }

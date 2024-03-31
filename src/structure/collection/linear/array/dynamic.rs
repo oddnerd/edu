@@ -818,7 +818,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> {
+    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
         unsafe {
             // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
             let ptr = self.buffer.cast::<T>().as_ptr();
@@ -852,7 +852,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> {
+    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
         unsafe {
             // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
             let ptr = self.buffer.cast::<T>().as_ptr();
