@@ -1585,23 +1585,61 @@ mod test {
             use super::*;
 
             #[test]
-            fn allocates() {
-                todo!()
-            }
+            fn has_elements() {
+                let mut actual = Dynamic::default();
 
-            #[test]
-            fn reallocates() {
-                todo!()
+                let expected = [0,1,2,3,4,5];
+                actual.extend(expected.iter().copied());
+
+                assert_eq!(actual.initialized, expected.len());
             }
 
             #[test]
             fn initializes_elements() {
-                todo!()
+                let mut actual = Dynamic::default();
+
+                let expected = [0,1,2,3,4,5];
+                actual.extend(expected.iter().copied());
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
             }
 
             #[test]
-            fn initializes_state() {
-                todo!()
+            fn inserts_after_initialized_elements() {
+                let initialized = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(initialized.iter().copied());
+
+                let expected = [6,7,8,9,10];
+                actual.extend(expected.iter().copied());
+
+                for index in initialized.len()..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.extend([6,7,8,9,10]);
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn empty() {
+                let mut actual = Dynamic::<()>::default();
+
+                actual.extend(std::iter::empty());
+
+                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.initialized, 0);
+                assert_eq!(actual.post_capacity, 0);
             }
         }
     }
