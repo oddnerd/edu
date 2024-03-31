@@ -17,10 +17,10 @@ use super::Collection;
 /// other elements are connected to exactly two.
 pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
-    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element>;
+    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>;
 
     /// Iterate over the elements by mutable reference.
-    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element>;
+    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>;
 
     /// Obtain an immutable reference to the element at `index`, bounds checked.
     fn at(&self, index: usize) -> Option<&Self::Element> {

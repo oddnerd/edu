@@ -143,7 +143,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter(&self) -> impl std::iter::Iterator<Item = &'a Self::Element> {
+    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> {
         unsafe {
             // SAFETY: will never be written to.
             let ptr = self.data.as_ptr().cast_mut();
@@ -172,7 +172,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter_mut(&mut self) -> impl std::iter::Iterator<Item = &'a mut Self::Element> {
+    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> {
         unsafe {
             let ptr = self.data.as_mut_ptr();
 
