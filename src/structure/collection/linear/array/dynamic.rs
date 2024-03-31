@@ -631,7 +631,8 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
             max.unwrap_or(min)
         };
 
-        self.reserve(count).expect("successful allocation");
+        // It is okay if this fails, later allocate for each individual element.
+        let _ = self.reserve(count);
 
         while let Some(element) = iter.next() {
             if self.capacity() == 0 {
