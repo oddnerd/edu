@@ -1507,7 +1507,19 @@ mod test {
 
             #[test]
             fn exhausted() {
-                todo!()
+                let actual = Dynamic::from_iter([()].iter());
+                let mut actual = actual.iter();
+
+                // Exhaust the elements.
+                actual.next();
+
+                // Yields `None` at least once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
             }
         }
 
