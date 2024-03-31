@@ -1709,17 +1709,20 @@ mod test {
 
         #[test]
         fn symmetric() {
-            todo!()
+            // A == B <=> B == A
+            todo!("A == B <=> B == A")
         }
 
         #[test]
         fn transitive() {
-            todo!()
+            // A == B && B == C => A == C
+            todo!("A == B && B == C => A == C")
         }
 
         #[test]
         fn reflexive() {
-            todo!()
+            // A == A
+            todo!("A == A")
         }
     }
 
