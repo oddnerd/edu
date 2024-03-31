@@ -972,14 +972,14 @@ mod test {
         fn allocates_capacity() {
             const COUNT: usize = 256;
 
-            let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
             for index in 0..COUNT {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1059,10 +1059,10 @@ mod test {
 
             for index in 0..COUNT {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1076,10 +1076,10 @@ mod test {
 
             for index in 0..(COUNT * 2) {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1120,18 +1120,22 @@ mod test {
 
         #[test]
         fn does_not_initialize_elements() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            const COUNT: usize = 256;
 
-            actual.shrink(Some(128)).expect("successful reallocation");
+            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+            actual.shrink(Some(COUNT/2)).expect("successful reallocation");
 
             assert_eq!(actual.initialized, 0);
         }
 
         #[test]
         fn decreases_capacity() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            const COUNT: usize = 256;
 
-            actual.shrink(Some(128)).expect("successful reallocation");
+            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
+
+            actual.shrink(Some(COUNT/2)).expect("successful reallocation");
 
             assert_eq!(actual.post_capacity, 128);
         }
@@ -1146,10 +1150,10 @@ mod test {
 
             for index in 0..(COUNT/2) {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1159,7 +1163,7 @@ mod test {
             let expected = [0, 1, 2, 3, 4, 5];
 
             let mut actual: Dynamic<usize> = expected.iter().copied().collect();
-            actual.reserve(expected.len() * 16).expect("successful allocation");
+            actual.reserve(expected.len() * 2).expect("successful allocation");
 
             actual.shrink(None).expect("successful reallocation");
 
@@ -1172,7 +1176,7 @@ mod test {
         fn does_not_increase_capacity() {
             let mut actual: Dynamic<usize> = [0,1,2,3,4,5].into_iter().collect();
 
-            actual.shrink(Some(256)).expect("already small enough");
+            actual.shrink(Some(actual.len() * 2)).expect("already small enough");
 
             assert!(actual.post_capacity < 256);
         }
@@ -1199,52 +1203,62 @@ mod test {
 
         #[test]
         fn increases_capacity() {
+            const COUNT: usize = 77;
+
             let mut actual = Dynamic::<usize>::default();
 
-            actual.resize(77).expect("successful allocation");
+            actual.resize(COUNT).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, 77);
+            assert_eq!(actual.post_capacity, COUNT);
         }
 
         #[test]
         fn increases_capacity_for_zero_size_types() {
+            const COUNT: usize = 77;
+
             let mut actual = Dynamic::<()>::default();
 
-            actual.resize(77).expect("successful allocation");
+            actual.resize(COUNT).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, 77);
+            assert_eq!(actual.post_capacity, COUNT);
         }
 
         #[test]
         fn decreases_capacity() {
-            let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            const COUNT: usize = 256;
 
-            actual.resize(77).expect("successful allocation");
+            let mut actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, 77);
+            actual.resize(COUNT/2).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, COUNT/2);
         }
 
         #[test]
         fn decreases_capacity_for_zero_size_types() {
-            let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+            const COUNT: usize = 256;
 
-            actual.resize(77).expect("successful allocation");
+            let mut actual = Dynamic::<()>::with_capacity(COUNT/2).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, 77);
+            actual.resize(COUNT/2).expect("successful allocation");
+
+            assert_eq!(actual.post_capacity, COUNT/2);
         }
 
         #[test]
         fn allocates_capacity() {
+            const COUNT: usize = 256;
+
             let mut actual = Dynamic::<usize>::default();
 
-            actual.resize(256).expect("successful reallocation");
+            actual.resize(COUNT).expect("successful reallocation");
 
-            for index in 0..(256) {
+            for index in 0..COUNT {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1259,10 +1273,10 @@ mod test {
 
             for index in 0..(COUNT/2) {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1341,14 +1355,14 @@ mod test {
         fn allocates() {
             let expected = [0,1,2,3,4,5];
 
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+            let mut actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
 
             for index in 0..expected.len() {
                 unsafe {
-                    let ptr = actual.buffer.as_ptr().add(index);
+                    let ptr = actual.as_mut_ptr().add(index);
 
                     // Ideally, this will seg-fault if we don't own the memory.
-                    (*ptr).write(index);
+                    ptr.write(index);
                 }
             }
         }
@@ -1519,16 +1533,15 @@ mod test {
 
             #[test]
             fn allocates() {
-                const COUNT: usize = 256;
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-
-                for index in 0..COUNT {
+                for index in 0..expected.len() {
                     unsafe {
-                        let ptr = actual.buffer.as_ptr().add(index);
+                        let ptr = actual.as_mut_ptr().add(index);
 
                         // Ideally, this will seg-fault if we don't own the memory.
-                        (*ptr).write(index);
+                        ptr.write(index);
                     }
                 }
             }
