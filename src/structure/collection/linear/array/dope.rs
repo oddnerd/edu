@@ -282,7 +282,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
+    fn iter(
+        &self,
+    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
+           + std::iter::ExactSizeIterator
+           + std::iter::FusedIterator {
         unsafe { super::Iter::new(self.ptr, self.count) }
     }
 
@@ -304,7 +308,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
+    fn iter_mut(
+        &mut self,
+    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
+           + std::iter::ExactSizeIterator
+           + std::iter::FusedIterator {
         unsafe { super::IterMut::new(self.ptr, self.count) }
     }
 }
@@ -360,248 +368,536 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
 mod test {
     use super::*;
 
-    #[test]
-    fn new_initializes_member_variables() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+    mod method {
+        use super::*;
 
-        assert_eq!(instance.ptr.as_ptr(), underlying.as_ptr().cast_mut());
-        assert_eq!(instance.count, underlying.len());
-    }
+        mod new {
+            use super::*;
 
-    #[test]
-    fn from_slice_initializes_member_variables() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let pointer = underlying.as_mut_ptr();
+            #[test]
+            fn correct_size() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = {
+                    let ptr = expected.as_ptr().cast_mut();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    unsafe { Dope::new(ptr, expected.len()) }
+                };
 
-        let instance = Dope::from(underlying.as_mut_slice());
+                assert_eq!(actual.count, expected.len());
+            }
 
-        assert_eq!(instance.ptr.as_ptr(), pointer);
-        assert_eq!(instance.count, underlying.len());
-    }
+            #[test]
+            fn correct_pointer() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = {
+                    let ptr = expected.as_ptr().cast_mut();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    unsafe { Dope::new(ptr, expected.len()) }
+                };
 
-    #[test]
-    fn index_yields_correct_element() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        for (index, value) in underlying.iter().enumerate() {
-            use std::ops::Index;
-            assert_eq!(instance.index(index), value);
+                assert_eq!(actual.ptr.as_ptr(), expected.as_ptr().cast_mut());
+            }
         }
     }
 
-    #[test]
-    #[should_panic]
-    fn index_panics_when_out_of_bounds() {
-        let mut underlying: [(); 0] = [];
-        let instance = Dope::from(underlying.as_mut_slice());
+    mod from {
+        use super::*;
 
+        mod primitive_slice {
+            use super::*;
+
+            #[test]
+            fn correct_size() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(actual.count, expected.len());
+            }
+
+            #[test]
+            fn correct_pointer() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+            }
+        }
+    }
+
+    mod index {
+        use super::*;
         use std::ops::Index;
-        instance.index(0);
-    }
 
-    #[test]
-    fn index_mut_yields_correct_element() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let mut instance = {
-            let ptr = underlying.as_mut_ptr();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        #[test]
+        fn correct_element() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            let actual = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
 
-        for (index, value) in underlying.iter_mut().enumerate() {
-            use std::ops::IndexMut;
-            assert_eq!(instance.index_mut(index), value);
+            for (index, expected) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), expected);
+            }
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_when_out_of_bounds() {
+            let mut underlying: [(); 0] = [];
+            let instance = Dope::from(underlying.as_mut_slice());
+
+            instance.index(0);
         }
     }
 
-    #[test]
-    #[should_panic]
-    fn index_mut_panics_when_out_of_bounds() {
-        let mut underlying: [(); 0] = [];
-        let mut instance = Dope::from(underlying.as_mut_slice());
-
+    mod index_mut {
+        use super::*;
         use std::ops::IndexMut;
-        instance.index_mut(0);
+
+        #[test]
+        fn correct_element() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+            let mut actual = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            for (index, expected) in expected.iter_mut().enumerate() {
+                assert_eq!(actual.index_mut(index), expected);
+            }
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_when_out_of_bounds() {
+            let mut underlying: [(); 0] = [];
+            let mut instance = Dope::from(underlying.as_mut_slice());
+
+            instance.index_mut(0);
+        }
     }
 
-    #[test]
-    fn eq_for_same_underlying() {
-        let underlying = [0, 1, 2, 3, 4, 5];
+    mod clone {
+        use super::*;
 
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        #[test]
+        fn has_elements() {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let expected = Dope::from(underlying.as_mut_slice());
 
-        let other = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+            let actual = expected.clone();
 
-        assert_eq!(instance, other);
+            assert_eq!(actual.count, expected.count);
+        }
+
+        #[test]
+        fn is_equivalent() {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let expected = Dope::from(underlying.as_mut_slice());
+
+            let actual = expected.clone();
+
+            assert_eq!(actual, expected);
+        }
     }
 
-    #[test]
-    fn eq_for_same_elements() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+    mod equality {
+        use super::*;
 
-        let underlying = underlying.clone();
-        let other = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        #[test]
+        fn eq_when_same_elements() {
+            let expected = [0, 1, 2, 3, 4, 5];
 
-        assert_eq!(instance, other);
+            let first = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            let second = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            assert_eq!(first, second);
+        }
+
+        #[test]
+        fn ne_when_different_elements() {
+            let underlying = [1];
+            let first = {
+                let ptr = underlying.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, underlying.len()) }
+            };
+
+            let underlying = [0];
+            let second = {
+                let ptr = underlying.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, underlying.len()) }
+            };
+
+            assert_ne!(first, second);
+        }
+
+        #[test]
+        fn is_symmetric() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let first = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            let second = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            // `first == second` <=> `second == first`
+            assert_eq!(first, second);
+            assert_eq!(second, first);
+        }
+
+        #[test]
+        fn is_transitive() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let first = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            let second = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            let third = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            // `first == second && second == third` => `first == third`
+            assert_eq!(first, second);
+            assert_eq!(second, third);
+            assert_eq!(third, first);
+        }
+
+        #[test]
+        fn is_reflexive() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let actual = {
+                let ptr = expected.as_ptr().cast_mut();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            assert_eq!(actual, actual);
+        }
     }
 
-    #[test]
-    fn eq_is_symmetric() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+    mod collection {
+        use super::*;
 
-        let underlying = underlying.clone();
-        let other = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        mod count {
+            use super::*;
 
-        assert_eq!(instance, other);
-        assert_eq!(other, instance);
+            #[test]
+            fn initialized_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = {
+                    let ptr = expected.as_ptr().cast_mut();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    unsafe { Dope::new(ptr, expected.len()) }
+                };
+
+                assert_eq!(actual.count, expected.len());
+                assert_eq!(Collection::count(&actual), expected.len());
+            }
+
+            #[test]
+            fn zero_when_empty() {
+                let mut expected: [(); 0] = [];
+                let actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(Collection::count(&actual), 0);
+            }
+        }
     }
 
-    #[test]
-    fn eq_is_transitive() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+    mod linear {
+        use super::*;
 
-        let underlying = underlying.clone();
-        let other = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+        mod iter {
+            use super::*;
 
-        let underlying = underlying.clone();
-        let another = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+            #[test]
+            fn element_count() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dope::from(expected.as_mut_slice());
 
-        assert_eq!(instance, other);
-        assert_eq!(instance, another);
-        assert_eq!(other, another);
+                assert_eq!(actual.iter().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = {
+                    let ptr = expected.as_ptr().cast_mut();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    unsafe { Dope::new(ptr, expected.len()) }
+                };
+
+                assert!(actual.iter().eq(expected.iter()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Dope::from(expected.as_mut_slice());
+
+                    assert_eq!(actual.iter().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = {
+                        let ptr = expected.as_ptr().cast_mut();
+                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        unsafe { Dope::new(ptr, expected.len()) }
+                    };
+
+                    assert!(actual.iter().rev().eq(expected.iter().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = {
+                        let ptr = expected.as_ptr().cast_mut();
+                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        unsafe { Dope::new(ptr, expected.len()) }
+                    };
+
+                    assert_eq!(
+                        actual.iter().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = {
+                        let ptr = expected.as_ptr().cast_mut();
+                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        unsafe { Dope::new(ptr, expected.len()) }
+                    };
+
+                    assert_eq!(actual.iter().len(), expected.len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Dope::from(expected.as_mut_slice());
+                    let mut actual = actual.iter();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Dope::from(expected.as_mut_slice());
+                    let mut actual = actual.iter();
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+
+        mod iter_mut {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(actual.iter_mut().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = {
+                    let ptr = expected.as_ptr().cast_mut();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    unsafe { Dope::new(ptr, expected.len()) }
+                };
+
+                assert!(actual.iter_mut().eq(expected.iter_mut()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Dope::from(expected.as_mut_slice());
+
+                    assert_eq!(actual.iter_mut().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = {
+                        let ptr = expected.as_ptr().cast_mut();
+                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        unsafe { Dope::new(ptr, expected.len()) }
+                    };
+
+                    assert!(actual.iter_mut().rev().eq(expected.iter_mut().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = {
+                        let ptr = expected.as_ptr().cast_mut();
+                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        unsafe { Dope::new(ptr, expected.len()) }
+                    };
+
+                    assert_eq!(
+                        actual.iter_mut().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = {
+                        let ptr = expected.as_ptr().cast_mut();
+                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        unsafe { Dope::new(ptr, expected.len()) }
+                    };
+
+                    assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Dope::from(expected.as_mut_slice());
+                    let mut actual = actual.iter_mut();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Dope::from(expected.as_mut_slice());
+                    let mut actual = actual.iter_mut();
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
     }
 
-    #[test]
-    fn eq_is_reflexive() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
+    mod array {
+        use super::*;
 
-        assert_eq!(instance, instance);
+        mod as_ptr {
+            use super::*;
+
+            #[test]
+            fn correct_address() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(unsafe { actual.as_ptr() }, expected.as_ptr());
+            }
+        }
+
+        mod as_mut_ptr {
+            use super::*;
+
+            #[test]
+            fn correct_address() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(unsafe { actual.as_mut_ptr() }, expected.as_mut_ptr());
+            }
+        }
     }
-
-    #[test]
-    fn ne_for_different_count() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len()) }
-        };
-
-        let other = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = std::ptr::NonNull::new(ptr).unwrap();
-            unsafe { Dope::new(ptr, underlying.len() - 1) }
-        };
-
-        assert_ne!(instance, other);
-    }
-
-    #[test]
-    fn ne_for_different_elements() {
-        let mut underlying = [0];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        let mut underlying = [1];
-        let other = Dope::from(underlying.as_mut_slice());
-
-        assert_ne!(instance, other);
-    }
-
-    #[test]
-    fn clone_is_eq() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let original = Dope::from(underlying.as_mut_slice());
-
-        let clone = original.clone();
-
-        assert_eq!(clone, original);
-    }
-
-    #[test]
-    fn count_for_normal_types_is_exact_element_count() {
-        let mut underlying = [0, 1, 2, 3, 4, 5];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(instance.count(), underlying.len());
-    }
-
-    #[test]
-    fn count_for_zero_size_types_is_constructed_count() {
-        let mut underlying = [(), (), (), (), (), ()];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(instance.count(), underlying.len());
-    }
-
-    #[test]
-    fn as_ptr_points_to_underlying() {
-        let mut underlying: [(); 0] = [];
-        let instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(unsafe { instance.as_ptr() }, underlying.as_ptr());
-    }
-
-    #[test]
-    fn as_mut_ptr_points_to_underlying() {
-        let mut underlying: [(); 0] = [];
-        let mut instance = Dope::from(underlying.as_mut_slice());
-
-        assert_eq!(unsafe { instance.as_mut_ptr() }, underlying.as_mut_ptr());
-    }
-
 }
