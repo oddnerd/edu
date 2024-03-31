@@ -261,7 +261,7 @@ impl<T> Dynamic<T> {
                         // SAFETY: empty state => pointer will not read/write.
                         std::ptr::NonNull::<T>::dangling().as_ptr()
                     }
-                    // Reallocation.
+                    // Reallocate.
                     else {
                         // SAFETY:
                         // * `ptr` was allocated using the corresponding allocator.
@@ -1230,6 +1230,11 @@ mod test {
 
             actual.shrink(None).expect("this should be a no-op");
         }
+
+        #[test]
+        fn deallocates_when_empty() {
+            todo!()
+        }
     }
 
     mod resize {
@@ -1349,6 +1354,11 @@ mod test {
             let mut actual = Dynamic::<usize>::default();
 
             actual.resize(0).expect("this should be a no-op");
+        }
+
+        #[test]
+        fn deallocates_when_empty() {
+            todo!()
         }
     }
 
