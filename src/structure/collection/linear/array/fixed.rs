@@ -143,7 +143,11 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
+    fn iter(
+        &self,
+    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
+           + std::iter::ExactSizeIterator
+           + std::iter::FusedIterator {
         unsafe {
             // SAFETY: will never be written to.
             let ptr = self.data.as_ptr().cast_mut();
@@ -172,7 +176,11 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ///     assert_eq!(actual, expected);
     /// }
     /// ```
-    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator {
+    fn iter_mut(
+        &mut self,
+    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
+           + std::iter::ExactSizeIterator
+           + std::iter::FusedIterator {
         unsafe {
             let ptr = self.data.as_mut_ptr();
 
@@ -351,7 +359,9 @@ impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N
                 let element = unsafe { array.add(index) };
 
                 // SAFETY: within bounds => pointing to initialized value.
-                Some(std::mem::ManuallyDrop::into_inner(unsafe { element.read() }))
+                Some(std::mem::ManuallyDrop::into_inner(unsafe {
+                    element.read()
+                }))
             }
             None => None,
         }
@@ -435,141 +445,511 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
 mod test {
     use super::*;
 
-    #[test]
-    fn from_array_initializes_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
+    mod from {
+        use super::*;
 
-        assert_eq!(instance.data, primitive);
-    }
+        mod primitive_array {
+            use super::*;
 
-    #[test]
-    fn count_is_element_count() {
-        let instance = Fixed::from([(), (), (), (), (), ()]);
+            #[test]
+            fn initializes_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
 
-        assert_eq!(instance.count(), instance.data.len());
-    }
-
-    #[test]
-    fn index_yields_correct_element() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        for (index, value) in primitive.iter().enumerate() {
-            use std::ops::Index;
-            assert_eq!(instance.index(index), value);
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn index_panics_when_out_of_bounds() {
-        let instance = Fixed::<(), 0>::default();
-
-        use std::ops::Index;
-        instance.index(0);
-    }
-
-    #[test]
-    fn index_mut_yields_correct_element() {
-        let mut primitive = [0, 1, 2, 3, 4, 5];
-        let mut instance = Fixed::from(primitive);
-
-        for (index, value) in primitive.iter_mut().enumerate() {
-            use std::ops::IndexMut;
-            assert_eq!(instance.index_mut(index), value);
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn index_mut_panics_when_out_of_bounds() {
-        let mut instance = Fixed::<(), 0>::default();
-
-        use std::ops::IndexMut;
-        instance.index_mut(0);
-    }
-
-    #[test]
-    fn as_ptr_is_valid_to_read_all_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive.clone());
-
-        let slice = unsafe { std::slice::from_raw_parts(instance.as_ptr(), instance.count()) };
-
-        assert_eq!(slice, primitive.as_slice());
-    }
-
-    #[test]
-    fn as_mut_ptr_is_valid_to_write_all_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let mut instance = Fixed::from(primitive.clone());
-
-        let slice =
-            unsafe { std::slice::from_raw_parts_mut(instance.as_mut_ptr(), instance.count()) };
-
-        for (expected, actual) in slice.iter_mut().zip(primitive) {
-            assert_eq!(*expected, actual);
-
-            *expected = 0;
-        }
-    }
-
-    #[test]
-    fn eq_for_same_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-        let other = Fixed::from(primitive);
-
-        assert_eq!(instance, other);
-    }
-
-    #[test]
-    fn ne_for_different_elements() {
-        let instance = Fixed::from([0]);
-        let other = Fixed::from([1]);
-
-        assert_ne!(instance, other);
-    }
-
-    #[test]
-    fn into_iter_yields_element_count() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert_eq!(instance.into_iter().count(), primitive.len());
-    }
-
-    #[test]
-    fn into_iter_yields_elements() {
-        let primitive = [0, 1, 2, 3, 4, 5];
-        let instance = Fixed::from(primitive);
-
-        assert!(instance.into_iter().eq(primitive.into_iter()));
-    }
-
-    #[test]
-    fn default_makes_all_elements_default() {
-        struct Value(i32);
-
-        impl std::default::Default for Value {
-            fn default() -> Self {
-                Value(12345)
+                assert_eq!(actual.data, expected);
             }
         }
 
-        let instance: Fixed<Value, 256> = Default::default();
+    }
 
-        for value in instance {
-            assert_eq!(value.0, Value::default().0);
+    mod index {
+        use super::*;
+        use std::ops::Index;
+
+        #[test]
+        fn correct_element() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            let actual = Fixed::from(expected.clone());
+
+            for (index, expected) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), expected);
+            }
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_when_out_of_bounds() {
+            let instance = Fixed::<(), 0>::default();
+
+            instance.index(0);
         }
     }
 
-    #[test]
-    fn clone_is_eq() {
-        let original = Fixed::from([0, 1, 2, 3, 4, 5]);
-        let clone = original.clone();
+    mod index_mut {
+        use super::*;
+        use std::ops::IndexMut;
 
-        assert_eq!(clone, original);
+        #[test]
+        fn correct_element() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+            let mut actual = Fixed::from(expected.clone());
+
+            for (index, expected) in expected.iter_mut().enumerate() {
+                assert_eq!(actual.index_mut(index), expected);
+            }
+        }
+
+        #[test]
+        #[should_panic]
+        fn panics_when_out_of_bounds() {
+            let mut instance = Fixed::<(), 0>::default();
+
+            instance.index_mut(0);
+        }
+    }
+
+    mod iterator {
+        use super::*;
+
+        mod into {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert_eq!(actual.into_iter().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert!(actual.into_iter().eq(expected.into_iter()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert_eq!(actual.into_iter().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert_eq!(
+                        actual.into_iter().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert_eq!(actual.into_iter().len(), expected.len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let actual = Fixed::<(), 0>::default();
+                    let mut actual = actual.into_iter();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let actual = Fixed::from([()]);
+                    let mut actual = actual.into_iter();
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+    }
+
+    mod default {
+        use super::*;
+
+        #[derive(Debug, PartialEq, Eq)]
+        struct Value {
+            underlying: usize,
+        }
+
+        impl Default for Value {
+            fn default() -> Self {
+                Value {
+                    underlying: 31415926,
+                }
+            }
+        }
+
+        #[test]
+        fn initializes_elements() {
+            let actual = Fixed::<usize, 256>::default();
+
+            for element in actual {
+                assert_eq!(element, Default::default());
+            }
+        }
+    }
+
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn is_equivalent() {
+            let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            assert_eq!(actual, expected);
+        }
+    }
+
+    mod equality {
+        use super::*;
+
+        #[test]
+        fn eq_when_same_elements() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let first = Fixed::from(expected.clone());
+            let second = Fixed::from(expected.clone());
+
+            assert_eq!(first, second);
+        }
+
+        #[test]
+        fn ne_when_different_elements() {
+            let first = Fixed::from([0]);
+            let second = Fixed::from([1]);
+
+            assert_ne!(first, second);
+        }
+
+        #[test]
+        fn is_symmetric() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let first = Fixed::from(expected.clone());
+            let second = Fixed::from(expected.clone());
+
+            // `first == second` <=> `second == first`
+            assert_eq!(first, second);
+            assert_eq!(second, first);
+        }
+
+        #[test]
+        fn is_transitive() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let first = Fixed::from(expected.clone());
+            let second = Fixed::from(expected.clone());
+            let third = Fixed::from(expected.clone());
+
+            // `first == second && second == third` => `first == third`
+            assert_eq!(first, second);
+            assert_eq!(second, third);
+            assert_eq!(third, first);
+        }
+
+        #[test]
+        fn is_reflexive() {
+            let actual = Fixed::<(), 0>::default();
+
+            assert_eq!(actual, actual);
+        }
+    }
+
+    mod collection {
+        use super::*;
+
+        mod count {
+            use super::*;
+
+            #[test]
+            fn initialized_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert_eq!(Collection::count(&actual), expected.len());
+            }
+
+            #[test]
+            fn zero_when_empty() {
+                let actual = Fixed::<(), 0>::default();
+
+                assert_eq!(Collection::count(&actual), 0);
+            }
+        }
+    }
+
+    mod linear {
+        use super::*;
+
+        mod iter {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert_eq!(actual.iter().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert!(actual.iter().eq(expected.iter()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert_eq!(actual.iter().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert!(actual.iter().rev().eq(expected.iter().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert_eq!(
+                        actual.iter().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected.clone());
+
+                    assert_eq!(actual.iter().len(), expected.len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let actual = Fixed::<(), 0>::default();
+                    let mut actual = actual.iter();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let actual = Fixed::from([()]);
+                    let mut actual = actual.iter();
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+
+        mod iter_mut {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Fixed::from(expected.clone());
+
+                assert_eq!(actual.iter_mut().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Fixed::from(expected.clone());
+
+                assert!(actual.iter_mut().eq(expected.iter_mut()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Fixed::from(expected.clone());
+
+                    assert_eq!(actual.iter_mut().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Fixed::from(expected.clone());
+
+                    assert!(actual.iter_mut().rev().eq(expected.iter_mut().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Fixed::from(expected.clone());
+
+                    assert_eq!(
+                        actual.iter_mut().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Fixed::from(expected.clone());
+
+                    assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let mut actual = Fixed::<(), 0>::default();
+                    let mut actual = actual.iter_mut();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let mut actual = Fixed::from([()]);
+                    let mut actual = actual.iter_mut();
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+    }
+
+    mod array {
+        use super::*;
+
+        mod as_ptr {
+            use super::*;
+
+            #[test]
+            fn correct_address() {
+                let actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+                assert_eq!(unsafe { actual.as_ptr() }, actual.data.as_ptr());
+            }
+        }
+
+        mod as_mut_ptr {
+            use super::*;
+
+            #[test]
+            fn correct_address() {
+                let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+                assert_eq!(unsafe { actual.as_mut_ptr() }, actual.data.as_mut_ptr());
+            }
+        }
     }
 }
