@@ -1461,7 +1461,10 @@ mod test {
 
             #[test]
             fn is_back_element() {
-                todo!()
+                let expected = [0,1,2,3,4,5];
+                let actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert!(actual.iter().rev().eq(expected.iter().rev()));
             }
         }
 
