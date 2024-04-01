@@ -2223,7 +2223,7 @@ mod test {
 
             #[test]
             fn adds_element() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 actual.insert(2, 256).expect("successful allocation");
@@ -2233,7 +2233,7 @@ mod test {
 
             #[test]
             fn initializes_element() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 actual.insert(2, 256).expect("successful allocation");
@@ -2243,7 +2243,7 @@ mod test {
 
             #[test]
             fn yields_inserted_element() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 let actual = actual.insert(2, 256).expect("successful allocation");
@@ -2253,7 +2253,7 @@ mod test {
 
             #[test]
             fn does_not_modify_leading_elements() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 const INDEX: usize = 2;
@@ -2266,7 +2266,7 @@ mod test {
 
             #[test]
             fn does_not_modify_trailing_elements() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 const INDEX: usize = 2;
@@ -2279,7 +2279,7 @@ mod test {
 
             #[test]
             fn appends_to_end() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 actual.insert(6, 256).expect("successful allocation");
@@ -2298,7 +2298,7 @@ mod test {
 
             #[test]
             fn errors_when_index_out_of_bounds() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                 const VALUE: usize = 256;
@@ -2312,6 +2312,60 @@ mod test {
         mod remove {
             use super::*;
 
+            #[test]
+            fn subtracts_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.remove(0);
+
+                assert_eq!(actual.initialized, expected.len() - 1);
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5, 256];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                let actual = actual.remove(6);
+
+                assert_eq!(actual.unwrap(), 256);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                const INDEX: usize = 2;
+                actual.remove(INDEX);
+
+                for index in 0..INDEX {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                const INDEX: usize = 2;
+                actual.remove(INDEX);
+
+                for index in 0..INDEX {
+                    assert_eq!(actual[index], expected[index + 1]);
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let mut actual = Dynamic::<()>::default();
+
+                let actual = actual.remove(0);
+
+                assert!(actual.is_none());
+            }
         }
 
         mod clear {
