@@ -999,30 +999,27 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
             ptr = unsafe { ptr.add(self.pre_capacity - 1) };
 
             self.pre_capacity -= 1;
-        } else {
-            if self.reserve(1).is_ok() {
-                ptr = self.buffer.as_ptr();
+        } else if self.reserve(1).is_ok() {
+            ptr = self.buffer.as_ptr();
 
-                // Shift elements `[index..]` one position to the right.
-                unsafe {
+            // Shift elements `[index..]` one position to the right.
+            unsafe {
+                // SAFETY: aligned within the allocated object.
+                ptr = ptr.add(self.pre_capacity + index);
 
-                    // SAFETY: aligned within the allocated object.
-                    ptr = ptr.add(self.pre_capacity + index);
+                // SAFETY: reserved memory => within the allocated object.
+                let destination = ptr.add(1);
 
-                    // SAFETY: reserved memory => within the allocated object.
-                    let destination = ptr.add(1);
-
-                    // SAFETY:
-                    // * owned memory => source/destination valid for read/writes.
-                    // * no aliasing restrictions => source and destination can overlap.
-                    // * underlying buffer is aligned => both pointers are aligned.
-                    std::ptr::copy(ptr, destination, self.initialized - index);
-                }
-
-                self.post_capacity -= 1;
-            } else {
-                return Err(element);
+                // SAFETY:
+                // * owned memory => source/destination valid for read/writes.
+                // * no aliasing restrictions => source and destination can overlap.
+                // * underlying buffer is aligned => both pointers are aligned.
+                std::ptr::copy(ptr, destination, self.initialized - index);
             }
+
+            self.post_capacity -= 1;
+        } else {
+            return Err(element);
         }
 
         self.initialized += 1;
