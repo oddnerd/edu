@@ -961,13 +961,13 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
 }
 
 impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic<T> {
-    /// TODO
+    /// Insert an `element` at `index`.
     ///
     /// # Panics
-    /// TODO
+    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
     ///
     /// # Performance
-    /// TODO
+    /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// # Examples
     /// TODO
@@ -977,7 +977,16 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
         element: Self::Element,
     ) -> Result<&mut Self::Element, Self::Element> {
         if index > self.initialized {
-            Err(element)
+            return Err(element);
+        }
+
+        let mut ptr = self.buffer.as_ptr();
+
+        if index == 0 && self.pre_capacity == 0 {
+            // SAFETY: aligned within the allocated object.
+            ptr = unsafe { ptr.add(self.pre_capacity - 1) };
+
+            self.pre_capacity -= 1;
         } else {
             if self.reserve(1).is_ok() {
                 // Shift elements `[index..]` one position to the right.
@@ -998,22 +1007,20 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
                     std::ptr::copy(source, destination, self.initialized);
                 }
 
-                // Initialize the new element.
-                unsafe {
-                    let ptr = self.buffer.as_ptr();
+                // SAFETY: aligned within the allocated object.
+                ptr = unsafe { ptr.add(self.pre_capacity + self.initialized) };
 
-                    // SAFETY: aligned within the allocated object.
-                    let ptr = ptr.add(self.pre_capacity + self.initialized);
-
-                    self.initialized += 1;
-                    self.post_capacity -= 1;
-
-                    Ok((*ptr).write(element))
-                }
+                self.post_capacity -= 1;
             } else {
-                Err(element)
+                return Err(element);
             }
         }
+
+        self.initialized += 1;
+
+        // SAFETY: the `MaybeUninit<T>` is initialized, even though the
+        // underlying `T` is unutilized.
+        Ok(unsafe { ptr.as_mut().unwrap_unchecked().write(element) })
     }
 
     /// TODO
