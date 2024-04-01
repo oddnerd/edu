@@ -1001,8 +1001,11 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
             self.pre_capacity -= 1;
         } else {
             if self.reserve(1).is_ok() {
+                ptr = self.buffer.as_ptr();
+
                 // Shift elements `[index..]` one position to the right.
                 unsafe {
+
                     // SAFETY: aligned within the allocated object.
                     ptr = ptr.add(self.pre_capacity + index);
 
