@@ -121,7 +121,7 @@ impl<T> Dynamic<T> {
             None => return Err(()),
         };
 
-        self.resize(size)
+        self.resize(size - self.initialized)
     }
 
     /// Attempt to reduce the capacity to exactly `capacity`, or none/zero.
