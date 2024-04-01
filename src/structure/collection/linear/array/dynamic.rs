@@ -1013,7 +1013,7 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
                     // * owned memory => source/destination valid for read/writes.
                     // * no aliasing restrictions => source and destination can overlap.
                     // * underlying buffer is aligned => both pointers are aligned.
-                    std::ptr::copy(ptr, destination, self.initialized);
+                    std::ptr::copy(ptr, destination, self.initialized - index);
                 }
 
                 self.post_capacity -= 1;
