@@ -970,7 +970,19 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
     /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::<usize>::default();
+    ///
+    /// instance.insert(0, 1);
+    /// instance.insert(1, 3);
+    /// instance.insert(1, 2);
+    /// instance.insert(0, 0);
+    ///
+    /// assert!(instance.into_iter().eq([0, 1, 2, 3]));
+    /// ```
     fn insert(
         &mut self,
         index: usize,
