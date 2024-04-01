@@ -2216,13 +2216,102 @@ mod test {
 
     mod list {
         use super::*;
+        use crate::structure::collection::linear::list::List;
 
         mod insert {
             use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.insert(2, 256).expect("successful allocation");
+
+                assert_eq!(actual.initialized, expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.insert(2, 256).expect("successful allocation");
+
+                assert_eq!(actual[2], 256);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                let actual = actual.insert(2, 256).expect("successful allocation");
+
+                assert_eq!(actual, &mut 256);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                const INDEX: usize = 2;
+                actual.insert(INDEX, 256).expect("successful allocation");
+
+                for index in 0..INDEX {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                const INDEX: usize = 2;
+                actual.insert(INDEX, 256).expect("successful allocation");
+
+                for index in INDEX..expected.len() {
+                    assert_eq!(actual[index + 1], expected[index]);
+                }
+            }
+
+            #[test]
+            fn appends_to_end() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.insert(6, 256).expect("successful allocation");
+
+                assert_eq!(actual[6], 256);
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Dynamic::<()>::default();
+
+                actual.insert(0, ()).expect("successful allocation");
+
+                assert_eq!(actual[0], ());
+            }
+
+            #[test]
+            fn errors_when_index_out_of_bounds() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                const VALUE: usize = 256;
+                let actual = actual.insert(7, VALUE);
+
+                assert!(actual.is_err());
+                assert_eq!(actual.unwrap_err(), VALUE);
+            }
         }
 
         mod remove {
             use super::*;
+
         }
 
         mod clear {
