@@ -976,7 +976,44 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
         index: usize,
         element: Self::Element,
     ) -> Result<&mut Self::Element, Self::Element> {
-        todo!("insert the element at index");
+        if index > self.initialized {
+            Err(element)
+        } else {
+            if self.reserve(1).is_ok() {
+                // Shift elements `[index..]` one position to the right.
+                unsafe {
+                    // SAFETY: `MaybeUninit<T>` has same layout as `T`.
+                    let destination = self.buffer.as_ptr().cast::<T>();
+
+                    // SAFETY: aligned within the allocated object.
+                    let source = destination.add(self.initialized);
+
+                    // SAFETY: reserved memory => within the allocated object.
+                    let destination = source.add(1);
+
+                    // SAFETY:
+                    // * owned memory => source/destination valid for read/writes.
+                    // * no aliasing restrictions => source and destination can overlap.
+                    // * underlying buffer is aligned => both pointers are aligned.
+                    std::ptr::copy(source, destination, self.initialized);
+                }
+
+                // Initialize the new element.
+                unsafe {
+                    let ptr = self.buffer.as_ptr();
+
+                    // SAFETY: aligned within the allocated object.
+                    let ptr = ptr.add(self.pre_capacity + self.initialized);
+
+                    self.initialized += 1;
+                    self.post_capacity -= 1;
+
+                    Ok((*ptr).write(element))
+                }
+            } else {
+                Err(element)
+            }
+        }
     }
 
     /// TODO
