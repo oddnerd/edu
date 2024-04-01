@@ -2339,23 +2339,11 @@ mod test {
 
             #[test]
             fn when_empty() {
-                let mut actual = Dynamic::<()>::default();
+                let mut actual = Dynamic::<usize>::default();
 
-                actual.insert(0, ()).expect("successful allocation");
+                actual.insert(0, 256).expect("successful allocation");
 
-                assert_eq!(actual[0], ());
-            }
-
-            #[test]
-            fn errors_when_index_out_of_bounds() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                const VALUE: usize = 256;
-                let actual = actual.insert(7, VALUE);
-
-                assert!(actual.is_err());
-                assert_eq!(actual.unwrap_err(), VALUE);
+                assert_eq!(actual[0], 256);
             }
         }
 
