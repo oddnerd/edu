@@ -2370,6 +2370,16 @@ mod test {
 
         mod clear {
             use super::*;
+
+            #[test]
+            fn uninitialized_all_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.clear();
+
+                assert_eq!(actual.initialized, 0);
+            }
         }
     }
 }
