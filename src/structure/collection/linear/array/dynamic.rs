@@ -1080,6 +1080,12 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
         }
 
         self.initialized -= 1;
+
+        if self.initialized == 0 {
+            self.post_capacity += self.pre_capacity;
+            self.pre_capacity = 0;
+        }
+
         Some(element)
     }
 
