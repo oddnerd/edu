@@ -1076,7 +1076,17 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(source, destination, self.initialized - self.pre_capacity - index);
+            std::ptr::copy(
+                source,
+                destination,
+                self.initialized - self.pre_capacity - index,
+            );
+        }
+
+        if index == 0 {
+            self.pre_capacity += 1;
+        } else {
+            self.post_capacity += 1;
         }
 
         self.initialized -= 1;
@@ -1111,7 +1121,7 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
         // SAFETY: initialized elements are after pre-capacity, so this stays
         // aligned within the allocation object pointing to the first
         // initialized element, if there exists one.
-        let ptr = unsafe { ptr.add(self.pre_capacity) } ;
+        let ptr = unsafe { ptr.add(self.pre_capacity) };
 
         for index in 0..self.initialized {
             // SAFETY: stays aligned within the allocated object.
@@ -1409,7 +1419,8 @@ mod test {
 
             #[test]
             fn deallocates_when_empty() {
-                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
                 actual.shrink(None).expect("successful deallocation");
 
@@ -1542,7 +1553,8 @@ mod test {
 
             #[test]
             fn deallocates_when_empty() {
-                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+                let mut actual =
+                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
                 actual.resize(0).expect("successful deallocation");
 
@@ -2097,7 +2109,7 @@ mod test {
 
             #[test]
             fn ignores_pre_capacity() {
-                let expected = [0,1,2,3,4,5];
+                let expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
@@ -2479,11 +2491,11 @@ mod test {
                 let expected = [-1, 0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                todo!("remove first element to have pre capacity");
+                actual.remove(0);
 
                 let capacity = actual.pre_capacity;
 
-                actual.insert(0, -1).expect("successful allocation");
+                actual.insert(0, -1).expect("uses pre-capacity");
 
                 assert_eq!(actual.pre_capacity, capacity - 1);
             }
