@@ -1409,7 +1409,12 @@ mod test {
 
             #[test]
             fn deallocates_when_empty() {
-                todo!()
+                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                actual.shrink(None).expect("successful deallocation");
+
+                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.post_capacity, 0);
             }
         }
 
