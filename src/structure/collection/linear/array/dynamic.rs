@@ -1090,7 +1090,21 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
     /// # Examples
     /// TODO
     fn clear(&mut self) {
-        todo!("drop all elements");
+        let ptr = self.buffer.as_ptr();
+
+        // SAFETY: initialized elements are after pre-capacity, so this stays
+        // aligned within the allocation object pointing to the first
+        // initialized element, if there exists one.
+        let ptr = unsafe { ptr.add(self.pre_capacity) } ;
+
+        for index in 0..self.initialized {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            unsafe { (*ptr).assume_init_drop() };
+        }
+
+        self.initialized = 0;
     }
 }
 
