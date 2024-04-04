@@ -2017,7 +2017,12 @@ mod test {
 
         #[test]
         fn ignores_different_pre_capacity() {
-            todo!()
+            let first = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+            let mut second = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+
+            std::mem::swap(&mut second.pre_capacity, &mut second.post_capacity);
+
+            assert_eq!(first, second);
         }
 
         #[test]
