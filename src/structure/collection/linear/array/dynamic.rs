@@ -2514,7 +2514,10 @@ mod test {
                 const INDEX: usize = 2;
                 actual.remove(INDEX);
 
-                for index in 0..INDEX {
+                // [0, 1, 2, 3, 4, 5]
+                // [0, 1, 3, 4, 5]
+
+                for index in INDEX..expected.len() - 1 {
                     assert_eq!(actual[index], expected[index + 1]);
                 }
             }
