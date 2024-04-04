@@ -12,10 +12,8 @@ pub trait List<'a>:
     + std::iter::ExactSizeIterator
     + std::iter::FusedIterator
     + std::iter::FromIterator<Self::Element>
-    + std::iter::FromIterator<&'a Self::Element>
-    + std::iter::FromIterator<&'a mut Self::Element>
 {
-    /// Insert an element at `index`.
+    /// Insert an `element` at `index`.
     ///
     /// The elements `[..index]` remain unmodified whereas elements `[index..]`
     /// are shifted to the right such that they become `[index + 1..]`, and the
