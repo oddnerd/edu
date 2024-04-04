@@ -2328,13 +2328,62 @@ mod test {
             }
 
             #[test]
-            fn appends_to_end() {
+            fn will_reserve_capacity() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                actual.insert(6, 256).expect("successful allocation");
+                actual.shrink(None).expect("successful allocation");
 
-                assert_eq!(actual[6], 256);
+                let actual = actual.insert(2, 12345);
+
+                assert!(actual.is_ok());
+            }
+
+            #[test]
+            fn can_append() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.insert(6, 12345).expect("successful allocation");
+
+                assert_eq!(actual[6], 12345);
+            }
+
+            #[test]
+            fn appending_consumes_post_capacity() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+                actual.reserve(1).expect("successful allocation");
+
+                let capacity = actual.post_capacity;
+
+                actual.insert(6, 12345).expect("successful allocation");
+
+                assert_eq!(actual.post_capacity, capacity - 1);
+            }
+
+            #[test]
+            fn can_prepend() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.insert(0, 12345).expect("successful allocation");
+
+                assert_eq!(actual[0], 12345);
+            }
+
+            #[test]
+            fn prepending_consumes_pre_capacity() {
+                let expected = [-1, 0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                todo!("remove first element to have pre capacity");
+
+                let capacity = actual.pre_capacity;
+
+                actual.insert(0, -1).expect("successful allocation");
+
+                assert_eq!(actual.pre_capacity, capacity - 1);
             }
 
             #[test]
