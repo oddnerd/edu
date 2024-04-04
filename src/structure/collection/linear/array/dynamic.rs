@@ -1079,6 +1079,7 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
             std::ptr::copy(source, destination, self.initialized - self.pre_capacity - index);
         }
 
+        self.initialized -= 1;
         Some(element)
     }
 
