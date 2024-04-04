@@ -186,7 +186,7 @@ impl<T> Dynamic<T> {
                 let destination = self.buffer.as_ptr().cast::<T>();
 
                 // SAFETY: aligned within the allocated object.
-                let source = destination.add(self.initialized);
+                let source = destination.add(self.pre_capacity);
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
