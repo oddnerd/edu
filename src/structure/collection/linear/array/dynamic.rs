@@ -1588,7 +1588,13 @@ mod test {
         fn all() {
             let mut actual = Dynamic::<usize>::from_iter([0, 1, 2, 3, 4, 5]);
 
-            todo!("need a way to remove front elements");
+            // allocate post-capacity
+            actual.reserve(256).expect("successful allocation");
+
+            // make pre-capacity
+            use crate::structure::collection::linear::list::List;
+            actual.remove(0);
+            actual.remove(0);
         }
     }
 
