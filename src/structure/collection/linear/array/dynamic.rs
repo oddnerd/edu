@@ -1083,13 +1083,22 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
         Some(element)
     }
 
-    /// TODO
+    /// Drop all initialized elements
     ///
     /// # Performance
-    /// TODO
+    /// This method takes O(N) time and consumes O(1) memory.
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
+    ///
+    /// instance.clear();
+    ///
+    /// assert!(instance.initialized, 0);
+    /// ```
     fn clear(&mut self) {
         let ptr = self.buffer.as_ptr();
 
