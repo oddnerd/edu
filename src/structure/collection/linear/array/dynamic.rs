@@ -919,7 +919,10 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
         assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
 
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
-        self.buffer.cast::<T>().as_ptr().cast_const()
+        let ptr = self.buffer.cast::<T>().as_ptr().cast_const();
+
+        // SAFETY: Stays aligned within the allocated object.
+        ptr.add(self.pre_capacity)
     }
 
     /// Obtain a mutable pointer to the underlying contigious memory.
@@ -956,7 +959,10 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
         assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
 
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
-        self.buffer.cast::<T>().as_ptr()
+        let ptr = self.buffer.cast::<T>().as_ptr();
+
+        // SAFETY: Stays aligned within the allocated object.
+        ptr.add(self.pre_capacity)
     }
 }
 
