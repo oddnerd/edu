@@ -1029,15 +1029,57 @@ impl<'a, T: 'a> crate::structure::collection::linear::list::List<'a> for Dynamic
         Ok(unsafe { ptr.as_mut().unwrap_unchecked().write(element) })
     }
 
-    /// TODO
+    /// Remove the element at `index`.
     ///
     /// # Performance
-    /// TODO
+    /// This methods takes O(N) time and O(1) memory.
     ///
     /// # Examples
-    /// TODO
+    /// ```
+    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
+    ///
+    /// instance.remove(5);
+    /// instance.remove(2);
+    /// instance.remove(0);
+    ///
+    /// assert!(instance.into_iter().eq([1, 3, 4]));
+    /// ```
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
-        todo!("remove the element at index");
+        if index >= self.initialized {
+            return None;
+        }
+
+        let element = unsafe {
+            let ptr = self.buffer.as_ptr();
+
+            // SAFETY: index within bounds => aligned within allocated object.
+            let ptr = ptr.add(index);
+
+            // SAFETY:
+            // * owned memory => `ptr` is valid for reads.
+            // * `MaybeUninit<T>` and underlying `T` are initialized.
+            // * This takes ownership.
+            ptr.read().assume_init()
+        };
+
+        unsafe {
+            // SAFETY: aligned within the allocated object.
+            let destination = self.buffer.as_ptr().add(index);
+
+            // SAFETY:
+            let source = destination.add(1);
+
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(source, destination, self.initialized - self.pre_capacity - index);
+        }
+
+        Some(element)
     }
 
     /// TODO
