@@ -159,6 +159,57 @@ impl<T> Dynamic<T> {
         self.resize(size)
     }
 
+    /// Shift the initialized elements `offset` position within the buffer.
+    ///
+    /// The buffer first contains uninitialized pre-capacity, then initialized
+    /// elements, and finally uninitialized post-capacity. This method maintains
+    /// the order of initialized elements, but shifts them thereby converting
+    /// some portion of the pre-capacity to post-capacity, or visa versa.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!();
+    /// ```
+    fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
+        if offset < 0 {
+            if offset.unsigned_abs() > self.pre_capacity {
+                return Err(());
+            }
+
+            self.pre_capacity -= offset.unsigned_abs();
+            self.post_capacity += offset.unsigned_abs();
+        } else if offset > 0 {
+            if offset.unsigned_abs() > self.post_capacity {
+                return Err(())
+            }
+
+            self.pre_capacity += offset.unsigned_abs();
+            self.post_capacity -= offset.unsigned_abs();
+        } else {
+            debug_assert_eq!(offset, 0);
+
+            return Ok(self);
+        }
+
+        unsafe {
+            let source = self.as_mut_ptr();
+
+            // SAFETY: aligned within the allocated object.
+            let destination = source.offset(offset);
+
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(source, destination, self.initialized);
+        }
+
+        Ok(self)
+    }
+
     /// Rearrange and/or (re)allocate the buffer to have exactly `capacity`.
     ///
     /// Shifts initialized elements to the beginning of the buffer, allocates
@@ -170,6 +221,11 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!();
+    /// ```
     fn resize(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
@@ -181,22 +237,7 @@ impl<T> Dynamic<T> {
 
         // Shift initialized elements to the start of the buffer.
         if self.pre_capacity > 0 {
-            unsafe {
-                // SAFETY: `MaybeUninit<T>` has same layout as `T`.
-                let destination = self.buffer.as_ptr().cast::<T>();
-
-                // SAFETY: aligned within the allocated object.
-                let source = destination.add(self.pre_capacity);
-
-                // SAFETY:
-                // * owned memory => source/destination valid for read/writes.
-                // * no aliasing restrictions => source and destination can overlap.
-                // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(source, destination, self.initialized);
-            }
-
-            self.post_capacity += self.pre_capacity;
-            self.pre_capacity = 0;
+            self.shift(-(self.pre_capacity as isize)).expect("has pre-capacity");
 
             // Shifting has created enough capacity, no need to reallocate.
             if self.post_capacity == capacity {
