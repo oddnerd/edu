@@ -82,6 +82,36 @@ impl<T> Dynamic<T> {
         self.post_capacity
     }
 
+    /// How many elements can be prepended in constant time/without allocation.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!()
+    /// ```
+    pub fn front_capacity(&self) -> usize {
+        todo!()
+    }
+
+    /// How many elements can be appended in constant time/without allocation.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!()
+    /// ```
+    pub fn back_capacity(&self) -> usize {
+        todo!()
+    }
+
     /// Attempt to allocate space for at least `capacity` additional elements.
     ///
     /// # Panics
@@ -124,6 +154,36 @@ impl<T> Dynamic<T> {
         self.resize(size - self.initialized)
     }
 
+    /// Allocate space for at least `capacity` elements to be prepended.
+    ///
+    /// # Panics
+    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!();
+    /// ```
+    pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+        todo!();
+    }
+
+    /// Allocate space for at least `capacity` elements to be appended.
+    ///
+    /// # Panics
+    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!();
+    /// ```
+    pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+        todo!();
+    }
+
     /// Attempt to reduce the capacity to exactly `capacity`, or none/zero.
     ///
     /// # Panics
@@ -157,6 +217,42 @@ impl<T> Dynamic<T> {
         };
 
         self.resize(size)
+    }
+
+    /// Reallocate to reduce front capacity to exactly `capacity` elements.
+    ///
+    /// # Panics
+    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!();
+    /// ```
+    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+        todo!()
+    }
+
+    /// Reallocate to reduce back capacity to exactly `capacity` elements.
+    ///
+    /// # Panics
+    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// todo!();
+    /// ```
+    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+        todo!()
     }
 
     /// Shift the initialized elements `offset` position within the buffer.
