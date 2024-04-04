@@ -2097,7 +2097,14 @@ mod test {
 
             #[test]
             fn ignores_pre_capacity() {
-                todo!()
+                let expected = [0,1,2,3,4,5];
+
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                use crate::structure::collection::linear::list::List;
+                actual.remove(0);
+
+                assert_eq!(actual.count(), expected.len() - 1);
             }
 
             #[test]
