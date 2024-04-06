@@ -96,7 +96,7 @@ impl<T> Dynamic<T> {
         self.pre_capacity + self.post_capacity
     }
 
-    /// How many elements can be prepended in constant time/without allocation.
+    /// How many elements can [`prepend`] in constant time/without reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -105,14 +105,24 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
+    /// let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
+    /// assert_eq!(instance.front_capacity(), 256);
     ///
-    /// todo!()
+    /// instance.reserve_front(512).expect("successful allocation");
+    /// assert_eq!(instance.front_capacity(), 512);
+    ///
+    /// instance.reserve_back(1024).expect(successful allocation);
+    /// assert_eq!(instance.front_capacity(), 1024);
     /// ```
     pub fn front_capacity(&self) -> usize {
-        todo!()
+        if self.initialized == 0 {
+            self.pre_capacity + self.post_capacity
+        } else {
+            self.pre_capacity
+        }
     }
 
-    /// How many elements can be appended in constant time/without allocation.
+    /// How many elements can [`append`] in constant time/without reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
