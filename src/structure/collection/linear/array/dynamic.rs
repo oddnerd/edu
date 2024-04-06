@@ -283,7 +283,7 @@ impl<T> Dynamic<T> {
         todo!();
     }
 
-    /// Attempt to reduce the capacity to exactly `capacity`, or none/zero.
+    /// Attempt to reduce [`capacity`] to exactly `capacity`, or none/zero.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -291,19 +291,39 @@ impl<T> Dynamic<T> {
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
     ///
+    /// In contrast to [`shrink_back`], this method will [`shift`] the elements
+    /// to the front of the buffer, _always_ shrinking [`capacity_front`] to
+    /// zero, reallocating if necessary to decrease [`capacity_back`].
+    ///
+    /// See also: [`shrink_front`] or [`shrink_back`] to shrink a specific
+    /// end of the buffer without shifting initialized elements.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<()>::with_capacity(256).expect("allocation");
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
+    /// // Fill with elements.
+    /// for element in 0..256 {
+    ///     instance.append(element);
+    /// }
+    ///
+    /// // Create capacity at the front.
+    /// instance.reserve_front(256);
+    ///
+    /// // Shrink to have capacity of 128 elements at the back.
     /// instance.shrink(Some(128));
-    /// assert_eq!(instance.capacity(), 128);
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 128);
     ///
+    /// // Shrink to have no capacity (shrink to fit).
     /// instance.shrink(None);
-    /// assert_eq!(instance.capacity(), 0);
+    /// assert_eq!(!instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+        todo!();
+
         if capacity.is_some_and(|capacity| capacity > self.post_capacity) {
             return Ok(self);
         }
@@ -318,7 +338,7 @@ impl<T> Dynamic<T> {
         self.resize(size)
     }
 
-    /// Reallocate to reduce front capacity to exactly `capacity` elements.
+    /// Reallocate to reduce [`capacity_front`] to exactly `capacity` elements.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -330,7 +350,24 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!();
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    ///
+    /// // Half fill with elements.
+    /// for element in 0..128 {
+    ///     instance.prepend(element);
+    /// }
+    /// assert_eq!(instance.capacity_front(), 128);
+    /// assert_eq!(instance.capacity_back(), 0);
+    ///
+    /// // Shrink to have capacity of 64 elements at the front.
+    /// instance.shrink_front(Some(64));
+    /// assert_eq!(instance.capacity_front(), 64);
+    /// assert_eq!(instance.capacity_back(), 0);
+    ///
+    /// // Shrink to have no capacity (shrink to fit).
+    /// instance.shrink_front(None);
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         todo!()
@@ -348,7 +385,24 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!();
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    ///
+    /// // Half fill with elements.
+    /// for element in 0..128 {
+    ///     instance.append(element);
+    /// }
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 128);
+    ///
+    /// // Shrink to have capacity of 64 elements at the front.
+    /// instance.shrink_back(Some(64));
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 64);
+    ///
+    /// // Shrink to have no capacity (shrink to fit).
+    /// instance.shrink_back(None);
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         todo!()
