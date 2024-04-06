@@ -116,6 +116,13 @@ impl<T> Dynamic<T> {
     /// // Reserving for wrong end of the buffer, but be empty.
     /// instance.reserve_back(1024).expect(successful allocation);
     /// assert_eq!(instance.front_capacity(), 1024);
+    ///
+    /// // So that many elements can be prepended without invalidating pointers.
+    /// let ptr = instance.as_ptr();
+    /// for _ in 0..instance.back_capacity() {
+    ///     instance.prepend(12345).expect("cannot fail");
+    /// }
+    /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     pub fn front_capacity(&self) -> usize {
         if self.initialized == 0 {
@@ -145,6 +152,13 @@ impl<T> Dynamic<T> {
     /// // Reserving for wrong end of the buffer, but be empty.
     /// instance.reserve_front(1024).expect(successful allocation);
     /// assert_eq!(instance.back_capacity(), 1024);
+    ///
+    /// // So that many elements can be appended without invalidating pointers.
+    /// let ptr = instance.as_ptr();
+    /// for _ in 0..instance.back_capacity() {
+    ///     instance.append(12345).expect("cannot fail");
+    /// }
+    /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     pub fn back_capacity(&self) -> usize {
         if self.initialized == 0 {
