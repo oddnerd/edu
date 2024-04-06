@@ -197,7 +197,7 @@ impl<T> Dynamic<T> {
     /// let instance = Dynamic::<usize>::default();
     ///
     /// // From empty instance.
-    /// instance.reserve(264).expect("successful allocation");
+    /// instance.reserve(256).expect("successful allocation");
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
