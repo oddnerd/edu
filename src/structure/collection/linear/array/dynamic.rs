@@ -525,10 +525,7 @@ impl<T> Dynamic<T> {
             self.pre_capacity = 0;
         }
 
-        let new_capacity = match self.post_capacity.checked_add_signed(capacity) {
-            Some(capacity) => capacity,
-            None => return Err(()),
-        };
+        let new_capacity = self.post_capacity.checked_add_signed(capacity).ok_or(())?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
@@ -544,12 +541,13 @@ impl<T> Dynamic<T> {
         let offset = self.pre_capacity + self.initialized;
         let total = offset + self.post_capacity;
 
-        let new_layout = match offset.checked_add(new_capacity) {
-            Some(capacity) => match std::alloc::Layout::array::<T>(total) {
+        let new_layout = {
+            let total = offset.checked_add(new_capacity).ok_or(())?;
+
+            match std::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
                 Err(_) => return Err(()),
-            },
-            None => return Err(()),
+            }
         };
 
         let ptr = {
