@@ -233,7 +233,7 @@ impl<T> Dynamic<T> {
         self.reserve_back(capacity)
     }
 
-    /// Allocate space for at least `capacity` elements to be prepended.
+    /// Allocate space for exactly `capacity` elements to be prepended.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -242,13 +242,23 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!();
+    /// let instance = Dynamic::<usize>::default();
+    ///
+    /// // From empty instance.
+    /// instance.reserve_front(256).expect("successful allocation");
+    ///
+    /// // That many elements can be prepended without invalidating pointers.
+    /// let ptr = instance.as_ptr();
+    /// for _ in 0..instance.capacity() {
+    ///     assert!(instance.prepend(12345).is_ok()) // cannot fail.
+    /// }
+    /// assert_eq(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         todo!();
     }
 
-    /// Allocate space for at least `capacity` elements to be appended.
+    /// Allocate space for exactly `capacity` elements to be appended.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
