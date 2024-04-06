@@ -69,7 +69,11 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// Query how many elements could be added without resizing/reallocation.
+    /// Query how many elements could be added without reallocation.
+    ///
+    /// Note that adding this many elements might still require rearranging the
+    /// underlying buffer in non-constant time, however no memory reallocation
+    /// will occur so pointers to elements remain valid.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -78,12 +82,18 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic::<()>::default();
-    ///
+    /// let mut instance = Dynamic::<()>::default();
     /// assert_eq!(instance.capacity(), 0);
+    ///
+    /// instance.reserve_back(256).expect("successful allocation");
+    /// assert_eq!(instance.capacity(), 256);
+    ///
+    /// instance.reverse_front(256);
+    /// assert_eq!(instance.capacity(), 512);
     /// ```
     pub fn capacity(&self) -> usize {
-        self.post_capacity
+        // SAFETY: Global allocator API => addition cannot overflow.
+        self.pre_capacity + self.post_capacity
     }
 
     /// How many elements can be prepended in constant time/without allocation.
@@ -94,6 +104,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    ///
     ///
     /// todo!()
     /// ```
