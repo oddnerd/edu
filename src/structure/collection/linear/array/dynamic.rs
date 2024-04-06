@@ -408,7 +408,7 @@ impl<T> Dynamic<T> {
         todo!()
     }
 
-    /// Shift the initialized elements `offset` position within the buffer.
+    /// Shift the initialized elements `offset` positions within the buffer.
     ///
     /// The buffer first contains uninitialized pre-capacity, then initialized
     /// elements, and finally uninitialized post-capacity. This method maintains
@@ -420,9 +420,32 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!();
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    ///
+    /// // Fill with elements.
+    /// for element in 0..256 {
+    ///     instance.append(element);
+    /// }
+    ///
+    /// // Allocate capacity at both ends.
+    /// instance.reserve_front(256);
+    /// instance.reserve_back(256);
+    ///
+    /// // Shift initialized elements to the front of the buffer.
+    /// instance.shift(-256).expect("offset <= capacity_front()");
+    /// instance.shift(-1).expect_err("offset out of bounds");
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_front(), 256);
+    ///
+    /// // Shift initialized elements to the end of the buffer.
+    /// instance.shift(512).expect("offset <= capacity_back()");
+    /// instance.shift(1).expect_err("offset out of bounds");
+    /// assert_eq!(instance.capacity_front(), 512);
+    /// assert_eq!(instance.capacity_front(), 0);
     /// ```
-    fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
+    pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
         if offset < 0 {
             if offset.unsigned_abs() > self.pre_capacity {
                 return Err(());
