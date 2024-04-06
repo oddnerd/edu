@@ -106,7 +106,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// // Constructing with generic capacity.
-    /// let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
     /// assert_eq!(instance.front_capacity(), 256);
     ///
     /// // Reserving for specific end of the buffer.
@@ -117,10 +117,10 @@ impl<T> Dynamic<T> {
     /// instance.reserve_back(1024).expect(successful allocation);
     /// assert_eq!(instance.front_capacity(), 1024);
     ///
-    /// // So that many elements can be prepended without invalidating pointers.
+    /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// for _ in 0..instance.back_capacity() {
-    ///     instance.prepend(12345).expect("cannot fail");
+    ///     assert!(instance.prepend(12345).is_ok()) // Cannot fail.
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
@@ -142,7 +142,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// // Constructing with generic capacity.
-    /// let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
     /// assert_eq!(instance.back_capacity(), 256);
     ///
     /// // Reserving for specific end of the buffer.
@@ -153,10 +153,10 @@ impl<T> Dynamic<T> {
     /// instance.reserve_front(1024).expect(successful allocation);
     /// assert_eq!(instance.back_capacity(), 1024);
     ///
-    /// // So that many elements can be appended without invalidating pointers.
+    /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// for _ in 0..instance.back_capacity() {
-    ///     instance.append(12345).expect("cannot fail");
+    ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
@@ -170,6 +170,20 @@ impl<T> Dynamic<T> {
 
     /// Attempt to allocate space for at least `capacity` additional elements.
     ///
+    /// In contrast to [`reserve_back`], this method will [`shift`] the
+    /// elements to the front of the buffer to create space (thereby making
+    /// [`capacity_front`] zero), (re)allocating if necessary to increase
+    /// [`capacity_back`].
+    ///
+    /// This method increases the size of buffer by a geometric progression
+    /// with a growth factor of two (2), hence the buffer could ideally contain
+    /// a power of two (2) number of elements. This means it may allocate more
+    /// memory than explicitly requested, but will attempt to recover when
+    /// exactly `capacity` can be allocated, but not more.
+    ///
+    /// See also: [`reserve_front`] or [`reserve_back`] to reserve an exact
+    /// amount of elements at a specific end of the buffer without [`shift`].
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
     ///
@@ -180,34 +194,43 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// const CAPACITY = 256;
+    /// let instance = Dynamic::<usize>::default();
     ///
-    /// let instance = Dynamic::<()>::default();
-    /// instance.reserve(CAPACITY);
+    /// // From empty instance.
+    /// instance.reserve(264).expect("successful allocation");
     ///
-    /// for _ in 0..CAPACITY {
-    ///     instance.append(()).expect("no reallocation!");
+    /// // That many elements can be appended without invalidating pointers.
+    /// let ptr = instance.as_ptr();
+    /// for _ in 0..instance.capacity() {
+    ///     assert!(instance.append(12345).is_ok()) // cannot fail.
     /// }
+    /// assert_eq(instance.as_ptr(), ptr);
+    ///
+    /// // Shifts elements to consume capacity at the front of the buffer.
+    /// instance.reserve_front(256).expect("successful allocation");
+    /// let ptr = instance.as_ptr();
+    /// assert!(instance.reserve(512).is_ok()); // No reallocation, just shift.
+    /// for _ in 0..instance.capacity() {
+    ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
+    /// }
+    /// assert!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        // There is already enough capacity.
-        if capacity <= self.post_capacity {
-            return Ok(self);
-        }
-
-        let size = match self.initialized.checked_add(capacity) {
+        let total_size = match self.initialized.checked_add(capacity) {
             Some(total) => total,
             None => return Err(()),
         };
 
-        // Amortized growth factor of two (2).
         // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-        let size = match size.checked_next_power_of_two() {
+        let size = match total_size.checked_next_power_of_two() {
             Some(increased_size) => increased_size,
             None => return Err(()),
         };
 
-        self.resize(size - self.initialized)
+        let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
+        self.shift(-offset).expect("cannot be out of bounds");
+
+        self.reserve_back(capacity)
     }
 
     /// Allocate space for at least `capacity` elements to be prepended.
