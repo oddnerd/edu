@@ -51,10 +51,14 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let instance = Dynamic::<i32>::with_capacity(256).expect("successful allocation");
-    ///
-    /// assert_eq!(Collection::count(&instance), 0);
-    /// assert_eq!(instance.capacity(), 256);
+    /// if let Ok(instance) = Dynamic::<i32>::with_capacity(256) {
+    ///     assert_eq!(Collection::count(&instance), 0);
+    ///     assert_eq!(instance.capacity(), 256);
+    ///     assert_eq!(instance.front_capacity(), 256);
+    ///     assert_eq!(instance.back_capacity(), 256);
+    /// } else {
+    ///     panic!("allocation failed");
+    /// }
     /// ```
     pub fn with_capacity(count: usize) -> Result<Self, ()> {
         let mut instance = Dynamic::<T>::default();
