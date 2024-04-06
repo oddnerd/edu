@@ -455,7 +455,7 @@ impl<T> Dynamic<T> {
             self.post_capacity += offset.unsigned_abs();
         } else if offset > 0 {
             if offset.unsigned_abs() > self.post_capacity {
-                return Err(())
+                return Err(());
             }
 
             self.pre_capacity += offset.unsigned_abs();
@@ -482,11 +482,10 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
-    /// Rearrange and/or (re)allocate the buffer to have exactly `capacity`.
+    /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
-    /// Shifts initialized elements to the beginning of the buffer, allocates
-    /// a buffer for `capacity` elements if no allocation, reallocating
-    /// otherwise to have exactly `capacity`.
+    /// This method will increase [`capacity_back`] if `capacity` is positive,
+    /// and decrease it if `capacity` is negative, (re)allocating if necessary.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -496,42 +495,66 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!();
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::<usize>::default();
+    ///
+    /// // Cannot decrease zero capacity.
+    /// assert_eq!(instance.capacity_back(), 0);
+    /// instance.resize(-1).expect_err("no back capacity to resize");
+    ///
+    /// // Will do initial allocation.
+    /// instance.resize(256).expect("successful allocation");
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 256);
+    ///
+    /// // Will reallocate to increase capacity.
+    /// instance.resize(256).expect("successful reallocation");
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 512);
+    ///
+    /// // Will reallocate to reduce capacity.
+    /// instance.resize(-256).expect("successful reallocation");
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 256);
     /// ```
-    fn resize(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+    fn resize(&mut self, capacity: isize) -> Result<&mut Self, ()> {
+        // Treat all capacity as back capacity when empty.
+        if self.initialized == 0 {
+            self.post_capacity += self.pre_capacity;
+            self.pre_capacity = 0;
+        }
+
+        let new_capacity = match self.post_capacity.checked_add_signed(capacity) {
+            Some(capacity) => capacity,
+            None => return Err(()),
+        };
+
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
-            self.pre_capacity = 0;
-            self.post_capacity = capacity;
+            self.post_capacity = new_capacity;
 
             return Ok(self);
         }
 
-        // Shift initialized elements to the start of the buffer.
-        if self.pre_capacity > 0 {
-            self.shift(-(self.pre_capacity as isize)).expect("has pre-capacity");
+        // SAFETY: the underlying global allocator API is limited to
+        // allocations with `isize` length in bytes, hence the existing
+        // allocation fits within `isize` elements so these additions
+        // cannot overflow `usize`.`
+        let offset = self.pre_capacity + self.initialized;
+        let total = offset + self.post_capacity;
 
-            // Shifting has created enough capacity, no need to reallocate.
-            if self.post_capacity == capacity {
-                return Ok(self);
-            }
-        }
-
-        let new_layout = {
-            let elements = match self.initialized.checked_add(capacity) {
-                Some(total) => total,
-                None => return Err(()),
-            };
-
-            match std::alloc::Layout::array::<T>(elements) {
+        let new_layout = match offset.checked_add(new_capacity) {
+            Some(capacity) => match std::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
                 Err(_) => return Err(()),
-            }
+            },
+            None => return Err(()),
         };
 
         let ptr = {
-            // Allocate the buffer.
-            if self.initialized + self.post_capacity == 0 {
+            // No previous allocation exists, so create one.
+            if total == 0 {
                 if new_layout.size() > 0 {
                     // SAFETY: layout has non-zero size.
                     unsafe { std::alloc::alloc(new_layout).cast::<T>() }
@@ -544,26 +567,16 @@ impl<T> Dynamic<T> {
             }
             // Modify an existing buffer allocation.
             else {
-                let existing_layout = {
-                    let elements = match self.initialized.checked_add(self.post_capacity) {
-                        Some(total) => total,
-                        None => return Err(()),
-                    };
-
-                    let layout = match std::alloc::Layout::array::<T>(elements) {
-                        Ok(layout) => layout,
-                        Err(_) => return Err(()),
-                    };
-
-                    layout
+                let existing_layout = match std::alloc::Layout::array::<T>(total) {
+                    Ok(layout) => layout,
+                    Err(_) => return Err(()),
                 };
 
                 unsafe {
-                    // SAFETY: `MaybeUninit<T>` has same layout as `T`.
                     let ptr = self.buffer.as_ptr().cast::<u8>();
 
                     // Deallocate.
-                    if self.initialized == 0 && capacity == 0 {
+                    if offset == 0 && new_capacity == 0 {
                         // SAFETY:
                         // * `ptr` was allocated using the corresponding allocator.
                         // * `existing_layout` is currently allocated at `ptr`.
@@ -595,7 +608,7 @@ impl<T> Dynamic<T> {
             None => return Err(()),
         };
 
-        self.post_capacity = capacity;
+        self.post_capacity = new_capacity;
 
         Ok(self)
     }
