@@ -267,7 +267,17 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!();
+    /// let instance = Dynamic::<usize>::default();
+    ///
+    /// // From empty instance.
+    /// instance.reserve_back(256).expect("successful allocation");
+    ///
+    /// // That many elements can be prepended without invalidating pointers.
+    /// let ptr = instance.as_ptr();
+    /// for _ in 0..instance.capacity() {
+    ///     assert!(instance.append(12345).is_ok()) // cannot fail.
+    /// }
+    /// assert_eq(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         todo!();
