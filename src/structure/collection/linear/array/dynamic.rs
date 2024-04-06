@@ -105,12 +105,15 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
+    /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
     /// assert_eq!(instance.front_capacity(), 256);
     ///
+    /// // Reserving for specific end of the buffer.
     /// instance.reserve_front(512).expect("successful allocation");
     /// assert_eq!(instance.front_capacity(), 512);
     ///
+    /// // Reserving for wrong end of the buffer, but be empty.
     /// instance.reserve_back(1024).expect(successful allocation);
     /// assert_eq!(instance.front_capacity(), 1024);
     /// ```
@@ -131,10 +134,24 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// todo!()
+    /// // Constructing with generic capacity.
+    /// let mut instance = Dynamic::<()>::with_capacity(256).unwrap();
+    /// assert_eq!(instance.back_capacity(), 256);
+    ///
+    /// // Reserving for specific end of the buffer.
+    /// instance.reserve_back(512).expect("successful allocation");
+    /// assert_eq!(instance.back_capacity(), 512);
+    ///
+    /// // Reserving for wrong end of the buffer, but be empty.
+    /// instance.reserve_front(1024).expect(successful allocation);
+    /// assert_eq!(instance.back_capacity(), 1024);
     /// ```
     pub fn back_capacity(&self) -> usize {
-        todo!()
+        if self.initialized == 0 {
+            self.pre_capacity + self.post_capacity
+        } else {
+            self.post_capacity
+        }
     }
 
     /// Attempt to allocate space for at least `capacity` additional elements.
