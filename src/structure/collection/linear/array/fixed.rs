@@ -937,7 +937,7 @@ mod test {
             fn correct_address() {
                 let actual = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-                assert_eq!(unsafe { actual.as_ptr() }, actual.data.as_ptr());
+                assert_eq!(actual.as_ptr(), actual.data.as_ptr());
             }
         }
 
@@ -948,7 +948,7 @@ mod test {
             fn correct_address() {
                 let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-                assert_eq!(unsafe { actual.as_mut_ptr() }, actual.data.as_mut_ptr());
+                assert_eq!(actual.as_mut_ptr(), actual.data.as_mut_ptr());
             }
         }
     }
