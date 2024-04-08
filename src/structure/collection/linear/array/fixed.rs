@@ -327,6 +327,24 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
             None => None,
         }
     }
+
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected).into_iter();
+    ///
+    /// assert_eq!(actual.size_hint(), expected.into_iter().size_hint());
+    /// ```
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.next.size_hint()
+    }
 }
 
 impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N> {
