@@ -723,7 +723,7 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected: [(); 0] = [];
                     let actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter();
 
@@ -738,7 +738,7 @@ mod test {
 
                 #[test]
                 fn exhausted() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected = [0];
                     let actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter();
 
@@ -839,7 +839,7 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected: [(); 0] = [];
                     let mut actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter_mut();
 
@@ -854,7 +854,7 @@ mod test {
 
                 #[test]
                 fn exhausted() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected = [0];
                     let mut actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter_mut();
 
