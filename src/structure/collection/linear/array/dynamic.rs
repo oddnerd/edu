@@ -259,7 +259,7 @@ impl<T> Dynamic<T> {
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
-        let capacity = isize::try_from(self.capacity_front()).unwrap();
+        let capacity = isize::try_from(capacity).unwrap();
 
         self.resize(capacity)
     }
