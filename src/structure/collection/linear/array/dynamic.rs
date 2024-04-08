@@ -216,16 +216,10 @@ impl<T> Dynamic<T> {
     /// assert!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        let total_size = match self.initialized.checked_add(capacity) {
-            Some(total) => total,
-            None => return Err(()),
-        };
+        let total_size = self.initialized.checked_add(capacity).ok_or(())?;
 
         // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-        let size = match total_size.checked_next_power_of_two() {
-            Some(increased_size) => increased_size,
-            None => return Err(()),
-        };
+        let size = total_size.checked_next_power_of_two().ok_or(())?;
 
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
         self.shift(-offset).expect("cannot be out of bounds");
