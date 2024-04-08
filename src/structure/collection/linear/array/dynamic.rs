@@ -322,20 +322,24 @@ impl<T> Dynamic<T> {
     /// assert_eq!(!instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
-        todo!();
-
-        if capacity.is_some_and(|capacity| capacity > self.post_capacity) {
-            return Ok(self);
-        }
-
         let capacity = capacity.unwrap_or(0);
 
-        let size = match self.initialized.checked_add(capacity) {
-            Some(total) => total,
+        // SAFETY: Allocator API ensures total allocation size in bytes will
+        // fit into `isize`, so this number of elements allocated will too.
+        let offset = isize::try_from(self.front_capacity()).unwrap();
+
+        self.shift(-offset).expect("front capacity to shift into");
+
+        let extra_capacity = match self.back_capacity().checked_sub(capacity) {
+            Some(capacity) => capacity,
             None => return Err(()),
         };
 
-        self.resize(size)
+        // SAFETY: Allocator API ensures total allocation size in bytes will
+        // fit into `isize`, so this number of elements allocated will too.
+        let extra_capacity = isize::try_from(extra_capacity).unwrap();
+
+        self.resize(-extra_capacity)
     }
 
     /// Reallocate to reduce [`capacity_front`] to exactly `capacity` elements.
