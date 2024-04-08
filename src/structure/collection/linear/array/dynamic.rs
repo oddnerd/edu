@@ -1268,7 +1268,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
-    unsafe fn as_ptr(&self) -> *const Self::Element {
+    fn as_ptr(&self) -> *const Self::Element {
         // If no allocation then the pointer is dangling and meaningless.
         assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
 
@@ -1276,7 +1276,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
         let ptr = self.buffer.cast::<T>().as_ptr().cast_const();
 
         // SAFETY: Stays aligned within the allocated object.
-        ptr.add(self.pre_capacity)
+        unsafe { ptr.add(self.pre_capacity) }
     }
 
     /// Obtain a mutable pointer to the underlying contigious memory.
@@ -1308,7 +1308,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
-    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+    fn as_mut_ptr(&mut self) -> *mut Self::Element {
         // If no allocation then the pointer is dangling and meaningless.
         assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
 
@@ -1316,7 +1316,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
         let ptr = self.buffer.cast::<T>().as_ptr();
 
         // SAFETY: Stays aligned within the allocated object.
-        ptr.add(self.pre_capacity)
+        unsafe { ptr.add(self.pre_capacity) }
     }
 }
 
