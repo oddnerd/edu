@@ -214,7 +214,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
-    unsafe fn as_ptr(&self) -> *const Self::Element {
+    fn as_ptr(&self) -> *const Self::Element {
         self.data.as_ptr()
     }
 
@@ -238,7 +238,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
-    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+    fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.data.as_mut_ptr()
     }
 }
