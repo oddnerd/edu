@@ -63,7 +63,7 @@ impl<T> Dynamic<T> {
     pub fn with_capacity(count: usize) -> Result<Self, ()> {
         let mut instance = Dynamic::<T>::default();
 
-        match instance.resize(count) {
+        match instance.reserve_back(count) {
             Ok(_) => Ok(instance),
             Err(_) => Err(()),
         }
