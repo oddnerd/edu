@@ -28,14 +28,14 @@ pub trait Array<'a>: Linear<'a> {
     /// # Safety
     /// * The object this pointer is derived from must outlive said pointer.
     /// * The pointer must not be invalidated by modifying the object.
-    unsafe fn as_ptr(&self) -> *const Self::Element;
+    fn as_ptr(&self) -> *const Self::Element;
 
     /// Obtain a mutable pointer to the underlying contigious memory buffer.
     ///
     /// # Safety
     /// * The object this pointer is derived from must outlive said pointer.
     /// * The pointer must not be invalidated by modifying the object.
-    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element;
+    fn as_mut_ptr(&mut self) -> *mut Self::Element;
 
     /// Obtain an immutable slice to the elements.
     fn as_slice(&self) -> &[Self::Element] {
