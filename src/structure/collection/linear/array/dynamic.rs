@@ -2472,7 +2472,7 @@ mod test {
                 let expected = [0,1,2,3,4,5];
                 let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                actual.resize(-128).expect("successful reallocation");
+                actual.resize(128).expect("successful reallocation");
 
                 for index in 0..expected.len() {
                     assert_eq!(actual[index], expected[index]);
