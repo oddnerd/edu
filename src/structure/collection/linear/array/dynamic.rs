@@ -1593,7 +1593,7 @@ mod test {
                 let ptr = actual.buffer.as_ptr();
 
                 for index in 0..actual.capacity() {
-                    actual.append(index);
+                    actual.append(index).expect("uses capacity");
                 }
 
                 assert_eq!(ptr, actual.buffer.as_ptr());
@@ -1637,7 +1637,7 @@ mod test {
                 let ptr = actual.buffer.as_ptr();
 
                 for index in 0..actual.capacity_front() {
-                    actual.prepend(index);
+                    actual.prepend(index).expect("uses capacity");
                 }
 
                 assert_eq!(ptr, actual.buffer.as_ptr());
@@ -1681,7 +1681,7 @@ mod test {
                 let ptr = actual.buffer.as_ptr();
 
                 for index in 0..actual.capacity_back() {
-                    actual.append(index);
+                    actual.append(index).expect("uses capacity");
                 }
 
                 assert_eq!(ptr, actual.buffer.as_ptr());
