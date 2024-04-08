@@ -280,7 +280,17 @@ impl<T> Dynamic<T> {
     /// assert_eq(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        todo!();
+        if self.back_capacity() > capacity {
+            return Ok(self);
+        }
+
+        let capacity = capacity.checked_sub(self.back_capacity()).ok_or(())?;
+
+        // SAFETY: Allocator API ensures total allocation size in bytes will
+        // fit into `isize`, so this number of elements allocated will too.
+        let capacity = isize::try_from(self.front_capacity()).unwrap();
+
+        self.resize(capacity)
     }
 
     /// Attempt to reduce [`capacity`] to exactly `capacity`, or none/zero.
