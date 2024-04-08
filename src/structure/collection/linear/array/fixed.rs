@@ -459,7 +459,6 @@ mod test {
                 assert_eq!(actual.data, expected);
             }
         }
-
     }
 
     mod index {
