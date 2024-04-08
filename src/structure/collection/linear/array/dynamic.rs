@@ -1519,7 +1519,7 @@ mod test {
 
             #[test]
             fn allocates_memory() {
-                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
                 for index in 0..actual.capacity() {
                     unsafe {
