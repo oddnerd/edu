@@ -2108,6 +2108,218 @@ mod test {
             }
         }
 
+        mod shrink_front {
+            use super::*;
+
+            #[test]
+            fn decreases_front_capacity_when_some() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                actual.reserve_front(256).expect("successful reallocation");
+
+                actual.shrink_front(Some(64)).expect("successful reallocation");
+
+                assert_eq!(actual.capacity_front(), 64);
+            }
+
+            #[test]
+            fn removes_front_capacity_when_none() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                actual.reserve_front(256).expect("successful reallocation");
+
+                actual.shrink_front(None).expect("successful reallocation");
+
+                assert_eq!(actual.capacity_front(), 0);
+            }
+
+            #[test]
+            fn does_not_increase_capacity() {
+                let mut actual = Dynamic::<usize>::with_capacity(64).expect("successful allocation");
+
+                assert!(actual.shrink_front(Some(256)).is_err());
+            }
+
+            #[test]
+            fn does_not_decrease_back_capacity_when_not_empty() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                actual.reserve_back(256);
+
+                actual.shrink_front(None).expect("no-op");
+
+                assert_eq!(actual.capacity_back(), 256);
+            }
+
+            #[test]
+            fn decreases_back_capacity_when_empty() {
+                let mut actual = Dynamic::<usize>::default();
+
+                actual.reserve_back(256);
+
+                actual.shrink_front(None);
+
+                assert_eq!(actual.capacity_back(), 0);
+            }
+
+            #[test]
+            fn reallocates_memory() {
+                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                actual.shrink_front(Some(128)).expect("successful allocation");
+
+                for index in 0..actual.capacity_front() {
+                    unsafe {
+                        let ptr = actual.buffer.as_ptr().add(index);
+
+                        // Ideally, this will seg-fault if unowned memory.
+                        (*ptr).write(index);
+                    }
+                }
+            }
+
+            #[test]
+            fn does_not_initialize_elements() {
+                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                actual.shrink_front(Some(128)).expect("successful reallocation");
+
+                assert_eq!(actual.initialized, 0);
+            }
+
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.shrink_front(None).expect("successful reallocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn zero_capacity_cannot_fail() {
+                let mut actual = Dynamic::<usize>::default();
+
+                assert!(actual.shrink_front(None).is_ok());
+            }
+
+            #[test]
+            fn zero_size_types_cannot_fail() {
+                let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+
+                assert!(actual.shrink_front(None).is_ok());
+            }
+        }
+
+        mod shrink_back {
+            use super::*;
+
+            #[test]
+            fn decreases_back_capacity_when_some() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                actual.reserve_back(256).expect("successful reallocation");
+
+                actual.shrink_back(Some(64)).expect("successful reallocation");
+
+                assert_eq!(actual.capacity_back(), 64);
+            }
+
+            #[test]
+            fn removes_back_capacity_when_none() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                actual.reserve_back(256).expect("successful reallocation");
+
+                actual.shrink_back(None).expect("successful reallocation");
+
+                assert_eq!(actual.capacity_back(), 0);
+            }
+
+            #[test]
+            fn does_not_increase_capacity() {
+                let mut actual = Dynamic::<usize>::with_capacity(64).expect("successful allocation");
+
+                assert!(actual.shrink_back(Some(256)).is_err());
+            }
+
+            #[test]
+            fn does_not_decrease_front_capacity_when_not_empty() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                actual.reserve_front(256);
+
+                actual.shrink_back(None).expect("no-op");
+
+                assert_eq!(actual.capacity_front(), 256);
+            }
+
+            #[test]
+            fn decreases_front_capacity_when_empty() {
+                let mut actual = Dynamic::<usize>::default();
+
+                actual.reserve_front(256);
+
+                actual.shrink_back(None);
+
+                assert_eq!(actual.capacity_front(), 0);
+            }
+
+            #[test]
+            fn reallocates_memory() {
+                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                actual.shrink_back(Some(128)).expect("successful allocation");
+
+                for index in 0..actual.capacity_back() {
+                    unsafe {
+                        let ptr = actual.buffer.as_ptr().add(index);
+
+                        // Ideally, this will seg-fault if unowned memory.
+                        (*ptr).write(index);
+                    }
+                }
+            }
+
+            #[test]
+            fn does_not_initialize_elements() {
+                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                actual.shrink_back(Some(128)).expect("successful reallocation");
+
+                assert_eq!(actual.initialized, 0);
+            }
+
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0,1,2,3,4,5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                actual.shrink_back(None).expect("successful reallocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn zero_capacity_cannot_fail() {
+                let mut actual = Dynamic::<usize>::default();
+
+                assert!(actual.shrink_back(None).is_ok());
+            }
+
+            #[test]
+            fn zero_size_types_cannot_fail() {
+                let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+
+                assert!(actual.shrink_back(None).is_ok());
+            }
+        }
+
         mod resize {
             use super::*;
 
