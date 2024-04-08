@@ -340,10 +340,7 @@ impl<T> Dynamic<T> {
 
         self.shift(-offset).expect("front capacity to shift into");
 
-        let extra_capacity = match self.back_capacity().checked_sub(capacity) {
-            Some(capacity) => capacity,
-            None => return Err(()),
-        };
+        let extra_capacity = self.back_capacity().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -386,18 +383,15 @@ impl<T> Dynamic<T> {
     pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = match self.front_capacity().checked_sub(capacity) {
-            Some(extra_capacity) => extra_capacity,
-            None => return Err(()),
-        };
+        let extra_capacity = self.front_capacity().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
-        let offset = isize::try_from(extra_capacity).unwrap();
+        let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
-        self.shift(-offset).expect("front capacity to shift into");
+        self.shift(-extra_capacity).expect("front capacity to shift into");
 
-        self.resize(-offset)
+        self.resize(-extra_capacity)
     }
 
     /// Reallocate to reduce back capacity to exactly `capacity` elements.
@@ -434,16 +428,13 @@ impl<T> Dynamic<T> {
     pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = match self.back_capacity().checked_sub(capacity) {
-            Some(extra_capacity) => extra_capacity,
-            None => return Err(()),
-        };
+        let extra_capacity = self.back_capacity().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
-        let offset = isize::try_from(extra_capacity).unwrap();
+        let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
-        self.resize(-offset)
+        self.resize(-extra_capacity)
     }
 
     /// Shift the initialized elements `offset` positions within the buffer.
