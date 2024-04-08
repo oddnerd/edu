@@ -221,7 +221,7 @@ impl<T> Dynamic<T> {
         let total_size = self.initialized.checked_add(capacity).ok_or(())?;
 
         // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-        let size = total_size.checked_next_power_of_two().ok_or(())?;
+        let capacity = total_size.checked_next_power_of_two().ok_or(())?;
 
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
         self.shift(-offset).expect("cannot be out of bounds");
@@ -1776,7 +1776,7 @@ mod test {
 
             #[test]
             fn zero_capacity_cannot_fail() {
-                let actual = Dynamic::<usize>::default();
+                let mut actual = Dynamic::<usize>::default();
 
                 assert!(actual.reserve(0).is_ok());
             }
@@ -1785,7 +1785,7 @@ mod test {
             fn zero_size_types_cannot_fail() {
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
-                let actual = Dynamic::<()>::default();
+                let mut actual = Dynamic::<()>::default();
 
                 assert!(actual.reserve(capacity).is_ok());
             }
@@ -1877,7 +1877,7 @@ mod test {
 
             #[test]
             fn zero_capacity_cannot_fail() {
-                let actual = Dynamic::<usize>::default();
+                let mut actual = Dynamic::<usize>::default();
 
                 assert!(actual.reserve_front(0).is_ok());
             }
@@ -1886,7 +1886,7 @@ mod test {
             fn zero_size_types_cannot_fail() {
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
-                let actual = Dynamic::<()>::default();
+                let mut actual = Dynamic::<()>::default();
 
                 assert!(actual.reserve_front(capacity).is_ok());
             }
@@ -1978,7 +1978,7 @@ mod test {
 
             #[test]
             fn zero_capacity_cannot_fail() {
-                let actual = Dynamic::<usize>::default();
+                let mut actual = Dynamic::<usize>::default();
 
                 assert!(actual.reserve_back(0).is_ok());
             }
@@ -1987,7 +1987,7 @@ mod test {
             fn zero_size_types_cannot_fail() {
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
-                let actual = Dynamic::<()>::default();
+                let mut actual = Dynamic::<()>::default();
 
                 assert!(actual.reserve_back(capacity).is_ok());
             }
@@ -3325,7 +3325,7 @@ mod test {
                 let actual = Dynamic::<i32>::from_iter([0, 1, 2, 3, 4, 5]);
 
                 assert_eq!(
-                    unsafe { actual.as_ptr() },
+                    actual.as_ptr(),
                     actual.buffer.as_ptr().cast::<i32>().cast_const()
                 );
             }
@@ -3334,10 +3334,10 @@ mod test {
             fn skips_front_capacity() {
                 let mut actual = Dynamic::<i32>::from_iter([0, 1, 2, 3, 4, 5]);
 
-                actual.reserve_front(256);
+                actual.reserve_front(256).expect("successful allocation");
 
                 assert_eq!(
-                    unsafe { actual.as_ptr() },
+                    actual.as_ptr(),
                     unsafe { actual.buffer.as_ptr().cast::<i32>().cast_const().add(256) }
                 );
             }
@@ -3347,7 +3347,7 @@ mod test {
             fn panics_if_no_allocation() {
                 let actual = Dynamic::<()>::default();
 
-                unsafe { actual.as_ptr() };
+                actual.as_ptr();
             }
         }
 
@@ -3356,10 +3356,10 @@ mod test {
 
             #[test]
             fn address_of_underlying_buffer() {
-                let actual = Dynamic::<i32>::from_iter([0, 1, 2, 3, 4, 5]);
+                let mut actual = Dynamic::<i32>::from_iter([0, 1, 2, 3, 4, 5]);
 
                 assert_eq!(
-                    unsafe { actual.as_mut_ptr() },
+                    actual.as_mut_ptr(),
                     actual.buffer.as_ptr().cast::<i32>()
                 );
             }
@@ -3368,10 +3368,10 @@ mod test {
             fn skips_front_capacity() {
                 let mut actual = Dynamic::<i32>::from_iter([0, 1, 2, 3, 4, 5]);
 
-                actual.reserve_front(256);
+                actual.reserve_front(256).expect("successful allocation");
 
                 assert_eq!(
-                    unsafe { actual.as_mut_ptr() },
+                    actual.as_mut_ptr(),
                     unsafe { actual.buffer.as_ptr().cast::<i32>().add(256) }
                 );
             }
@@ -3381,7 +3381,7 @@ mod test {
             fn panics_if_no_allocation() {
                 let mut actual = Dynamic::<()>::default();
 
-                unsafe { actual.as_mut_ptr() };
+                actual.as_mut_ptr();
             }
         }
     }
