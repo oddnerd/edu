@@ -405,7 +405,86 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
-        todo!()
+        let capacity = capacity.unwrap_or(0);
+
+        // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
+        if std::mem::size_of::<T>() == 0 {
+            self.post_capacity = capacity;
+
+            return Ok(self);
+        }
+
+        let new_layout = {
+            let total = self.pre_capacity + self.initialized + capacity;
+
+            match std::alloc::Layout::array::<T>(total) {
+                Ok(layout) => layout,
+                Err(_) => return Err(()),
+            }
+        };
+
+        let ptr = {
+            let allocated_elements = self.pre_capacity + self.initialized + self.post_capacity;
+
+            // No previous allocation exists, so create one.
+            if allocated_elements == 0 {
+                if new_layout.size() > 0 {
+                    // SAFETY: layout has non-zero size.
+                    unsafe { std::alloc::alloc(new_layout).cast::<T>() }
+                } else {
+                    debug_assert_eq!(capacity, 0);
+
+                    // SAFETY: empty state => pointer will not be read/write.
+                    std::ptr::NonNull::<T>::dangling().as_ptr()
+                }
+            }
+            // Modify an existing buffer allocation.
+            else {
+                let existing_layout = match std::alloc::Layout::array::<T>(allocated_elements) {
+                    Ok(layout) => layout,
+                    Err(_) => panic!("the existing allocation could not be replicated"),
+                };
+
+                unsafe {
+                    let ptr = self.buffer.as_ptr().cast::<u8>();
+
+                    // Deallocate.
+                    if self.pre_capacity == 0 && self.initialized == 0 && capacity == 0 {
+                        // SAFETY:
+                        // * `ptr` was allocated using the corresponding allocator.
+                        // * `existing_layout` is currently allocated at `ptr`.
+                        // * `new_layout` has non-zero size.
+                        // * `Layout` guarantees `new_size.size() <= isize::MAX`.
+                        std::alloc::dealloc(ptr, existing_layout);
+
+                        // SAFETY: empty state => pointer will not read/write.
+                        std::ptr::NonNull::<T>::dangling().as_ptr()
+                    }
+                    // Reallocate.
+                    else {
+                        // SAFETY:
+                        // * `ptr` was allocated using the corresponding allocator.
+                        // * `existing_layout` is currently allocated at `ptr`.
+                        // * `new_layout` has non-zero size.
+                        // * `Layout` guarantees `new_size.size() <= isize::MAX`.
+                        std::alloc::realloc(ptr, existing_layout, new_layout.size()).cast::<T>()
+                    }
+                }
+            }
+        };
+
+        // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
+        let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+
+        self.buffer = match std::ptr::NonNull::new(ptr) {
+            Some(ptr) => ptr,
+            // SAFETY: If `realloc` yields null, `buffer` remains.
+            None => return Err(()),
+        };
+
+        self.post_capacity = capacity;
+
+        Ok(self)
     }
 
     /// Shift the initialized elements `offset` positions within the buffer.
