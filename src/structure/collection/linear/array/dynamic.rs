@@ -220,13 +220,18 @@ impl<T> Dynamic<T> {
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         let total_size = self.initialized.checked_add(capacity).ok_or(())?;
 
-        // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-        let capacity = total_size.checked_next_power_of_two().ok_or(())?;
-
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
         self.shift(-offset).expect("cannot be out of bounds");
 
-        self.reserve_back(capacity)
+        // Shifting initialized elements has created enough capacity.
+        if self.capacity_back() >= capacity {
+            Ok(self)
+        } else {
+            // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
+            let capacity = total_size.checked_next_power_of_two().ok_or(())?;
+
+            self.reserve_back(capacity)
+        }
     }
 
     /// Allocate space for exactly `capacity` elements to be prepended.
@@ -481,14 +486,14 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
         if offset < 0 {
-            if offset.unsigned_abs() > self.pre_capacity {
+            if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
                 return Err(());
             }
 
             self.pre_capacity -= offset.unsigned_abs();
             self.post_capacity += offset.unsigned_abs();
         } else if offset > 0 {
-            if offset.unsigned_abs() > self.post_capacity {
+            if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
                 return Err(());
             }
 
