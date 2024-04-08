@@ -255,7 +255,17 @@ impl<T> Dynamic<T> {
     /// assert_eq(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        todo!();
+        if self.front_capacity() > capacity {
+            return Ok(self);
+        }
+
+        let capacity = capacity.checked_sub(self.front_capacity()).ok_or(())?;
+
+        // SAFETY: Allocator API ensures total allocation size in bytes will
+        // fit into `isize`, so this number of elements allocated will too.
+        let capacity = isize::try_from(self.front_capacity()).unwrap();
+
+        self.resize(capacity)
     }
 
     /// Allocate space for exactly `capacity` elements to be appended.
@@ -332,14 +342,13 @@ impl<T> Dynamic<T> {
     /// assert_eq!(!instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
-        let capacity = capacity.unwrap_or(0);
-
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
         let offset = isize::try_from(self.front_capacity()).unwrap();
 
         self.shift(-offset).expect("front capacity to shift into");
 
+        let capacity = capacity.unwrap_or(0);
         let extra_capacity = self.back_capacity().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
