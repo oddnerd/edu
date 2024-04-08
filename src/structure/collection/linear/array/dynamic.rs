@@ -1134,7 +1134,7 @@ impl<T> std::fmt::Pointer for Dynamic<T> {
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: the address of the pointer it read, not the pointer itself.
-        std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
+        std::fmt::Pointer::fmt(&self.as_ptr(), f)
     }
 }
 
