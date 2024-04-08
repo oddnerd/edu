@@ -557,24 +557,22 @@ impl<T> Dynamic<T> {
             self.pre_capacity = 0;
         }
 
-        let new_capacity = self.post_capacity.checked_add_signed(capacity).ok_or(())?;
+        let capacity = self.post_capacity.checked_add_signed(capacity).ok_or(())?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
-            self.post_capacity = new_capacity;
+            self.post_capacity = capacity;
 
             return Ok(self);
         }
 
-        // SAFETY: the underlying global allocator API is limited to
-        // allocations with `isize` length in bytes, hence the existing
-        // allocation fits within `isize` elements so these additions
-        // cannot overflow `usize`.`
-        let offset = self.pre_capacity + self.initialized;
-        let total = offset + self.post_capacity;
+        // SAFETY: Allocator API ensures total allocation size in bytes will
+        // fit into `isize`, so these number of elements allocated will too.
+        let front = self.pre_capacity + self.initialized;
+        let total = front + self.post_capacity;
 
         let new_layout = {
-            let total = offset.checked_add(new_capacity).ok_or(())?;
+            let total = front.checked_add(capacity).ok_or(())?;
 
             match std::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
@@ -606,7 +604,7 @@ impl<T> Dynamic<T> {
                     let ptr = self.buffer.as_ptr().cast::<u8>();
 
                     // Deallocate.
-                    if offset == 0 && new_capacity == 0 {
+                    if front == 0 && capacity == 0 {
                         // SAFETY:
                         // * `ptr` was allocated using the corresponding allocator.
                         // * `existing_layout` is currently allocated at `ptr`.
@@ -638,7 +636,7 @@ impl<T> Dynamic<T> {
             None => return Err(()),
         };
 
-        self.post_capacity = new_capacity;
+        self.post_capacity = capacity;
 
         Ok(self)
     }
