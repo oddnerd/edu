@@ -370,7 +370,20 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
-        todo!()
+        let capacity = capacity.unwrap_or(0);
+
+        let extra_capacity = match self.front_capacity().checked_sub(capacity) {
+            Some(extra_capacity) => extra_capacity,
+            None => return Err(()),
+        };
+
+        // SAFETY: Allocator API ensures total allocation size in bytes will
+        // fit into `isize`, so this number of elements allocated will too.
+        let offset = isize::try_from(extra_capacity).unwrap();
+
+        self.shift(-offset).expect("front capacity to shift into");
+
+        self.resize(-offset)
     }
 
     /// Reallocate to reduce back capacity to exactly `capacity` elements.
