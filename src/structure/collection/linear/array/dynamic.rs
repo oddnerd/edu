@@ -1516,15 +1516,6 @@ mod test {
             }
 
             #[test]
-            fn increases_capacity_for_zero_size_types() {
-                let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
-
-                assert_eq!(actual.capacity(), 256);
-                assert_eq!(actual.capacity_front(), 256);
-                assert_eq!(actual.capacity_back(), 256);
-            }
-
-            #[test]
             fn allocates_capacity() {
                 let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
@@ -1553,33 +1544,61 @@ mod test {
 
                 assert_eq!(actual.initialized, 0);
             }
+
+            #[test]
+            fn handles_zero_size_types() {
+                let capacity = usize::try_from(isize::MAX).unwrap();
+
+                let actual = Dynamic::<()>::with_capacity(capacity);
+
+                assert!(actual.is_ok());
+            }
         }
 
         mod capacity {
             use super::*;
 
             #[test]
-            fn is_reserved_element_count() {
-                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            fn only_front_capacity() {
+                let mut actual = Dynamic::<usize>::from_iter([0,1,2,3,4,5]);
 
-                assert_eq!(actual.capacity(), actual.post_capacity);
+                actual.reserve_front(256).expect("successful allocation");
+
+                assert_eq!(actual.capacity(), 256);
             }
 
             #[test]
-            fn does_not_count_pre_capacity() {
-                let mut actual =
-                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            fn only_back_capacity() {
+                let mut actual = Dynamic::<usize>::from_iter([0,1,2,3,4,5]);
 
-                std::mem::swap(&mut actual.pre_capacity, &mut actual.post_capacity);
+                actual.reserve_back(256).expect("successful allocation");
 
-                assert_eq!(actual.capacity(), actual.post_capacity);
+                assert_eq!(actual.capacity(), 256);
             }
 
             #[test]
-            fn specific_for_zero_size_types() {
-                let actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+            fn front_and_back_capacity() {
+                let mut actual = Dynamic::<usize>::from_iter([0,1,2,3,4,5]);
 
-                assert_eq!(actual.capacity(), actual.post_capacity);
+                actual.reserve_front(256).expect("successful allocation");
+                actual.reserve_back(256).expect("successful allocation");
+
+                assert_eq!(actual.capacity(), 512);
+            }
+
+            #[test]
+            fn does_not_invalidate_pointers_for_that_many_additions() {
+                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+
+                let ptr = actual.buffer.as_ptr();
+
+                for index in 0..actual.capacity() {
+                    use crate::structure::collection::linear::list::List;
+
+                    actual.append(index);
+                }
+
+                assert_eq!(ptr, actual.buffer.as_ptr());
             }
         }
 
