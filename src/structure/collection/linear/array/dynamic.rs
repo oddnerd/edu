@@ -124,7 +124,7 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
-    pub fn front_capacity(&self) -> usize {
+    pub fn capacity_front(&self) -> usize {
         if self.initialized == 0 {
             self.pre_capacity + self.post_capacity
         } else {
@@ -160,7 +160,7 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
-    pub fn back_capacity(&self) -> usize {
+    pub fn capacity_back(&self) -> usize {
         if self.initialized == 0 {
             self.pre_capacity + self.post_capacity
         } else {
@@ -249,15 +249,15 @@ impl<T> Dynamic<T> {
     /// assert_eq(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        if self.front_capacity() > capacity {
+        if self.capacity_front() > capacity {
             return Ok(self);
         }
 
-        let capacity = capacity.checked_sub(self.front_capacity()).ok_or(())?;
+        let capacity = capacity.checked_sub(self.capacity_front()).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
-        let capacity = isize::try_from(self.front_capacity()).unwrap();
+        let capacity = isize::try_from(self.capacity_front()).unwrap();
 
         self.resize(capacity)
     }
@@ -284,11 +284,11 @@ impl<T> Dynamic<T> {
     /// assert_eq(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        if self.back_capacity() > capacity {
+        if self.capacity_back() > capacity {
             return Ok(self);
         }
 
-        let capacity = capacity.checked_sub(self.back_capacity()).ok_or(())?;
+        let capacity = capacity.checked_sub(self.capacity_back()).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -338,12 +338,12 @@ impl<T> Dynamic<T> {
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
-        let offset = isize::try_from(self.front_capacity()).unwrap();
+        let offset = isize::try_from(self.capacity_front()).unwrap();
 
         self.shift(-offset).expect("front capacity to shift into");
 
         let capacity = capacity.unwrap_or(0);
-        let extra_capacity = self.back_capacity().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -386,7 +386,7 @@ impl<T> Dynamic<T> {
     pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self.front_capacity().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self.capacity_front().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -431,7 +431,7 @@ impl<T> Dynamic<T> {
     pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self.back_capacity().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -1507,13 +1507,6 @@ mod test {
             use super::*;
 
             #[test]
-            fn does_not_offset_buffer() {
-                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
-
-                assert_eq!(actual.pre_capacity, 0);
-            }
-
-            #[test]
             fn does_not_initialize_elements() {
                 let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
@@ -1522,11 +1515,11 @@ mod test {
 
             #[test]
             fn increases_capacity() {
-                const COUNT: usize = 256;
+                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-                let actual = Dynamic::<usize>::with_capacity(COUNT).expect("successful allocation");
-
-                assert_eq!(actual.post_capacity, COUNT);
+                assert_eq!(actual.capacity(), 256);
+                assert_eq!(actual.capacity_front(), 256);
+                assert_eq!(actual.capacity_back(), 256);
             }
 
             #[test]
