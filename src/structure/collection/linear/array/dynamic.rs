@@ -985,7 +985,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
             max.unwrap_or(min)
         };
 
-        // It is okay if this fails, later allocate for each individual element.
+        // It is okay if this fails, lazy allocate for each individual element.
         let _ = self.reserve(count);
 
         while let Some(element) = iter.next() {
