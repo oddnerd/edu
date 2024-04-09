@@ -487,6 +487,8 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
+        let source = self.as_mut_ptr();
+
         if offset < 0 {
             if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
                 return Err(());
@@ -508,10 +510,8 @@ impl<T> Dynamic<T> {
         }
 
         unsafe {
-            let source = self.as_mut_ptr();
-
             // SAFETY: aligned within the allocated object.
-            let destination = source.offset(offset);
+            let destination = self.as_mut_ptr();
 
             // SAFETY:
             // * owned memory => source/destination valid for read/writes.
@@ -2336,7 +2336,6 @@ mod test {
             #[test]
             fn left_increases_post_capacity_and_decreases_pre_capacity() {
                 let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
-
                 actual.reserve_front(256).expect("successful allocation");
 
                 for _ in 0..256 {
@@ -2353,9 +2352,7 @@ mod test {
             #[test]
             fn left_does_not_modify_initialized_elements() {
                 let expected = [0,1,2,3,4,5];
-
                 let mut actual = Dynamic::from_iter(expected);
-
                 actual.reserve_front(256).expect("successful allocation");
 
                 for _ in 0..256 {
@@ -2370,7 +2367,6 @@ mod test {
             #[test]
             fn right_increases_pre_capacity_and_decreases_post_capacity() {
                 let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
-
                 actual.reserve_back(256).expect("successful allocation");
 
                 for _ in 0..256 {
@@ -2387,10 +2383,8 @@ mod test {
             #[test]
             fn right_does_not_modify_initialized_elements() {
                 let expected = [0,1,2,3,4,5];
-
                 let mut actual = Dynamic::from_iter(expected);
-
-                actual.reserve_front(256).expect("successful allocation");
+                actual.reserve_back(256).expect("successful allocation");
 
                 for _ in 0..256 {
                     assert!(actual.shift(1).is_ok());
