@@ -1363,7 +1363,12 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 
         let mut ptr = self.buffer.as_ptr();
 
-        if index == 0 && self.pre_capacity != 0 {
+        if index == 0 && self.capacity_front() != 0 {
+            if self.initialized == 0 {
+                self.pre_capacity += self.post_capacity;
+                self.post_capacity = 0;
+            }
+
             // SAFETY: aligned within the allocated object.
             ptr = unsafe { ptr.add(self.pre_capacity - 1) };
 
