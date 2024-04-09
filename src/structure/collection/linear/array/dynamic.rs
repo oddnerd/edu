@@ -1007,7 +1007,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
         };
 
         // It is okay if this fails, lazy allocate for each individual element.
-        let _ = self.reserve(count);
+        let _ = self.reserve_back(count);
 
         iter.for_each(|element| {
             self.append(element).unwrap_or_else(|_| {
