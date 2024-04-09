@@ -3691,6 +3691,17 @@ mod test {
 
                 assert!(actual.remove(0).is_none());
             }
+
+            #[test]
+            fn increases_front_capacity_if_first_element() {
+                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                for index in 0..actual.len() {
+                    actual.remove(0).expect("element to remove");
+
+                    assert_eq!(actual.capacity_front(), index + 1);
+                }
+            }
         }
 
         mod clear {
