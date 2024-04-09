@@ -1683,9 +1683,26 @@ mod test {
             fn increases_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                actual.reserve(256).expect("successful allocation");
+                actual.reserve(1).expect("successful allocation");
 
-                assert_eq!(actual.capacity(), 256);
+                assert!(actual.capacity() >= 1);
+            }
+
+            #[test]
+            fn increases_capacity_in_powers_of_two() {
+                let mut actual = Dynamic::<()>::default();
+
+                for _ in 0..(isize::BITS) {
+                    let capacity = actual.capacity() + 1;
+
+                    println!("CAPACITY: {:?}", capacity);
+
+                    actual.reserve(capacity).expect("successful allocation");
+
+                    let capacity = capacity.checked_next_power_of_two().unwrap();
+
+                    assert_eq!(actual.capacity(), capacity);
+                }
             }
 
             #[test]
