@@ -233,7 +233,7 @@ impl<T> Dynamic<T> {
             // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
             let amortized = total_size.checked_next_power_of_two().ok_or(())?;
 
-            if self.reserve(amortized).is_ok() {
+            if self.reserve_back(amortized).is_ok() {
                 Ok(self)
             } else {
                 self.reserve_back(capacity)
@@ -995,7 +995,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     /// assert!(actual.eq(expected))
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let iter = iter.into_iter();
+        let mut iter = iter.into_iter();
 
         // SAFETY: `size_hint` can _NOT_ be trusted to exact size.
         let count = {
@@ -1006,11 +1006,17 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
         // It is okay if this fails, lazy allocate for each individual element.
         let _ = self.reserve_back(count);
 
-        iter.for_each(|element| {
-            self.append(element).unwrap_or_else(|_| {
-                panic!("allocation failed, could not append element during extend")
-            });
-        });
+        while let Some(element) = iter.next() {
+            if self.append(element).is_err() {
+                panic!("TODO");
+            }
+        }
+
+        // iter.for_each(|element| {
+        //     self.append(element).unwrap_or_else(|_| {
+        //         panic!("allocation failed, could not append element during extend")
+        //     });
+        // });
     }
 }
 
