@@ -487,6 +487,10 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
+        if self.initialized == 0 {
+            return Err(());
+        }
+
         let source = self.as_mut_ptr();
 
         if offset < 0 {
