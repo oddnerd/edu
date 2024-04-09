@@ -231,9 +231,13 @@ impl<T> Dynamic<T> {
             Ok(self)
         } else {
             // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-            let capacity = total_size.checked_next_power_of_two().ok_or(())?;
+            let amortized = total_size.checked_next_power_of_two().ok_or(())?;
 
-            self.reserve_back(capacity)
+            if self.reserve(amortized).is_ok() {
+                Ok(self)
+            } else {
+                self.reserve_back(capacity)
+            }
         }
     }
 
