@@ -1145,7 +1145,7 @@ impl<T> std::fmt::Pointer for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> super::Collection<'a> for Dynamic<T> {
+impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
     type Element = T;
 
     /// Query the number of initialized elements contained.
