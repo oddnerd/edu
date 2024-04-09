@@ -1436,11 +1436,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(
-                    source,
-                    destination,
-                    self.initialized - index - 1,
-                );
+                std::ptr::copy(source, destination, self.initialized - index - 1);
             }
 
             self.post_capacity += 1;
@@ -1482,9 +1478,8 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             unsafe { (*ptr).assume_init_drop() };
         }
 
+        self.post_capacity += self.initialized;
         self.initialized = 0;
-        self.post_capacity += self.pre_capacity;
-        self.pre_capacity = 0;
     }
 }
 
@@ -3699,7 +3694,7 @@ mod test {
 
             #[test]
             fn increases_front_capacity_if_first_element() {
-                let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 for index in 0..actual.len() {
                     actual.remove(0).expect("element to remove");
