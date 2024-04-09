@@ -408,8 +408,10 @@ impl<T> Dynamic<T> {
         // fit into `isize`, so this number of elements allocated will too.
         let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
-        self.shift(-extra_capacity)
-            .expect("front capacity to shift into");
+        if self.initialized > 0 {
+            self.shift(-extra_capacity)
+                .expect("front capacity to shift into");
+        }
 
         self.resize(-extra_capacity)
     }
