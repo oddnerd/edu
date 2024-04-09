@@ -271,7 +271,11 @@ impl<T> Dynamic<T> {
 
         self.resize(capacity)?;
 
-        self.shift(capacity)
+        if self.initialized > 0 {
+            self.shift(capacity)
+        } else {
+            Ok(self)
+        }
     }
 
     /// Allocate space for exactly `capacity` elements to be appended.
