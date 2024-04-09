@@ -1407,48 +1407,41 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         }
 
         let element = unsafe {
-            let ptr = self.buffer.as_ptr();
-
             // SAFETY: index within bounds => aligned within allocated object.
-            let ptr = ptr.add(index);
+            let ptr = self.as_ptr().add(index);
 
             // SAFETY:
             // * owned memory => `ptr` is valid for reads.
-            // * `MaybeUninit<T>` and underlying `T` are initialized.
+            // * Underlying `T` is initialized.
             // * This takes ownership.
-            ptr.read().assume_init()
+            ptr.read()
         };
-
-        unsafe {
-            // SAFETY: aligned within the allocated object.
-            let destination = self.buffer.as_ptr().add(index);
-
-            // SAFETY:
-            let source = destination.add(1);
-
-            // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(
-                source,
-                destination,
-                self.initialized - self.pre_capacity - index,
-            );
-        }
 
         if index == 0 {
             self.pre_capacity += 1;
         } else {
+            unsafe {
+                // SAFETY: index within bounds => aligned within allocated object.
+                let destination = self.as_mut_ptr().add(index);
+
+                // SAFETY: aligned within the allocated object.
+                let source = destination.add(1);
+
+                // SAFETY:
+                // * owned memory => source/destination valid for read/writes.
+                // * no aliasing restrictions => source and destination can overlap.
+                // * underlying buffer is aligned => both pointers are aligned.
+                std::ptr::copy(
+                    source,
+                    destination,
+                    self.initialized - index - 1,
+                );
+            }
+
             self.post_capacity += 1;
         }
 
         self.initialized -= 1;
-
-        if self.initialized == 0 {
-            self.post_capacity += self.pre_capacity;
-            self.pre_capacity = 0;
-        }
 
         Some(element)
     }
