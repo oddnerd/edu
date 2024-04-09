@@ -310,11 +310,11 @@ impl<T> Dynamic<T> {
 
         let capacity = capacity.checked_sub(self.capacity_back()).ok_or(())?;
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
-        let capacity = isize::try_from(capacity).unwrap();
-
-        self.resize(capacity)
+        if let Ok(capacity) = isize::try_from(capacity) {
+            self.resize(capacity)
+        } else {
+            Err(())
+        }
     }
 
     /// Attempt to reduce [`capacity`] to exactly `capacity`, or none/zero.
@@ -1803,6 +1803,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
+                // let capacity = usize::try_from((2 as isize).pow(isize::BITS - 2)).unwrap();
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
                 let mut actual = Dynamic::<()>::default();
