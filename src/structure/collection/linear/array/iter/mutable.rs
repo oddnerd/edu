@@ -106,127 +106,182 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for IterMut<'a, T> {
 mod test {
     use super::*;
 
-    #[test]
-    fn size_hint_for_normal_types_is_exact_element_count() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+    mod method {
+        use super::*;
 
-        assert_eq!(underlying.len(), instance.size_hint().0);
-        assert_eq!(underlying.len(), instance.size_hint().1.unwrap());
-    }
+        mod new {
+            use super::*;
 
-    #[test]
-    fn size_hint_for_zero_size_types_is_constructed_count() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+            #[test]
+            fn sets_pointer() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
 
-        assert_eq!(underlying.len(), instance.size_hint().0);
-        assert_eq!(underlying.len(), instance.size_hint().1.unwrap());
-    }
+                let actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
 
-    #[test]
-    fn len_for_normal_types_is_exact_element_count() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+                    IterMut::new(ptr, expected.len())
+                };
 
-        assert_eq!(underlying.len(), instance.len());
-    }
+                assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+            }
 
-    #[test]
-    fn len_for_zero_size_types_is_constructed_count() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+            #[test]
+            fn sets_elements_count() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
 
-        assert_eq!(underlying.len(), instance.len());
-    }
+                let actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
 
-    #[test]
-    fn next_yields_element_count_for_normal_types() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+                    IterMut::new(ptr, expected.len())
+                };
 
-        assert_eq!(underlying.len(), instance.count());
-    }
-
-    #[test]
-    fn next_yields_element_count_for_zero_size_types() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
-
-        assert_eq!(underlying.len(), instance.count());
-    }
-
-    #[test]
-    fn next_yields_front_element() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
-
-        assert!(underlying.iter().eq(instance));
-    }
-
-    #[test]
-    fn next_back_yields_element_count_for_normal_types() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
+                assert_eq!(actual.count, expected.len());
+            }
         }
-        .rev();
-
-        assert_eq!(underlying.len(), instance.count());
     }
 
-    #[test]
-    fn next_back_yields_element_count_for_zero_size_types() {
-        let underlying = [(), (), (), (), (), ()];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
+    mod iterator {
+        use super::*;
+
+        #[test]
+        fn element_count() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let actual = unsafe {
+                let ptr = expected.as_mut_ptr();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                IterMut::new(ptr, expected.len())
+            };
+
+            assert_eq!(actual.count(), expected.len());
         }
-        .rev();
 
-        assert_eq!(underlying.len(), instance.count());
-    }
+        #[test]
+        fn in_order() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
 
-    #[test]
-    fn next_back_yields_back_element() {
-        let underlying = [0, 1, 2, 3, 4, 5];
-        let instance = {
-            let ptr = underlying.as_ptr().cast_mut();
-            let ptr = unsafe { std::ptr::NonNull::new_unchecked(ptr) };
-            unsafe { IterMut::new(ptr, underlying.len()) }
-        };
+            let actual = unsafe {
+                let ptr = expected.as_mut_ptr();
+                let ptr = std::ptr::NonNull::new(ptr).unwrap();
 
-        assert!(underlying.iter().rev().eq(instance.rev()));
+                IterMut::new(ptr, expected.len())
+            };
+
+            assert!(actual.eq(expected.iter()));
+        }
+
+        mod double_ended {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                    IterMut::new(ptr, expected.len())
+                };
+
+                assert_eq!(actual.rev().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                    IterMut::new(ptr, expected.len())
+                };
+
+                assert!(actual.rev().eq(expected.iter().rev()));
+            }
+        }
+
+        mod exact_size {
+            use super::*;
+
+            #[test]
+            fn hint() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                    IterMut::new(ptr, expected.len())
+                };
+
+                assert_eq!(actual.size_hint(), (expected.len(), Some(expected.len())));
+            }
+
+            #[test]
+            fn len() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                    IterMut::new(ptr, expected.len())
+                };
+
+                assert_eq!(actual.len(), expected.len());
+            }
+        }
+
+        mod fused {
+            use super::*;
+
+            #[test]
+            fn empty() {
+                let mut expected: [(); 0] = [];
+
+                let mut actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                    IterMut::new(ptr, expected.len())
+                };
+
+                // Yields `None` at least once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+
+            #[test]
+            fn exhausted() {
+                let mut expected = [0];
+
+                let mut actual = unsafe {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+
+                    IterMut::new(ptr, expected.len())
+                };
+
+                // Exhaust the elements.
+                actual.next();
+
+                // Yields `None` at least once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+        }
     }
 }

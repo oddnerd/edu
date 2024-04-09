@@ -236,7 +236,7 @@ impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
     /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: the address of the pointer it read, not the pointer itself.
-        std::fmt::Pointer::fmt(unsafe { &self.as_ptr() }, f)
+        std::fmt::Pointer::fmt(&self.as_ptr(), f)
     }
 }
 
@@ -337,7 +337,7 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// assert_eq!(unsafe { actual.as_ptr() }, expected.as_ptr());
     /// ```
-    unsafe fn as_ptr(&self) -> *const Self::Element {
+    fn as_ptr(&self) -> *const Self::Element {
         self.ptr.as_ptr().cast_const()
     }
 
@@ -359,7 +359,7 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// assert_eq!(unsafe { actual.as_mut_ptr() }, expected.as_mut_ptr());
     /// ```
-    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+    fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.ptr.as_ptr()
     }
 }
@@ -723,7 +723,7 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected: [(); 0] = [];
                     let actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter();
 
@@ -738,7 +738,7 @@ mod test {
 
                 #[test]
                 fn exhausted() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected = [0];
                     let actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter();
 
@@ -839,7 +839,7 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected: [(); 0] = [];
                     let mut actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter_mut();
 
@@ -854,7 +854,7 @@ mod test {
 
                 #[test]
                 fn exhausted() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
+                    let mut expected = [0];
                     let mut actual = Dope::from(expected.as_mut_slice());
                     let mut actual = actual.iter_mut();
 
@@ -884,7 +884,7 @@ mod test {
                 let mut expected = [0, 1, 2, 3, 4, 5];
                 let actual = Dope::from(expected.as_mut_slice());
 
-                assert_eq!(unsafe { actual.as_ptr() }, expected.as_ptr());
+                assert_eq!(actual.as_ptr(), expected.as_ptr());
             }
         }
 
@@ -896,7 +896,7 @@ mod test {
                 let mut expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = Dope::from(expected.as_mut_slice());
 
-                assert_eq!(unsafe { actual.as_mut_ptr() }, expected.as_mut_ptr());
+                assert_eq!(actual.as_mut_ptr(), expected.as_mut_ptr());
             }
         }
     }

@@ -214,7 +214,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
-    unsafe fn as_ptr(&self) -> *const Self::Element {
+    fn as_ptr(&self) -> *const Self::Element {
         self.data.as_ptr()
     }
 
@@ -238,7 +238,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     ///
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
-    unsafe fn as_mut_ptr(&mut self) -> *mut Self::Element {
+    fn as_mut_ptr(&mut self) -> *mut Self::Element {
         self.data.as_mut_ptr()
     }
 }
@@ -326,6 +326,24 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
             }
             None => None,
         }
+    }
+
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected).into_iter();
+    ///
+    /// assert_eq!(actual.size_hint(), expected.into_iter().size_hint());
+    /// ```
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.next.size_hint()
     }
 }
 
@@ -459,7 +477,6 @@ mod test {
                 assert_eq!(actual.data, expected);
             }
         }
-
     }
 
     mod index {
@@ -937,7 +954,7 @@ mod test {
             fn correct_address() {
                 let actual = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-                assert_eq!(unsafe { actual.as_ptr() }, actual.data.as_ptr());
+                assert_eq!(actual.as_ptr(), actual.data.as_ptr());
             }
         }
 
@@ -948,7 +965,7 @@ mod test {
             fn correct_address() {
                 let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-                assert_eq!(unsafe { actual.as_mut_ptr() }, actual.data.as_mut_ptr());
+                assert_eq!(actual.as_mut_ptr(), actual.data.as_mut_ptr());
             }
         }
     }
