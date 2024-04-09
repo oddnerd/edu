@@ -356,7 +356,12 @@ impl<T> Dynamic<T> {
         // fit into `isize`, so this number of elements allocated will too.
         let offset = isize::try_from(self.capacity_front()).unwrap();
 
-        self.shift(-offset).expect("front capacity to shift into");
+        if self.initialized > 0 {
+            self.shift(-offset).expect("front capacity to shift into");
+        } else {
+            self.post_capacity += self.pre_capacity;
+            self.pre_capacity = 0;
+        }
 
         let capacity = capacity.unwrap_or(0);
         let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
