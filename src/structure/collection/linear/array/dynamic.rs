@@ -2334,24 +2334,70 @@ mod test {
             use super::*;
 
             #[test]
-            fn left() {
+            fn left_increases_post_capacity_and_decreases_pre_capacity() {
                 let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
 
                 actual.reserve_front(256).expect("successful allocation");
 
-                for _ in 0..actual.capacity_front() {
+                for _ in 0..256 {
+                    let pre_capacity = actual.pre_capacity;
+                    let post_capacity = actual.post_capacity;
+
                     assert!(actual.shift(-1).is_ok());
+
+                    assert_eq!(actual.pre_capacity, pre_capacity - 1);
+                    assert_eq!(actual.post_capacity, post_capacity + 1);
                 }
             }
 
             #[test]
-            fn right() {
+            fn left_does_not_modify_initialized_elements() {
+                let expected = [0,1,2,3,4,5];
+
+                let mut actual = Dynamic::from_iter(expected);
+
+                actual.reserve_front(256).expect("successful allocation");
+
+                for _ in 0..256 {
+                    assert!(actual.shift(-1).is_ok());
+
+                    for index in 0..expected.len() {
+                        assert_eq!(actual[index], expected[index]);
+                    }
+                }
+            }
+
+            #[test]
+            fn right_increases_pre_capacity_and_decreases_post_capacity() {
                 let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
 
                 actual.reserve_back(256).expect("successful allocation");
 
-                for _ in 0..actual.capacity_front() {
+                for _ in 0..256 {
+                    let pre_capacity = actual.pre_capacity;
+                    let post_capacity = actual.post_capacity;
+
                     assert!(actual.shift(1).is_ok());
+
+                    assert_eq!(actual.pre_capacity, pre_capacity + 1);
+                    assert_eq!(actual.post_capacity, post_capacity - 1);
+                }
+            }
+
+            #[test]
+            fn right_does_not_modify_initialized_elements() {
+                let expected = [0,1,2,3,4,5];
+
+                let mut actual = Dynamic::from_iter(expected);
+
+                actual.reserve_front(256).expect("successful allocation");
+
+                for _ in 0..256 {
+                    assert!(actual.shift(1).is_ok());
+
+                    for index in 0..expected.len() {
+                        assert_eq!(actual[index], expected[index]);
+                    }
                 }
             }
 
