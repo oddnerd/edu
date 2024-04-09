@@ -266,7 +266,9 @@ impl<T> Dynamic<T> {
         // fit into `isize`, so this number of elements allocated will too.
         let capacity = isize::try_from(capacity).unwrap();
 
-        self.resize(capacity)
+        self.resize(capacity)?;
+
+        self.shift(capacity)
     }
 
     /// Allocate space for exactly `capacity` elements to be appended.
