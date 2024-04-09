@@ -221,7 +221,10 @@ impl<T> Dynamic<T> {
         let total_size = self.initialized.checked_add(capacity).ok_or(())?;
 
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
-        self.shift(-offset).expect("cannot be out of bounds");
+
+        if self.initialized != 0 {
+            self.shift(-offset).expect("cannot be out of bounds");
+        }
 
         // Shifting initialized elements has created enough capacity.
         if self.capacity_back() >= capacity {
@@ -990,7 +993,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     /// assert!(actual.eq(expected))
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let mut iter = iter.into_iter();
+        let iter = iter.into_iter();
 
         // SAFETY: `size_hint` can _NOT_ be trusted to exact size.
         let count = {
@@ -1001,26 +1004,9 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
         // It is okay if this fails, lazy allocate for each individual element.
         let _ = self.reserve(count);
 
-        while let Some(element) = iter.next() {
-            if self.capacity() == 0 {
-                self.reserve(1).expect("successful allocation");
-            }
-
-            let ptr = self.buffer.as_ptr();
-
-            let offset = self.pre_capacity + self.initialized;
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(offset) };
-
-            // SAFETY:
-            // * `self.buffer` is non-null => `ptr` is non-null.
-            // * the `MaybeUninit<T>` element is initialized.
-            unsafe { (*ptr).write(element) };
-
-            self.initialized += 1;
-            self.post_capacity -= 1;
-        }
+        iter.for_each(|element| {
+            self.append(element).unwrap_or_else(|_| panic!("allocation failed, could not append element during extend"));
+        });
     }
 }
 
