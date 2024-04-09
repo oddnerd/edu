@@ -56,8 +56,8 @@ impl<T> Dynamic<T> {
     /// if let Ok(instance) = Dynamic::<i32>::with_capacity(256) {
     ///     assert_eq!(Collection::count(&instance), 0);
     ///     assert_eq!(instance.capacity(), 256);
-    ///     assert_eq!(instance.front_capacity(), 256);
-    ///     assert_eq!(instance.back_capacity(), 256);
+    ///     assert_eq!(instance.capacity_front(), 256);
+    ///     assert_eq!(instance.capacity_back(), 256);
     /// } else {
     ///     panic!("allocation failed");
     /// }
@@ -84,13 +84,13 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<()>::default();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// assert_eq!(instance.capacity(), 0);
     ///
     /// instance.reserve_back(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 256);
     ///
-    /// instance.reverse_front(256);
+    /// instance.reserve_front(256);
     /// assert_eq!(instance.capacity(), 512);
     /// ```
     pub fn capacity(&self) -> usize {
@@ -106,22 +106,24 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::list::List;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
-    /// assert_eq!(instance.front_capacity(), 256);
+    /// assert_eq!(instance.capacity_front(), 256);
     ///
     /// // Reserving for specific end of the buffer.
     /// instance.reserve_front(512).expect("successful allocation");
-    /// assert_eq!(instance.front_capacity(), 512);
+    /// assert_eq!(instance.capacity_front(), 512);
     ///
     /// // Reserving for wrong end of the buffer, but be empty.
-    /// instance.reserve_back(1024).expect(successful allocation);
-    /// assert_eq!(instance.front_capacity(), 1024);
+    /// instance.reserve_back(1024).expect("successful allocation");
+    /// assert_eq!(instance.capacity_front(), 1024);
     ///
     /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.back_capacity() {
+    /// for _ in 0..instance.capacity_back() {
     ///     assert!(instance.prepend(12345).is_ok()) // Cannot fail.
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
@@ -142,22 +144,24 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::list::List;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
-    /// assert_eq!(instance.back_capacity(), 256);
+    /// assert_eq!(instance.capacity_back(), 256);
     ///
     /// // Reserving for specific end of the buffer.
     /// instance.reserve_back(512).expect("successful allocation");
-    /// assert_eq!(instance.back_capacity(), 512);
+    /// assert_eq!(instance.capacity_back(), 512);
     ///
     /// // Reserving for wrong end of the buffer, but be empty.
-    /// instance.reserve_front(1024).expect(successful allocation);
-    /// assert_eq!(instance.back_capacity(), 1024);
+    /// instance.reserve_front(1024).expect("successful allocation");
+    /// assert_eq!(instance.capacity_back(), 1024);
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.back_capacity() {
+    /// for _ in 0..instance.capacity_back() {
     ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
@@ -195,8 +199,10 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::list::List;
     ///
-    /// let instance = Dynamic::<usize>::default();
+    /// let mut instance = Dynamic::<usize>::default();
     ///
     /// // From empty instance.
     /// instance.reserve(256).expect("successful allocation");
@@ -204,18 +210,16 @@ impl<T> Dynamic<T> {
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.append(12345).is_ok()) // cannot fail.
+    ///     assert!(instance.append(12345).is_ok()); // cannot fail.
     /// }
-    /// assert_eq(instance.as_ptr(), ptr);
+    /// assert_eq!(instance.as_ptr(), ptr);
     ///
     /// // Shifts elements to consume capacity at the front of the buffer.
     /// instance.reserve_front(256).expect("successful allocation");
-    /// let ptr = instance.as_ptr();
     /// assert!(instance.reserve(512).is_ok()); // No reallocation, just shift.
     /// for _ in 0..instance.capacity() {
     ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
     /// }
-    /// assert!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         let total_size = self.initialized.checked_add(capacity).ok_or(())?;
@@ -249,8 +253,10 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::list::List;
     ///
-    /// let instance = Dynamic::<usize>::default();
+    /// let mut instance = Dynamic::<usize>::default();
     ///
     /// // From empty instance.
     /// instance.reserve_front(256).expect("successful allocation");
@@ -258,9 +264,9 @@ impl<T> Dynamic<T> {
     /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.prepend(12345).is_ok()) // cannot fail.
+    ///     assert!(instance.prepend(12345).is_ok()); // cannot fail.
     /// }
-    /// assert_eq(instance.as_ptr(), ptr);
+    /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         if self.capacity_front() > capacity {
@@ -290,8 +296,10 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::list::List;
     ///
-    /// let instance = Dynamic::<usize>::default();
+    /// let mut instance = Dynamic::<usize>::default();
     ///
     /// // From empty instance.
     /// instance.reserve_back(256).expect("successful allocation");
@@ -299,9 +307,9 @@ impl<T> Dynamic<T> {
     /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.append(12345).is_ok()) // cannot fail.
+    ///     assert!(instance.append(12345).is_ok()); // cannot fail.
     /// }
-    /// assert_eq(instance.as_ptr(), ptr);
+    /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
         if self.capacity_back() > capacity {
@@ -335,6 +343,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::list::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -353,7 +362,7 @@ impl<T> Dynamic<T> {
     ///
     /// // Shrink to have no capacity (shrink to fit).
     /// instance.shrink(None);
-    /// assert_eq!(!instance.capacity_back(), 0);
+    /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
         // SAFETY: Allocator API ensures total allocation size in bytes will
@@ -388,6 +397,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::list::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -436,6 +446,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::list::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -481,6 +492,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::list::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -497,13 +509,13 @@ impl<T> Dynamic<T> {
     /// instance.shift(-256).expect("offset <= capacity_front()");
     /// instance.shift(-1).expect_err("offset out of bounds");
     /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_front(), 256);
+    /// assert_eq!(instance.capacity_back(), 512);
     ///
     /// // Shift initialized elements to the end of the buffer.
     /// instance.shift(512).expect("offset <= capacity_back()");
     /// instance.shift(1).expect_err("offset out of bounds");
     /// assert_eq!(instance.capacity_front(), 512);
-    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
         if self.initialized == 0 {
@@ -556,32 +568,6 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::<usize>::default();
-    ///
-    /// // Cannot decrease zero capacity.
-    /// assert_eq!(instance.capacity_back(), 0);
-    /// instance.resize(-1).expect_err("no back capacity to resize");
-    ///
-    /// // Will do initial allocation.
-    /// instance.resize(256).expect("successful allocation");
-    /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_back(), 256);
-    ///
-    /// // Will reallocate to increase capacity.
-    /// instance.resize(256).expect("successful reallocation");
-    /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_back(), 512);
-    ///
-    /// // Will reallocate to reduce capacity.
-    /// instance.resize(-256).expect("successful reallocation");
-    /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_back(), 256);
-    /// ```
     fn resize(&mut self, capacity: isize) -> Result<&mut Self, ()> {
         // Treat all capacity as back capacity when empty.
         if self.initialized == 0 {
@@ -1476,7 +1462,8 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ///
     /// instance.clear();
     ///
-    /// assert!(instance.initialized, 0);
+    /// assert_eq!(instance.len(), 0);
+    /// assert_eq!(instance.capacity(), 6);
     /// ```
     fn clear(&mut self) {
         let ptr = self.buffer.as_ptr();
