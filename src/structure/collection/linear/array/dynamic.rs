@@ -920,6 +920,10 @@ impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
     }
 }
 
+impl<T> std::iter::ExactSizeIterator for Dynamic<T> {}
+
+impl<T> std::iter::FusedIterator for Dynamic<T> {}
+
 impl<'a, T: 'a> std::iter::FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
     ///
