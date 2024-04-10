@@ -558,6 +558,10 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
+    pub fn drain(&mut self, range: std::ops::Range<usize>) -> Drain<'_, T> {
+        todo!("construct the drain iterator");
+    }
+
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
     /// This method will increase [`capacity_back`] by `capacity` if positive,
@@ -874,10 +878,6 @@ impl<T> std::iter::Iterator for Dynamic<T> {
         (self.initialized, Some(self.initialized))
     }
 }
-
-impl<T> std::iter::FusedIterator for Dynamic<T> {}
-
-impl<T> std::iter::ExactSizeIterator for Dynamic<T> {}
 
 impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
     /// Obtain the last initialized element.
@@ -1486,6 +1486,52 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 
         self.post_capacity += self.initialized;
         self.initialized = 0;
+    }
+}
+
+pub struct Drain<'a, T> {
+    // The underlying [`Dynamic`] being drained from.
+    underlying: &'a mut Dynamic<T>,
+
+    // The index range of elements being drained.
+    range: std::ops::Range<usize>,
+
+    // The index range of elements being drained that have yet to be yielded.
+    next: std::ops::Range<usize>,
+}
+
+impl<'a, T> std::ops::Drop for Drain<'a, T> {
+    fn drop(&mut self) {
+        todo!("drop all elements that have yet to be drained");
+        todo!("fix internal state of the underlying Dynamic");
+    }
+}
+
+impl<'a, T> std::iter::Iterator for Drain<'a, T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!("obtain the front drained element, if there is any");
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        todo!("exact count of un-yielded drained elements")
+    }
+}
+
+impl<'a, T> std::iter::DoubleEndedIterator for Drain<'a, T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        todo!("obtain the back drained element, if there is any");
+    }
+}
+
+impl<'a, T> std::iter::ExactSizeIterator for Drain<'a, T> {}
+
+impl<'a, T> std::iter::FusedIterator for Drain<'a, T> {}
+
+impl<'a, T> std::fmt::Debug for Drain<'a, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!("print remaining elements");
     }
 }
 
