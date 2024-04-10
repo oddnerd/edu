@@ -558,6 +558,37 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
+    /// Optimally remove elements within `range` by-value.
+    ///
+    /// This method is more efficient than using `remove` for sequential
+    /// elements, moving elements out of the buffer as iterated and shifting as
+    /// necessary only once the [`Drain`] has been dropped.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
+    ///
+    /// let mut drain = instance.drain(..2);
+    /// assert_eq!(drain.next(), 0);
+    /// assert_eq!(drain.next(), 1);
+    ///
+    /// let mut drain = instance.drain(0..2);
+    /// assert_eq!(drain.next(), 2);
+    /// assert_eq!(drain.next(), 3);
+    ///
+    /// let mut drain = instance.drain(0..=1);
+    /// assert_eq!(drain.next(), 4);
+    /// assert_eq!(drain.next(), 5);
+    ///
+    /// let mut drain = instance.drain(0..);
+    /// assert_eq!(drain.next(), 6);
+    /// assert_eq!(drain.next(), 7);
+    /// ```
     pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Result<Drain<'_, T>, ()> {
         let start = match range.start_bound() {
             std::ops::Bound::Included(start) => *start,
