@@ -1575,7 +1575,23 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
     /// assert_eq!(instance.iter().eq([0, 1, 5, 6]));
     /// ```
     fn drop(&mut self) {
-        todo!("drop all elements that have yet to be drained");
+        for index in self.next.clone() {
+            unsafe {
+                let ptr = self.underlying.buffer.as_ptr();
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = ptr.add(self.underlying.pre_capacity);
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = ptr.add(index);
+
+                // SAFETY:
+                // * The `MaybeUninit<T>` is initialized => safe deref.
+                // * The `T` is initialized => safe drop.
+                (*ptr).assume_init_drop();
+            }
+        }
+
         todo!("fix internal state of the underlying Dynamic");
     }
 }
