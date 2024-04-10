@@ -558,8 +558,30 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
-    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Drain<'_, T> {
-        todo!("construct the drain iterator");
+    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Result<Drain<'_, T>, ()> {
+        let start = match range.start_bound() {
+            std::ops::Bound::Included(start) => *start,
+            std::ops::Bound::Excluded(start) => *start + 1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = match range.end_bound() {
+            std::ops::Bound::Included(end) => *end + 1,
+            std::ops::Bound::Excluded(end) => *end,
+            std::ops::Bound::Unbounded => self.len(),
+        };
+
+        if start > self.len() || end > self.len() {
+            return Err(());
+        }
+
+        let range = start..end;
+
+        Ok(Drain {
+            underlying: self,
+            range: range.clone(),
+            next: range.clone(),
+        })
     }
 
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
