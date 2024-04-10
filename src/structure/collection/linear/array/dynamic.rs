@@ -2588,7 +2588,7 @@ mod test {
                     let mut expected = vec![0, 1, 2, 3, 4, 5];
                     let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                    assert_eq!(actual.drain(1..4).count(), expected.drain(1..4).count());
+                    assert_eq!(actual.drain(1..4).expect("valid range").count(), expected.drain(1..4).count());
                 }
 
                 #[test]
@@ -2596,7 +2596,7 @@ mod test {
                     let mut expected = vec![0, 1, 2, 3, 4, 5];
                     let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                    assert!(actual.drain(1..4).eq(expected.drain(1..4)));
+                    assert!(actual.drain(1..4).expect("valid range").eq(expected.drain(1..4)));
                 }
 
                 mod double_ended {
@@ -2608,7 +2608,7 @@ mod test {
                         let mut actual = Dynamic::from_iter(expected.iter().copied());
 
                         assert_eq!(
-                            actual.drain(1..4).rev().count(),
+                            actual.drain(1..4).expect("valid range").rev().count(),
                             expected.drain(1..4).rev().count()
                         );
                     }
@@ -2618,7 +2618,7 @@ mod test {
                         let mut expected = vec![0, 1, 2, 3, 4, 5];
                         let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                        assert!(actual.drain(1..4).rev().eq(expected.drain(1..4).rev()));
+                        assert!(actual.drain(1..4).expect("valid range").rev().eq(expected.drain(1..4).rev()));
                     }
                 }
 
@@ -2633,7 +2633,7 @@ mod test {
                         let expected = expected.drain(1..4);
 
                         assert_eq!(
-                            actual.drain(1..4).size_hint(),
+                            actual.drain(1..4).expect("valid range").size_hint(),
                             (expected.len(), Some(expected.len()))
                         );
                     }
@@ -2643,7 +2643,7 @@ mod test {
                         let mut expected = vec![0, 1, 2, 3, 4, 5];
                         let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                        assert_eq!(actual.drain(1..4).len(), expected.drain(1..4).len());
+                        assert_eq!(actual.drain(1..4).expect("valid range").len(), expected.drain(1..4).len());
                     }
                 }
 
@@ -2653,7 +2653,7 @@ mod test {
                     #[test]
                     fn empty() {
                         let mut actual = Dynamic::<()>::default();
-                        let mut actual = actual.drain(0..0);
+                        let mut actual = actual.drain(0..0).expect("valid range");
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
@@ -2667,7 +2667,7 @@ mod test {
                     #[test]
                     fn exhausted() {
                         let mut actual = Dynamic::from_iter([()].iter());
-                        let mut actual = actual.drain(0..=0);
+                        let mut actual = actual.drain(0..=0).expect("valid range");
 
                         // Exhaust the elements.
                         actual.next();
