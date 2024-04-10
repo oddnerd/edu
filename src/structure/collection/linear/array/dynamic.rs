@@ -1554,6 +1554,26 @@ pub struct Drain<'a, T> {
 }
 
 impl<'a, T> std::ops::Drop for Drain<'a, T> {
+    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
+    ///
+    /// let mut drain = instance.drain(2..=4);
+    ///
+    /// instance.next();      // Consumes the element with value `2`.
+    /// instance.next_back(); // Consumes the element with value `4`.
+    ///
+    /// std::mem::drop(drain); // Drops the elements with value '3'.
+    ///
+    /// assert_eq!(instance.iter().eq([0, 1, 5, 6]));
+    /// ```
     fn drop(&mut self) {
         todo!("drop all elements that have yet to be drained");
         todo!("fix internal state of the underlying Dynamic");
