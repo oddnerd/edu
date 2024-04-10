@@ -2504,6 +2504,107 @@ mod test {
             }
         }
 
+        mod drain {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let mut expected = vec![0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert_eq!(actual.drain(1..4).count(), expected.drain(1..4).count());
+            }
+
+            #[test]
+            fn in_order() {
+                let mut expected = vec![0, 1, 2, 3, 4, 5];
+                let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                assert!(actual.drain(1..4).eq(expected.drain(1..4)));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(
+                        actual.drain(1..4).rev().count(),
+                        expected.drain(1..4).rev().count()
+                    );
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert!(actual.drain(1..4).rev().eq(expected.drain(1..4).rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    let expected = expected.drain(1..4);
+
+                    assert_eq!(
+                        actual.drain(1..4).size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(actual.drain(1..4).len(), expected.drain(1..4).len());
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let mut actual = Dynamic::<()>::default().drain(0..0);
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let actual = Dynamic::from_iter([()].iter()).drain(0..=0);
+
+                    // Exhaust the elements.
+                    actual.next();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+
         mod resize {
             use super::*;
 
