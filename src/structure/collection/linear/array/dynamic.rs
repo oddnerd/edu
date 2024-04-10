@@ -558,7 +558,7 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
-    pub fn drain(&mut self, range: std::ops::Range<usize>) -> Drain<'_, T> {
+    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Drain<'_, T> {
         todo!("construct the drain iterator");
     }
 
@@ -2576,7 +2576,8 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    let mut actual = Dynamic::<()>::default().drain(0..0);
+                    let mut actual = Dynamic::<()>::default();
+                    let mut actual = actual.drain(0..0);
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -2589,7 +2590,8 @@ mod test {
 
                 #[test]
                 fn exhausted() {
-                    let actual = Dynamic::from_iter([()].iter()).drain(0..=0);
+                    let mut actual = Dynamic::from_iter([()].iter());
+                    let mut actual = actual.drain(0..=0);
 
                     // Exhaust the elements.
                     actual.next();
