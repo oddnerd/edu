@@ -2725,6 +2725,17 @@ mod test {
                 }
 
                 #[test]
+                fn increases_capacity_when_draining_middle() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(2..=3).expect("valid range");
+                    }
+
+                    assert_eq!(actual.capacity_back(), 4);
+                }
+
+                #[test]
                 fn removes_yielded_elements() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
