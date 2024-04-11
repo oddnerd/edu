@@ -3772,6 +3772,22 @@ mod test {
         }
     }
 
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dynamic::from_iter(expected.iter().cloned());
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+        }
+    }
+
     mod collection {
         use super::*;
 
