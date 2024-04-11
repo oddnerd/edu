@@ -1059,7 +1059,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     /// assert!(actual.eq(expected))
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let mut iter = iter.into_iter();
+        let iter = iter.into_iter();
 
         // SAFETY: `size_hint` can _NOT_ be trusted to exact size.
         let count = {
@@ -1070,17 +1070,11 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
         // It is okay if this fails, lazy allocate for each individual element.
         let _ = self.reserve_back(count);
 
-        while let Some(element) = iter.next() {
+        for element in iter {
             if self.append(element).is_err() {
-                panic!("TODO");
+                panic!("allocation failed, could not append element");
             }
         }
-
-        // iter.for_each(|element| {
-        //     self.append(element).unwrap_or_else(|_| {
-        //         panic!("allocation failed, could not append element during extend")
-        //     });
-        // });
     }
 }
 
