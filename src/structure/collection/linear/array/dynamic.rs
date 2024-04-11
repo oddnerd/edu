@@ -1595,13 +1595,15 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
             }
         }
 
-        self.underlying.initialized -= self.range.len();
-
         if self.range.end == self.underlying.initialized {
             self.underlying.post_capacity += self.range.len();
+            self.underlying.initialized -= self.range.len();
         } else if self.range.start == 0 {
             self.underlying.pre_capacity += self.range.len();
+            self.underlying.initialized -= self.range.len();
         } else {
+            self.underlying.initialized -= self.range.len();
+
             unsafe {
                 let ptr = self.underlying.buffer.as_ptr();
 
@@ -1639,7 +1641,7 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(src, dst, self.underlying.initialized - self.range.len());
+                std::ptr::copy(src, dst, self.underlying.initialized);
             }
         }
     }
