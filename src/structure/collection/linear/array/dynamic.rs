@@ -573,21 +573,29 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
     ///
-    /// let mut drain = instance.drain(..2);
-    /// assert_eq!(drain.next(), 0);
-    /// assert_eq!(drain.next(), 1);
+    /// instance.drain(8..).expect_err("invalid range");
     ///
-    /// let mut drain = instance.drain(0..2);
-    /// assert_eq!(drain.next(), 2);
-    /// assert_eq!(drain.next(), 3);
+    /// let mut drain = instance.drain(..2).expect("valid range");
+    /// assert_eq!(drain.next(), Some(0));
+    /// assert_eq!(drain.next(), Some(1));
+    /// std::mem::drop(drain);
     ///
-    /// let mut drain = instance.drain(0..=1);
-    /// assert_eq!(drain.next(), 4);
-    /// assert_eq!(drain.next(), 5);
+    /// let mut drain = instance.drain(0..2).expect("valid range");
+    /// assert_eq!(drain.next(), Some(2));
+    /// assert_eq!(drain.next(), Some(3));
+    /// std::mem::drop(drain);
     ///
-    /// let mut drain = instance.drain(0..);
-    /// assert_eq!(drain.next(), 6);
-    /// assert_eq!(drain.next(), 7);
+    /// let mut drain = instance.drain(0..=1).expect("valid range");
+    /// assert_eq!(drain.next(), Some(4));
+    /// assert_eq!(drain.next(), Some(5));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..).expect("valid range");
+    /// assert_eq!(drain.next(), Some(6));
+    /// assert_eq!(drain.next(), Some(7));
+    /// std::mem::drop(drain);
+    ///
+    /// instance.drain(..).expect_err("invalid range/no elements to drain");
     /// ```
     pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Result<Drain<'_, T>, ()> {
         let start = match range.start_bound() {
@@ -1565,17 +1573,18 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::Linear;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
     ///
-    /// let mut drain = instance.drain(2..=4);
+    /// let mut drain = instance.drain(2..=4).expect("valid range");
     ///
-    /// instance.next();      // Consumes the element with value `2`.
-    /// instance.next_back(); // Consumes the element with value `4`.
+    /// drain.next();      // Consumes the element with value `2`.
+    /// drain.next_back(); // Consumes the element with value `4`.
     ///
-    /// std::mem::drop(drain); // Drops the elements with value '3'.
+    /// std::mem::drop(drain); // Drops the element with value '3'.
     ///
-    /// assert_eq!(instance.iter().eq([0, 1, 5, 6]));
+    /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
     /// ```
     fn drop(&mut self) {
         for index in self.next.clone() {
@@ -1665,7 +1674,7 @@ impl<'a, T> std::iter::Iterator for Drain<'a, T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..);
+    /// let mut actual = underlying.drain(..).expect("valid range");
     ///
     ///
     /// assert_eq!(actual.next(), Some(0));
@@ -1705,9 +1714,9 @@ impl<'a, T> std::iter::Iterator for Drain<'a, T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..);
+    /// let mut actual = underlying.drain(..).expect("valid range");
     ///
-    /// assert_eq!(actual.size_hint(), 6);
+    /// assert_eq!(actual.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.next.len(), Some(self.next.len()))
@@ -1724,8 +1733,8 @@ impl<'a, T> std::iter::DoubleEndedIterator for Drain<'a, T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut underlying = Dynamic::from([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..);
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..).expect("valid range");
     ///
     /// assert_eq!(actual.next_back(), Some(5));
     /// assert_eq!(actual.next_back(), Some(4));
