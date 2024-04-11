@@ -1645,6 +1645,27 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
 impl<'a, T> std::iter::Iterator for Drain<'a, T> {
     type Item = T;
 
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..);
+    ///
+    ///
+    /// assert_eq!(actual.next(), Some(0));
+    /// assert_eq!(actual.next(), Some(1));
+    /// assert_eq!(actual.next(), Some(2));
+    /// assert_eq!(actual.next(), Some(3));
+    /// assert_eq!(actual.next(), Some(4));
+    /// assert_eq!(actual.next(), Some(5));
+    /// assert_eq!(actual.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         let ptr = self.underlying.buffer.as_ptr();
 
