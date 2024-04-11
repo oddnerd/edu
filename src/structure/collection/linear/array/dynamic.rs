@@ -1597,57 +1597,60 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
 
         if self.range.end == self.underlying.initialized {
             self.underlying.post_capacity += self.range.len();
-            self.underlying.initialized -= self.range.len();
         } else if self.range.start == 0 {
             self.underlying.pre_capacity += self.range.len();
-            self.underlying.initialized -= self.range.len();
         } else {
-            self.underlying.initialized -= self.range.len();
+            let leading = self.range.start;
+            let trailing = self.underlying.initialized - self.range.end;
+
+            // let leading = (self.underlying.initialized - self.range.len()) - self.range.start;
+            // let trailing = (self.underlying.initialized - self.range.len()) - self.range.end;
+
+            let only_front_capacity = self.underlying.pre_capacity != 0 && self.underlying.post_capacity == 0;
+            let only_back_capacity = self.underlying.pre_capacity == 0 && self.underlying.post_capacity != 0;
 
             unsafe {
-                let ptr = self.underlying.buffer.as_ptr();
+                let ptr = self.underlying.as_mut_ptr();
 
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = ptr.add(self.underlying.pre_capacity);
+                let source: *mut T;
+                let destination: *mut T;
+                let count : usize;
 
-                let (src, dst) = if self.underlying.pre_capacity > 0
-                    && self.underlying.post_capacity == 0
-                {
-                    // [pre_capacity] [to shift] [drained] [remaining]
-                    self.underlying.pre_capacity += self.range.len();
+                if only_front_capacity || (!only_back_capacity && trailing > leading) {
+                    // [pre_capacity] [remain] [drained] [shift] [post_capacity]
 
-                    // SAFETY: stays aligned within the allocated object.
-                    (ptr, ptr.add(self.range.len()))
-                } else if self.underlying.post_capacity > 0 && self.underlying.pre_capacity == 0 {
-                    // [remaining] [drained] [to shift] [post_capacity]
-                    self.underlying.post_capacity += self.range.len();
+                    self.underlying.post_capacity = self.range.len();
+
+                    count = trailing;
 
                     // SAFETY: stays aligned within the allocated object.
-                    (ptr.add(self.range.end), ptr.add(self.range.start))
+                    source = ptr.add(self.range.end);
+
+                    // SAFETY: stays aligned within the allocated object.
+                    destination = ptr.add(self.range.start);
+
                 } else {
-                    // shift to minimize elements being shifted.
-                    if self.underlying.initialized > self.range.start {
-                        // [pre_capacity] [to shift] [drained] [remaining] [post_capacity]
-                        self.underlying.pre_capacity += self.range.len();
+                    // [pre_capacity] [shift] [drained] [remain] [post_capacity]
 
-                        // SAFETY: stays aligned within the allocated object.
-                        (ptr, ptr.add(self.range.len()))
-                    } else {
-                        // [pre_capacity] [remaining] [drained] [to shift] [post_capacity]
-                        self.underlying.post_capacity += self.range.len();
+                    self.underlying.pre_capacity = self.range.len();
 
-                        // SAFETY: stays aligned within the allocated object.
-                        (ptr.add(self.range.end), ptr.add(self.range.start))
-                    }
-                };
+                    count = leading;
+
+                    source = ptr;
+
+                    // SAFETY: stays aligned within the allocated object.
+                    destination = ptr.add(self.range.len());
+                }
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(src, dst, self.underlying.initialized);
+                std::ptr::copy(source, destination, count);
             }
         }
+
+        self.underlying.initialized -= self.range.len();
     }
 }
 
@@ -2878,7 +2881,7 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn increases_front_capacity_when_draining_front() {
+                fn increases_front_capacity_when_front() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     {
@@ -2889,7 +2892,7 @@ mod test {
                 }
 
                 #[test]
-                fn increases_back_capacity_when_draining_back() {
+                fn increases_back_capacity_when_back() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     {
@@ -2900,7 +2903,7 @@ mod test {
                 }
 
                 #[test]
-                fn increases_capacity_when_draining_middle() {
+                fn increases_capacity_when_middle() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     {
