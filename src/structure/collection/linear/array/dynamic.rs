@@ -558,6 +558,71 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
+    /// Optimally remove elements within `range` by-value.
+    ///
+    /// This method is more efficient than using `remove` for sequential
+    /// elements, moving elements out of the buffer as iterated and shifting
+    /// once only when the [`Drain`] has been dropped.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
+    ///
+    /// instance.drain(8..).expect_err("invalid range");
+    ///
+    /// let mut drain = instance.drain(..2).expect("valid range");
+    /// assert_eq!(drain.next(), Some(0));
+    /// assert_eq!(drain.next(), Some(1));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..2).expect("valid range");
+    /// assert_eq!(drain.next(), Some(2));
+    /// assert_eq!(drain.next(), Some(3));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..=1).expect("valid range");
+    /// assert_eq!(drain.next(), Some(4));
+    /// assert_eq!(drain.next(), Some(5));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..).expect("valid range");
+    /// assert_eq!(drain.next(), Some(6));
+    /// assert_eq!(drain.next(), Some(7));
+    /// std::mem::drop(drain);
+    ///
+    /// instance.drain(..).expect_err("invalid range/no elements to drain");
+    /// ```
+    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Result<Drain<'_, T>, ()> {
+        let start = match range.start_bound() {
+            std::ops::Bound::Included(start) => *start,
+            std::ops::Bound::Excluded(start) => *start + 1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = match range.end_bound() {
+            std::ops::Bound::Included(end) => *end + 1,
+            std::ops::Bound::Excluded(end) => *end,
+            std::ops::Bound::Unbounded => self.len(),
+        };
+
+        if start >= self.len() || end > self.len() {
+            return Err(());
+        }
+
+        let range = start..end;
+
+        Ok(Drain {
+            underlying: self,
+            range: range.clone(),
+            next: range.clone(),
+        })
+    }
+
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
     /// This method will increase [`capacity_back`] by `capacity` if positive,
@@ -875,10 +940,6 @@ impl<T> std::iter::Iterator for Dynamic<T> {
     }
 }
 
-impl<T> std::iter::FusedIterator for Dynamic<T> {}
-
-impl<T> std::iter::ExactSizeIterator for Dynamic<T> {}
-
 impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
     /// Obtain the last initialized element.
     ///
@@ -919,6 +980,10 @@ impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
         }
     }
 }
+
+impl<T> std::iter::ExactSizeIterator for Dynamic<T> {}
+
+impl<T> std::iter::FusedIterator for Dynamic<T> {}
 
 impl<'a, T: 'a> std::iter::FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
@@ -1482,6 +1547,252 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 
         self.post_capacity += self.initialized;
         self.initialized = 0;
+    }
+}
+
+/// By-value [`Iterator`] to remove elements from a [`Dynamic`].
+///
+/// See [`Dynamic::drain`].
+pub struct Drain<'a, T> {
+    // The underlying [`Dynamic`] being drained from.
+    underlying: &'a mut Dynamic<T>,
+
+    // The index range of elements being drained.
+    range: std::ops::Range<usize>,
+
+    // The index range of elements being drained that have yet to be yielded.
+    next: std::ops::Range<usize>,
+}
+
+impl<'a, T> std::ops::Drop for Drain<'a, T> {
+    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::Linear;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
+    ///
+    /// let mut drain = instance.drain(2..=4).expect("valid range");
+    ///
+    /// drain.next();      // Consumes the element with value `2`.
+    /// drain.next_back(); // Consumes the element with value `4`.
+    ///
+    /// std::mem::drop(drain); // Drops the element with value '3'.
+    ///
+    /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
+    /// ```
+    fn drop(&mut self) {
+        for index in self.next.clone() {
+            unsafe {
+                let ptr = self.underlying.buffer.as_ptr();
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = ptr.add(self.underlying.pre_capacity);
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = ptr.add(index);
+
+                // SAFETY:
+                // * The `MaybeUninit<T>` is initialized => safe deref.
+                // * The `T` is initialized => safe drop.
+                (*ptr).assume_init_drop();
+            }
+        }
+
+        if self.range.end == self.underlying.initialized {
+            self.underlying.post_capacity += self.range.len();
+        } else if self.range.start == 0 {
+            self.underlying.pre_capacity += self.range.len();
+        } else {
+            let leading = self.range.start;
+            let trailing = self.underlying.initialized - self.range.end;
+
+            let only_front_capacity =
+                self.underlying.pre_capacity != 0 && self.underlying.post_capacity == 0;
+            let only_back_capacity =
+                self.underlying.pre_capacity == 0 && self.underlying.post_capacity != 0;
+
+            unsafe {
+                let ptr = self.underlying.as_mut_ptr();
+
+                let source: *mut T;
+                let destination: *mut T;
+                let count: usize;
+
+                if only_front_capacity || (!only_back_capacity && trailing > leading) {
+                    // [pre_capacity] [remain] [drained] [shift] [post_capacity]
+
+                    self.underlying.post_capacity = self.range.len();
+
+                    count = trailing;
+
+                    // SAFETY: stays aligned within the allocated object.
+                    source = ptr.add(self.range.end);
+
+                    // SAFETY: stays aligned within the allocated object.
+                    destination = ptr.add(self.range.start);
+                } else {
+                    // [pre_capacity] [shift] [drained] [remain] [post_capacity]
+
+                    self.underlying.pre_capacity = self.range.len();
+
+                    count = leading;
+
+                    source = ptr;
+
+                    // SAFETY: stays aligned within the allocated object.
+                    destination = ptr.add(self.range.len());
+                }
+
+                // SAFETY:
+                // * owned memory => source/destination valid for read/writes.
+                // * no aliasing restrictions => source and destination can overlap.
+                // * underlying buffer is aligned => both pointers are aligned.
+                std::ptr::copy(source, destination, count);
+            }
+        }
+
+        self.underlying.initialized -= self.range.len();
+    }
+}
+
+impl<'a, T> std::iter::Iterator for Drain<'a, T> {
+    type Item = T;
+
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..).expect("valid range");
+    ///
+    ///
+    /// assert_eq!(actual.next(), Some(0));
+    /// assert_eq!(actual.next(), Some(1));
+    /// assert_eq!(actual.next(), Some(2));
+    /// assert_eq!(actual.next(), Some(3));
+    /// assert_eq!(actual.next(), Some(4));
+    /// assert_eq!(actual.next(), Some(5));
+    /// assert_eq!(actual.next(), None);
+    /// ```
+    fn next(&mut self) -> Option<Self::Item> {
+        let ptr = self.underlying.buffer.as_ptr();
+
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe { ptr.add(self.underlying.pre_capacity) };
+
+        if let Some(index) = self.next.next() {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY:
+            // * `ptr` is valid => safe to dereference.
+            // * underlying `T` is initialized.
+            Some(unsafe { (*ptr).assume_init_read() })
+        } else {
+            None
+        }
+    }
+
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..).expect("valid range");
+    ///
+    /// assert_eq!(actual.size_hint(), (6, Some(6)));
+    /// ```
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.next.len(), Some(self.next.len()))
+    }
+}
+
+impl<'a, T> std::iter::DoubleEndedIterator for Drain<'a, T> {
+    /// Obtain the final element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..).expect("valid range");
+    ///
+    /// assert_eq!(actual.next_back(), Some(5));
+    /// assert_eq!(actual.next_back(), Some(4));
+    /// assert_eq!(actual.next_back(), Some(3));
+    /// assert_eq!(actual.next_back(), Some(2));
+    /// assert_eq!(actual.next_back(), Some(1));
+    /// assert_eq!(actual.next_back(), Some(0));
+    /// assert_eq!(actual.next_back(), None);
+    /// ```
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let ptr = self.underlying.buffer.as_ptr();
+
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe { ptr.add(self.underlying.pre_capacity) };
+
+        if let Some(index) = self.next.next_back() {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY:
+            // * `ptr` is valid => safe to dereference.
+            // * underlying `T` is initialized.
+            Some(unsafe { (*ptr).assume_init_read() })
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a, T> std::iter::ExactSizeIterator for Drain<'a, T> {}
+
+impl<'a, T> std::iter::FusedIterator for Drain<'a, T> {}
+
+impl<'a, T: std::fmt::Debug> std::fmt::Debug for Drain<'a, T> {
+    /// List the elements being drained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let actual = underlying.drain(1..4);
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("Ok([1, 2, 3])"));
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let ptr = self.underlying.as_ptr();
+
+        let mut list = f.debug_list();
+
+        for index in self.next.clone() {
+            list.entry(unsafe { &*ptr.add(index) });
+        }
+
+        list.finish()
     }
 }
 
@@ -2451,6 +2762,243 @@ mod test {
                 let mut actual = Dynamic::<()>::default();
 
                 assert!(actual.shift(0).is_ok())
+            }
+        }
+
+        mod drain {
+            use super::*;
+
+            #[test]
+            fn ok_when_range_is_in_bounds() {
+                let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                for start in 0..actual.len() {
+                    for end in (start + 1)..actual.len() {
+                        let mut actual = actual.clone();
+
+                        assert!(actual.drain(start..end).is_ok());
+                    }
+                }
+            }
+
+            #[test]
+            fn errors_when_start_out_of_bounds() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                assert!(actual.drain(actual.len()..).is_err());
+            }
+
+            #[test]
+            fn errors_when_end_out_of_bounds() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                assert!(actual.drain(..actual.len() + 1).is_err());
+            }
+
+            #[test]
+            fn errors_when_empty() {
+                let mut actual = Dynamic::<()>::default();
+
+                assert!(actual.drain(..).is_err())
+            }
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(
+                        actual.drain(1..4).expect("valid range").count(),
+                        expected.drain(1..4).count()
+                    );
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert!(actual
+                        .drain(1..4)
+                        .expect("valid range")
+                        .eq(expected.drain(1..4)));
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        assert_eq!(
+                            actual.drain(1..4).expect("valid range").rev().count(),
+                            expected.drain(1..4).rev().count()
+                        );
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        assert!(actual
+                            .drain(1..4)
+                            .expect("valid range")
+                            .rev()
+                            .eq(expected.drain(1..4).rev()));
+                    }
+                }
+
+                mod exact_size {
+                    use super::*;
+
+                    #[test]
+                    fn hint() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        let expected = expected.drain(1..4);
+
+                        assert_eq!(
+                            actual.drain(1..4).expect("valid range").size_hint(),
+                            (expected.len(), Some(expected.len()))
+                        );
+                    }
+
+                    #[test]
+                    fn len() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        assert_eq!(
+                            actual.drain(1..4).expect("valid range").len(),
+                            expected.drain(1..4).len()
+                        );
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn exhausted() {
+                        let mut actual = Dynamic::from_iter([()].iter());
+                        let mut actual = actual.drain(0..=0).expect("valid range");
+
+                        // Exhaust the elements.
+                        actual.next();
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn increases_front_capacity_when_front() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(..3).expect("valid range");
+                    }
+
+                    assert_eq!(actual.capacity_front(), 3);
+                }
+
+                #[test]
+                fn increases_back_capacity_when_back() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(3..).expect("valid range");
+                    }
+
+                    assert_eq!(actual.capacity_back(), 3);
+                }
+
+                #[test]
+                fn increases_capacity_when_middle() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(2..=3).expect("valid range");
+                    }
+
+                    assert_eq!(actual.capacity(), 2);
+                }
+
+                #[test]
+                fn removes_yielded_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(..).expect("valid range");
+                    }
+
+                    assert_eq!(actual.len(), 0);
+                    assert_eq!(actual.capacity(), 6);
+                }
+
+                #[test]
+                fn does_not_modify_leading_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(3..).expect("valid range");
+                    }
+
+                    assert!(actual.iter().eq([0, 1, 2].iter()));
+                }
+
+                #[test]
+                fn does_not_modify_trailing_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(..3).expect("valid range");
+                    }
+
+                    assert!(actual.iter().eq([3, 4, 5].iter()));
+                }
+
+                #[test]
+                fn shifts_trailing_elements_after_leading_when_mostly_front() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(1..=2).expect("valid range");
+                    }
+
+                    println!("{:?}", actual);
+
+                    assert!(actual.iter().eq([0, 3, 4, 5].iter()));
+                }
+
+                #[test]
+                fn shifts_leading_elements_before_trailing_when_mostly_back() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(3..=4).expect("valid range");
+                    }
+
+                    println!("{:?}", actual);
+
+                    assert!(actual.iter().eq([0, 1, 2, 5].iter()));
+                }
             }
         }
 
