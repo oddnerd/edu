@@ -610,7 +610,7 @@ impl<T> Dynamic<T> {
             std::ops::Bound::Unbounded => self.len(),
         };
 
-        if start > self.len() || end > self.len() {
+        if start >= self.len() || end > self.len() {
             return Err(());
         }
 
