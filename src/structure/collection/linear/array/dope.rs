@@ -608,6 +608,23 @@ mod test {
         }
     }
 
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+                let actual = unsafe { Dope::new(ptr, expected.len()) };
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+        }
+    }
+
     mod collection {
         use super::*;
 
