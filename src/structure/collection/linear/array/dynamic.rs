@@ -1749,9 +1749,31 @@ impl<'a, T> std::iter::ExactSizeIterator for Drain<'a, T> {}
 
 impl<'a, T> std::iter::FusedIterator for Drain<'a, T> {}
 
-impl<'a, T> std::fmt::Debug for Drain<'a, T> {
+impl<'a, T: std::fmt::Debug> std::fmt::Debug for Drain<'a, T> {
+    /// List the elements being drained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let actual = underlying.drain(1..4);
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("Ok([1, 2, 3])"));
+    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!("print remaining elements");
+        let ptr = self.underlying.as_ptr();
+
+        let mut list = f.debug_list();
+
+        for index in self.next.clone() {
+            list.entry(unsafe { &*ptr.add(index) });
+        }
+
+        list.finish()
     }
 }
 
