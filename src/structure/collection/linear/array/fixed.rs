@@ -36,26 +36,37 @@ impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
-    type Element = T;
-
-    /// Query how many elements are contained.
+impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
+    /// Construct with default initialized elements.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Fixed::from(expected.clone());
+    /// let actual: Fixed<i32, 256> = Default::default();
     ///
-    /// assert_eq!(actual.count(), expected.len());
+    /// for actual in actual {
+    ///     assert_eq!(actual, Default::default());
+    /// }
     /// ```
-    fn count(&self) -> usize {
-        N
+    fn default() -> Self {
+        // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
+        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
+            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+
+        for element in uninitialized.iter_mut() {
+            element.write(Default::default());
+        }
+
+        // SAFETY:
+        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
+        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
+        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
+
+        Self::from(initialized)
     }
 }
 
@@ -122,6 +133,29 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
         unsafe { &mut *self.data.as_mut_ptr().add(index) }
+    }
+}
+
+impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
+    type Element = T;
+
+    /// Query how many elements are contained.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert_eq!(actual.count(), expected.len());
+    /// ```
+    fn count(&self) -> usize {
+        N
     }
 }
 
@@ -422,40 +456,6 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
 
             next: 0..N,
         }
-    }
-}
-
-impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
-    /// Construct with default initialized elements.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let actual: Fixed<i32, 256> = Default::default();
-    ///
-    /// for actual in actual {
-    ///     assert_eq!(actual, Default::default());
-    /// }
-    /// ```
-    fn default() -> Self {
-        // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
-        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-
-        for element in uninitialized.iter_mut() {
-            element.write(Default::default());
-        }
-
-        // SAFETY:
-        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
-        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
-        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
-
-        Self::from(initialized)
     }
 }
 
