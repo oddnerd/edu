@@ -1691,6 +1691,26 @@ impl<'a, T> std::iter::Iterator for Drain<'a, T> {
 }
 
 impl<'a, T> std::iter::DoubleEndedIterator for Drain<'a, T> {
+    /// Obtain the final element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..);
+    ///
+    /// assert_eq!(actual.next_back(), Some(5));
+    /// assert_eq!(actual.next_back(), Some(4));
+    /// assert_eq!(actual.next_back(), Some(3));
+    /// assert_eq!(actual.next_back(), Some(2));
+    /// assert_eq!(actual.next_back(), Some(1));
+    /// assert_eq!(actual.next_back(), Some(0));
+    /// assert_eq!(actual.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         let ptr = self.underlying.buffer.as_ptr();
 
