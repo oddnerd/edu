@@ -1614,11 +1614,13 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
                     && self.underlying.post_capacity == 0
                 {
                     // [pre_capacity] [to shift] [drained] [remaining]
+                    self.underlying.pre_capacity += self.range.len();
 
                     // SAFETY: stays aligned within the allocated object.
                     (ptr, ptr.add(self.range.len()))
                 } else if self.underlying.post_capacity > 0 && self.underlying.pre_capacity == 0 {
                     // [remaining] [drained] [to shift] [post_capacity]
+                    self.underlying.post_capacity += self.range.len();
 
                     // SAFETY: stays aligned within the allocated object.
                     (ptr.add(self.range.end), ptr.add(self.range.start))
@@ -1626,11 +1628,13 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
                     // shift to minimize elements being shifted.
                     if self.underlying.initialized > self.range.start {
                         // [pre_capacity] [to shift] [drained] [remaining] [post_capacity]
+                        self.underlying.pre_capacity += self.range.len();
 
                         // SAFETY: stays aligned within the allocated object.
                         (ptr, ptr.add(self.range.len()))
                     } else {
                         // [pre_capacity] [remaining] [drained] [to shift] [post_capacity]
+                        self.underlying.post_capacity += self.range.len();
 
                         // SAFETY: stays aligned within the allocated object.
                         (ptr.add(self.range.end), ptr.add(self.range.start))
