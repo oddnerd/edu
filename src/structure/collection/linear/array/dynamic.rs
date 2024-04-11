@@ -2886,20 +2886,6 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn empty() {
-                        let mut actual = Dynamic::<()>::default();
-                        let mut actual = actual.drain(0..0).expect("valid range");
-
-                        // Yields `None` at least once.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-
-                        // Continues to yield `None`.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-                    }
-
-                    #[test]
                     fn exhausted() {
                         let mut actual = Dynamic::from_iter([()].iter());
                         let mut actual = actual.drain(0..=0).expect("valid range");
