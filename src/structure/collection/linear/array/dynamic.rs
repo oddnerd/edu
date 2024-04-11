@@ -2785,14 +2785,14 @@ mod test {
             fn errors_when_start_out_of_bounds() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert!(actual.drain(6..).is_err());
+                assert!(actual.drain(actual.len()..).is_err());
             }
 
             #[test]
             fn errors_when_end_out_of_bounds() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert!(actual.drain(..6).is_err());
+                assert!(actual.drain(..actual.len() + 1).is_err());
             }
 
             #[test]
