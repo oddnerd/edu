@@ -1903,7 +1903,11 @@ mod test {
                 let ptr = actual.buffer.as_ptr();
 
                 for index in 0..actual.capacity() {
-                    actual.append(index).expect("uses capacity");
+                    if index % 2 == 0 {
+                        actual.append(index).expect("uses capacity");
+                    } else {
+                        actual.prepend(index).expect("uses capacity");
+                    }
                 }
 
                 assert_eq!(ptr, actual.buffer.as_ptr());
