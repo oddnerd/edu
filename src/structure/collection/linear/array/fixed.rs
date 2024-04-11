@@ -136,6 +136,41 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
     }
 }
 
+impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
+    type Item = T;
+
+    type IntoIter = IntoIter<T, N>;
+
+    /// Obtain an iterator that yields ownership of elements by value.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert!(actual.into_iter().eq(expected.into_iter()));
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter {
+            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
+            data: unsafe {
+                self.data
+                    .as_ptr()
+                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
+                    .read()
+            },
+
+            next: 0..N,
+        }
+    }
+}
+
 impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     type Element = T;
 
@@ -423,41 +458,6 @@ impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N
 impl<'a, T: 'a, const N: usize> std::iter::ExactSizeIterator for IntoIter<T, N> {}
 
 impl<'a, T: 'a, const N: usize> std::iter::FusedIterator for IntoIter<T, N> {}
-
-impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
-    type Item = T;
-
-    type IntoIter = IntoIter<T, N>;
-
-    /// Obtain an iterator that yields ownership of elements by value.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Fixed::from(expected.clone());
-    ///
-    /// assert!(actual.into_iter().eq(expected.into_iter()));
-    /// ```
-    fn into_iter(self) -> Self::IntoIter {
-        IntoIter {
-            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
-            data: unsafe {
-                self.data
-                    .as_ptr()
-                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
-                    .read()
-            },
-
-            next: 0..N,
-        }
-    }
-}
 
 #[cfg(test)]
 mod test {
