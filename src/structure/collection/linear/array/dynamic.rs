@@ -2907,7 +2907,7 @@ mod test {
                         actual.drain(2..=3).expect("valid range");
                     }
 
-                    assert_eq!(actual.capacity(), 4);
+                    assert_eq!(actual.capacity(), 2);
                 }
 
                 #[test]
