@@ -537,24 +537,24 @@ impl<T> Dynamic<T> {
 
         let source = self.as_mut_ptr();
 
-        if offset < 0 {
-            if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
-                return Err(());
+        match offset.cmp(&0) {
+            std::cmp::Ordering::Less => {
+                if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
+                    return Err(());
+                }
+
+                self.pre_capacity -= offset.unsigned_abs();
+                self.post_capacity += offset.unsigned_abs();
             }
+            std::cmp::Ordering::Greater => {
+                if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
+                    return Err(());
+                }
 
-            self.pre_capacity -= offset.unsigned_abs();
-            self.post_capacity += offset.unsigned_abs();
-        } else if offset > 0 {
-            if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
-                return Err(());
+                self.pre_capacity += offset.unsigned_abs();
+                self.post_capacity -= offset.unsigned_abs();
             }
-
-            self.pre_capacity += offset.unsigned_abs();
-            self.post_capacity -= offset.unsigned_abs();
-        } else {
-            debug_assert_eq!(offset, 0);
-
-            return Ok(self);
+            std::cmp::Ordering::Equal => return Ok(self),
         }
 
         unsafe {
