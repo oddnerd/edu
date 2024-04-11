@@ -561,8 +561,8 @@ impl<T> Dynamic<T> {
     /// Optimally remove elements within `range` by-value.
     ///
     /// This method is more efficient than using `remove` for sequential
-    /// elements, moving elements out of the buffer as iterated and shifting as
-    /// necessary only once the [`Drain`] has been dropped.
+    /// elements, moving elements out of the buffer as iterated and shifting
+    /// once only when the [`Drain`] has been dropped.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
@@ -1592,7 +1592,54 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
             }
         }
 
-        todo!("fix internal state of the underlying Dynamic");
+        self.underlying.initialized -= self.range.len();
+
+        if self.range.end == self.underlying.initialized {
+            self.underlying.post_capacity += self.range.len();
+        } else if self.range.start == 0 {
+            self.underlying.pre_capacity += self.range.len();
+        } else {
+            unsafe {
+                let ptr = self.underlying.buffer.as_ptr();
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = ptr.add(self.underlying.pre_capacity);
+
+                let (src, dst) = if self.underlying.pre_capacity > 0
+                    && self.underlying.post_capacity == 0
+                {
+                    // [pre_capacity] [to shift] [drained] [remaining]
+
+                    // SAFETY: stays aligned within the allocated object.
+                    (ptr, ptr.add(self.range.len()))
+                } else if self.underlying.post_capacity > 0 && self.underlying.pre_capacity == 0 {
+                    // [remaining] [drained] [to shift] [post_capacity]
+
+                    // SAFETY: stays aligned within the allocated object.
+                    (ptr.add(self.range.end), ptr.add(self.range.start))
+                } else {
+                    // shift to minimize elements being shifted.
+                    if self.underlying.initialized > self.range.start {
+                        // [pre_capacity] [to shift] [drained] [remaining] [post_capacity]
+
+                        // SAFETY: stays aligned within the allocated object.
+                        (ptr, ptr.add(self.range.len()))
+                    } else {
+                        // [pre_capacity] [remaining] [drained] [to shift] [post_capacity]
+
+                        // SAFETY: stays aligned within the allocated object.
+                        (ptr.add(self.range.end), ptr.add(self.range.start))
+                    }
+                };
+
+                // SAFETY:
+                // * owned memory => source/destination valid for read/writes.
+                // * no aliasing restrictions => source and destination can overlap.
+                // * underlying buffer is aligned => both pointers are aligned.
+                std::ptr::copy(src, dst, self.underlying.initialized - self.range.len());
+            }
+        }
+
     }
 }
 
@@ -2604,7 +2651,10 @@ mod test {
                     let mut expected = vec![0, 1, 2, 3, 4, 5];
                     let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                    assert_eq!(actual.drain(1..4).expect("valid range").count(), expected.drain(1..4).count());
+                    assert_eq!(
+                        actual.drain(1..4).expect("valid range").count(),
+                        expected.drain(1..4).count()
+                    );
                 }
 
                 #[test]
@@ -2612,7 +2662,10 @@ mod test {
                     let mut expected = vec![0, 1, 2, 3, 4, 5];
                     let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                    assert!(actual.drain(1..4).expect("valid range").eq(expected.drain(1..4)));
+                    assert!(actual
+                        .drain(1..4)
+                        .expect("valid range")
+                        .eq(expected.drain(1..4)));
                 }
 
                 mod double_ended {
@@ -2634,7 +2687,11 @@ mod test {
                         let mut expected = vec![0, 1, 2, 3, 4, 5];
                         let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                        assert!(actual.drain(1..4).expect("valid range").rev().eq(expected.drain(1..4).rev()));
+                        assert!(actual
+                            .drain(1..4)
+                            .expect("valid range")
+                            .rev()
+                            .eq(expected.drain(1..4).rev()));
                     }
                 }
 
@@ -2659,7 +2716,10 @@ mod test {
                         let mut expected = vec![0, 1, 2, 3, 4, 5];
                         let mut actual = Dynamic::from_iter(expected.iter().copied());
 
-                        assert_eq!(actual.drain(1..4).expect("valid range").len(), expected.drain(1..4).len());
+                        assert_eq!(
+                            actual.drain(1..4).expect("valid range").len(),
+                            expected.drain(1..4).len()
+                        );
                     }
                 }
 
