@@ -2945,14 +2945,29 @@ mod test {
                 }
 
                 #[test]
-                fn combines_leading_and_trailing_elements() {
+                fn combines_leading_with_trailing_elements_when_draining_front() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     {
-                        actual.drain(1..=4).expect("valid range");
+                        actual.drain(1..=2).expect("valid range");
                     }
 
-                    assert!(actual.iter().eq([1, 5].iter()));
+                    println!("{:?}", actual);
+
+                    assert!(actual.iter().eq([0, 3, 4, 5].iter()));
+                }
+
+                #[test]
+                fn combines_trailing_with_leading_elements_when_draining_back() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    {
+                        actual.drain(3..=4).expect("valid range");
+                    }
+
+                    println!("{:?}", actual);
+
+                    assert!(actual.iter().eq([0, 1, 2, 5].iter()));
                 }
             }
         }
