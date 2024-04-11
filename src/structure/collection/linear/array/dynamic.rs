@@ -1639,7 +1639,6 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
                 std::ptr::copy(src, dst, self.underlying.initialized - self.range.len());
             }
         }
-
     }
 }
 
@@ -1647,7 +1646,22 @@ impl<'a, T> std::iter::Iterator for Drain<'a, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        todo!("obtain the front drained element, if there is any");
+        let ptr = self.underlying.buffer.as_ptr();
+
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe { ptr.add(self.underlying.pre_capacity) };
+
+        if let Some(index) = self.next.next() {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY:
+            // * `ptr` is valid => safe to dereference.
+            // * underlying `T` is initialized.
+            Some(unsafe { (*ptr).assume_init_read() })
+        } else {
+            None
+        }
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
