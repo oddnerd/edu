@@ -24,8 +24,8 @@ use super::super::list::List;
 /// to an uninitialized element as the pre-existing elements may be moved
 /// within the buffer (maintaining order, see [`Self::shift`]) to utilize said
 /// capacity. In contrast, using end-specific capacity via [`Self::prepend`] or
-/// [`Self::append`] alongside [`Self::front_capacity`] or
-/// [`Self::back_capacity`] _will_ maintain pointers to specific elements.
+/// [`Self::append`] alongside [`Self::capacity_back`] or
+/// [`Self::capacity_back`] _will_ maintain pointers to specific elements.
 ///
 /// Capacity may be manually allocated via [`Self::with_capacity`] and
 /// [`Self::reserve`], or end-specific [`Self::reserve_front`] and
@@ -109,7 +109,7 @@ impl<T> Dynamic<T> {
         self.pre_capacity + self.post_capacity
     }
 
-    /// How many elements can [`prepend`] in constant time/without reallocation.
+    /// How many elements can [`Self::prepend`] in constant time/without reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -147,7 +147,7 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// How many elements can [`append`] in constant time/without reallocation.
+    /// How many elements can [`Self::append`] in constant time/without reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -187,10 +187,10 @@ impl<T> Dynamic<T> {
 
     /// Attempt to allocate space for at least `capacity` additional elements.
     ///
-    /// In contrast to [`reserve_back`], this method will [`shift`] the
-    /// elements to the front of the buffer to create space (thereby making
-    /// [`capacity_front`] zero), (re)allocating if necessary to increase
-    /// [`capacity_back`].
+    /// In contrast to [`Self::reserve_back`], this method will [`Self::shift`]
+    /// the elements to the front of the buffer to create space (thereby making
+    /// [`Self::capacity_front`] zero), (re)allocating if necessary to increase
+    /// [`Self::capacity_back`].
     ///
     /// This method increases the size of buffer by a geometric progression
     /// with a growth factor of two (2), hence the buffer could ideally contain
@@ -198,8 +198,9 @@ impl<T> Dynamic<T> {
     /// memory than explicitly requested, but will attempt to recover when
     /// exactly `capacity` can be allocated, but not more.
     ///
-    /// See also: [`reserve_front`] or [`reserve_back`] to reserve an exact
-    /// amount of elements at a specific end of the buffer without [`shift`].
+    /// See also: [`Self::reserve_front`] or [`Self::reserve_back`] to reserve
+    /// an exact amount of elements at a specific end of the buffer without
+    /// [`Self::shift`].
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -336,7 +337,7 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// Attempt to reduce [`capacity`] to exactly `capacity`, or none/zero.
+    /// Attempt to reduce [`Self::capacity`] to exactly `capacity`, or none/zero.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -344,12 +345,13 @@ impl<T> Dynamic<T> {
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
     ///
-    /// In contrast to [`shrink_back`], this method will [`shift`] the elements
-    /// to the front of the buffer, _always_ shrinking [`capacity_front`] to
-    /// zero, reallocating if necessary to decrease [`capacity_back`].
+    /// In contrast to [`Self::shrink_back`], this method will [`Self::shift`]
+    /// the elements to the front of the buffer, _always_ shrinking
+    /// [`Self::capacity_front`] to zero, reallocating if necessary to decrease
+    /// [`Self::capacity_back`].
     ///
-    /// See also: [`shrink_front`] or [`shrink_back`] to shrink a specific
-    /// end of the buffer without shifting initialized elements.
+    /// See also: [`Self::shrink_front`] or [`Self::shrink_back`] to shrink a
+    /// specific end of the buffer without shifting initialized elements.
     ///
     /// # Examples
     /// ```
@@ -397,7 +399,7 @@ impl<T> Dynamic<T> {
         self.resize(-extra_capacity)
     }
 
-    /// Reallocate to reduce [`capacity_front`] to exactly `capacity` elements.
+    /// Reallocate to reduce [`Self::capacity_front`] to exactly `capacity`.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
