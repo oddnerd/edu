@@ -1603,18 +1603,17 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
             let leading = self.range.start;
             let trailing = self.underlying.initialized - self.range.end;
 
-            // let leading = (self.underlying.initialized - self.range.len()) - self.range.start;
-            // let trailing = (self.underlying.initialized - self.range.len()) - self.range.end;
-
-            let only_front_capacity = self.underlying.pre_capacity != 0 && self.underlying.post_capacity == 0;
-            let only_back_capacity = self.underlying.pre_capacity == 0 && self.underlying.post_capacity != 0;
+            let only_front_capacity =
+                self.underlying.pre_capacity != 0 && self.underlying.post_capacity == 0;
+            let only_back_capacity =
+                self.underlying.pre_capacity == 0 && self.underlying.post_capacity != 0;
 
             unsafe {
                 let ptr = self.underlying.as_mut_ptr();
 
                 let source: *mut T;
                 let destination: *mut T;
-                let count : usize;
+                let count: usize;
 
                 if only_front_capacity || (!only_back_capacity && trailing > leading) {
                     // [pre_capacity] [remain] [drained] [shift] [post_capacity]
@@ -1628,7 +1627,6 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
 
                     // SAFETY: stays aligned within the allocated object.
                     destination = ptr.add(self.range.start);
-
                 } else {
                     // [pre_capacity] [shift] [drained] [remain] [post_capacity]
 
