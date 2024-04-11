@@ -2945,7 +2945,7 @@ mod test {
                 }
 
                 #[test]
-                fn combines_leading_with_trailing_elements_when_draining_front() {
+                fn shifts_trailing_elements_after_leading_when_mostly_front() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     {
@@ -2958,7 +2958,7 @@ mod test {
                 }
 
                 #[test]
-                fn combines_trailing_with_leading_elements_when_draining_back() {
+                fn shifts_leading_elements_before_trailing_when_mostly_back() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     {
