@@ -1685,8 +1685,22 @@ impl<'a, T> std::iter::Iterator for Drain<'a, T> {
         }
     }
 
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.drain(..);
+    ///
+    /// assert_eq!(actual.size_hint(), 6);
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!("exact count of un-yielded drained elements")
+        (self.next.len(), Some(self.next.len()))
     }
 }
 
