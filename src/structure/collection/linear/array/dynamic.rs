@@ -1557,7 +1557,7 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
     /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(1) memory.
+    /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// # Examples
     /// ```
