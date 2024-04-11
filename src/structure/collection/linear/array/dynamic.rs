@@ -1542,6 +1542,9 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     }
 }
 
+/// By-value [`Iterator`] to remove elements from a [`Dynamic`].
+///
+/// See [`Dynamic::drain`].
 pub struct Drain<'a, T> {
     // The underlying [`Dynamic`] being drained from.
     underlying: &'a mut Dynamic<T>,
