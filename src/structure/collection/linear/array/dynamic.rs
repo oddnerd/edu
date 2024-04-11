@@ -2768,6 +2768,40 @@ mod test {
         mod drain {
             use super::*;
 
+            #[test]
+            fn ok_when_range_is_in_bounds() {
+                let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                for start in 0..actual.len() {
+                    for end in (start + 1)..actual.len() {
+                        let mut actual = actual.clone();
+
+                        assert!(actual.drain(start..end).is_ok());
+                    }
+                }
+            }
+
+            #[test]
+            fn errors_when_start_out_of_bounds() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                assert!(actual.drain(6..).is_err());
+            }
+
+            #[test]
+            fn errors_when_end_out_of_bounds() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                assert!(actual.drain(..6).is_err());
+            }
+
+            #[test]
+            fn errors_when_empty() {
+                let mut actual = Dynamic::<()>::default();
+
+                assert!(actual.drain(..).is_err())
+            }
+
             mod iterator {
                 use super::*;
 
