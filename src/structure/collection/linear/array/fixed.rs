@@ -9,7 +9,7 @@ use super::Linear;
 /// [`Fixed`] is equivalent to Rust's primitive array (`[T; N]`) or C++'s
 /// smart array (`std::array`) which interprets the underlying array as being
 /// 'dumb' that eagerly decays to a pointer and wraps it in a object.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Fixed<T, const N: usize> {
     /// Underlying memory buffer.
     data: [T; N],
@@ -168,6 +168,26 @@ impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
 
             next: 0..N,
         }
+    }
+}
+
+impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
+    /// List the elements referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
     }
 }
 
