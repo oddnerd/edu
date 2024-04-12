@@ -2,7 +2,7 @@
 
 use super::Linear;
 
-/// [`Linear`] [`Collection`] which can insert or remove elements.
+/// [`Linear`] [`super::Collection`] which can insert or remove elements.
 pub trait List<'a>:
     Linear<'a>
     + IntoIterator<Item = Self::Element>
