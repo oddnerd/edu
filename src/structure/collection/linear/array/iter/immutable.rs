@@ -158,7 +158,7 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Iter<'a, T> {
     /// Obtain the next element from the back.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// # Examples
     /// ```
