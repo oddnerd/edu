@@ -16,7 +16,7 @@ use super::Collection;
 /// A [`Collection`] with sequential ordering.
 ///
 /// Implementations of this trait have only one possible method of iteration
-/// thus implicitly having an order, even if such ordering represents nothing
+/// thus implicitly have an order, even if such ordering represents nothing
 /// of the elements. Such [`Collection`] are one-dimensional hence elements can
 /// either be 'before' or 'after' another element but no other relationships
 /// are inherent in the structure. Moreover, this implies there will exist
