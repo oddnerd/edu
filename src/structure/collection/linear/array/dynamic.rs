@@ -1834,7 +1834,7 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
 }
 
 /// Error type for recoverable allocation failure.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct FailedAllocation;
 
 impl std::fmt::Display for FailedAllocation {
@@ -1846,7 +1846,7 @@ impl std::fmt::Display for FailedAllocation {
 impl std::error::Error for FailedAllocation {}
 
 /// Error type for invalid index parameters.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct OutOfBounds;
 
 impl std::fmt::Display for OutOfBounds {
