@@ -3,3 +3,5 @@
 //! associated behaviour.
 
 pub mod collection;
+
+pub use collection::Collection;

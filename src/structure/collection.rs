@@ -3,6 +3,8 @@
 
 pub mod linear;
 
+pub use linear::Linear;
+
 /// Multiple instances of a single type (elements) grouped together.
 pub trait Collection<'a> {
     /// The type of the elements.

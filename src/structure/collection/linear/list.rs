@@ -1,6 +1,5 @@
 //! Implementations of [`List`].
 
-use super::Collection;
 use super::Linear;
 
 /// [`Linear`] [`Collection`] which can insert or remove elements.
