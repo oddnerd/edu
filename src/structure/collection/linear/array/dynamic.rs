@@ -73,12 +73,12 @@ impl<T> Dynamic<T> {
     ///     panic!("allocation failed");
     /// }
     /// ```
-    pub fn with_capacity(count: usize) -> Result<Self, ()> {
+    pub fn with_capacity(count: usize) -> Result<Self, FailedAllocation> {
         let mut instance = Dynamic::<T>::default();
 
         match instance.reserve_back(count) {
             Ok(_) => Ok(instance),
-            Err(_) => Err(()),
+            Err(_) => Err(FailedAllocation),
         }
     }
 
@@ -233,7 +233,7 @@ impl<T> Dynamic<T> {
     ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
     /// }
     /// ```
-    pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+    pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let total_size = self.initialized.checked_add(capacity).ok_or(())?;
 
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
@@ -280,7 +280,7 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
-    pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+    pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         if self.capacity_front() > capacity {
             return Ok(self);
         }
@@ -323,7 +323,7 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
-    pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+    pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         if self.capacity_back() > capacity {
             return Ok(self);
         }
@@ -377,7 +377,7 @@ impl<T> Dynamic<T> {
     /// instance.shrink(None);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+    pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
         let offset = isize::try_from(self.capacity_front()).unwrap();
@@ -431,7 +431,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
         let extra_capacity = self.capacity_front().checked_sub(capacity).ok_or(())?;
@@ -480,7 +480,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
         let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
@@ -646,7 +646,7 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    fn resize(&mut self, capacity: isize) -> Result<&mut Self, ()> {
+    fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
         // Treat all capacity as back capacity when empty.
         if self.initialized == 0 {
             self.post_capacity += self.pre_capacity;
@@ -782,7 +782,7 @@ impl<T> std::ops::Drop for Dynamic<T> {
 }
 
 impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
-    type Error = ();
+    type Error = FailedAllocation;
 
     /// Construct by cloning elements from an existing slice.
     ///
