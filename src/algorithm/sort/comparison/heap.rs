@@ -31,7 +31,7 @@ mod sift_down {
     /// Swap the first element (current root) with the greatest root of either
     /// the left or right child max-heap until the subtree rooted by the first
     /// element is itself a valid max-heap.
-    pub fn top_down<T>(slice: &mut [T])
+    pub(super) fn top_down<T>(slice: &mut [T])
     where
         T: Ord,
     {
@@ -53,7 +53,7 @@ mod sift_down {
         }
     }
 
-    pub fn bottom_up<T>(slice: &mut [T], index: usize)
+    pub(super) fn bottom_up<T>(slice: &mut [T], index: usize)
     where
         T: Ord,
     {
@@ -97,7 +97,7 @@ mod max_heapify {
     /// Interpret `slice` as a binary tree where, for each node at index i, the
     /// left child is at index (2*i+1) and the right child is at index (2*i+2).
     /// Reorder the nodes such that all children are less than their parent.
-    pub fn bottom_up<T>(slice: &mut [T])
+    pub(super) fn bottom_up<T>(slice: &mut [T])
     where
         T: Ord,
     {
@@ -123,7 +123,7 @@ mod max_heapify {
     /// Interpret `slice` as a binary tree where, for each node at index i, the
     /// left child is at index (2*i+1) and the right child is at index (2*i+2).
     /// Reorder the nodes such that all children are less than their parent.
-    pub fn top_down<T>(slice: &mut [T])
+    pub(super) fn top_down<T>(slice: &mut [T])
     where
         T: Ord,
     {
