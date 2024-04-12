@@ -1826,7 +1826,7 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
         let mut list = f.debug_list();
 
         for index in self.next.clone() {
-            list.entry(unsafe { &*ptr.add(index) });
+            let _ = list.entry(unsafe { &*ptr.add(index) });
         }
 
         list.finish()
