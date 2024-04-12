@@ -2150,8 +2150,6 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                // TODO: remove dead code?
-                // let capacity = usize::try_from((2 as isize).pow(isize::BITS - 2)).unwrap();
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
                 let mut actual = Dynamic::<()>::default();
