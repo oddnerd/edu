@@ -454,7 +454,8 @@ impl<T> Dynamic<T> {
         let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
         if self.initialized > 0 {
-            let _ = self.shift(-extra_capacity)
+            let _ = self
+                .shift(-extra_capacity)
                 .expect("front capacity to shift into");
         }
 
@@ -1276,9 +1277,8 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
-           + std::iter::ExactSizeIterator
-           + std::iter::FusedIterator {
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    {
         unsafe {
             // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
             let ptr = self.buffer.cast::<T>().as_ptr();
@@ -1314,8 +1314,8 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
-           + std::iter::ExactSizeIterator
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
            + std::iter::FusedIterator {
         unsafe {
             // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
