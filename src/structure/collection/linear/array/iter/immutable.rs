@@ -2,7 +2,7 @@
 
 /// Immutable reference [`Iterator`] over an [`super::super::Array`].
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Iter<'a, T: 'a> {
+pub struct Iter<'a, T> {
     /// Pointer to the hypothetical next element.
     ptr: std::ptr::NonNull<T>,
 
