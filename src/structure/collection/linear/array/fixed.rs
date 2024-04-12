@@ -551,7 +551,7 @@ mod test {
         fn panics_when_out_of_bounds() {
             let instance = Fixed::<(), 0>::default();
 
-            instance.index(0);
+            let _ = instance.index(0);
         }
     }
 
@@ -574,7 +574,7 @@ mod test {
         fn panics_when_out_of_bounds() {
             let mut instance = Fixed::<(), 0>::default();
 
-            instance.index_mut(0);
+            let _ = instance.index_mut(0);
         }
     }
 
@@ -666,7 +666,7 @@ mod test {
                     let mut actual = actual.into_iter();
 
                     // Exhaust the elements.
-                    actual.next();
+                    actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -901,7 +901,7 @@ mod test {
                     let mut actual = actual.iter();
 
                     // Exhaust the elements.
-                    actual.next();
+                    let _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -999,7 +999,7 @@ mod test {
                     let mut actual = actual.iter_mut();
 
                     // Exhaust the elements.
-                    actual.next();
+                    let _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
