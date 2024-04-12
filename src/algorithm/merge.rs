@@ -12,6 +12,7 @@
 /// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).cloned().collect();
 /// assert_eq!(output, [0,1,2,3,4,5]);
 /// ```
+#[derive(Debug)]
 pub struct MergeIter<T: Ord, Iter: Iterator<Item = T>> {
     first: std::iter::Peekable<Iter>,
     second: std::iter::Peekable<Iter>,
