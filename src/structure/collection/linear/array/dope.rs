@@ -196,7 +196,7 @@ impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::Eq for Dope<'a, T> {}
+impl<'a, T: 'a + Eq> Eq for Dope<'a, T> {}
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     /// List the elements referenced to/contained.
