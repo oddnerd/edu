@@ -21,6 +21,9 @@ impl<'a, T: 'a> Iter<'a, T> {
     /// * `ptr` must point to one contigious allocated object.
     /// * `ptr` must point to `count` consecutive initialized instances of `T`.
     ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::iter::Iter;
