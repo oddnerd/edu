@@ -40,7 +40,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
+impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -72,9 +72,9 @@ impl<'a, T: 'a> std::iter::Iterator for IterMut<'a, T> {
 
 impl<'a, T: 'a> std::iter::FusedIterator for IterMut<'a, T> {}
 
-impl<'a, T: 'a> std::iter::ExactSizeIterator for IterMut<'a, T> {}
+impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 
-impl<'a, T: 'a> std::iter::DoubleEndedIterator for IterMut<'a, T> {
+impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.count > 0 {
             self.count -= 1;
