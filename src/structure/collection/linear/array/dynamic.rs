@@ -1838,6 +1838,10 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
 pub struct FailedAllocation;
 
 impl std::fmt::Display for FailedAllocation {
+    /// Write a human-facing description of the error.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "memory allocation failed")
     }
@@ -1850,6 +1854,10 @@ impl std::error::Error for FailedAllocation {}
 pub struct OutOfBounds;
 
 impl std::fmt::Display for OutOfBounds {
+    /// Write a human-facing description of the error.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "index is outside the bounds of initialized elements")
     }
