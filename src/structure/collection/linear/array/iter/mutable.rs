@@ -272,7 +272,7 @@ mod test {
                 };
 
                 // Exhaust the elements.
-                actual.next();
+                let _ = actual.next().expect("the one element");
 
                 // Yields `None` at least once.
                 assert_eq!(actual.next(), None);
