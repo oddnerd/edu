@@ -22,15 +22,13 @@ pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::
     /// Iterate over the elements by immutable reference.
     fn iter(
         &self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
-           + std::iter::ExactSizeIterator
-           + std::iter::FusedIterator;
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
     fn iter_mut(
         &mut self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
-           + std::iter::ExactSizeIterator
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
            + std::iter::FusedIterator;
 
     /// Obtain an immutable reference to the element at `index`, bounds checked.
