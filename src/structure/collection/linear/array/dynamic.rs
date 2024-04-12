@@ -252,7 +252,11 @@ impl<T> Dynamic<T> {
             // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
             let amortized = total_size.checked_next_power_of_two().unwrap_or(capacity);
 
-            self.reserve_back(amortized)
+            if self.reserve_back(amortized).is_ok() {
+                Ok(self)
+            } else {
+                self.reserve_back(capacity)
+            }
         }
     }
 
@@ -2146,6 +2150,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
+                // TODO: remove dead code?
                 // let capacity = usize::try_from((2 as isize).pow(isize::BITS - 2)).unwrap();
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
