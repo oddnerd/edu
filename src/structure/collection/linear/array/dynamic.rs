@@ -1191,6 +1191,8 @@ impl<T: std::cmp::PartialEq> std::cmp::PartialEq for Dynamic<T> {
     }
 }
 
+impl<T: Eq> Eq for Dynamic<T> {}
+
 impl<T: std::fmt::Debug> std::fmt::Debug for Dynamic<T> {
     /// List the elements referenced to/contained.
     ///
