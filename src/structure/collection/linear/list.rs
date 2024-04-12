@@ -53,7 +53,7 @@ pub trait List<'a>:
     /// Drop all elements.
     fn clear(&mut self) {
         for _ in 0..self.count() {
-            self.remove(0);
+            let _element = self.remove(0).expect("element to remove");
         }
     }
 }
