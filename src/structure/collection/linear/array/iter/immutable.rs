@@ -43,6 +43,27 @@ impl<'a, T: 'a> Iter<'a, T> {
 impl<'a, T: 'a> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
+    /// Obtain the next element from the front.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// assert_eq!(iter.next(), Some(&0));
+    /// assert_eq!(iter.next(), Some(&1));
+    /// assert_eq!(iter.next(), Some(&2));
+    /// assert_eq!(iter.next(), Some(&3));
+    /// assert_eq!(iter.next(), Some(&4));
+    /// assert_eq!(iter.next(), Some(&5));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         if self.count > 0 {
             // SAFETY:
