@@ -546,9 +546,13 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 512);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
+    pub fn shift(&mut self, offset: isize) -> Result<&mut Self, OutOfBounds> {
         if self.initialized == 0 {
-            return if offset == 0 { Ok(self) } else { Err(()) };
+            return if offset == 0 {
+                Ok(self)
+            } else {
+                Err(OutOfBounds)
+            };
         }
 
         let source = self.as_mut_ptr();
@@ -556,7 +560,7 @@ impl<T> Dynamic<T> {
         match offset.cmp(&0) {
             std::cmp::Ordering::Less => {
                 if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
-                    return Err(());
+                    return Err(OutOfBounds);
                 }
 
                 self.pre_capacity -= offset.unsigned_abs();
@@ -564,7 +568,7 @@ impl<T> Dynamic<T> {
             }
             std::cmp::Ordering::Greater => {
                 if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
-                    return Err(());
+                    return Err(OutOfBounds);
                 }
 
                 self.pre_capacity += offset.unsigned_abs();
@@ -626,7 +630,10 @@ impl<T> Dynamic<T> {
     ///
     /// instance.drain(..).expect_err("invalid range/no elements to drain");
     /// ```
-    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Result<Drain<'_, T>, ()> {
+    pub fn drain<R: std::ops::RangeBounds<usize>>(
+        &mut self,
+        range: R,
+    ) -> Result<Drain<'_, T>, OutOfBounds> {
         let start = match range.start_bound() {
             std::ops::Bound::Included(start) => *start,
             std::ops::Bound::Excluded(start) => *start + 1,
@@ -640,7 +647,7 @@ impl<T> Dynamic<T> {
         };
 
         if start >= self.len() || end > self.len() {
-            return Err(());
+            return Err(OutOfBounds);
         }
 
         let range = start..end;
@@ -1838,15 +1845,15 @@ impl std::error::Error for FailedAllocation {}
 
 /// Error type for invalid index parameters.
 #[derive(Debug)]
-pub struct InvalidIndex;
+pub struct OutOfBounds;
 
-impl std::fmt::Display for InvalidIndex {
+impl std::fmt::Display for OutOfBounds {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "index is outside the bounds of initialized elements")
     }
 }
 
-impl std::error::Error for InvalidIndex {}
+impl std::error::Error for OutOfBounds {}
 
 #[cfg(test)]
 mod test {
