@@ -766,7 +766,7 @@ impl<T> Dynamic<T> {
     }
 }
 
-impl<T> std::ops::Drop for Dynamic<T> {
+impl<T> Drop for Dynamic<T> {
     /// Drops the elements that are initialized and deallocates memory.
     ///
     /// # Performance
@@ -809,7 +809,7 @@ impl<T> std::ops::Drop for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
+impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
     type Error = FailedAllocation;
 
     /// Construct by cloning elements from an existing slice.
@@ -920,7 +920,7 @@ impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
     }
 }
 
-impl<T> std::iter::Iterator for Dynamic<T> {
+impl<T> Iterator for Dynamic<T> {
     type Item = T;
 
     /// Obtain the first initialized element.
@@ -981,7 +981,7 @@ impl<T> std::iter::Iterator for Dynamic<T> {
     }
 }
 
-impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
+impl<T> DoubleEndedIterator for Dynamic<T> {
     /// Obtain the last initialized element.
     ///
     /// # Performance
@@ -1022,11 +1022,11 @@ impl<T> std::iter::DoubleEndedIterator for Dynamic<T> {
     }
 }
 
-impl<T> std::iter::ExactSizeIterator for Dynamic<T> {}
+impl<T> ExactSizeIterator for Dynamic<T> {}
 
 impl<T> std::iter::FusedIterator for Dynamic<T> {}
 
-impl<'a, T: 'a> std::iter::FromIterator<T> for Dynamic<T> {
+impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
     ///
     /// # Panics
@@ -1063,7 +1063,7 @@ impl<'a, T: 'a> std::iter::FromIterator<T> for Dynamic<T> {
     }
 }
 
-impl<T> std::iter::Extend<T> for Dynamic<T> {
+impl<T> Extend<T> for Dynamic<T> {
     /// Append elements of an iterator in order.
     ///
     /// # Panics
@@ -1106,7 +1106,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     }
 }
 
-impl<T> std::default::Default for Dynamic<T> {
+impl<T> Default for Dynamic<T> {
     /// Construct an instance with no elements and no capacity/allocation.
     ///
     /// # Performance
@@ -1158,7 +1158,7 @@ impl<T: Clone> Clone for Dynamic<T> {
     }
 }
 
-impl<T: std::cmp::PartialEq> std::cmp::PartialEq for Dynamic<T> {
+impl<T: PartialEq> PartialEq for Dynamic<T> {
     /// Query if the elements referenced to/contained are the same as `other`.
     ///
     /// # Performance
@@ -1601,7 +1601,7 @@ pub struct Drain<'a, T> {
     next: std::ops::Range<usize>,
 }
 
-impl<'a, T> std::ops::Drop for Drain<'a, T> {
+impl<'a, T> Drop for Drain<'a, T> {
     /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
     ///
     /// # Performance
@@ -1698,7 +1698,7 @@ impl<'a, T> std::ops::Drop for Drain<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::Iterator for Drain<'a, T> {
+impl<'a, T> Iterator for Drain<'a, T> {
     type Item = T;
 
     /// Obtain the next element, if there are any left.
@@ -1760,7 +1760,7 @@ impl<'a, T> std::iter::Iterator for Drain<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::DoubleEndedIterator for Drain<'a, T> {
+impl<'a, T> DoubleEndedIterator for Drain<'a, T> {
     /// Obtain the final element, if there are any left.
     ///
     /// # Performance
@@ -1801,7 +1801,7 @@ impl<'a, T> std::iter::DoubleEndedIterator for Drain<'a, T> {
     }
 }
 
-impl<'a, T> std::iter::ExactSizeIterator for Drain<'a, T> {}
+impl<'a, T> ExactSizeIterator for Drain<'a, T> {}
 
 impl<'a, T> std::iter::FusedIterator for Drain<'a, T> {}
 
