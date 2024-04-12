@@ -12,12 +12,12 @@
 /// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).cloned().collect();
 /// assert_eq!(output, [0,1,2,3,4,5]);
 /// ```
-pub struct MergeIter<T: Ord, Iter: std::iter::Iterator<Item = T>> {
+pub struct MergeIter<T: Ord, Iter: Iterator<Item = T>> {
     first: std::iter::Peekable<Iter>,
     second: std::iter::Peekable<Iter>,
 }
 
-impl<T: Ord, Iter: std::iter::Iterator<Item = T>> MergeIter<T, Iter> {
+impl<T: Ord, Iter: Iterator<Item = T>> MergeIter<T, Iter> {
     /// Construct a [`MergeIter`] from two other [`Iterator`].
     pub fn new(first: Iter, second: Iter) -> Self {
         MergeIter {
@@ -27,7 +27,7 @@ impl<T: Ord, Iter: std::iter::Iterator<Item = T>> MergeIter<T, Iter> {
     }
 }
 
-impl<T: Ord, Iter: std::iter::Iterator<Item = T>> Iterator for MergeIter<T, Iter> {
+impl<T: Ord, Iter: Iterator<Item = T>> Iterator for MergeIter<T, Iter> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
