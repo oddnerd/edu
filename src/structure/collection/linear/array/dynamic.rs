@@ -1836,6 +1836,18 @@ impl std::fmt::Display for FailedAllocation {
 
 impl std::error::Error for FailedAllocation {}
 
+/// Error type for invalid index parameters.
+#[derive(Debug)]
+pub struct InvalidIndex;
+
+impl std::fmt::Display for InvalidIndex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "index is outside the bounds of initialized elements")
+    }
+}
+
+impl std::error::Error for InvalidIndex {}
+
 #[cfg(test)]
 mod test {
     use super::*;
