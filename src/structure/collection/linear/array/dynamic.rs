@@ -234,26 +234,25 @@ impl<T> Dynamic<T> {
     /// }
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
-        let total_size = self.initialized.checked_add(capacity).ok_or(())?;
+        let total_size = self
+            .initialized
+            .checked_add(capacity)
+            .ok_or(FailedAllocation)?;
 
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
 
-        if self.initialized != 0 {
-            self.shift(-offset).expect("cannot be out of bounds");
+        if self.initialized > 0 {
+            self.shift(-offset).expect("front capacity to shift into");
         }
 
-        // Shifting initialized elements has created enough capacity.
         if self.capacity_back() >= capacity {
+            // Shifting initialized elements has created enough capacity.
             Ok(self)
         } else {
             // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-            let amortized = total_size.checked_next_power_of_two().ok_or(())?;
+            let amortized = total_size.checked_next_power_of_two().unwrap_or(capacity);
 
-            if self.reserve_back(amortized).is_ok() {
-                Ok(self)
-            } else {
-                self.reserve_back(capacity)
-            }
+            self.reserve_back(amortized)
         }
     }
 
@@ -285,19 +284,21 @@ impl<T> Dynamic<T> {
             return Ok(self);
         }
 
-        let capacity = capacity.checked_sub(self.capacity_front()).ok_or(())?;
+        let capacity = capacity
+            .checked_sub(self.capacity_front())
+            .ok_or(FailedAllocation)?;
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
+        // Allocator API ensures total allocation size in bytes will fit into
+        // `isize`, so this number of elements allocated will too.
         let capacity = isize::try_from(capacity).unwrap();
 
         self.resize(capacity)?;
 
         if self.initialized > 0 {
-            self.shift(capacity)
-        } else {
-            Ok(self)
+            self.shift(capacity).expect("back capacity to shift into");
         }
+
+        Ok(self)
     }
 
     /// Allocate space for exactly `capacity` elements to be appended.
@@ -328,12 +329,14 @@ impl<T> Dynamic<T> {
             return Ok(self);
         }
 
-        let capacity = capacity.checked_sub(self.capacity_back()).ok_or(())?;
+        let capacity = capacity
+            .checked_sub(self.capacity_back())
+            .ok_or(FailedAllocation)?;
 
         if let Ok(capacity) = isize::try_from(capacity) {
             self.resize(capacity)
         } else {
-            Err(())
+            Err(FailedAllocation)
         }
     }
 
@@ -378,8 +381,8 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
+        // Allocator API ensures total allocation size in bytes will fit into
+        // `isize`, so this number of elements allocated will too.
         let offset = isize::try_from(self.capacity_front()).unwrap();
 
         if self.initialized > 0 {
@@ -390,10 +393,13 @@ impl<T> Dynamic<T> {
         }
 
         let capacity = capacity.unwrap_or(0);
-        let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self
+            .capacity_back()
+            .checked_sub(capacity)
+            .ok_or(FailedAllocation)?;
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
+        // Allocator API ensures total allocation size in bytes will fit into
+        // `isize`, so this number of elements allocated will too.
         let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
         self.resize(-extra_capacity)
@@ -434,7 +440,10 @@ impl<T> Dynamic<T> {
     pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self.capacity_front().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self
+            .capacity_front()
+            .checked_sub(capacity)
+            .ok_or(FailedAllocation)?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -483,7 +492,10 @@ impl<T> Dynamic<T> {
     pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self
+            .capacity_back()
+            .checked_sub(capacity)
+            .ok_or(FailedAllocation)?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -655,7 +667,10 @@ impl<T> Dynamic<T> {
             self.pre_capacity = 0;
         }
 
-        let capacity = self.post_capacity.checked_add_signed(capacity).ok_or(())?;
+        let capacity = self
+            .post_capacity
+            .checked_add_signed(capacity)
+            .ok_or(FailedAllocation)?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
@@ -670,11 +685,11 @@ impl<T> Dynamic<T> {
         let total = front + self.post_capacity;
 
         let new_layout = {
-            let total = front.checked_add(capacity).ok_or(())?;
+            let total = front.checked_add(capacity).ok_or(FailedAllocation)?;
 
             match std::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
-                Err(_) => return Err(()),
+                Err(_) => return Err(FailedAllocation),
             }
         };
 
@@ -695,7 +710,7 @@ impl<T> Dynamic<T> {
             else {
                 let existing_layout = match std::alloc::Layout::array::<T>(total) {
                     Ok(layout) => layout,
-                    Err(_) => return Err(()),
+                    Err(_) => return Err(FailedAllocation),
                 };
 
                 unsafe {
@@ -731,7 +746,7 @@ impl<T> Dynamic<T> {
 
         self.buffer = match std::ptr::NonNull::new(ptr) {
             Some(ptr) => ptr,
-            None => return Err(()),
+            None => return Err(FailedAllocation),
         };
 
         self.post_capacity = capacity;
