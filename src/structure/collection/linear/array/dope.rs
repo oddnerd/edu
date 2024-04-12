@@ -13,7 +13,7 @@ use super::Linear;
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
 #[derive(Clone, Copy, Hash)]
-pub struct Dope<'a, T: 'a> {
+pub struct Dope<'a, T> {
     /// Pointer to the start of the array.
     ptr: std::ptr::NonNull<T>,
 
