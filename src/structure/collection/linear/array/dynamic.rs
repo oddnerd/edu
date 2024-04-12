@@ -1601,7 +1601,7 @@ pub struct Drain<'a, T> {
     next: std::ops::Range<usize>,
 }
 
-impl<'a, T> Drop for Drain<'a, T> {
+impl<T> Drop for Drain<'_, T> {
     /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
     ///
     /// # Performance
@@ -1698,7 +1698,7 @@ impl<'a, T> Drop for Drain<'a, T> {
     }
 }
 
-impl<'a, T> Iterator for Drain<'a, T> {
+impl<T> Iterator for Drain<'_, T> {
     type Item = T;
 
     /// Obtain the next element, if there are any left.
@@ -1760,7 +1760,7 @@ impl<'a, T> Iterator for Drain<'a, T> {
     }
 }
 
-impl<'a, T> DoubleEndedIterator for Drain<'a, T> {
+impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// Obtain the final element, if there are any left.
     ///
     /// # Performance
@@ -1801,11 +1801,11 @@ impl<'a, T> DoubleEndedIterator for Drain<'a, T> {
     }
 }
 
-impl<'a, T> ExactSizeIterator for Drain<'a, T> {}
+impl<T> ExactSizeIterator for Drain<'_, T> {}
 
-impl<'a, T> std::iter::FusedIterator for Drain<'a, T> {}
+impl<T> std::iter::FusedIterator for Drain<'_, T> {}
 
-impl<'a, T: std::fmt::Debug> std::fmt::Debug for Drain<'a, T> {
+impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
     /// List the elements being drained.
     ///
     /// # Performance
