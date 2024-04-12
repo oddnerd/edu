@@ -111,6 +111,27 @@ impl<'a, T: 'a> std::iter::FusedIterator for Iter<'a, T> {}
 impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
 
 impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
+    /// Obtain the next element from the back.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// assert_eq!(iter.next_back(), Some(&5));
+    /// assert_eq!(iter.next_back(), Some(&4));
+    /// assert_eq!(iter.next_back(), Some(&3));
+    /// assert_eq!(iter.next_back(), Some(&2));
+    /// assert_eq!(iter.next_back(), Some(&1));
+    /// assert_eq!(iter.next_back(), Some(&0));
+    /// assert_eq!(iter.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.count > 0 {
             self.count -= 1;
