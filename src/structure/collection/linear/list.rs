@@ -1,4 +1,4 @@
-//! Implementations of [`Linear`].
+//! Implementations of [`List`].
 
 use super::Collection;
 use super::Linear;
