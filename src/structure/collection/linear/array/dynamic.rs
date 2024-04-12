@@ -641,6 +641,8 @@ impl<T> Dynamic<T> {
     /// This method will increase [`capacity_back`] by `capacity` if positive,
     /// and decrease by `capacity` if negative, (re)allocating if necessary.
     ///
+    /// Note that failed allocation will _NOT_ modify the underlying buffer.
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
     ///
