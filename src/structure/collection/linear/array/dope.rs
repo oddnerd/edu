@@ -56,7 +56,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
+impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     /// Construct from an existing [`slice`].
     ///
     /// # Performance
@@ -163,7 +163,7 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
+impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
     /// Query if the elements referenced to/contained are the same as `other`.
     ///
     /// # Performance
@@ -263,9 +263,8 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
-           + std::iter::ExactSizeIterator
-           + std::iter::FusedIterator {
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    {
         unsafe { super::Iter::new(self.ptr, self.count) }
     }
 
@@ -289,8 +288,8 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
-           + std::iter::ExactSizeIterator
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
            + std::iter::FusedIterator {
         unsafe { super::IterMut::new(self.ptr, self.count) }
     }
