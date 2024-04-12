@@ -426,7 +426,7 @@ mod test {
             let mut underlying: [(); 0] = [];
             let instance = Dope::from(underlying.as_mut_slice());
 
-            instance.index(0);
+            let _ = instance.index(0);
         }
     }
 
@@ -454,7 +454,7 @@ mod test {
             let mut underlying: [(); 0] = [];
             let mut instance = Dope::from(underlying.as_mut_slice());
 
-            instance.index_mut(0);
+            let _ = instance.index_mut(0);
         }
     }
 
@@ -738,7 +738,7 @@ mod test {
                     let mut actual = actual.iter();
 
                     // Exhaust the elements.
-                    actual.next();
+                    let _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -854,7 +854,7 @@ mod test {
                     let mut actual = actual.iter_mut();
 
                     // Exhaust the elements.
-                    actual.next();
+                    let _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
