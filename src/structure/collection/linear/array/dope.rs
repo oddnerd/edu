@@ -219,27 +219,6 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     }
 }
 
-impl<'a, T> std::fmt::Pointer for Dope<'a, T> {
-    /// Display the underlying address pointed to.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    ///
-    /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = unsafe { Dope::from(expected.as_mut_slice()) };
-    ///
-    /// assert_eq!(format!("{actual:p}"), format!("{:p}", expected.as_ptr()));
-    /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // SAFETY: the address of the pointer it read, not the pointer itself.
-        std::fmt::Pointer::fmt(&self.as_ptr(), f)
-    }
-}
-
 impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     type Element = T;
 
@@ -605,6 +584,23 @@ mod test {
             };
 
             assert_eq!(actual, actual);
+        }
+    }
+
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+                let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+                let actual = unsafe { Dope::new(ptr, expected.len()) };
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
         }
     }
 

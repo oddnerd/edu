@@ -9,7 +9,7 @@ use super::Linear;
 /// [`Fixed`] is equivalent to Rust's primitive array (`[T; N]`) or C++'s
 /// smart array (`std::array`) which interprets the underlying array as being
 /// 'dumb' that eagerly decays to a pointer and wraps it in a object.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Fixed<T, const N: usize> {
     /// Underlying memory buffer.
     data: [T; N],
@@ -36,26 +36,37 @@ impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
-    type Element = T;
-
-    /// Query how many elements are contained.
+impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
+    /// Construct with default initialized elements.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Fixed::from(expected.clone());
+    /// let actual: Fixed<i32, 256> = Default::default();
     ///
-    /// assert_eq!(actual.count(), expected.len());
+    /// for actual in actual {
+    ///     assert_eq!(actual, Default::default());
+    /// }
     /// ```
-    fn count(&self) -> usize {
-        N
+    fn default() -> Self {
+        // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
+        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
+            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+
+        for element in uninitialized.iter_mut() {
+            element.write(Default::default());
+        }
+
+        // SAFETY:
+        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
+        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
+        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
+
+        Self::from(initialized)
     }
 }
 
@@ -122,6 +133,84 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
         unsafe { &mut *self.data.as_mut_ptr().add(index) }
+    }
+}
+
+impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
+    type Item = T;
+
+    type IntoIter = IntoIter<T, N>;
+
+    /// Obtain an iterator that yields ownership of elements by value.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert!(actual.into_iter().eq(expected.into_iter()));
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter {
+            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
+            data: unsafe {
+                self.data
+                    .as_ptr()
+                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
+                    .read()
+            },
+
+            next: 0..N,
+        }
+    }
+}
+
+impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
+    /// List the elements referenced to/contained.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+
+impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
+    type Element = T;
+
+    /// Query how many elements are contained.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Collection;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert_eq!(actual.count(), expected.len());
+    /// ```
+    fn count(&self) -> usize {
+        N
     }
 }
 
@@ -390,75 +479,6 @@ impl<'a, T: 'a, const N: usize> std::iter::ExactSizeIterator for IntoIter<T, N> 
 
 impl<'a, T: 'a, const N: usize> std::iter::FusedIterator for IntoIter<T, N> {}
 
-impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
-    type Item = T;
-
-    type IntoIter = IntoIter<T, N>;
-
-    /// Obtain an iterator that yields ownership of elements by value.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Fixed::from(expected.clone());
-    ///
-    /// assert!(actual.into_iter().eq(expected.into_iter()));
-    /// ```
-    fn into_iter(self) -> Self::IntoIter {
-        IntoIter {
-            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
-            data: unsafe {
-                self.data
-                    .as_ptr()
-                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
-                    .read()
-            },
-
-            next: 0..N,
-        }
-    }
-}
-
-impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
-    /// Construct with default initialized elements.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let actual: Fixed<i32, 256> = Default::default();
-    ///
-    /// for actual in actual {
-    ///     assert_eq!(actual, Default::default());
-    /// }
-    /// ```
-    fn default() -> Self {
-        // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
-        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
-
-        for element in uninitialized.iter_mut() {
-            element.write(Default::default());
-        }
-
-        // SAFETY:
-        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
-        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
-        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
-
-        Self::from(initialized)
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -718,6 +738,22 @@ mod test {
             let actual = Fixed::<(), 0>::default();
 
             assert_eq!(actual, actual);
+        }
+    }
+
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Fixed::from(expected.clone());
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
         }
     }
 

@@ -8,21 +8,32 @@ use super::super::list::List;
 
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
-/// Contigious memory is heap-allocated with alignment and size to store
-/// elements of type `T`, referred to as the buffer. Said buffer is either:
-/// explicitly allocated via [`Self::with_capacity`] or [`Self::reserve`]; or
-/// lazily allocated as elements are added via [`Self::prepend`],
-/// [`Self::append`], and [`Self::insert`].
+/// [`Dynamic`] is (mostly) equivalent to Rust's [`Vec`] or C++'s `std::vector`.
 ///
-/// The elements are arranged such that the beginning of the buffer potentially
-/// contains uninitialized memory produced by removing elements via
-/// [`Self::front`] or [`Self::remove`] which will be reclaimed when
-/// reallocating or adding to the front. Immediately following are all
-/// initialized elements ([`Self::count`] many) in the order they were added.
-/// The rest of the buffer contains uninitialized memory to hold
-/// [`Self::capacity`] elements. The capacity may be reduced via
-/// [`Self::shrink`] to reduce the allocation size, or even deallocate an empty
-/// buffer.
+/// Contigious memory is heap-allocated with alignment and size to store
+/// elements of type `T`, referred to as the buffer. The front of the buffer
+/// (potentially) contains uninitialized elements, then all initialized
+/// elements in the order they were inserted, and finally at the back
+/// (potentially) other uninitialized elements.
+///
+/// The term 'capacity' refers to pre-allocated memory containing those
+/// uninitialized elements into which new elements can be added without
+/// additional memory allocation. This means [`Self::capacity`] elements can be
+/// [`Self::insert`] without invalidating pointers to the buffer. Note that
+/// pointers to specific elements may no longer point to the same element/point
+/// to an uninitialized element as the pre-existing elements may be moved
+/// within the buffer (maintaining order, see [`Self::shift`]) to utilize said
+/// capacity. In contrast, using end-specific capacity via [`Self::prepend`] or
+/// [`Self::append`] alongside [`Self::capacity_back`] or
+/// [`Self::capacity_back`] _will_ maintain pointers to specific elements.
+///
+/// Capacity may be manually allocated via [`Self::with_capacity`] and
+/// [`Self::reserve`], or end-specific [`Self::reserve_front`] and
+/// [`Self::reserve_back`] methods which will reallocate thereby invaliding all
+/// pointers. Furthermore, capacity can be deallocated (retaining initialized
+/// elements) via [`Self::shrink`], or end-specific [`Self::shrink_front`]
+/// and [`Self::shrink_back`]. Shrinking when no elements are initialized will
+/// deallocate freeing all memory.
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
@@ -62,12 +73,12 @@ impl<T> Dynamic<T> {
     ///     panic!("allocation failed");
     /// }
     /// ```
-    pub fn with_capacity(count: usize) -> Result<Self, ()> {
+    pub fn with_capacity(count: usize) -> Result<Self, FailedAllocation> {
         let mut instance = Dynamic::<T>::default();
 
         match instance.reserve_back(count) {
             Ok(_) => Ok(instance),
-            Err(_) => Err(()),
+            Err(_) => Err(FailedAllocation),
         }
     }
 
@@ -98,7 +109,7 @@ impl<T> Dynamic<T> {
         self.pre_capacity + self.post_capacity
     }
 
-    /// How many elements can [`prepend`] in constant time/without reallocation.
+    /// How many elements can [`Self::prepend`] in constant time/without reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -136,7 +147,7 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// How many elements can [`append`] in constant time/without reallocation.
+    /// How many elements can [`Self::append`] in constant time/without reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -176,10 +187,10 @@ impl<T> Dynamic<T> {
 
     /// Attempt to allocate space for at least `capacity` additional elements.
     ///
-    /// In contrast to [`reserve_back`], this method will [`shift`] the
-    /// elements to the front of the buffer to create space (thereby making
-    /// [`capacity_front`] zero), (re)allocating if necessary to increase
-    /// [`capacity_back`].
+    /// In contrast to [`Self::reserve_back`], this method will [`Self::shift`]
+    /// the elements to the front of the buffer to create space (thereby making
+    /// [`Self::capacity_front`] zero), (re)allocating if necessary to increase
+    /// [`Self::capacity_back`].
     ///
     /// This method increases the size of buffer by a geometric progression
     /// with a growth factor of two (2), hence the buffer could ideally contain
@@ -187,8 +198,9 @@ impl<T> Dynamic<T> {
     /// memory than explicitly requested, but will attempt to recover when
     /// exactly `capacity` can be allocated, but not more.
     ///
-    /// See also: [`reserve_front`] or [`reserve_back`] to reserve an exact
-    /// amount of elements at a specific end of the buffer without [`shift`].
+    /// See also: [`Self::reserve_front`] or [`Self::reserve_back`] to reserve
+    /// an exact amount of elements at a specific end of the buffer without
+    /// [`Self::shift`].
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -221,21 +233,24 @@ impl<T> Dynamic<T> {
     ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
     /// }
     /// ```
-    pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, ()> {
-        let total_size = self.initialized.checked_add(capacity).ok_or(())?;
+    pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
+        let total_size = self
+            .initialized
+            .checked_add(capacity)
+            .ok_or(FailedAllocation)?;
 
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
 
-        if self.initialized != 0 {
-            self.shift(-offset).expect("cannot be out of bounds");
+        if self.initialized > 0 {
+            self.shift(-offset).expect("front capacity to shift into");
         }
 
-        // Shifting initialized elements has created enough capacity.
         if self.capacity_back() >= capacity {
+            // Shifting initialized elements has created enough capacity.
             Ok(self)
         } else {
             // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-            let amortized = total_size.checked_next_power_of_two().ok_or(())?;
+            let amortized = total_size.checked_next_power_of_two().unwrap_or(capacity);
 
             if self.reserve_back(amortized).is_ok() {
                 Ok(self)
@@ -268,24 +283,26 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
-    pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+    pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         if self.capacity_front() > capacity {
             return Ok(self);
         }
 
-        let capacity = capacity.checked_sub(self.capacity_front()).ok_or(())?;
+        let capacity = capacity
+            .checked_sub(self.capacity_front())
+            .ok_or(FailedAllocation)?;
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
+        // Allocator API ensures total allocation size in bytes will fit into
+        // `isize`, so this number of elements allocated will too.
         let capacity = isize::try_from(capacity).unwrap();
 
         self.resize(capacity)?;
 
         if self.initialized > 0 {
-            self.shift(capacity)
-        } else {
-            Ok(self)
+            self.shift(capacity).expect("back capacity to shift into");
         }
+
+        Ok(self)
     }
 
     /// Allocate space for exactly `capacity` elements to be appended.
@@ -311,21 +328,23 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
-    pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, ()> {
+    pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         if self.capacity_back() > capacity {
             return Ok(self);
         }
 
-        let capacity = capacity.checked_sub(self.capacity_back()).ok_or(())?;
+        let capacity = capacity
+            .checked_sub(self.capacity_back())
+            .ok_or(FailedAllocation)?;
 
         if let Ok(capacity) = isize::try_from(capacity) {
             self.resize(capacity)
         } else {
-            Err(())
+            Err(FailedAllocation)
         }
     }
 
-    /// Attempt to reduce [`capacity`] to exactly `capacity`, or none/zero.
+    /// Attempt to reduce [`Self::capacity`] to exactly `capacity`, or none/zero.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -333,12 +352,13 @@ impl<T> Dynamic<T> {
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
     ///
-    /// In contrast to [`shrink_back`], this method will [`shift`] the elements
-    /// to the front of the buffer, _always_ shrinking [`capacity_front`] to
-    /// zero, reallocating if necessary to decrease [`capacity_back`].
+    /// In contrast to [`Self::shrink_back`], this method will [`Self::shift`]
+    /// the elements to the front of the buffer, _always_ shrinking
+    /// [`Self::capacity_front`] to zero, reallocating if necessary to decrease
+    /// [`Self::capacity_back`].
     ///
-    /// See also: [`shrink_front`] or [`shrink_back`] to shrink a specific
-    /// end of the buffer without shifting initialized elements.
+    /// See also: [`Self::shrink_front`] or [`Self::shrink_back`] to shrink a
+    /// specific end of the buffer without shifting initialized elements.
     ///
     /// # Examples
     /// ```
@@ -364,9 +384,9 @@ impl<T> Dynamic<T> {
     /// instance.shrink(None);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
+    pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
+        // Allocator API ensures total allocation size in bytes will fit into
+        // `isize`, so this number of elements allocated will too.
         let offset = isize::try_from(self.capacity_front()).unwrap();
 
         if self.initialized > 0 {
@@ -377,16 +397,19 @@ impl<T> Dynamic<T> {
         }
 
         let capacity = capacity.unwrap_or(0);
-        let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self
+            .capacity_back()
+            .checked_sub(capacity)
+            .ok_or(FailedAllocation)?;
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
+        // Allocator API ensures total allocation size in bytes will fit into
+        // `isize`, so this number of elements allocated will too.
         let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
         self.resize(-extra_capacity)
     }
 
-    /// Reallocate to reduce [`capacity_front`] to exactly `capacity` elements.
+    /// Reallocate to reduce [`Self::capacity_front`] to exactly `capacity`.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
@@ -418,10 +441,13 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self.capacity_front().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self
+            .capacity_front()
+            .checked_sub(capacity)
+            .ok_or(FailedAllocation)?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -467,10 +493,13 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, ()> {
+    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self.capacity_back().checked_sub(capacity).ok_or(())?;
+        let extra_capacity = self
+            .capacity_back()
+            .checked_sub(capacity)
+            .ok_or(FailedAllocation)?;
 
         // SAFETY: Allocator API ensures total allocation size in bytes will
         // fit into `isize`, so this number of elements allocated will too.
@@ -517,31 +546,35 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 512);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shift(&mut self, offset: isize) -> Result<&mut Self, ()> {
+    pub fn shift(&mut self, offset: isize) -> Result<&mut Self, OutOfBounds> {
         if self.initialized == 0 {
-            return if offset == 0 { Ok(self) } else { Err(()) };
+            return if offset == 0 {
+                Ok(self)
+            } else {
+                Err(OutOfBounds)
+            };
         }
 
         let source = self.as_mut_ptr();
 
-        if offset < 0 {
-            if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
-                return Err(());
+        match offset.cmp(&0) {
+            std::cmp::Ordering::Less => {
+                if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
+                    return Err(OutOfBounds);
+                }
+
+                self.pre_capacity -= offset.unsigned_abs();
+                self.post_capacity += offset.unsigned_abs();
             }
+            std::cmp::Ordering::Greater => {
+                if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
+                    return Err(OutOfBounds);
+                }
 
-            self.pre_capacity -= offset.unsigned_abs();
-            self.post_capacity += offset.unsigned_abs();
-        } else if offset > 0 {
-            if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
-                return Err(());
+                self.pre_capacity += offset.unsigned_abs();
+                self.post_capacity -= offset.unsigned_abs();
             }
-
-            self.pre_capacity += offset.unsigned_abs();
-            self.post_capacity -= offset.unsigned_abs();
-        } else {
-            debug_assert_eq!(offset, 0);
-
-            return Ok(self);
+            std::cmp::Ordering::Equal => return Ok(self),
         }
 
         unsafe {
@@ -597,7 +630,10 @@ impl<T> Dynamic<T> {
     ///
     /// instance.drain(..).expect_err("invalid range/no elements to drain");
     /// ```
-    pub fn drain<R: std::ops::RangeBounds<usize>>(&mut self, range: R) -> Result<Drain<'_, T>, ()> {
+    pub fn drain<R: std::ops::RangeBounds<usize>>(
+        &mut self,
+        range: R,
+    ) -> Result<Drain<'_, T>, OutOfBounds> {
         let start = match range.start_bound() {
             std::ops::Bound::Included(start) => *start,
             std::ops::Bound::Excluded(start) => *start + 1,
@@ -611,7 +647,7 @@ impl<T> Dynamic<T> {
         };
 
         if start >= self.len() || end > self.len() {
-            return Err(());
+            return Err(OutOfBounds);
         }
 
         let range = start..end;
@@ -628,19 +664,24 @@ impl<T> Dynamic<T> {
     /// This method will increase [`capacity_back`] by `capacity` if positive,
     /// and decrease by `capacity` if negative, (re)allocating if necessary.
     ///
+    /// Note that failed allocation will _NOT_ modify the underlying buffer.
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    fn resize(&mut self, capacity: isize) -> Result<&mut Self, ()> {
+    fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
         // Treat all capacity as back capacity when empty.
         if self.initialized == 0 {
             self.post_capacity += self.pre_capacity;
             self.pre_capacity = 0;
         }
 
-        let capacity = self.post_capacity.checked_add_signed(capacity).ok_or(())?;
+        let capacity = self
+            .post_capacity
+            .checked_add_signed(capacity)
+            .ok_or(FailedAllocation)?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if std::mem::size_of::<T>() == 0 {
@@ -655,11 +696,11 @@ impl<T> Dynamic<T> {
         let total = front + self.post_capacity;
 
         let new_layout = {
-            let total = front.checked_add(capacity).ok_or(())?;
+            let total = front.checked_add(capacity).ok_or(FailedAllocation)?;
 
             match std::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
-                Err(_) => return Err(()),
+                Err(_) => return Err(FailedAllocation),
             }
         };
 
@@ -680,7 +721,7 @@ impl<T> Dynamic<T> {
             else {
                 let existing_layout = match std::alloc::Layout::array::<T>(total) {
                     Ok(layout) => layout,
-                    Err(_) => return Err(()),
+                    Err(_) => return Err(FailedAllocation),
                 };
 
                 unsafe {
@@ -716,7 +757,7 @@ impl<T> Dynamic<T> {
 
         self.buffer = match std::ptr::NonNull::new(ptr) {
             Some(ptr) => ptr,
-            None => return Err(()),
+            None => return Err(FailedAllocation),
         };
 
         self.post_capacity = capacity;
@@ -769,7 +810,7 @@ impl<T> std::ops::Drop for Dynamic<T> {
 }
 
 impl<'a, T: 'a + Clone> std::convert::TryFrom<&'a [T]> for Dynamic<T> {
-    type Error = ();
+    type Error = FailedAllocation;
 
     /// Construct by cloning elements from an existing slice.
     ///
@@ -1046,7 +1087,7 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
     /// assert!(actual.eq(expected))
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let mut iter = iter.into_iter();
+        let iter = iter.into_iter();
 
         // SAFETY: `size_hint` can _NOT_ be trusted to exact size.
         let count = {
@@ -1057,17 +1098,11 @@ impl<T> std::iter::Extend<T> for Dynamic<T> {
         // It is okay if this fails, lazy allocate for each individual element.
         let _ = self.reserve_back(count);
 
-        while let Some(element) = iter.next() {
+        for element in iter {
             if self.append(element).is_err() {
-                panic!("TODO");
+                panic!("allocation failed, could not append element");
             }
         }
-
-        // iter.for_each(|element| {
-        //     self.append(element).unwrap_or_else(|_| {
-        //         panic!("allocation failed, could not append element during extend")
-        //     });
-        // });
     }
 }
 
@@ -1796,6 +1831,30 @@ impl<'a, T: std::fmt::Debug> std::fmt::Debug for Drain<'a, T> {
     }
 }
 
+/// Error type for recoverable allocation failure.
+#[derive(Debug)]
+pub struct FailedAllocation;
+
+impl std::fmt::Display for FailedAllocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "memory allocation failed")
+    }
+}
+
+impl std::error::Error for FailedAllocation {}
+
+/// Error type for invalid index parameters.
+#[derive(Debug)]
+pub struct OutOfBounds;
+
+impl std::fmt::Display for OutOfBounds {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "index is outside the bounds of initialized elements")
+    }
+}
+
+impl std::error::Error for OutOfBounds {}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -1892,7 +1951,11 @@ mod test {
                 let ptr = actual.buffer.as_ptr();
 
                 for index in 0..actual.capacity() {
-                    actual.append(index).expect("uses capacity");
+                    if index % 2 == 0 {
+                        actual.append(index).expect("uses capacity");
+                    } else {
+                        actual.prepend(index).expect("uses capacity");
+                    }
                 }
 
                 assert_eq!(ptr, actual.buffer.as_ptr());
@@ -2106,7 +2169,6 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                // let capacity = usize::try_from((2 as isize).pow(isize::BITS - 2)).unwrap();
                 let capacity = usize::try_from(isize::MAX).unwrap();
 
                 let mut actual = Dynamic::<()>::default();
@@ -3754,6 +3816,22 @@ mod test {
             let actual = Dynamic::<()>::default();
 
             assert_eq!(actual, actual);
+        }
+    }
+
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dynamic::from_iter(expected.iter().cloned());
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
         }
     }
 
