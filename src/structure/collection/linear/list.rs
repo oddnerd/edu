@@ -1,17 +1,16 @@
 //! Implementations of [`List`].
 
-use super::Collection;
 use super::Linear;
 
-/// [`Linear`] [`Collection`] which can insert or remove elements.
+/// [`Linear`] [`super::Collection`] which can insert or remove elements.
 pub trait List<'a>:
     Linear<'a>
-    + std::iter::IntoIterator<Item = Self::Element>
-    + std::iter::Iterator<Item = Self::Element>
-    + std::iter::DoubleEndedIterator<Item = Self::Element>
-    + std::iter::ExactSizeIterator
+    + IntoIterator<Item = Self::Element>
+    + Iterator<Item = Self::Element>
+    + DoubleEndedIterator<Item = Self::Element>
+    + ExactSizeIterator
     + std::iter::FusedIterator
-    + std::iter::FromIterator<Self::Element>
+    + FromIterator<Self::Element>
 {
     /// Insert an `element` at `index`.
     ///
@@ -54,7 +53,7 @@ pub trait List<'a>:
     /// Drop all elements.
     fn clear(&mut self) {
         for _ in 0..self.count() {
-            self.remove(0);
+            let _element = self.remove(0).expect("element to remove");
         }
     }
 }

@@ -3,6 +3,9 @@
 pub mod array;
 pub mod list;
 
+pub use array::Array;
+pub use list::List;
+
 use super::Collection;
 
 /// A [`Collection`] with sequential ordering.
@@ -17,10 +20,16 @@ use super::Collection;
 /// other elements are connected to exactly two.
 pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
-    fn iter(&self) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator;
+    fn iter(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
-    fn iter_mut(&mut self) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element> + std::iter::ExactSizeIterator + std::iter::FusedIterator;
+    fn iter_mut(
+        &mut self,
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
+           + std::iter::FusedIterator;
 
     /// Obtain an immutable reference to the element at `index`, bounds checked.
     fn at(&self, index: usize) -> Option<&Self::Element> {
@@ -55,7 +64,7 @@ pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::
         self.at_mut(0)
     }
 
-    /// Obtain a reference to the element at the back, the last element().
+    /// Obtain a reference to the element at the back, the last element.
     fn last_mut(&mut self) -> Option<&mut Self::Element> {
         self.at_mut(self.count() - 1)
     }

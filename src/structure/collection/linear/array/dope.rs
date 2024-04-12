@@ -13,7 +13,7 @@ use super::Linear;
 /// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
 /// and views (`std::string_view`).
 #[derive(Clone, Copy, Hash)]
-pub struct Dope<'a, T: 'a> {
+pub struct Dope<'a, T> {
     /// Pointer to the start of the array.
     ptr: std::ptr::NonNull<T>,
 
@@ -56,7 +56,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::convert::From<&'a mut [T]> for Dope<'a, T> {
+impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     /// Construct from an existing [`slice`].
     ///
     /// # Performance
@@ -163,7 +163,7 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
+impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
     /// Query if the elements referenced to/contained are the same as `other`.
     ///
     /// # Performance
@@ -196,7 +196,7 @@ impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::PartialEq for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a + std::cmp::PartialEq> std::cmp::Eq for Dope<'a, T> {}
+impl<'a, T: 'a + Eq> Eq for Dope<'a, T> {}
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     /// List the elements referenced to/contained.
@@ -263,9 +263,8 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
-           + std::iter::ExactSizeIterator
-           + std::iter::FusedIterator {
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    {
         unsafe { super::Iter::new(self.ptr, self.count) }
     }
 
@@ -289,8 +288,8 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
-           + std::iter::ExactSizeIterator
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
            + std::iter::FusedIterator {
         unsafe { super::IterMut::new(self.ptr, self.count) }
     }
@@ -427,7 +426,7 @@ mod test {
             let mut underlying: [(); 0] = [];
             let instance = Dope::from(underlying.as_mut_slice());
 
-            instance.index(0);
+            let _ = instance.index(0);
         }
     }
 
@@ -455,7 +454,7 @@ mod test {
             let mut underlying: [(); 0] = [];
             let mut instance = Dope::from(underlying.as_mut_slice());
 
-            instance.index_mut(0);
+            let _ = instance.index_mut(0);
         }
     }
 
@@ -739,7 +738,7 @@ mod test {
                     let mut actual = actual.iter();
 
                     // Exhaust the elements.
-                    actual.next();
+                    let _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -855,7 +854,7 @@ mod test {
                     let mut actual = actual.iter_mut();
 
                     // Exhaust the elements.
-                    actual.next();
+                    let _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);

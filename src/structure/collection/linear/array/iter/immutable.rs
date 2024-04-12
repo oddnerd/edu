@@ -2,7 +2,7 @@
 
 /// Immutable reference [`Iterator`] over an [`super::super::Array`].
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Iter<'a, T: 'a> {
+pub struct Iter<'a, T> {
     /// Pointer to the hypothetical next element.
     ptr: std::ptr::NonNull<T>,
 
@@ -20,6 +20,9 @@ impl<'a, T: 'a> Iter<'a, T> {
     /// * `ptr` must have an address aligned for access to `T`.
     /// * `ptr` must point to one contigious allocated object.
     /// * `ptr` must point to `count` consecutive initialized instances of `T`.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
@@ -40,9 +43,30 @@ impl<'a, T: 'a> Iter<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
+impl<'a, T: 'a> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
+    /// Obtain the next element from the front.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// assert_eq!(iter.next(), Some(&0));
+    /// assert_eq!(iter.next(), Some(&1));
+    /// assert_eq!(iter.next(), Some(&2));
+    /// assert_eq!(iter.next(), Some(&3));
+    /// assert_eq!(iter.next(), Some(&4));
+    /// assert_eq!(iter.next(), Some(&5));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         if self.count > 0 {
             // SAFETY:
@@ -65,6 +89,21 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
         }
     }
 
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// assert_eq!(iter.size_hint(), (6, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.count, Some(self.count))
     }
@@ -72,9 +111,30 @@ impl<'a, T: 'a> std::iter::Iterator for Iter<'a, T> {
 
 impl<'a, T: 'a> std::iter::FusedIterator for Iter<'a, T> {}
 
-impl<'a, T: 'a> std::iter::ExactSizeIterator for Iter<'a, T> {}
+impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
 
-impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
+impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
+    /// Obtain the next element from the back.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// assert_eq!(iter.next_back(), Some(&5));
+    /// assert_eq!(iter.next_back(), Some(&4));
+    /// assert_eq!(iter.next_back(), Some(&3));
+    /// assert_eq!(iter.next_back(), Some(&2));
+    /// assert_eq!(iter.next_back(), Some(&1));
+    /// assert_eq!(iter.next_back(), Some(&0));
+    /// assert_eq!(iter.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.count > 0 {
             self.count -= 1;
@@ -95,6 +155,25 @@ impl<'a, T: 'a> std::iter::DoubleEndedIterator for Iter<'a, T> {
 }
 
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Iter<'a, T> {
+    /// Obtain the next element from the back.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let mut iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// // Remove some elements.
+    /// iter.next();
+    /// iter.next_back();
+    ///
+    /// assert_eq!(format!("{iter:?}"), format!("[1, 2, 3, 4]"));
+    ///
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // SAFETY: points to `count` initialized instance of `T`.
         let slice = unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
@@ -272,7 +351,7 @@ mod test {
                 };
 
                 // Exhaust the elements.
-                actual.next();
+                let _ = actual.next().expect("the one element");
 
                 // Yields `None` at least once.
                 assert_eq!(actual.next(), None);
