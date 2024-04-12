@@ -1,4 +1,4 @@
-//! Implementations of [`Linear`].
+//! Implementation of [`Linear`].
 
 pub mod array;
 pub mod list;
