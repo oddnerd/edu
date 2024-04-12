@@ -5,12 +5,12 @@ use super::Linear;
 /// [`Linear`] [`Collection`] which can insert or remove elements.
 pub trait List<'a>:
     Linear<'a>
-    + std::iter::IntoIterator<Item = Self::Element>
-    + std::iter::Iterator<Item = Self::Element>
-    + std::iter::DoubleEndedIterator<Item = Self::Element>
-    + std::iter::ExactSizeIterator
+    + IntoIterator<Item = Self::Element>
+    + Iterator<Item = Self::Element>
+    + DoubleEndedIterator<Item = Self::Element>
+    + ExactSizeIterator
     + std::iter::FusedIterator
-    + std::iter::FromIterator<Self::Element>
+    + FromIterator<Self::Element>
 {
     /// Insert an `element` at `index`.
     ///
