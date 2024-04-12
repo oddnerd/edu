@@ -1803,6 +1803,18 @@ impl<'a, T: std::fmt::Debug> std::fmt::Debug for Drain<'a, T> {
     }
 }
 
+/// Error type for recoverable allocation failure.
+#[derive(Debug)]
+pub struct FailedAllocation;
+
+impl std::fmt::Display for FailedAllocation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "memory allocation failed")
+    }
+}
+
+impl std::error::Error for FailedAllocation {}
+
 #[cfg(test)]
 mod test {
     use super::*;
