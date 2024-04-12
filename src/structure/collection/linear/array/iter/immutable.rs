@@ -86,6 +86,21 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
         }
     }
 
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::iter::Iter;
+    ///
+    /// let mut underlying = [0, 1, 2, 3, 4, 5];
+    /// let ptr = std::ptr::NonNull::new(underlying.as_mut_ptr()).unwrap();
+    /// let iter = unsafe { Iter::new(ptr, underlying.len()) };
+    ///
+    /// assert_eq!(iter.size_hint(), (6, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.count, Some(self.count))
     }
