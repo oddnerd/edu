@@ -3,8 +3,7 @@
 use super::Array;
 use super::Collection;
 use super::Linear;
-
-use super::super::list::List;
+use super::super::List;
 
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
