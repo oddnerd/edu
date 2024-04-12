@@ -242,7 +242,7 @@ impl<T> Dynamic<T> {
         let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
 
         if self.initialized > 0 {
-            self.shift(-offset).expect("front capacity to shift into");
+            let _ = self.shift(-offset).expect("front capacity to shift into");
         }
 
         if self.capacity_back() >= capacity {
@@ -296,10 +296,10 @@ impl<T> Dynamic<T> {
         // `isize`, so this number of elements allocated will too.
         let capacity = isize::try_from(capacity).unwrap();
 
-        self.resize(capacity)?;
+        let _ = self.resize(capacity)?;
 
         if self.initialized > 0 {
-            self.shift(capacity).expect("back capacity to shift into");
+            let _ = self.shift(capacity).expect("back capacity to shift into");
         }
 
         Ok(self)
@@ -390,7 +390,7 @@ impl<T> Dynamic<T> {
         let offset = isize::try_from(self.capacity_front()).unwrap();
 
         if self.initialized > 0 {
-            self.shift(-offset).expect("front capacity to shift into");
+            let _ = self.shift(-offset).expect("front capacity to shift into");
         } else {
             self.post_capacity += self.pre_capacity;
             self.pre_capacity = 0;
@@ -454,7 +454,7 @@ impl<T> Dynamic<T> {
         let extra_capacity = isize::try_from(extra_capacity).unwrap();
 
         if self.initialized > 0 {
-            self.shift(-extra_capacity)
+            let _ = self.shift(-extra_capacity)
                 .expect("front capacity to shift into");
         }
 
@@ -805,7 +805,7 @@ impl<T> Drop for Dynamic<T> {
         self.post_capacity += self.pre_capacity;
         self.pre_capacity = 0;
 
-        self.resize(0).expect("deallocation cannot fail");
+        let _ = self.resize(0).expect("deallocation cannot fail");
     }
 }
 
