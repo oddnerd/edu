@@ -15,7 +15,7 @@ pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
 
-impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
+impl<T, const N: usize> From<[T; N]> for Fixed<T, N> {
     /// Construct from an existing [`array`].
     ///
     /// # Performance
@@ -36,7 +36,7 @@ impl<T, const N: usize> std::convert::From<[T; N]> for Fixed<T, N> {
     }
 }
 
-impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
+impl<T: Default, const N: usize> Default for Fixed<T, N> {
     /// Construct with default initialized elements.
     ///
     /// # Performance
@@ -58,7 +58,7 @@ impl<T: Default, const N: usize> std::default::Default for Fixed<T, N> {
             unsafe { std::mem::MaybeUninit::uninit().assume_init() };
 
         for element in uninitialized.iter_mut() {
-            element.write(Default::default());
+            let _ = element.write(Default::default());
         }
 
         // SAFETY:
@@ -136,7 +136,7 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> std::iter::IntoIterator for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> IntoIterator for Fixed<T, N> {
     type Item = T;
 
     type IntoIter = IntoIter<T, N>;
@@ -234,9 +234,8 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter(
         &self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a Self::Element>
-           + std::iter::ExactSizeIterator
-           + std::iter::FusedIterator {
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    {
         unsafe {
             // SAFETY: will never be written to.
             let ptr = self.data.as_ptr().cast_mut();
@@ -267,8 +266,8 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl std::iter::DoubleEndedIterator<Item = &'a mut Self::Element>
-           + std::iter::ExactSizeIterator
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
            + std::iter::FusedIterator {
         unsafe {
             let ptr = self.data.as_mut_ptr();
@@ -341,7 +340,7 @@ pub struct IntoIter<T, const N: usize> {
     next: std::ops::Range<usize>,
 }
 
-impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
+impl<T, const N: usize> Drop for IntoIter<T, N> {
     /// Drops the elements that have yet to be yielded.
     ///
     /// # Performance
@@ -377,7 +376,7 @@ impl<T, const N: usize> std::ops::Drop for IntoIter<T, N> {
     }
 }
 
-impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
+impl<T, const N: usize> Iterator for IntoIter<T, N> {
     type Item = T;
 
     /// Obtain the next element, if there are any left.
@@ -436,7 +435,7 @@ impl<T, const N: usize> std::iter::Iterator for IntoIter<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N> {
+impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     /// Obtain the final element, if there are any left.
     ///
     /// # Performance
@@ -475,7 +474,7 @@ impl<'a, T: 'a, const N: usize> std::iter::DoubleEndedIterator for IntoIter<T, N
     }
 }
 
-impl<'a, T: 'a, const N: usize> std::iter::ExactSizeIterator for IntoIter<T, N> {}
+impl<'a, T: 'a, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 
 impl<'a, T: 'a, const N: usize> std::iter::FusedIterator for IntoIter<T, N> {}
 
