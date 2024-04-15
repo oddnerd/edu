@@ -3196,12 +3196,33 @@ mod test {
 
                     #[test]
                     fn empty() {
-                        todo!()
+                        let mut underlying = Dynamic::from_iter([0]);
+                        let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Exhaust the elements.
+                        let _ = actual.next().expect("the one element");
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
 
                     #[test]
                     fn exhausted() {
-                        todo!()
+                        let mut underlying = Dynamic::<usize>::default();
+                        let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
                 }
             }
