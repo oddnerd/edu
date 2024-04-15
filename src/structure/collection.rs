@@ -1,11 +1,14 @@
-//! [Collections](https://en.wikipedia.org/wiki/Collection_(abstract_data_type))
-//! are data structures which store multiple elements of a single type.
+//! Implementations of [`Collection`].
+//!
+//! Included within are:
+//!
+//! * [`Linear`] relationships where elements have sequential ordering.
 
 pub mod linear;
 
 pub use linear::Linear;
 
-/// Multiple instances of a single type (elements) grouped together.
+/// A data structure which stores multiple elements of a single type.
 pub trait Collection<'a> {
     /// The type of the elements.
     type Element: 'a;

@@ -7,7 +7,7 @@ use super::super::List;
 
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
-/// [`Dynamic`] is (mostly) equivalent to Rust's [`Vec`] or C++'s `std::vector`.
+/// This is (mostly) equivalent to Rust's [`Vec`] or C++'s `std::vector`.
 ///
 /// Contigious memory is heap-allocated with alignment and size to store
 /// elements of type `T`, referred to as the buffer. The front of the buffer

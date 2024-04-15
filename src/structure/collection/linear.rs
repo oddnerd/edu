@@ -1,9 +1,9 @@
-//! Data structures which arrange elements in sequential order.
+//! Implementations of [`Linear`].
 //!
 //! Included within are:
 //!
-//! * [Array] which stores elements in contigious memory.
-//! * [List] which dynamically allocates storage for elements.
+//! * [`Array`] which stores elements in contigious memory.
+//! * [`List`] which dynamically allocates storage for elements.
 
 pub mod array;
 pub mod list;
@@ -15,14 +15,14 @@ use super::Collection;
 
 /// A [`Collection`] with sequential ordering.
 ///
-/// Implementations of this trait have only one possible method of iteration
-/// thus implicitly have an order, even if such ordering represents nothing
-/// of the elements. Such [`Collection`] are one-dimensional hence elements can
-/// either be 'before' or 'after' another element but no other relationships
-/// are inherent in the structure. Moreover, this implies there will exist
-/// element(s) that can be said to be the [`Self::first`] and/or [`Self::last`]
-/// contained because they are connected to only one other element whereas all
-/// other elements are connected to exactly two.
+/// Implementations of this trait have exactly one (bidirectional) method of
+/// iteration. The logical layout of the elements is one dimensional such that
+/// the only relationship between elements is they occur 'before' or 'after'
+/// one another. This implies each element is associated with a unique
+/// identifying [index](`std::ops::IndexMut`) relative to its position. This
+/// means starting from the [`Self::first`] element which is defined as always
+/// having an index of zero, all other elements can be accessed by incrementing
+/// the index up to and including the [`Self::last`] element.
 pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
     fn iter(

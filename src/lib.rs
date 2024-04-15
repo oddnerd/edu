@@ -1,4 +1,4 @@
-//! Hand-written implementations in Rust for reference.
+//! Hand-written implementations in Rust for personal reference.
 
 // https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
 #![warn(
