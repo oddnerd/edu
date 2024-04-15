@@ -3162,7 +3162,11 @@ mod test {
 
                 #[test]
                 fn in_order() {
-                    todo!()
+                    let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert!(actual.eq([0, 2, 4]));
                 }
 
                 mod double_ended {
