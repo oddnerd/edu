@@ -1904,9 +1904,22 @@ impl<T, F: Fn(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         todo!()
     }
 
-    /// TODO
+    /// Query how many elements can be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert!(instance.size_hint(), (0, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!()
+        (0, Some(self.underlying.len()))
     }
 }
 
