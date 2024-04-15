@@ -3153,7 +3153,7 @@ mod test {
 
                 #[test]
                 fn element_count() {
-                    let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     let actual = underlying.withdraw(|element| element % 2 == 0);
 
@@ -3162,7 +3162,7 @@ mod test {
 
                 #[test]
                 fn in_order() {
-                    let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     let actual = underlying.withdraw(|element| element % 2 == 0);
 
@@ -3174,7 +3174,7 @@ mod test {
 
                     #[test]
                     fn element_count() {
-                        let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                         let actual = underlying.withdraw(|element| element % 2 == 0);
 
@@ -3183,7 +3183,7 @@ mod test {
 
                     #[test]
                     fn in_order() {
-                        let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                         let actual = underlying.withdraw(|element| element % 2 == 0);
 
@@ -3232,16 +3232,16 @@ mod test {
 
                 #[test]
                 fn retains_non_matching_elements_in_order() {
-                    let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     drop(actual.withdraw(|element| element % 2 == 0));
 
-                    assert!(actual.eq([1,3,5]));
+                    assert!(actual.eq([1, 3, 5]));
                 }
 
                 #[test]
                 fn increases_capacity() {
-                    let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     drop(actual.withdraw(|element| element % 2 == 0));
 
@@ -3250,7 +3250,7 @@ mod test {
 
                 #[test]
                 fn shifts_trailing_elements_after_first_retained() {
-                    let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     let expected = unsafe { actual.as_ptr().add(1) };
 
