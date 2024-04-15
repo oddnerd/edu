@@ -3145,6 +3145,100 @@ mod test {
             }
         }
 
+        mod withdraw {
+            use super::*;
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    todo!()
+                }
+
+                #[test]
+                fn in_order() {
+                    todo!()
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        todo!()
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn empty() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn exhausted() {
+                        todo!()
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn retains_non_matching_elements_in_order() {
+                    todo!()
+                }
+
+                #[test]
+                fn shifts_trailing_elements_after_first_retained() {
+                    todo!()
+                }
+
+                #[test]
+                fn does_not_modify_allocation() {
+                    todo!()
+                }
+
+                #[test]
+                fn increases_capacity() {
+                    todo!()
+                }
+            }
+        }
+
+        mod retain {
+            use super::*;
+
+            #[test]
+            fn retains_matching_elements_in_order() {
+                todo!()
+            }
+
+            #[test]
+            fn shifts_trailing_elements_after_first_retained() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_modify_allocation() {
+                todo!()
+            }
+
+            #[test]
+            fn increases_capacity() {
+                todo!()
+            }
+        }
+
         mod resize {
             use super::*;
 
