@@ -3250,15 +3250,14 @@ mod test {
 
                 #[test]
                 fn shifts_trailing_elements_after_first_retained() {
-                    todo!()
+                    let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                    let expected = unsafe { actual.as_ptr().add(1) };
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert_eq!(actual.as_ptr(), expected);
                 }
-
-                #[test]
-                fn does_not_modify_allocation() {
-                    todo!()
-                }
-
-
             }
         }
 
