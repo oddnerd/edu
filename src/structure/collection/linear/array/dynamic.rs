@@ -3174,12 +3174,20 @@ mod test {
 
                     #[test]
                     fn element_count() {
-                        todo!()
+                        let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        assert_eq!(actual.rev().count(), 3);
                     }
 
                     #[test]
                     fn in_order() {
-                        todo!()
+                        let mut underlying = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        assert!(actual.rev().eq([4, 2, 0]));
                     }
                 }
 
