@@ -659,6 +659,43 @@ impl<T> Dynamic<T> {
         })
     }
 
+    /// Remove the elements which match some `predicate`.
+    ///
+    /// The `predicate` is called exactly once per each element, in order.
+    /// Elements for which the `predicate` is true are removed in order from
+    /// left to right. Elements for which the `predicate` is false are shifted
+    /// left to immediately after the previously retained element, thereby
+    /// maintaining order.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<T> {
+        todo!()
+    }
+
+    /// Drop elements which don't match some `predicate`.
+    ///
+    /// Same as [`Self::withdraw`] all elements that do not match `predicate`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    pub fn retain<F>(&mut self, predicate: F)
+    where
+        F: FnMut(&T) -> bool,
+    {
+        todo!()
+    }
+
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
     /// This method will increase [`capacity_back`] by `capacity` if positive,
@@ -1590,13 +1627,13 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 ///
 /// See [`Dynamic::drain`].
 pub struct Drain<'a, T> {
-    // The underlying [`Dynamic`] being drained from.
+    /// The underlying [`Dynamic`] being drained from.
     underlying: &'a mut Dynamic<T>,
 
-    // The index range of elements being drained.
+    /// The index range of elements being drained.
     range: std::ops::Range<usize>,
 
-    // The index range of elements being drained that have yet to be yielded.
+    /// The index range of elements being drained that have yet to be yielded.
     next: std::ops::Range<usize>,
 }
 
@@ -1829,6 +1866,63 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
         }
 
         list.finish()
+    }
+}
+
+/// By-value [`Iterator`] to remove elements from a [`Dynamic`].
+///
+/// See [`Dynamic::withdraw`].
+pub struct Withdraw<'a, T, F: Fn(&T) -> bool> {
+    /// The underlying [`Dynamic`] begin withdrawn from.
+    underlying: &'a mut Dynamic<T>,
+
+    /// The predicate based upon which elements are withdrawn.
+    predicate: F,
+
+    /// The index of the next (front) element to query with the predicate.
+    next_front: usize,
+
+    /// The index of the next (back) element to query with the predicate.
+    next_back: usize,
+
+    /// The number of retained elements at the back to shift forward.
+    back_elements: usize,
+}
+
+impl<T, F: Fn(&T) -> bool> Drop for Withdraw<'_, T, F> {
+    /// TODO
+    fn drop(&mut self) {
+        todo!()
+    }
+}
+
+impl<T, F: Fn(&T) -> bool> Iterator for Withdraw<'_, T, F> {
+    type Item = T;
+
+    /// TODO
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
+    }
+
+    /// TODO
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        todo!()
+    }
+}
+
+impl<T, F: Fn(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
+    /// TODO
+    fn next_back(&mut self) -> Option<Self::Item> {
+        todo!()
+    }
+}
+
+impl<T, F: Fn(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
+
+impl<T, F: Fn(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
+    /// TODO
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
     }
 }
 
