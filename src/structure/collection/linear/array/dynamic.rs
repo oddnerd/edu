@@ -3232,7 +3232,11 @@ mod test {
 
                 #[test]
                 fn retains_non_matching_elements_in_order() {
-                    todo!()
+                    let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert!(actual.eq([1,3,5]));
                 }
 
                 #[test]
