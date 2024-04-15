@@ -3240,6 +3240,15 @@ mod test {
                 }
 
                 #[test]
+                fn increases_capacity() {
+                    let mut actual = Dynamic::from_iter([0,1,2,3,4,5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert_eq!(actual.capacity(), 3);
+                }
+
+                #[test]
                 fn shifts_trailing_elements_after_first_retained() {
                     todo!()
                 }
@@ -3249,10 +3258,7 @@ mod test {
                     todo!()
                 }
 
-                #[test]
-                fn increases_capacity() {
-                    todo!()
-                }
+
             }
         }
 
