@@ -3265,23 +3265,32 @@ mod test {
             use super::*;
 
             #[test]
+            fn increases_capacity() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                actual.retain(|element| element % 2 == 0);
+
+                assert_eq!(actual.capacity(), 3);
+            }
+
+            #[test]
             fn retains_matching_elements_in_order() {
-                todo!()
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                actual.retain(|element| element % 2 == 0);
+
+                assert!(actual.eq([0, 2, 4]));
             }
 
             #[test]
             fn shifts_trailing_elements_after_first_retained() {
-                todo!()
-            }
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-            #[test]
-            fn does_not_modify_allocation() {
-                todo!()
-            }
+                let expected = actual.as_ptr();
 
-            #[test]
-            fn increases_capacity() {
-                todo!()
+                actual.retain(|element| element % 2 == 0);
+
+                assert_eq!(actual.as_ptr(), expected);
             }
         }
 
