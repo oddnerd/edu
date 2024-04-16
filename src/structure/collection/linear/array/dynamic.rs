@@ -700,7 +700,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// todo!()
     /// ```
-    pub fn retain<F>(&mut self, predicate: F)
+    pub fn retain<F>(&mut self, _predicate: F)
     where
         F: FnMut(&T) -> bool,
     {
@@ -1903,7 +1903,7 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// TODO
     fn drop(&mut self) {
-        todo!()
+        // todo!()
     }
 }
 
@@ -1913,19 +1913,19 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// TODO
     fn next(&mut self) -> Option<Self::Item> {
         // The first element to retain.
-        let source = self.next_front;
+        // let source = self.next_front;
 
         // How many consecutive elements to retain starting from `source`.
-        let mut count = 0;
+        // let mut count = 0;
 
-        // Shift the current run of retained to the left.
-        let do_shift = |count| unsafe {
-            // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(source, self.destination, count);
-        };
+        // // Shift the current run of retained to the left.
+        // let do_shift = |count| unsafe {
+        //     // SAFETY:
+        //     // * owned memory => source/destination valid for read/writes.
+        //     // * no aliasing restrictions => source and destination can overlap.
+        //     // * underlying buffer is aligned => both pointers are aligned.
+        //     std::ptr::copy(source, self.destination, count);
+        // };
 
         while self.next_front <= self.next_back {
             // SAFETY: the `MaybeUninit<T>` and underlying `T` are initialized.
@@ -1943,21 +1943,21 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 // SAFETY: aligned within the allocated object, or one byte past.
                 self.next_front = unsafe { self.next_front.add(1) };
 
-                do_shift(count);
+                // do_shift(count);
 
                 // SAFETY: aligned within the allocated object, or one byte past.
-                self.destination = unsafe { self.destination.add(count) };
+                // self.destination = unsafe { self.destination.add(count) };
 
                 return Some(element);
             } else {
-                // SAFETY: aligned within the allocated object.
+                // SAFETY: aligned within the allocated object, or one byte past.
                 self.next_front = unsafe { self.next_front.add(1) };
 
-                count += 1;
+                // count += 1;
             }
         }
 
-        do_shift(count);
+        // do_shift(count);
 
         None
     }
@@ -1992,7 +1992,7 @@ impl<T, F: FnMut(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
 
 impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
     /// TODO
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }
