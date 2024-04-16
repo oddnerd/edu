@@ -3338,7 +3338,7 @@ mod test {
                 }
 
                 #[test]
-                fn shifts_trailing_elements_after_first_retained() {
+                fn does_not_shift_first_retained_element() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     let expected = unsafe { actual.as_ptr().add(1) };
