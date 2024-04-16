@@ -1977,7 +1977,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert!(instance.size_hint(), (0, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (0, Some(self.underlying.len()))
+        todo!("update as elements are withdrawn")
     }
 }
 
