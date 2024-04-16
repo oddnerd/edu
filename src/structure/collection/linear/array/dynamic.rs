@@ -674,7 +674,7 @@ impl<T> Dynamic<T> {
     /// ```
     /// todo!()
     /// ```
-    pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<T> {
+    pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
         todo!()
     }
 
@@ -1872,36 +1872,83 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
 /// By-value [`Iterator`] to remove elements from a [`Dynamic`].
 ///
 /// See [`Dynamic::withdraw`].
-pub struct Withdraw<'a, T, F: Fn(&T) -> bool> {
+pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// The underlying [`Dynamic`] begin withdrawn from.
     underlying: &'a mut Dynamic<T>,
 
     /// The predicate based upon which elements are withdrawn.
     predicate: F,
 
-    /// The index of the next (front) element to query with the predicate.
-    next_front: usize,
+    /// Where to write the next retained element to.
+    destination: *mut T,
 
-    /// The index of the next (back) element to query with the predicate.
-    next_back: usize,
+    /// The next (front) element to query with the predicate.
+    next_front: *mut T,
 
-    /// The number of retained elements at the back to shift forward.
-    back_elements: usize,
+    /// The next (back) element to query with the predicate.
+    next_back: *mut T,
 }
 
-impl<T, F: Fn(&T) -> bool> Drop for Withdraw<'_, T, F> {
+impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// TODO
     fn drop(&mut self) {
         todo!()
     }
 }
 
-impl<T, F: Fn(&T) -> bool> Iterator for Withdraw<'_, T, F> {
+impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     type Item = T;
 
     /// TODO
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        // The first element to retain.
+        let source = self.next_front;
+
+        // How many consecutive elements to retain starting from `source`.
+        let mut count = 0;
+
+        // Shift the current run of retained to the left.
+        let do_shift = |count| unsafe {
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(source, self.destination, count);
+        };
+
+        while self.next_front <= self.next_back {
+            // SAFETY: the `MaybeUninit<T>` and underlying `T` are initialized.
+            let current = unsafe { &*self.next_front };
+
+            if (self.predicate)(current) {
+                let element = unsafe {
+                    // SAFETY:
+                    // * owned memory => pointer is valid for reads.
+                    // * `pointer::add` => pointier is aligned.
+                    // * the pointed to `T` is initialized.
+                    self.next_front.read()
+                };
+
+                // SAFETY: aligned within the allocated object, or one byte past.
+                self.next_front = unsafe { self.next_front.add(1) };
+
+                do_shift(count);
+
+                // SAFETY: aligned within the allocated object, or one byte past.
+                self.destination = unsafe { self.destination.add(count) };
+
+                return Some(element);
+            } else {
+                // SAFETY: aligned within the allocated object.
+                self.next_front = unsafe { self.next_front.add(1) };
+
+                count += 1;
+            }
+        }
+
+        do_shift(count);
+
+        None
     }
 
     /// Query how many elements can be yielded.
@@ -1923,16 +1970,16 @@ impl<T, F: Fn(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     }
 }
 
-impl<T, F: Fn(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
+impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// TODO
     fn next_back(&mut self) -> Option<Self::Item> {
         todo!()
     }
 }
 
-impl<T, F: Fn(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
+impl<T, F: FnMut(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
 
-impl<T, F: Fn(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
+impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
     /// TODO
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()
@@ -3219,7 +3266,7 @@ mod test {
                     #[test]
                     fn empty() {
                         let mut underlying = Dynamic::from_iter([0]);
-                        let actual = underlying.withdraw(|element| element % 2 == 0);
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
 
                         // Exhaust the elements.
                         let _ = actual.next().expect("the one element");
@@ -3236,7 +3283,7 @@ mod test {
                     #[test]
                     fn exhausted() {
                         let mut underlying = Dynamic::<usize>::default();
-                        let actual = underlying.withdraw(|element| element % 2 == 0);
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
