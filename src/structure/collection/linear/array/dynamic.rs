@@ -1939,7 +1939,12 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 let element = unsafe { std::ptr::read(current) };
 
                 self.underlying.initialized -= 1;
-                self.underlying.post_capacity += 1;
+
+                if self.underlying.as_ptr() == source {
+                    self.underlying.pre_capacity += 1;
+                } else {
+                    self.underlying.post_capacity += 1;
+                }
 
                 shift_retained(count);
 
@@ -3228,13 +3233,11 @@ mod test {
 
                 #[test]
                 fn in_order() {
-                    let mut underlying = Dynamic::from_iter([0, 1, 1, 1, 2, 2, 3, 4, 5, 5]);
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     let actual = underlying.withdraw(|element| element % 2 == 0);
 
-                    for _ in actual {}
-
-                    // assert!(actual.eq([0, 2, 4]));
+                    assert!(actual.eq([0, 2, 4]));
                 }
 
                 #[test]
