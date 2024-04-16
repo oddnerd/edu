@@ -3329,6 +3329,15 @@ mod test {
                 }
 
                 #[test]
+                fn withdrawing_front_elements_increases_front_capacity() {
+                    let mut actual = Dynamic::from_iter([0, 0, 0, 1]);
+
+                    drop(actual.withdraw(|element| element == &0));
+
+                    assert_eq!(actual.capacity_front(), 3);
+                }
+
+                #[test]
                 fn shifts_trailing_elements_after_first_retained() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
