@@ -675,7 +675,18 @@ impl<T> Dynamic<T> {
     /// todo!()
     /// ```
     pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
-        todo!()
+        let start = self.as_mut_ptr();
+
+        // SAFETY: stays aligned within the allocated object.
+        let end = unsafe { start.add(self.initialized) };
+
+        Withdraw {
+            underlying: self,
+            predicate,
+            destination: start,
+            next_front: start,
+            next_back: end,
+        }
     }
 
     /// Drop elements which don't match some `predicate`.
