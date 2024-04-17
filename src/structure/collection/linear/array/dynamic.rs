@@ -675,17 +675,25 @@ impl<T> Dynamic<T> {
     /// todo!()
     /// ```
     pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
-        let start = self.as_mut_ptr();
+        let head = self.as_mut_ptr();
 
-        // SAFETY: stays aligned within the allocated object.
-        let end = unsafe { start.add(self.initialized) };
+        let tail = if self.initialized == 0 {
+            head
+        } else {
+            // SAFETY: stays aligned within the allocated object.
+            unsafe { head.add(self.initialized - 1) }
+        };
+
+        let remaining = self.initialized;
 
         Withdraw {
             underlying: self,
             predicate,
-            retained: start,
-            next: start,
-            end,
+            remaining,
+            retained: head,
+            head,
+            tail,
+            trailing: 0,
         }
     }
 
@@ -1892,11 +1900,17 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// Where to write the next retained element to.
     retained: *mut T,
 
-    /// The next (front) element to query with the predicate.
-    next: *mut T,
+    /// How many element are left to query with the predicate.
+    remaining: usize,
 
-    /// One past the final element to query with the predicate.
-    end: *mut T,
+    /// The next (front) element to query with the predicate.
+    head: *mut T,
+
+    /// The next (back) element to query with the predicate.
+    tail: *mut T,
+
+    /// The number of retained elements at the end because of `next_back`.
+    trailing: usize,
 }
 
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
@@ -1927,7 +1941,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        let first_retained = self.next;
+        let first_retained = self.head;
         let mut consecutive_retained = 0;
 
         // Shift the current run of retained elements to the left.
@@ -1939,12 +1953,14 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             std::ptr::copy(src, dst, count);
         };
 
-        while self.next < self.end {
+        while self.remaining != 0 {
+            self.remaining -= 1;
+
             // SAFETY: the element is initialized.
-            let current = unsafe { &*self.next };
+            let current = unsafe { &*self.head };
 
             // SAFETY: aligned within the allocated object, or one byte past.
-            self.next = unsafe { self.next.add(1) };
+            self.head = unsafe { self.head.add(1) };
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
@@ -1978,6 +1994,11 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         // shift any string of retained elements at the end of the buffer.
         shift_retained(first_retained, self.retained, consecutive_retained);
 
+
+        // TODO: does this shift trailing elements?
+        shift_retained(self.tail, self.retained, self.trailing);
+        self.trailing = 0;
+
         None
     }
 
@@ -2003,7 +2024,60 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// TODO
     fn next_back(&mut self) -> Option<Self::Item> {
-        todo!()
+        let mut consecutive_retained = 0;
+
+        // Shift the current run of retained elements to the left.
+        let shift_retained = |src: *mut T, dst: *mut T, count| unsafe {
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(src, dst, count);
+        };
+
+        while self.remaining != 0 {
+            self.remaining -= 1;
+
+            // SAFETY: the element is initialized.
+            let current = unsafe { &*self.tail };
+
+            if self.remaining != 0 {
+                // SAFETY: aligned within the allocated object.
+                self.tail = unsafe { self.tail.sub(1) };
+            }
+
+            if (self.predicate)(current) {
+                // SAFETY: this takes ownership (moved out of buffer).
+                let element = unsafe { std::ptr::read(current) };
+
+                self.underlying.initialized -= 1;
+                self.underlying.post_capacity += 1;
+
+                let first_retained = {
+                    let current:* const T = current;
+
+                    // SAFETY: stays aligned within the allocated object.
+                    unsafe { current.add(1) }.cast_mut()
+                };
+
+                let current = {
+                    let current: *const T = current;
+                    current.cast_mut()
+                };
+
+                shift_retained(first_retained, current, consecutive_retained);
+
+                return Some(element);
+            } else {
+                consecutive_retained += 1;
+                self.trailing += 1;
+            }
+        }
+
+        shift_retained(self.tail, self.retained, self.trailing);
+        self.trailing = 0;
+
+        None
     }
 }
 
@@ -3275,18 +3349,23 @@ mod test {
                     fn element_count() {
                         let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                        let actual = underlying.withdraw(|element| element % 2 == 0);
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
 
-                        assert_eq!(actual.rev().count(), 3);
+                        assert_eq!(actual.count(), 3);
                     }
 
                     #[test]
                     fn in_order() {
                         let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                        let actual = underlying.withdraw(|element| element % 2 == 0);
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
 
-                        assert!(actual.rev().eq([4, 2, 0]));
+                        assert!(actual.eq([4, 2, 0]));
+                    }
+
+                    #[test]
+                    fn handles_retained_at_end() {
+                        todo!()
                     }
                 }
 
