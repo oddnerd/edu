@@ -683,9 +683,9 @@ impl<T> Dynamic<T> {
         Withdraw {
             underlying: self,
             predicate,
-            next_retained: start,
-            next_front: start,
-            next_back: end,
+            retained: start,
+            next: start,
+            end,
         }
     }
 
@@ -1890,13 +1890,13 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     predicate: F,
 
     /// Where to write the next retained element to.
-    next_retained: *mut T,
+    retained: *mut T,
 
     /// The next (front) element to query with the predicate.
-    next_front: *mut T,
+    next: *mut T,
 
-    /// The next (back) element to query with the predicate.
-    next_back: *mut T,
+    /// One past the final element to query with the predicate.
+    end: *mut T,
 }
 
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
@@ -1927,7 +1927,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        let first_retained = self.next_front;
+        let first_retained = self.next;
         let mut consecutive_retained = 0;
 
         // Shift the current run of retained elements to the left.
@@ -1939,12 +1939,12 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             std::ptr::copy(src, dst, count);
         };
 
-        while self.next_front < self.next_back {
+        while self.next < self.end {
             // SAFETY: the element is initialized.
-            let current = unsafe { &*self.next_front };
+            let current = unsafe { &*self.next };
 
             // SAFETY: aligned within the allocated object, or one byte past.
-            self.next_front = unsafe { self.next_front.add(1) };
+            self.next = unsafe { self.next.add(1) };
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
@@ -1959,15 +1959,15 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     self.underlying.pre_capacity += 1;
 
                     // SAFETY: aligned within the allocated object, or one byte past.
-                    self.next_retained = unsafe { self.next_retained.add(1) };
+                    self.retained = unsafe { self.retained.add(1) };
                 } else {
                     self.underlying.post_capacity += 1;
                 }
 
-                shift_retained(first_retained, self.next_retained, consecutive_retained);
+                shift_retained(first_retained, self.retained, consecutive_retained);
 
                 // SAFETY: aligned within the allocated object, or one byte past.
-                self.next_retained = unsafe { self.next_retained.add(consecutive_retained) };
+                self.retained = unsafe { self.retained.add(consecutive_retained) };
 
                 return Some(element);
             } else {
@@ -1976,7 +1976,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         }
 
         // shift any string of retained elements at the end of the buffer.
-        shift_retained(first_retained, self.next_retained, consecutive_retained);
+        shift_retained(first_retained, self.retained, consecutive_retained);
 
         None
     }
