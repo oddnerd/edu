@@ -683,7 +683,7 @@ impl<T> Dynamic<T> {
         Withdraw {
             underlying: self,
             predicate,
-            destination: start,
+            next_retained: start,
             next_front: start,
             next_back: end,
         }
@@ -1891,7 +1891,7 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     predicate: F,
 
     /// Where to write the next retained element to.
-    destination: *mut T,
+    next_retained: *mut T,
 
     /// The next (front) element to query with the predicate.
     next_front: *mut T,
@@ -1912,19 +1912,16 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 
     /// TODO
     fn next(&mut self) -> Option<Self::Item> {
-        // The first element to retain.
-        let source = self.next_front;
-
-        // How many consecutive elements to retain starting from `source`.
-        let mut count = 0;
+        let first_retained = self.next_front;
+        let mut consecutive_retained = 0;
 
         // Shift the current run of retained elements to the left.
-        let shift_retained = |count| unsafe {
+        let shift_retained = |src: *mut T, dst: *mut T, count| unsafe {
             // SAFETY:
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(source, self.destination, count);
+            std::ptr::copy(src, dst, count);
         };
 
         while self.next_front < self.next_back {
@@ -1940,24 +1937,31 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 
                 self.underlying.initialized -= 1;
 
-                if self.underlying.as_ptr() == source {
+                // Increase pre-capacity rather than shift into it when the
+                // first element is being withdrawn, this ensures the first
+                // retained element does not move.
+                if self.underlying.as_ptr() == current {
                     self.underlying.pre_capacity += 1;
+
+                    // SAFETY: aligned within the allocated object, or one byte past.
+                    self.next_retained = unsafe { self.next_retained.add(1) };
                 } else {
                     self.underlying.post_capacity += 1;
                 }
 
-                shift_retained(count);
+                shift_retained(first_retained, self.next_retained, consecutive_retained);
 
                 // SAFETY: aligned within the allocated object, or one byte past.
-                self.destination = unsafe { self.destination.add(count) };
+                self.next_retained = unsafe { self.next_retained.add(consecutive_retained) };
 
                 return Some(element);
             } else {
-                count += 1;
+                consecutive_retained += 1;
             }
         }
 
-        shift_retained(count);
+        // shift any string of retained elements at the end of the buffer.
+        shift_retained(first_retained, self.next_retained, consecutive_retained);
 
         None
     }
