@@ -1760,7 +1760,6 @@ impl<T> Iterator for Drain<'_, T> {
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.drain(..).expect("valid range");
     ///
-    ///
     /// assert_eq!(actual.next(), Some(0));
     /// assert_eq!(actual.next(), Some(1));
     /// assert_eq!(actual.next(), Some(2));
@@ -1910,7 +1909,23 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
 impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     type Item = T;
 
-    /// TODO
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(actual.next(), Some(0));
+    /// assert_eq!(actual.next(), Some(2));
+    /// assert_eq!(actual.next(), Some(4));
+    /// assert_eq!(actual.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         let first_retained = self.next_front;
         let mut consecutive_retained = 0;
