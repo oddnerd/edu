@@ -3332,9 +3332,9 @@ mod test {
                 fn increases_front_capacity_when_withdrawing_first_element() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                    drop(actual.withdraw(|_element| true));
+                    drop(actual.withdraw(|element| element != &5));
 
-                    assert_eq!(actual.capacity_front(), 6);
+                    assert_eq!(actual.capacity_front(), 5);
                     assert_eq!(actual.capacity_back(), 0);
                 }
 
@@ -3402,10 +3402,10 @@ mod test {
                     fn increases_back_capacity_when_withdrawing_last_element() {
                         let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                        drop(actual.withdraw(|_element| true).rev());
+                        drop(actual.withdraw(|element| element > &0).rev());
 
                         assert_eq!(actual.capacity_front(), 0);
-                        assert_eq!(actual.capacity_back(), 6);
+                        assert_eq!(actual.capacity_back(), 5);
                     }
 
                     #[test]
