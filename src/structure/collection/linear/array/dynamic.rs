@@ -675,17 +675,28 @@ impl<T> Dynamic<T> {
     /// todo!()
     /// ```
     pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
-        let head = if self.initialized == 0{
-            std::ptr::null_mut()
+        let head = if self.initialized == 0 {
+            // SAFETY: this pointer will not be modified or read.
+            std::ptr::NonNull::dangling()
         } else {
-            self.as_mut_ptr()
+            // SAFETY: at least one element exist => pointer cannot be null.
+            unsafe { std::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
         };
 
         let tail = if self.initialized == 0 {
             head
         } else {
             // SAFETY: stays aligned within the allocated object.
-            unsafe { head.add(self.initialized - 1) }
+            unsafe {
+                // SAFETY: at least one element exists => cannot underflow.
+                let offset = self.initialized - 1;
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = head.as_ptr().add(offset);
+
+                // SAFETY: `head` cannot be null => pointer cannot be null.
+                std::ptr::NonNull::new_unchecked(ptr)
+            }
         };
 
         let remaining = self.initialized;
@@ -1902,16 +1913,16 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     predicate: F,
 
     /// Where to write the next retained element to.
-    retained: *mut T,
+    retained: std::ptr::NonNull<T>,
 
     /// How many element are left to query with the predicate.
     remaining: usize,
 
     /// The next (front) element to query with the predicate.
-    head: *mut T,
+    head: std::ptr::NonNull<T>,
 
     /// The next (back) element to query with the predicate.
-    tail: *mut T,
+    tail: std::ptr::NonNull<T>,
 
     /// The number of retained elements at the end because of `next_back`.
     trailing: usize,
@@ -1929,7 +1940,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(self.tail, self.retained, self.trailing)
+            std::ptr::copy(self.tail.as_ptr(), self.retained.as_ptr(), self.trailing)
         };
     }
 }
@@ -1971,10 +1982,15 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             self.remaining -= 1;
 
             // SAFETY: the element is initialized.
-            let current = unsafe { &*self.head };
+            let current = unsafe { self.head.as_ref() };
 
-            // SAFETY: aligned within the allocated object, or one byte past.
-            self.head = unsafe { self.head.add(1) };
+            self.head = unsafe {
+                // SAFETY: aligned within the allocated object, or one byte past.
+                let ptr = self.head.as_ptr().add(1);
+
+                // SAFETY: `head` is not null => pointer is not null.
+                std::ptr::NonNull::new_unchecked(ptr)
+            };
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
@@ -1986,16 +2002,30 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 if self.underlying.as_ptr() == current {
                     self.underlying.pre_capacity += 1;
 
-                    // SAFETY: aligned within the allocated object, or one byte past.
-                    self.retained = unsafe { self.retained.add(1) };
+                    self.retained = unsafe {
+                        // SAFETY: aligned within the allocated object, or one byte past.
+                        let ptr = self.retained.as_ptr().add(1);
+
+                        // SAFETY: `retained` is not null => pointer is not null.
+                        std::ptr::NonNull::new_unchecked(ptr)
+                    };
                 } else {
                     self.underlying.post_capacity += 1;
                 }
 
-                shift_retained(first_retained, self.retained, consecutive_retained);
+                shift_retained(
+                    first_retained.as_ptr(),
+                    self.retained.as_ptr(),
+                    consecutive_retained,
+                );
 
-                // SAFETY: aligned within the allocated object, or one byte past.
-                self.retained = unsafe { self.retained.add(consecutive_retained) };
+                self.retained = unsafe {
+                    // SAFETY: aligned within the allocated object, or one byte past.
+                    let ptr = self.retained.as_ptr().add(consecutive_retained);
+
+                    // SAFETY: `retained` is not null => pointer is not null.
+                    std::ptr::NonNull::new_unchecked(ptr)
+                };
 
                 self.underlying.initialized -= 1;
 
@@ -2006,7 +2036,11 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         }
 
         // shift any string of retained elements at the end of the buffer.
-        shift_retained(first_retained, self.retained, consecutive_retained);
+        shift_retained(
+            first_retained.as_ptr(),
+            self.retained.as_ptr(),
+            consecutive_retained,
+        );
 
         None
     }
@@ -2037,11 +2071,19 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             self.remaining -= 1;
 
             // SAFETY: the element is initialized.
-            let current = unsafe { &*self.tail };
+            let current = unsafe { self.tail.as_ref() };
 
-            if self.remaining != 0 {
-                // SAFETY: aligned within the allocated object.
-                self.tail = unsafe { self.tail.sub(1) };
+            unsafe {
+                // SAFETY: prevent moving the pointer to before the allocated object.
+                if self.remaining != 0 {
+                    self.tail = {
+                        // SAFETY: aligned within the allocated object.
+                        let ptr = self.tail.as_ptr().sub(1);
+
+                        // SAFETY: `retained` is not null => pointer is not null.
+                        std::ptr::NonNull::new_unchecked(ptr)
+                    };
+                }
             }
 
             if (self.predicate)(current) {
