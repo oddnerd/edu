@@ -2169,9 +2169,43 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 impl<T, F: FnMut(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
 
 impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
-    /// TODO
-    fn fmt(&self, _f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+    /// Output what indexes are being pointed to in the underlying buffer.
+    ///
+    /// Note that these indexes are _NOT_ based on the first initialized
+    /// element, but rather absolute relative to the beginning of the
+    /// allocated object.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut withdraw = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// println!("{withdraw:?}")
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let origin = self.underlying.buffer.as_ptr().cast::<T>();
+
+        // SAFETY: both pointers are aligned within the allocated object.
+        let head = unsafe { self.head.as_ptr().offset_from(origin) };
+
+        // SAFETY: both pointers are aligned within the allocated object.
+        let retained = unsafe { self.retained.as_ptr().offset_from(origin) };
+
+        // SAFETY: both pointers are aligned within the allocated object.
+        let tail = unsafe { self.tail.as_ptr().offset_from(origin) };
+
+        f.debug_struct("Withdraw")
+            .field("head index", &head)
+            .field("tail index", &tail)
+            .field("remaining elements", &self.remaining)
+            .field("retained index", &retained)
+            .field("trailing elements", &self.trailing)
+            .finish_non_exhaustive()
     }
 }
 
