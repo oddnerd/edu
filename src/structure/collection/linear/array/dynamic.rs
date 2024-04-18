@@ -733,11 +733,9 @@ impl<T> Dynamic<T> {
     /// ```
     /// todo!()
     /// ```
-    pub fn retain<F>(&mut self, _predicate: F)
-    where
-        F: FnMut(&T) -> bool,
+    pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut predicate: F)
     {
-        todo!()
+        self.withdraw(|element| !predicate(element)).for_each(drop)
     }
 
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
