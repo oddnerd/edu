@@ -731,7 +731,13 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// instance.retain(|element| element % 2 == 0);
+    ///
+    /// assert!(instance.eq([0, 2, 4]));
     /// ```
     pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut predicate: F)
     {
