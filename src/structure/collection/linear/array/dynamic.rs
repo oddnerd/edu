@@ -1939,7 +1939,26 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 }
 
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
-    /// TODO
+    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(withdraw.next(), Some(0));      // Consumes the element with value `0`.
+    /// assert_eq!(withdraw.next_back(), Some(4)); // Consumes the element with value `4`.
+    ///
+    /// drop(withdraw); // Drops the element with value '2'.
+    ///
+    /// assert!(instance.eq([1, 3, 5])); // Retained elements.
+    /// ```
     fn drop(&mut self) {
         // Drop all remaining elements to withdraw.
         self.for_each(drop);
