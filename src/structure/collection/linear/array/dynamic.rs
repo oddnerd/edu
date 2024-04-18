@@ -1928,7 +1928,6 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
             std::ptr::copy(self.tail, self.retained, self.trailing)
         };
     }
-
 }
 
 impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
@@ -3434,14 +3433,12 @@ mod test {
                         let mut actual = underlying.withdraw(|element| element != &0);
 
                         // make head and tail meet.
-                        let _  = actual.next().expect("the element with value '1'");
-                        let _  = actual.next_back().expect("the element with value '2'");
+                        let _ = actual.next().expect("the element with value '1'");
+                        let _ = actual.next_back().expect("the element with value '2'");
 
                         assert_eq!(actual.next(), None);
                         assert_eq!(actual.next_back(), None);
                     }
-
-
                 }
 
                 mod fused {
