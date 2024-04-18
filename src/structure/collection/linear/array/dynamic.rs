@@ -2105,10 +2105,10 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let instance = underlying.withdraw(|element| element % 2 == 0);
     ///
-    /// assert!(instance.size_hint(), (0, Some(6)));
+    /// assert_eq!(instance.size_hint(), (0, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, Some(self.remaining))
