@@ -2094,7 +2094,23 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 }
 
 impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
-    /// TODO
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(actual.next_back(), Some(4));
+    /// assert_eq!(actual.next_back(), Some(2));
+    /// assert_eq!(actual.next_back(), Some(0));
+    /// assert_eq!(actual.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         while self.remaining != 0 {
             self.remaining -= 1;
