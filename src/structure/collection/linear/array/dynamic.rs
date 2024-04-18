@@ -675,12 +675,12 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut iter = instance.withdraw(|element| element % 2 == 0);
+    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
     ///
-    /// assert_eq!(iter.next(), Some(0));
-    /// assert_eq!(iter.next_back(), Some(4));
+    /// assert_eq!(withdraw.next(), Some(0));
+    /// assert_eq!(withdraw.next_back(), Some(4));
     ///
-    /// drop(iter);
+    /// drop(withdraw);
     ///
     /// assert!(instance.eq([1, 3, 5]));
     /// ```
@@ -739,8 +739,7 @@ impl<T> Dynamic<T> {
     ///
     /// assert!(instance.eq([0, 2, 4]));
     /// ```
-    pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut predicate: F)
-    {
+    pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut predicate: F) {
         self.withdraw(|element| !predicate(element)).for_each(drop)
     }
 
@@ -1969,11 +1968,14 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
 
         // Shift any string of trailing retained elements into position.
         unsafe {
+            // SAFETY: aligned within the allocated object, or one byte past.
+            let trailing = self.tail.as_ptr().add(1);
+
             // SAFETY:
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(self.tail.as_ptr(), self.retained.as_ptr(), self.trailing)
+            std::ptr::copy(trailing, self.retained.as_ptr(), self.trailing)
         };
     }
 }
@@ -2068,12 +2070,28 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             }
         }
 
-        // shift any string of retained elements at the end of the buffer.
+        // The above loop will exit whenever there are no more remaining
+        // elements to query with the predicate. However, this means the loop
+        // may iterate through a string of elements to retain at the end of the
+        // buffer before exhausting elements to query. In such a circumstance,
+        // there is no element at the end to withdraw hence the loop will exit
+        // without shifting these elements to align with previously retained
+        // elements. Nevertheless, previous iterations of the loop ensure the
+        // pointer and counter denote a valid range of retained elements (if
+        // any) so they can still be shifted before returning none.
         shift_retained(
             first_retained.as_ptr(),
             self.retained.as_ptr(),
             consecutive_retained,
         );
+
+        self.retained = unsafe {
+            // SAFETY: aligned within the allocated object, or one byte past.
+            let ptr = self.retained.as_ptr().add(consecutive_retained);
+
+            // SAFETY: `retained` is not null => pointer is not null.
+            std::ptr::NonNull::new_unchecked(ptr)
+        };
 
         None
     }
@@ -3626,7 +3644,7 @@ mod test {
 
                     // Create two regions of retained elements: the first
                     // region contains [0, 1, 2]; the element with value '3'
-                    // has been dropped and is not uninitialized; the second
+                    // has been dropped and is not initialized; the second
                     // region contains [5, 6, 7]. Both ends of the iterator
                     // have been exhausted, yet the underlying buffer contains
                     // a gap between two groups of retained elements.
