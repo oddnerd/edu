@@ -659,6 +659,90 @@ impl<T> Dynamic<T> {
         })
     }
 
+    /// Remove the elements which match some `predicate`.
+    ///
+    /// The `predicate` is called exactly once per each element, in order.
+    /// Elements for which the `predicate` is true are removed in order from
+    /// left to right. Elements for which the `predicate` is false are shifted
+    /// left to immediately after the previously retained element, thereby
+    /// maintaining order.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(withdraw.next(), Some(0));
+    /// assert_eq!(withdraw.next_back(), Some(4));
+    ///
+    /// drop(withdraw);
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
+    pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
+        let head = if self.initialized == 0 {
+            // SAFETY: this pointer will not be modified or read.
+            std::ptr::NonNull::dangling()
+        } else {
+            // SAFETY: at least one element exist => pointer cannot be null.
+            unsafe { std::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
+        };
+
+        let tail = if self.initialized == 0 {
+            head
+        } else {
+            // SAFETY: stays aligned within the allocated object.
+            unsafe {
+                // SAFETY: at least one element exists => cannot underflow.
+                let offset = self.initialized - 1;
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = head.as_ptr().add(offset);
+
+                // SAFETY: `head` cannot be null => pointer cannot be null.
+                std::ptr::NonNull::new_unchecked(ptr)
+            }
+        };
+
+        let remaining = self.initialized;
+
+        Withdraw {
+            underlying: self,
+            predicate,
+            remaining,
+            retained: head,
+            head,
+            tail,
+            trailing: 0,
+        }
+    }
+
+    /// Drop elements which don't match some `predicate`.
+    ///
+    /// Same as [`Self::withdraw`] all elements that do not match `predicate`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// instance.retain(|element| element % 2 == 0);
+    ///
+    /// assert!(instance.eq([0, 2, 4]));
+    /// ```
+    pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut predicate: F) {
+        self.withdraw(|element| !predicate(element)).for_each(drop)
+    }
+
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
     /// This method will increase [`capacity_back`] by `capacity` if positive,
@@ -1590,13 +1674,13 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 ///
 /// See [`Dynamic::drain`].
 pub struct Drain<'a, T> {
-    // The underlying [`Dynamic`] being drained from.
+    /// The underlying [`Dynamic`] being drained from.
     underlying: &'a mut Dynamic<T>,
 
-    // The index range of elements being drained.
+    /// The index range of elements being drained.
     range: std::ops::Range<usize>,
 
-    // The index range of elements being drained that have yet to be yielded.
+    /// The index range of elements being drained that have yet to be yielded.
     next: std::ops::Range<usize>,
 }
 
@@ -1711,7 +1795,6 @@ impl<T> Iterator for Drain<'_, T> {
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.drain(..).expect("valid range");
-    ///
     ///
     /// assert_eq!(actual.next(), Some(0));
     /// assert_eq!(actual.next(), Some(1));
@@ -1829,6 +1912,322 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
         }
 
         list.finish()
+    }
+}
+
+/// By-value [`Iterator`] to remove elements from a [`Dynamic`].
+///
+/// See [`Dynamic::withdraw`].
+pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
+    /// The underlying [`Dynamic`] begin withdrawn from.
+    underlying: &'a mut Dynamic<T>,
+
+    /// The predicate based upon which elements are withdrawn.
+    predicate: F,
+
+    /// Where to write the next retained element to.
+    retained: std::ptr::NonNull<T>,
+
+    /// How many element are left to query with the predicate.
+    remaining: usize,
+
+    /// The next (front) element to query with the predicate.
+    head: std::ptr::NonNull<T>,
+
+    /// The next (back) element to query with the predicate.
+    tail: std::ptr::NonNull<T>,
+
+    /// The number of retained elements at the end because of `next_back`.
+    trailing: usize,
+}
+
+impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
+    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(withdraw.next(), Some(0));      // Consumes the element with value `0`.
+    /// assert_eq!(withdraw.next_back(), Some(4)); // Consumes the element with value `4`.
+    ///
+    /// drop(withdraw); // Drops the element with value '2'.
+    ///
+    /// assert!(instance.eq([1, 3, 5])); // Retained elements.
+    /// ```
+    fn drop(&mut self) {
+        // Drop all remaining elements to withdraw.
+        self.for_each(drop);
+
+        // Shift any string of trailing retained elements into position.
+        unsafe {
+            // SAFETY: aligned within the allocated object, or one byte past.
+            let trailing = self.tail.as_ptr().add(1);
+
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(trailing, self.retained.as_ptr(), self.trailing)
+        };
+    }
+}
+
+impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
+    type Item = T;
+
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(actual.next(), Some(0));
+    /// assert_eq!(actual.next(), Some(2));
+    /// assert_eq!(actual.next(), Some(4));
+    /// assert_eq!(actual.next(), None);
+    /// ```
+    fn next(&mut self) -> Option<Self::Item> {
+        let first_retained = self.head;
+        let mut consecutive_retained = 0;
+
+        // Shift the current run of retained elements to the left.
+        let shift_retained = |src: *mut T, dst: *mut T, count| unsafe {
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(src, dst, count);
+        };
+
+        while self.remaining != 0 {
+            self.remaining -= 1;
+
+            // SAFETY: the element is initialized.
+            let current = unsafe { self.head.as_ref() };
+
+            self.head = unsafe {
+                // SAFETY: aligned within the allocated object, or one byte past.
+                let ptr = self.head.as_ptr().add(1);
+
+                // SAFETY: `head` is not null => pointer is not null.
+                std::ptr::NonNull::new_unchecked(ptr)
+            };
+
+            if (self.predicate)(current) {
+                // SAFETY: this takes ownership (moved out of buffer).
+                let element = unsafe { std::ptr::read(current) };
+
+                // Increase pre-capacity rather than shift into it when the
+                // first element is being withdrawn, this ensures the first
+                // retained element does not move.
+                if self.underlying.as_ptr() == current {
+                    self.underlying.pre_capacity += 1;
+
+                    self.retained = unsafe {
+                        // SAFETY: aligned within the allocated object, or one byte past.
+                        let ptr = self.retained.as_ptr().add(1);
+
+                        // SAFETY: `retained` is not null => pointer is not null.
+                        std::ptr::NonNull::new_unchecked(ptr)
+                    };
+                } else {
+                    self.underlying.post_capacity += 1;
+                }
+
+                shift_retained(
+                    first_retained.as_ptr(),
+                    self.retained.as_ptr(),
+                    consecutive_retained,
+                );
+
+                self.retained = unsafe {
+                    // SAFETY: aligned within the allocated object, or one byte past.
+                    let ptr = self.retained.as_ptr().add(consecutive_retained);
+
+                    // SAFETY: `retained` is not null => pointer is not null.
+                    std::ptr::NonNull::new_unchecked(ptr)
+                };
+
+                self.underlying.initialized -= 1;
+
+                return Some(element);
+            } else {
+                consecutive_retained += 1;
+            }
+        }
+
+        // The above loop will exit whenever there are no more remaining
+        // elements to query with the predicate. However, this means the loop
+        // may iterate through a string of elements to retain at the end of the
+        // buffer before exhausting elements to query. In such a circumstance,
+        // there is no element at the end to withdraw hence the loop will exit
+        // without shifting these elements to align with previously retained
+        // elements. Nevertheless, previous iterations of the loop ensure the
+        // pointer and counter denote a valid range of retained elements (if
+        // any) so they can still be shifted before returning none.
+        shift_retained(
+            first_retained.as_ptr(),
+            self.retained.as_ptr(),
+            consecutive_retained,
+        );
+
+        self.retained = unsafe {
+            // SAFETY: aligned within the allocated object, or one byte past.
+            let ptr = self.retained.as_ptr().add(consecutive_retained);
+
+            // SAFETY: `retained` is not null => pointer is not null.
+            std::ptr::NonNull::new_unchecked(ptr)
+        };
+
+        None
+    }
+
+    /// Query how many elements can be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(instance.size_hint(), (0, Some(6)));
+    /// ```
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (0, Some(self.remaining))
+    }
+}
+
+impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
+    /// Obtain the next element, if there are any left.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(actual.next_back(), Some(4));
+    /// assert_eq!(actual.next_back(), Some(2));
+    /// assert_eq!(actual.next_back(), Some(0));
+    /// assert_eq!(actual.next_back(), None);
+    /// ```
+    fn next_back(&mut self) -> Option<Self::Item> {
+        while self.remaining != 0 {
+            self.remaining -= 1;
+
+            // SAFETY: the element is initialized.
+            let current = unsafe { self.tail.as_ref() };
+
+            unsafe {
+                // SAFETY: prevent moving the pointer to before the allocated object.
+                if self.remaining != 0 {
+                    self.tail = {
+                        // SAFETY: aligned within the allocated object.
+                        let ptr = self.tail.as_ptr().sub(1);
+
+                        // SAFETY: `retained` is not null => pointer is not null.
+                        std::ptr::NonNull::new_unchecked(ptr)
+                    };
+                }
+            }
+
+            if (self.predicate)(current) {
+                // SAFETY: this takes ownership (moved out of buffer).
+                let element = unsafe { std::ptr::read(current) };
+
+                self.underlying.initialized -= 1;
+                self.underlying.post_capacity += 1;
+
+                let src = {
+                    let current: *const T = current;
+
+                    // SAFETY: stays aligned within the allocated object.
+                    unsafe { current.add(1) }.cast_mut()
+                };
+
+                let dst = {
+                    let current: *const T = current;
+                    current.cast_mut()
+                };
+
+                // SAFETY:
+                // * owned memory => source/destination valid for read/writes.
+                // * no aliasing restrictions => source and destination can overlap.
+                // * underlying buffer is aligned => both pointers are aligned.
+                unsafe { std::ptr::copy(src, dst, self.trailing) };
+
+                return Some(element);
+            } else {
+                self.trailing += 1;
+            }
+        }
+
+        None
+    }
+}
+
+impl<T, F: FnMut(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
+
+impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
+    /// Output what indexes are being pointed to in the underlying buffer.
+    ///
+    /// Note that these indexes are _NOT_ based on the first initialized
+    /// element, but rather absolute relative to the beginning of the
+    /// allocated object.
+    ///
+    /// # Performance
+    /// This methods takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut withdraw = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// println!("{withdraw:?}")
+    /// ```
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let origin = self.underlying.buffer.as_ptr().cast::<T>();
+
+        // SAFETY: both pointers are aligned within the allocated object.
+        let head = unsafe { self.head.as_ptr().offset_from(origin) };
+
+        // SAFETY: both pointers are aligned within the allocated object.
+        let retained = unsafe { self.retained.as_ptr().offset_from(origin) };
+
+        // SAFETY: both pointers are aligned within the allocated object.
+        let tail = unsafe { self.tail.as_ptr().offset_from(origin) };
+
+        f.debug_struct("Withdraw")
+            .field("head index", &head)
+            .field("tail index", &tail)
+            .field("remaining elements", &self.remaining)
+            .field("retained index", &retained)
+            .field("trailing elements", &self.trailing)
+            .finish_non_exhaustive()
     }
 }
 
@@ -3048,6 +3447,248 @@ mod test {
 
                     assert!(actual.iter().eq([0, 1, 2, 5].iter()));
                 }
+            }
+        }
+
+        mod withdraw {
+            use super::*;
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert_eq!(actual.count(), 3);
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert!(actual.eq([0, 2, 4]));
+                }
+
+                #[test]
+                fn increases_front_capacity_when_withdrawing_first_element() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element != &5));
+
+                    assert_eq!(actual.capacity_front(), 5);
+                    assert_eq!(actual.capacity_back(), 0);
+                }
+
+                #[test]
+                fn increases_back_capacity_when_retained_are_combined() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 1));
+
+                    assert_eq!(actual.capacity_front(), 0);
+                    assert_eq!(actual.capacity_back(), 3);
+                }
+
+                #[test]
+                fn combines_retained_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element == &1));
+
+                    assert!(actual.eq([0, 2, 3, 4, 5]));
+                }
+
+                #[test]
+                fn first_retained_element_is_not_repositioned() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
+                }
+
+                #[test]
+                fn size_hint() {
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert_eq!(actual.size_hint(), (0, Some(6)));
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
+
+                        assert_eq!(actual.count(), 3);
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
+
+                        assert!(actual.eq([4, 2, 0]));
+                    }
+
+                    #[test]
+                    fn increases_back_capacity_when_withdrawing_last_element() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element > &0).rev());
+
+                        assert_eq!(actual.capacity_front(), 0);
+                        assert_eq!(actual.capacity_back(), 5);
+                    }
+
+                    #[test]
+                    fn increases_back_capacity_when_retained_are_combined() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element % 2 == 1).rev());
+
+                        assert_eq!(actual.capacity_front(), 0);
+                        assert_eq!(actual.capacity_back(), 3);
+                    }
+
+                    #[test]
+                    fn combines_retained_elements() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element == &1).rev());
+
+                        assert!(actual.eq([0, 2, 3, 4, 5]));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 0]);
+
+                        let mut actual = underlying.withdraw(|element| element != &0);
+
+                        // make head and tail meet.
+                        let _ = actual.next().expect("the element with value '1'");
+                        let _ = actual.next_back().expect("the element with value '2'");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn empty() {
+                        let mut underlying = Dynamic::from_iter([0]);
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Exhaust the elements.
+                        let _ = actual.next().expect("the one element");
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn exhausted() {
+                        let mut underlying = Dynamic::<usize>::default();
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn drops_yet_to_be_yielded_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert!(actual.eq([1, 3, 5]));
+                }
+
+                #[test]
+                fn combines_trailing_retained_with_beginning_retained() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
+
+                    let mut iter = actual.withdraw(|element| element == &3 || element == &4);
+
+                    // Create two regions of retained elements: the first
+                    // region contains [0, 1, 2]; the element with value '3'
+                    // has been dropped and is not initialized; the second
+                    // region contains [5, 6, 7]. Both ends of the iterator
+                    // have been exhausted, yet the underlying buffer contains
+                    // a gap between two groups of retained elements.
+                    let _ = iter.next_back().expect("the element with value '4'");
+                    let _ = iter.next().expect("the element with value '3'");
+
+                    // The above means it is now the responsibility of `drop`
+                    // to combine these two regions thereby fixing the state of
+                    // the underlying buffer for future use.
+                    drop(iter);
+                }
+            }
+        }
+
+        mod retain {
+            use super::*;
+
+            #[test]
+            fn increases_capacity() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                actual.retain(|element| element % 2 == 0);
+
+                assert_eq!(actual.capacity(), 3);
+            }
+
+            #[test]
+            fn retains_matching_elements_in_order() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                actual.retain(|element| element % 2 == 0);
+
+                assert!(actual.eq([0, 2, 4]));
+            }
+
+            #[test]
+            fn shifts_trailing_elements_after_first_retained() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let expected = actual.as_ptr();
+
+                actual.retain(|element| element % 2 == 0);
+
+                assert_eq!(actual.as_ptr(), expected);
             }
         }
 
