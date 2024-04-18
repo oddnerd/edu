@@ -1916,8 +1916,19 @@ pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// TODO
     fn drop(&mut self) {
+        // Drop all remaining elements to withdraw.
         self.for_each(drop);
+
+        // Shift any string of trailing retained elements into position.
+        unsafe {
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            std::ptr::copy(self.tail, self.retained, self.trailing)
+        };
     }
+
 }
 
 impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
@@ -1994,11 +2005,6 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         // shift any string of retained elements at the end of the buffer.
         shift_retained(first_retained, self.retained, consecutive_retained);
 
-
-        // TODO: does this shift trailing elements?
-        shift_retained(self.tail, self.retained, self.trailing);
-        self.trailing = 0;
-
         None
     }
 
@@ -2024,17 +2030,6 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// TODO
     fn next_back(&mut self) -> Option<Self::Item> {
-        let mut consecutive_retained = 0;
-
-        // Shift the current run of retained elements to the left.
-        let shift_retained = |src: *mut T, dst: *mut T, count| unsafe {
-            // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(src, dst, count);
-        };
-
         while self.remaining != 0 {
             self.remaining -= 1;
 
@@ -2053,29 +2048,29 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 self.underlying.initialized -= 1;
                 self.underlying.post_capacity += 1;
 
-                let first_retained = {
-                    let current:* const T = current;
+                let src = {
+                    let current: *const T = current;
 
                     // SAFETY: stays aligned within the allocated object.
                     unsafe { current.add(1) }.cast_mut()
                 };
 
-                let current = {
+                let dst = {
                     let current: *const T = current;
                     current.cast_mut()
                 };
 
-                shift_retained(first_retained, current, consecutive_retained);
+                // SAFETY:
+                // * owned memory => source/destination valid for read/writes.
+                // * no aliasing restrictions => source and destination can overlap.
+                // * underlying buffer is aligned => both pointers are aligned.
+                unsafe { std::ptr::copy(src, dst, self.trailing) };
 
                 return Some(element);
             } else {
-                consecutive_retained += 1;
                 self.trailing += 1;
             }
         }
-
-        shift_retained(self.tail, self.retained, self.trailing);
-        self.trailing = 0;
 
         None
     }
@@ -3334,6 +3329,46 @@ mod test {
                 }
 
                 #[test]
+                fn increases_front_capacity_when_withdrawing_first_element() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|_element| true));
+
+                    assert_eq!(actual.capacity_front(), 6);
+                    assert_eq!(actual.capacity_back(), 0);
+                }
+
+                #[test]
+                fn increases_back_capacity_when_retained_are_combined() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 1));
+
+                    assert_eq!(actual.capacity_front(), 0);
+                    assert_eq!(actual.capacity_back(), 3);
+                }
+
+                #[test]
+                fn combines_retained_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element == &1));
+
+                    assert!(actual.eq([0, 2, 3, 4, 5]));
+                }
+
+                #[test]
+                fn first_retained_element_is_not_repositioned() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
+                }
+
+                #[test]
                 fn size_hint() {
                     let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
@@ -3364,9 +3399,49 @@ mod test {
                     }
 
                     #[test]
-                    fn handles_retained_at_end() {
-                        todo!()
+                    fn increases_back_capacity_when_withdrawing_last_element() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|_element| true).rev());
+
+                        assert_eq!(actual.capacity_front(), 0);
+                        assert_eq!(actual.capacity_back(), 6);
                     }
+
+                    #[test]
+                    fn increases_back_capacity_when_retained_are_combined() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element % 2 == 2).rev());
+
+                        assert_eq!(actual.capacity_front(), 0);
+                        assert_eq!(actual.capacity_back(), 3);
+                    }
+
+                    #[test]
+                    fn combines_retained_elements() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element == &1).rev());
+
+                        assert!(actual.eq([0, 2, 3, 4, 5]));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 0]);
+
+                        let mut actual = underlying.withdraw(|element| element != &0);
+
+                        // make head and tail meet.
+                        let _  = actual.next().expect("the element with value '1'");
+                        let _  = actual.next_back().expect("the element with value '2'");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+
                 }
 
                 mod fused {
@@ -3409,7 +3484,7 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn retains_non_matching_elements_in_order() {
+                fn drops_yet_to_be_yielded_elements() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     drop(actual.withdraw(|element| element % 2 == 0));
@@ -3418,32 +3493,24 @@ mod test {
                 }
 
                 #[test]
-                fn increases_capacity() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                fn combines_trailing_retained_with_beginning_retained() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
 
-                    drop(actual.withdraw(|element| element % 2 == 0));
+                    let mut iter = actual.withdraw(|element| element == &3 || element == &4);
 
-                    assert_eq!(actual.capacity(), 3);
-                }
+                    // Create two regions of retained elements: the first
+                    // region contains [0, 1, 2]; the element with value '3'
+                    // has been dropped and is not uninitialized; the second
+                    // region contains [5, 6, 7]. Both ends of the iterator
+                    // have been exhausted, yet the underlying buffer contains
+                    // a gap between two groups of retained elements.
+                    let _ = iter.next_back().expect("the element with value '4'");
+                    let _ = iter.next().expect("the element with value '3'");
 
-                #[test]
-                fn withdrawing_front_elements_increases_front_capacity() {
-                    let mut actual = Dynamic::from_iter([0, 0, 0, 1]);
-
-                    drop(actual.withdraw(|element| element == &0));
-
-                    assert_eq!(actual.capacity_front(), 3);
-                }
-
-                #[test]
-                fn does_not_shift_first_retained_element() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    let expected = unsafe { actual.as_ptr().add(1) };
-
-                    drop(actual.withdraw(|element| element % 2 == 0));
-
-                    assert_eq!(actual.as_ptr(), expected);
+                    // The above means it is now the responsibility of `drop`
+                    // to combine these two regions thereby fixing the state of
+                    // the underlying buffer for future use.
+                    drop(iter);
                 }
             }
         }
