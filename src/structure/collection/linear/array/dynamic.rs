@@ -672,7 +672,17 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut iter = instance.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(iter.next(), Some(0));
+    /// assert_eq!(iter.next_back(), Some(4));
+    ///
+    /// drop(iter);
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
     /// ```
     pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
         let head = if self.initialized == 0 {
