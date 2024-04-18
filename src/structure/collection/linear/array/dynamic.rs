@@ -675,7 +675,11 @@ impl<T> Dynamic<T> {
     /// todo!()
     /// ```
     pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
-        let head = self.as_mut_ptr();
+        let head = if self.initialized == 0{
+            std::ptr::null_mut()
+        } else {
+            self.as_mut_ptr()
+        };
 
         let tail = if self.initialized == 0 {
             head
@@ -1976,8 +1980,6 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 // SAFETY: this takes ownership (moved out of buffer).
                 let element = unsafe { std::ptr::read(current) };
 
-                self.underlying.initialized -= 1;
-
                 // Increase pre-capacity rather than shift into it when the
                 // first element is being withdrawn, this ensures the first
                 // retained element does not move.
@@ -1994,6 +1996,8 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 
                 // SAFETY: aligned within the allocated object, or one byte past.
                 self.retained = unsafe { self.retained.add(consecutive_retained) };
+
+                self.underlying.initialized -= 1;
 
                 return Some(element);
             } else {
