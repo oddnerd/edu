@@ -3412,7 +3412,7 @@ mod test {
                     fn increases_back_capacity_when_retained_are_combined() {
                         let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                        drop(actual.withdraw(|element| element % 2 == 2).rev());
+                        drop(actual.withdraw(|element| element % 2 == 1).rev());
 
                         assert_eq!(actual.capacity_front(), 0);
                         assert_eq!(actual.capacity_back(), 3);
