@@ -3789,6 +3789,156 @@ mod test {
             }
         }
 
+        mod remove_via_front {
+            use super::*;
+
+            #[test]
+            fn yields_none_when_out_of_bounds() {
+                let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let actual = underlying.remove_via_front(underlying.len());
+
+                assert_eq!(actual, None);
+            }
+
+            #[test]
+            fn yields_element_when_in_bounds() {
+                let underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                for index in 1..underlying.len() {
+                    let mut underlying = underlying.clone();
+
+                    let actual = underlying.remove_via_front(index);
+
+                    assert_eq!(actual, Some(index));
+                }
+            }
+
+            #[test]
+            fn removed_becomes_first_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_front(3).expect("element with value '3'");
+
+                assert_eq!(actual[2], 0);
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_front(1);
+
+                assert!(actual.eq([0, 2, 3, 4, 5]));
+            }
+
+            #[test]
+            fn increases_front_capacity() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_front(5);
+
+                assert_eq!(actual.capacity_front(), 1);
+            }
+
+            #[test]
+            fn when_front_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let removed = actual.remove_via_front(0);
+
+                assert_eq!(removed, Some(0));
+                assert_eq!(actual.capacity_front(), 1);
+                assert!(actual.eq([1, 2, 3, 4, 5]));
+            }
+
+            #[test]
+            fn when_only_one_element() {
+                let mut actual = Dynamic::from_iter([0]);
+
+                let removed = actual.remove_via_front(0);
+
+                assert_eq!(removed, Some(0));
+                assert_eq!(actual.capacity_front(), 1);
+                assert_eq!(actual.len(), 0);
+            }
+        }
+
+        mod remove_via_back {
+            use super::*;
+
+            #[test]
+            fn yields_none_when_out_of_bounds() {
+                let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let actual = underlying.remove_via_back(underlying.len());
+
+                assert_eq!(actual, None);
+            }
+
+            #[test]
+            fn yields_element_when_in_bounds() {
+                let underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                for index in 1..underlying.len() {
+                    let mut underlying = underlying.clone();
+
+                    let actual = underlying.remove_via_back(index);
+
+                    assert_eq!(actual, Some(index));
+                }
+            }
+
+            #[test]
+            fn removed_becomes_last_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_back(3).expect("element with value '3'");
+
+                assert_eq!(actual[3], 5);
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_back(4);
+
+                assert!(actual.eq([0, 1, 2, 3, 5]));
+            }
+
+            #[test]
+            fn increases_back_capacity() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_back(0);
+
+                assert_eq!(actual.capacity_back(), 1);
+            }
+
+            #[test]
+            fn when_back_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let removed = actual.remove_via_back(5);
+
+                assert_eq!(removed, Some(5));
+                assert_eq!(actual.capacity_back(), 1);
+                assert!(actual.eq([0, 1, 2, 3, 4]));
+            }
+
+            #[test]
+            fn when_only_one_element() {
+                let mut actual = Dynamic::from_iter([0]);
+
+                let removed = actual.remove_via_back(0);
+
+                assert_eq!(removed, Some(0));
+                assert_eq!(actual.capacity_back(), 1);
+                assert_eq!(actual.len(), 0);
+            }
+        }
+
         mod resize {
             use super::*;
 
