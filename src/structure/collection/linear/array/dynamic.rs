@@ -753,7 +753,13 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.remove_via_front(3), Some(3));
+    /// assert_eq!(instance.capacity_front(), 1);
+    /// assert_eq!(instance[2], 0);
     /// ```
     pub fn remove_via_front(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
@@ -794,7 +800,13 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// todo!()
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.remove_via_back(3), Some(3));
+    /// assert_eq!(instance.capacity_back(), 1);
+    /// assert_eq!(instance[3], 5);
     /// ```
     pub fn remove_via_back(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
