@@ -1,8 +1,4 @@
 //! Implementations of [`Collection`].
-//!
-//! Included within are:
-//!
-//! * [`Linear`] relationships where elements have sequential ordering.
 
 pub mod linear;
 

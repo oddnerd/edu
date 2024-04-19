@@ -1,9 +1,4 @@
 //! Implementations of [`Linear`].
-//!
-//! Included within are:
-//!
-//! * [`Array`] which stores elements in contigious memory.
-//! * [`List`] which dynamically allocates storage for elements.
 
 pub mod array;
 pub mod list;
