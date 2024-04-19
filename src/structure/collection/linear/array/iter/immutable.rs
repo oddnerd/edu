@@ -2,7 +2,7 @@
 
 /// Immutable reference [`Iterator`] over an [`super::super::Array`].
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Iter<'a, T> {
+pub(in super::super) struct Iter<'a, T> {
     /// Pointer to the hypothetical next element.
     ptr: std::ptr::NonNull<T>,
 
@@ -34,7 +34,7 @@ impl<'a, T: 'a> Iter<'a, T> {
     ///
     /// assert!(underlying.iter().eq(iter));
     /// ```
-    pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
+    pub(in super::super) unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
             ptr,
             count,

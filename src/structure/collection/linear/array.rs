@@ -1,8 +1,8 @@
 //! Implementations of [`Array`].
 
-pub mod iter;
-pub use iter::Iter;
-pub use iter::IterMut;
+mod iter;
+use iter::Iter;
+use iter::IterMut;
 
 pub mod dope;
 pub use dope::Dope;

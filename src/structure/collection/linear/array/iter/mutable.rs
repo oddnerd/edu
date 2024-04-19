@@ -2,7 +2,7 @@
 
 /// Mutable reference [`Iterator`] over an [`super::super::Array`].
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct IterMut<'a, T> {
+pub(in super::super) struct IterMut<'a, T> {
     /// Pointer to the hypothetical next element.
     ptr: std::ptr::NonNull<T>,
 
@@ -34,7 +34,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
     ///
     /// assert!(underlying.iter().eq(iter));
     /// ```
-    pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
+    pub(in super::super) unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
         Self {
             ptr,
             count,
