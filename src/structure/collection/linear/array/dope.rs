@@ -10,8 +10,11 @@ use super::Linear;
 /// pointer and length pair leveraging compile-time type information alongside
 /// pointer arithmetic to distinguish between individual elements.
 ///
-/// [`Dope`] is equivalent to Rust's slice (`[T]`) or C++'s span (`std::span`)
-/// and views (`std::string_view`).
+/// [`Dope`] is equivalent to Rust's slice ([`[T]`]([`slice`]))  or C++'s span
+/// ([`std::span`][span]) and views ([`std::string_view`][string_view]).
+///
+/// [span]: https://en.cppreference.com/w/cpp/container/span
+/// [string_view]: https://en.cppreference.com/w/cpp/string/basic_string_view
 #[derive(Clone, Copy, Hash)]
 pub struct Dope<'a, T> {
     /// Pointer to the start of the array.
