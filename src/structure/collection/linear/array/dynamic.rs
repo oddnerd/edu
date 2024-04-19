@@ -743,6 +743,91 @@ impl<T> Dynamic<T> {
         self.withdraw(|element| !predicate(element)).for_each(drop)
     }
 
+    /// Remove an element by swapping it with the first element.
+    ///
+    /// In contrast to [`Self::remove`], this method takes constant time and
+    /// does _NOT_ preserve order.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    pub fn remove_via_front(&mut self, index: usize) -> Option<T> {
+        if index >= self.initialized {
+            None
+        } else {
+            let element: T;
+
+            unsafe {
+                let front = self.as_mut_ptr();
+
+                // SAFETY: index is in bounds => aligned within the allocated object.
+                let index = front.add(index);
+
+                // SAFETY:
+                // * both pointers are valid for reads and write.
+                // * both pointers are aligned.
+                // * no aliasing restrictions.
+                std::ptr::swap(front, index);
+
+                // SAFETY: this takes ownership (moved out of buffer).
+                element = front.read();
+            }
+
+            self.initialized -= 1;
+            self.pre_capacity += 1;
+
+            Some(element)
+        }
+    }
+
+    /// Remove an element by swapping it with the last element.
+    ///
+    /// In contrast to [`Self::remove`], this method takes constant time and
+    /// does _NOT_ preserve order.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    pub fn remove_via_back(&mut self, index: usize) -> Option<T> {
+        if index >= self.initialized {
+            None
+        } else {
+            let element: T;
+
+            unsafe {
+                let ptr = self.as_mut_ptr();
+
+                // SAFETY: at least one element => aligned within the allocated object.
+                let last = ptr.add(self.initialized - 1);
+
+                // SAFETY: index is in bounds => aligned within the allocated object.
+                let index = ptr.add(index);
+
+                // SAFETY:
+                // * both pointers are valid for reads and write.
+                // * both pointers are aligned.
+                // * no aliasing restrictions.
+                std::ptr::swap(last, index);
+
+                // SAFETY: this takes ownership (moved out of buffer).
+                element = last.read()
+            }
+
+            self.post_capacity += 1;
+            self.initialized -= 1;
+
+            Some(element)
+        }
+    }
+
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
     /// This method will increase [`capacity_back`] by `capacity` if positive,
