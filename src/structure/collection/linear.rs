@@ -10,14 +10,51 @@ use super::Collection;
 
 /// A [`Collection`] with sequential ordering.
 ///
-/// Implementations of this trait have exactly one (bidirectional) method of
-/// iteration. The logical layout of the elements is one dimensional such that
-/// the only relationship between elements is they occur 'before' or 'after'
-/// one another. This implies each element is associated with a unique
-/// identifying [index](`std::ops::IndexMut`) relative to its position. This
-/// means starting from the [`Self::first`] element which is defined as always
-/// having an index of zero, all other elements can be accessed by incrementing
-/// the index up to and including the [`Self::last`] element.
+/// # Layout
+///
+/// This trait does not enforce the layout of memory, it instead denotes a
+/// logical layout of elements. The primary characteristic of this trait
+/// is that such [`Collection`] have exactly one (bidirectional) method of
+/// iteration ([`Self::iter`]/[`Self::iter_mut`]) that allows access to all
+/// contained elements.
+///
+/// The elements are arranged such that starting from the [`Self::first`]
+/// element, there exists exactly one element after it, and exactly one element
+/// after that element, iterating to the element after through every contained
+/// element. Likewise starting from the  [`Self::last`] element, there exists
+/// exactly one element before it, and exactly one element before that element,
+/// iterating to the element before through every contained element.
+///
+/// # Indexing
+///
+/// The layout described above implies elements are stored one-dimensionally
+/// such that the only relationship between them is they occur 'before' or
+/// 'after' one another as visualized below:
+///
+/// ```
+/// +-----------+-------------+-------------+-------------+-----+------+
+/// | first (0) | element (1) | element (2) | element (3) | ... | last |
+/// +-----------+-------------+-------------+-------------+-----+------+
+/// ```
+///
+/// The [`Self::first`] and [`Self::last`] element are the ends of a line made
+/// up of elements connected end-to-end. This means the elements inherently
+/// have some specific ordering which can be leveraged to uniquely index each
+/// element. Denoted above within parenthesis is the index scheme used by
+/// implementors of this trait. If we arbitrarily denote the [`Self::first`]
+/// element to have index of value zero ([zero-based indexing][zbi]), then each
+/// subsequent element can have index one greater than the element before it,
+/// hence the index increments by one for each element.
+///
+/// The methods [`Self::at`] and [`Self::at_mut`] provide access to the element
+/// at some given index, but will do bounds checking which means they are safe
+/// to input indexes which are past the last element likely at the cost of some
+///  performance. In contrast, [`std::ops::Index`] and [`std::ops::IndexMut`]
+/// do _not_ bounds check instead causing undefined behaviour if an out of
+/// bounds index is provided, but this allows you to have external logic
+/// associating indexes to elements which prevents erroneous inputs.
+///
+/// [zbi]: https://en.wikipedia.org/wiki/Zero-based_numbering
 pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
     fn iter(
