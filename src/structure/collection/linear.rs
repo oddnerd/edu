@@ -31,7 +31,7 @@ use super::Collection;
 /// such that the only relationship between them is they occur 'before' or
 /// 'after' one another as visualized below:
 ///
-/// ```
+/// ```text
 /// +-----------+-------------+-------------+-------------+-----+------+
 /// | first (0) | element (1) | element (2) | element (3) | ... | last |
 /// +-----------+-------------+-------------+-------------+-----+------+

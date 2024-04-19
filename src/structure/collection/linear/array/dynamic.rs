@@ -591,158 +591,6 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
-    /// Optimally remove elements within `range` by-value.
-    ///
-    /// This method is more efficient than using `remove` for sequential
-    /// elements, moving elements out of the buffer as iterated and shifting
-    /// once only when the [`Drain`] has been dropped.
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
-    ///
-    /// instance.drain(8..).expect_err("invalid range");
-    ///
-    /// let mut drain = instance.drain(..2).expect("valid range");
-    /// assert_eq!(drain.next(), Some(0));
-    /// assert_eq!(drain.next(), Some(1));
-    /// std::mem::drop(drain);
-    ///
-    /// let mut drain = instance.drain(0..2).expect("valid range");
-    /// assert_eq!(drain.next(), Some(2));
-    /// assert_eq!(drain.next(), Some(3));
-    /// std::mem::drop(drain);
-    ///
-    /// let mut drain = instance.drain(0..=1).expect("valid range");
-    /// assert_eq!(drain.next(), Some(4));
-    /// assert_eq!(drain.next(), Some(5));
-    /// std::mem::drop(drain);
-    ///
-    /// let mut drain = instance.drain(0..).expect("valid range");
-    /// assert_eq!(drain.next(), Some(6));
-    /// assert_eq!(drain.next(), Some(7));
-    /// std::mem::drop(drain);
-    ///
-    /// instance.drain(..).expect_err("invalid range/no elements to drain");
-    /// ```
-    pub fn drain<R: std::ops::RangeBounds<usize>>(
-        &mut self,
-        range: R,
-    ) -> Result<Drain<'_, T>, OutOfBounds> {
-        let start = match range.start_bound() {
-            std::ops::Bound::Included(start) => *start,
-            std::ops::Bound::Excluded(start) => *start + 1,
-            std::ops::Bound::Unbounded => 0,
-        };
-
-        let end = match range.end_bound() {
-            std::ops::Bound::Included(end) => *end + 1,
-            std::ops::Bound::Excluded(end) => *end,
-            std::ops::Bound::Unbounded => self.len(),
-        };
-
-        if start >= self.len() || end > self.len() {
-            return Err(OutOfBounds);
-        }
-
-        let range = start..end;
-
-        Ok(Drain {
-            underlying: self,
-            range: range.clone(),
-            next: range.clone(),
-        })
-    }
-
-    /// Remove the elements which match some `predicate`.
-    ///
-    /// The `predicate` is called exactly once per each element, in order.
-    /// Elements for which the `predicate` is true are removed in order from
-    /// left to right. Elements for which the `predicate` is false are shifted
-    /// left to immediately after the previously retained element, thereby
-    /// maintaining order.
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
-    ///
-    /// assert_eq!(withdraw.next(), Some(0));
-    /// assert_eq!(withdraw.next_back(), Some(4));
-    ///
-    /// drop(withdraw);
-    ///
-    /// assert!(instance.eq([1, 3, 5]));
-    /// ```
-    pub fn withdraw<F: FnMut(&T) -> bool>(&mut self, predicate: F) -> Withdraw<'_, T, F> {
-        let head = if self.initialized == 0 {
-            // SAFETY: this pointer will not be modified or read.
-            std::ptr::NonNull::dangling()
-        } else {
-            // SAFETY: at least one element exist => pointer cannot be null.
-            unsafe { std::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
-        };
-
-        let tail = if self.initialized == 0 {
-            head
-        } else {
-            // SAFETY: stays aligned within the allocated object.
-            unsafe {
-                // SAFETY: at least one element exists => cannot underflow.
-                let offset = self.initialized - 1;
-
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = head.as_ptr().add(offset);
-
-                // SAFETY: `head` cannot be null => pointer cannot be null.
-                std::ptr::NonNull::new_unchecked(ptr)
-            }
-        };
-
-        let remaining = self.initialized;
-
-        Withdraw {
-            underlying: self,
-            predicate,
-            remaining,
-            retained: head,
-            head,
-            tail,
-            trailing: 0,
-        }
-    }
-
-    /// Drop elements which don't match some `predicate`.
-    ///
-    /// Same as [`Self::withdraw`] all elements that do not match `predicate`.
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    ///
-    /// instance.retain(|element| element % 2 == 0);
-    ///
-    /// assert!(instance.eq([0, 2, 4]));
-    /// ```
-    pub fn retain<F: FnMut(&T) -> bool>(&mut self, mut predicate: F) {
-        self.withdraw(|element| !predicate(element)).for_each(drop)
-    }
-
     /// Remove an element by swapping it with the first element.
     ///
     /// In contrast to [`Self::remove`], this method takes constant time and
@@ -1730,6 +1578,141 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         Some(element)
     }
 
+    /// Optimally remove elements within `range` by-value.
+    ///
+    /// This method is more efficient than using `remove` for sequential
+    /// elements, moving elements out of the buffer as iterated and shifting
+    /// once only when the iterator has been dropped.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
+    ///
+    /// let mut drain = instance.drain(..2);
+    /// assert_eq!(drain.next(), Some(0));
+    /// assert_eq!(drain.next_back(), Some(1));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..2);
+    /// assert_eq!(drain.next(), Some(2));
+    /// assert_eq!(drain.next_back(), Some(3));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..=1);
+    /// assert_eq!(drain.next(), Some(4));
+    /// assert_eq!(drain.next_back(), Some(5));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(0..);
+    /// assert_eq!(drain.next(), Some(6));
+    /// assert_eq!(drain.next_back(), Some(7));
+    /// std::mem::drop(drain);
+    ///
+    /// let mut drain = instance.drain(..);
+    /// assert_eq!(drain.next(), None);
+    /// assert_eq!(drain.next_back(), None);
+    /// ```
+    fn drain(
+        &mut self,
+        range: impl std::ops::RangeBounds<usize>,
+    ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
+        let start = match range.start_bound() {
+            std::ops::Bound::Included(start) => *start,
+            std::ops::Bound::Excluded(start) => *start + 1,
+            std::ops::Bound::Unbounded => 0,
+        };
+
+        let end = match range.end_bound() {
+            std::ops::Bound::Included(end) => *end + 1,
+            std::ops::Bound::Excluded(end) => *end,
+            std::ops::Bound::Unbounded => self.len(),
+        };
+
+        let start = self.len().min(start);
+        let end = self.len().min(end);
+
+        let range = start..end;
+
+        Drain {
+            underlying: self,
+            range: range.clone(),
+            next: range.clone(),
+        }
+    }
+
+    /// Remove the elements which match some `predicate`.
+    ///
+    /// The `predicate` is called exactly once per each element, in order.
+    /// Elements for which the `predicate` is true are removed in order from
+    /// left to right. Elements for which the `predicate` is false are shifted
+    /// left to immediately after the previously retained element, thereby
+    /// maintaining order.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(withdraw.next(), Some(0));
+    /// assert_eq!(withdraw.next_back(), Some(4));
+    ///
+    /// drop(withdraw);
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
+    fn withdraw(
+        &mut self,
+        predicate: impl FnMut(&T) -> bool,
+    ) -> impl DoubleEndedIterator<Item = Self::Element> {
+        let head = if self.initialized == 0 {
+            // SAFETY: this pointer will not be modified or read.
+            std::ptr::NonNull::dangling()
+        } else {
+            // SAFETY: at least one element exist => pointer cannot be null.
+            unsafe { std::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
+        };
+
+        let tail = if self.initialized == 0 {
+            head
+        } else {
+            // SAFETY: stays aligned within the allocated object.
+            unsafe {
+                // SAFETY: at least one element exists => cannot underflow.
+                let offset = self.initialized - 1;
+
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = head.as_ptr().add(offset);
+
+                // SAFETY: `head` cannot be null => pointer cannot be null.
+                std::ptr::NonNull::new_unchecked(ptr)
+            }
+        };
+
+        let remaining = self.initialized;
+
+        Withdraw {
+            underlying: self,
+            predicate,
+            remaining,
+            retained: head,
+            head,
+            tail,
+            trailing: 0,
+        }
+    }
+
     /// Drop all initialized elements
     ///
     /// # Performance
@@ -1770,7 +1753,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 /// By-value [`Iterator`] to remove elements from a [`Dynamic`].
 ///
 /// See [`Dynamic::drain`].
-pub struct Drain<'a, T> {
+struct Drain<'a, T> {
     /// The underlying [`Dynamic`] being drained from.
     underlying: &'a mut Dynamic<T>,
 
@@ -1790,11 +1773,11 @@ impl<T> Drop for Drain<'_, T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
     ///
-    /// let mut drain = instance.drain(2..=4).expect("valid range");
+    /// let mut drain = instance.drain(2..=4);
     ///
     /// drain.next();      // Consumes the element with value `2`.
     /// drain.next_back(); // Consumes the element with value `4`.
@@ -1889,17 +1872,19 @@ impl<T> Iterator for Drain<'_, T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..).expect("valid range");
+    /// let mut actual = underlying.drain(..);
     ///
     /// assert_eq!(actual.next(), Some(0));
     /// assert_eq!(actual.next(), Some(1));
     /// assert_eq!(actual.next(), Some(2));
-    /// assert_eq!(actual.next(), Some(3));
-    /// assert_eq!(actual.next(), Some(4));
-    /// assert_eq!(actual.next(), Some(5));
+    /// assert_eq!(actual.next_back(), Some(5));
+    /// assert_eq!(actual.next_back(), Some(4));
+    /// assert_eq!(actual.next_back(), Some(3));
     /// assert_eq!(actual.next(), None);
+    /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         let ptr = self.underlying.buffer.as_ptr();
@@ -1928,9 +1913,10 @@ impl<T> Iterator for Drain<'_, T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..).expect("valid range");
+    /// let mut actual = underlying.drain(..);
     ///
     /// assert_eq!(actual.size_hint(), (6, Some(6)));
     /// ```
@@ -1948,9 +1934,10 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..).expect("valid range");
+    /// let mut actual = underlying.drain(..);
     ///
     /// assert_eq!(actual.next_back(), Some(5));
     /// assert_eq!(actual.next_back(), Some(4));
@@ -1989,16 +1976,6 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let actual = underlying.drain(1..4);
-    ///
-    /// assert_eq!(format!("{actual:?}"), format!("Ok([1, 2, 3])"));
-    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let ptr = self.underlying.as_ptr();
 
@@ -2015,7 +1992,7 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
 /// By-value [`Iterator`] to remove elements from a [`Dynamic`].
 ///
 /// See [`Dynamic::withdraw`].
-pub struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
+struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// The underlying [`Dynamic`] begin withdrawn from.
     underlying: &'a mut Dynamic<T>,
 
@@ -2047,6 +2024,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
@@ -2088,6 +2066,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
@@ -2201,6 +2180,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let instance = underlying.withdraw(|element| element % 2 == 0);
@@ -2221,6 +2201,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
@@ -2296,16 +2277,6 @@ impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut withdraw = underlying.withdraw(|element| element % 2 == 0);
-    ///
-    /// println!("{withdraw:?}")
-    /// ```
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let origin = self.underlying.buffer.as_ptr().cast::<T>();
 
@@ -3327,465 +3298,6 @@ mod test {
                 let mut actual = Dynamic::<()>::default();
 
                 assert!(actual.shift(0).is_ok())
-            }
-        }
-
-        mod drain {
-            use super::*;
-
-            #[test]
-            fn ok_when_range_is_in_bounds() {
-                let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                for start in 0..actual.len() {
-                    for end in (start + 1)..actual.len() {
-                        let mut actual = actual.clone();
-
-                        assert!(actual.drain(start..end).is_ok());
-                    }
-                }
-            }
-
-            #[test]
-            fn errors_when_start_out_of_bounds() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                assert!(actual.drain(actual.len()..).is_err());
-            }
-
-            #[test]
-            fn errors_when_end_out_of_bounds() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                assert!(actual.drain(..actual.len() + 1).is_err());
-            }
-
-            #[test]
-            fn errors_when_empty() {
-                let mut actual = Dynamic::<()>::default();
-
-                assert!(actual.drain(..).is_err())
-            }
-
-            mod iterator {
-                use super::*;
-
-                #[test]
-                fn element_count() {
-                    let mut expected = vec![0, 1, 2, 3, 4, 5];
-                    let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                    assert_eq!(
-                        actual.drain(1..4).expect("valid range").count(),
-                        expected.drain(1..4).count()
-                    );
-                }
-
-                #[test]
-                fn in_order() {
-                    let mut expected = vec![0, 1, 2, 3, 4, 5];
-                    let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                    assert!(actual
-                        .drain(1..4)
-                        .expect("valid range")
-                        .eq(expected.drain(1..4)));
-                }
-
-                mod double_ended {
-                    use super::*;
-
-                    #[test]
-                    fn element_count() {
-                        let mut expected = vec![0, 1, 2, 3, 4, 5];
-                        let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                        assert_eq!(
-                            actual.drain(1..4).expect("valid range").rev().count(),
-                            expected.drain(1..4).rev().count()
-                        );
-                    }
-
-                    #[test]
-                    fn in_order() {
-                        let mut expected = vec![0, 1, 2, 3, 4, 5];
-                        let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                        assert!(actual
-                            .drain(1..4)
-                            .expect("valid range")
-                            .rev()
-                            .eq(expected.drain(1..4).rev()));
-                    }
-                }
-
-                mod exact_size {
-                    use super::*;
-
-                    #[test]
-                    fn hint() {
-                        let mut expected = vec![0, 1, 2, 3, 4, 5];
-                        let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                        let expected = expected.drain(1..4);
-
-                        assert_eq!(
-                            actual.drain(1..4).expect("valid range").size_hint(),
-                            (expected.len(), Some(expected.len()))
-                        );
-                    }
-
-                    #[test]
-                    fn len() {
-                        let mut expected = vec![0, 1, 2, 3, 4, 5];
-                        let mut actual = Dynamic::from_iter(expected.iter().copied());
-
-                        assert_eq!(
-                            actual.drain(1..4).expect("valid range").len(),
-                            expected.drain(1..4).len()
-                        );
-                    }
-                }
-
-                mod fused {
-                    use super::*;
-
-                    #[test]
-                    fn exhausted() {
-                        let mut actual = Dynamic::from_iter([()].iter());
-                        let mut actual = actual.drain(0..=0).expect("valid range");
-
-                        // Exhaust the elements.
-                        let _ = actual.next().expect("the one element");
-
-                        // Yields `None` at least once.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-
-                        // Continues to yield `None`.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-                    }
-                }
-            }
-
-            mod drop {
-                use super::*;
-
-                #[test]
-                fn increases_front_capacity_when_front() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(..3).expect("valid range"));
-
-                    assert_eq!(actual.capacity_front(), 3);
-                }
-
-                #[test]
-                fn increases_back_capacity_when_back() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(3..).expect("valid range"));
-
-                    assert_eq!(actual.capacity_back(), 3);
-                }
-
-                #[test]
-                fn increases_capacity_when_middle() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(2..=3).expect("valid range"));
-
-                    assert_eq!(actual.capacity(), 2);
-                }
-
-                #[test]
-                fn removes_yielded_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(..).expect("valid range"));
-
-                    assert_eq!(actual.len(), 0);
-                    assert_eq!(actual.capacity(), 6);
-                }
-
-                #[test]
-                fn does_not_modify_leading_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(3..).expect("valid range"));
-
-                    assert!(actual.iter().eq([0, 1, 2].iter()));
-                }
-
-                #[test]
-                fn does_not_modify_trailing_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(..3).expect("valid range"));
-
-                    assert!(actual.iter().eq([3, 4, 5].iter()));
-                }
-
-                #[test]
-                fn shifts_trailing_elements_after_leading_when_mostly_front() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(1..=2).expect("valid range"));
-
-                    assert!(actual.iter().eq([0, 3, 4, 5].iter()));
-                }
-
-                #[test]
-                fn shifts_leading_elements_before_trailing_when_mostly_back() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(3..=4).expect("valid range"));
-
-                    assert!(actual.iter().eq([0, 1, 2, 5].iter()));
-                }
-            }
-        }
-
-        mod withdraw {
-            use super::*;
-
-            mod iterator {
-                use super::*;
-
-                #[test]
-                fn element_count() {
-                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    let actual = underlying.withdraw(|element| element % 2 == 0);
-
-                    assert_eq!(actual.count(), 3);
-                }
-
-                #[test]
-                fn in_order() {
-                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    let actual = underlying.withdraw(|element| element % 2 == 0);
-
-                    assert!(actual.eq([0, 2, 4]));
-                }
-
-                #[test]
-                fn increases_front_capacity_when_withdrawing_first_element() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element != &5));
-
-                    assert_eq!(actual.capacity_front(), 5);
-                    assert_eq!(actual.capacity_back(), 0);
-                }
-
-                #[test]
-                fn increases_back_capacity_when_retained_are_combined() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element % 2 == 1));
-
-                    assert_eq!(actual.capacity_front(), 0);
-                    assert_eq!(actual.capacity_back(), 3);
-                }
-
-                #[test]
-                fn combines_retained_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element == &1));
-
-                    assert!(actual.eq([0, 2, 3, 4, 5]));
-                }
-
-                #[test]
-                fn first_retained_element_is_not_repositioned() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
-
-                    drop(actual.withdraw(|element| element % 2 == 0));
-
-                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
-                }
-
-                #[test]
-                fn size_hint() {
-                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    let actual = underlying.withdraw(|element| element % 2 == 0);
-
-                    assert_eq!(actual.size_hint(), (0, Some(6)));
-                }
-
-                mod double_ended {
-                    use super::*;
-
-                    #[test]
-                    fn element_count() {
-                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
-
-                        assert_eq!(actual.count(), 3);
-                    }
-
-                    #[test]
-                    fn in_order() {
-                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
-
-                        assert!(actual.eq([4, 2, 0]));
-                    }
-
-                    #[test]
-                    fn increases_back_capacity_when_withdrawing_last_element() {
-                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                        drop(actual.withdraw(|element| element > &0).rev());
-
-                        assert_eq!(actual.capacity_front(), 0);
-                        assert_eq!(actual.capacity_back(), 5);
-                    }
-
-                    #[test]
-                    fn increases_back_capacity_when_retained_are_combined() {
-                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                        drop(actual.withdraw(|element| element % 2 == 1).rev());
-
-                        assert_eq!(actual.capacity_front(), 0);
-                        assert_eq!(actual.capacity_back(), 3);
-                    }
-
-                    #[test]
-                    fn combines_retained_elements() {
-                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                        drop(actual.withdraw(|element| element == &1).rev());
-
-                        assert!(actual.eq([0, 2, 3, 4, 5]));
-                    }
-
-                    #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once() {
-                        let mut underlying = Dynamic::from_iter([0, 1, 2, 0]);
-
-                        let mut actual = underlying.withdraw(|element| element != &0);
-
-                        // make head and tail meet.
-                        let _ = actual.next().expect("the element with value '1'");
-                        let _ = actual.next_back().expect("the element with value '2'");
-
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-                    }
-                }
-
-                mod fused {
-                    use super::*;
-
-                    #[test]
-                    fn empty() {
-                        let mut underlying = Dynamic::from_iter([0]);
-                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
-
-                        // Exhaust the elements.
-                        let _ = actual.next().expect("the one element");
-
-                        // Yields `None` at least once.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-
-                        // Continues to yield `None`.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-                    }
-
-                    #[test]
-                    fn exhausted() {
-                        let mut underlying = Dynamic::<usize>::default();
-                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
-
-                        // Yields `None` at least once.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-
-                        // Continues to yield `None`.
-                        assert_eq!(actual.next(), None);
-                        assert_eq!(actual.next_back(), None);
-                    }
-                }
-            }
-
-            mod drop {
-                use super::*;
-
-                #[test]
-                fn drops_yet_to_be_yielded_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element % 2 == 0));
-
-                    assert!(actual.eq([1, 3, 5]));
-                }
-
-                #[test]
-                fn combines_trailing_retained_with_beginning_retained() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
-
-                    let mut iter = actual.withdraw(|element| element == &3 || element == &4);
-
-                    // Create two regions of retained elements: the first
-                    // region contains [0, 1, 2]; the element with value '3'
-                    // has been dropped and is not initialized; the second
-                    // region contains [5, 6, 7]. Both ends of the iterator
-                    // have been exhausted, yet the underlying buffer contains
-                    // a gap between two groups of retained elements.
-                    let _ = iter.next_back().expect("the element with value '4'");
-                    let _ = iter.next().expect("the element with value '3'");
-
-                    // The above means it is now the responsibility of `drop`
-                    // to combine these two regions thereby fixing the state of
-                    // the underlying buffer for future use.
-                    drop(iter);
-                }
-            }
-        }
-
-        mod retain {
-            use super::*;
-
-            #[test]
-            fn increases_capacity() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                actual.retain(|element| element % 2 == 0);
-
-                assert_eq!(actual.capacity(), 3);
-            }
-
-            #[test]
-            fn retains_matching_elements_in_order() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                actual.retain(|element| element % 2 == 0);
-
-                assert!(actual.eq([0, 2, 4]));
-            }
-
-            #[test]
-            fn shifts_trailing_elements_after_first_retained() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                let expected = actual.as_ptr();
-
-                actual.retain(|element| element % 2 == 0);
-
-                assert_eq!(actual.as_ptr(), expected);
             }
         }
 
@@ -5229,6 +4741,411 @@ mod test {
                     let _ = actual.remove(0).expect("element to remove");
 
                     assert_eq!(actual.capacity_front(), index + 1);
+                }
+            }
+        }
+
+        mod drain {
+            use super::*;
+
+            #[test]
+            fn none_out_of_bounds_range() {
+                let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let mut actual = instance.drain(256..);
+
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                drop(actual);
+            }
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert_eq!(actual.drain(1..4).count(), expected.drain(1..4).count());
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                    assert!(actual.drain(1..4).eq(expected.drain(1..4)));
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        assert_eq!(
+                            actual.drain(1..4).rev().count(),
+                            expected.drain(1..4).rev().count()
+                        );
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        assert!(actual.drain(1..4).rev().eq(expected.drain(1..4).rev()));
+                    }
+                }
+
+                mod exact_size {
+                    use super::*;
+
+                    #[test]
+                    fn hint() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        let expected = expected.drain(1..4);
+
+                        assert_eq!(
+                            actual.drain(1..4).size_hint(),
+                            (expected.len(), Some(expected.len()))
+                        );
+                    }
+
+                    #[test]
+                    fn len() {
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual = Dynamic::from_iter(expected.iter().copied());
+
+                        assert_eq!(actual.drain(1..4).len(), expected.drain(1..4).len());
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn empty() {
+                        let mut actual = Dynamic::<()>::default();
+                        let mut actual = actual.drain(0..=0);
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn exhausted() {
+                        let mut actual = Dynamic::from_iter([()].iter());
+                        let mut actual = actual.drain(0..=0);
+
+                        // Exhaust the elements.
+                        let _ = actual.next().expect("the one element");
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn increases_front_capacity_when_front() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(..3));
+
+                    assert_eq!(actual.capacity_front(), 3);
+                }
+
+                #[test]
+                fn increases_back_capacity_when_back() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(3..));
+
+                    assert_eq!(actual.capacity_back(), 3);
+                }
+
+                #[test]
+                fn increases_capacity_when_middle() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(2..=3));
+
+                    assert_eq!(actual.capacity(), 2);
+                }
+
+                #[test]
+                fn removes_yielded_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(..));
+
+                    assert_eq!(actual.len(), 0);
+                    assert_eq!(actual.capacity(), 6);
+                }
+
+                #[test]
+                fn does_not_modify_leading_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(3..));
+
+                    assert!(actual.iter().eq([0, 1, 2].iter()));
+                }
+
+                #[test]
+                fn does_not_modify_trailing_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(..3));
+
+                    assert!(actual.iter().eq([3, 4, 5].iter()));
+                }
+
+                #[test]
+                fn shifts_trailing_elements_after_leading_when_mostly_front() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(1..=2));
+
+                    assert!(actual.iter().eq([0, 3, 4, 5].iter()));
+                }
+
+                #[test]
+                fn shifts_leading_elements_before_trailing_when_mostly_back() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(3..=4));
+
+                    assert!(actual.iter().eq([0, 1, 2, 5].iter()));
+                }
+            }
+        }
+
+        mod withdraw {
+            use super::*;
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert_eq!(actual.count(), 3);
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert!(actual.eq([0, 2, 4]));
+                }
+
+                #[test]
+                fn increases_front_capacity_when_withdrawing_first_element() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element != &5));
+
+                    assert_eq!(actual.capacity_front(), 5);
+                    assert_eq!(actual.capacity_back(), 0);
+                }
+
+                #[test]
+                fn increases_back_capacity_when_retained_are_combined() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 1));
+
+                    assert_eq!(actual.capacity_front(), 0);
+                    assert_eq!(actual.capacity_back(), 3);
+                }
+
+                #[test]
+                fn combines_retained_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element == &1));
+
+                    assert!(actual.eq([0, 2, 3, 4, 5]));
+                }
+
+                #[test]
+                fn first_retained_element_is_not_repositioned() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
+                }
+
+                #[test]
+                fn size_hint() {
+                    let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert_eq!(actual.size_hint(), (0, Some(6)));
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
+
+                        assert_eq!(actual.count(), 3);
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
+
+                        assert!(actual.eq([4, 2, 0]));
+                    }
+
+                    #[test]
+                    fn increases_back_capacity_when_withdrawing_last_element() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element > &0).rev());
+
+                        assert_eq!(actual.capacity_front(), 0);
+                        assert_eq!(actual.capacity_back(), 5);
+                    }
+
+                    #[test]
+                    fn increases_back_capacity_when_retained_are_combined() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element % 2 == 1).rev());
+
+                        assert_eq!(actual.capacity_front(), 0);
+                        assert_eq!(actual.capacity_back(), 3);
+                    }
+
+                    #[test]
+                    fn combines_retained_elements() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element == &1).rev());
+
+                        assert!(actual.eq([0, 2, 3, 4, 5]));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 0]);
+
+                        let mut actual = underlying.withdraw(|element| element != &0);
+
+                        // make head and tail meet.
+                        let _ = actual.next().expect("the element with value '1'");
+                        let _ = actual.next_back().expect("the element with value '2'");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn empty() {
+                        let mut underlying = Dynamic::from_iter([0]);
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Exhaust the elements.
+                        let _ = actual.next().expect("the one element");
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn exhausted() {
+                        let mut underlying = Dynamic::<usize>::default();
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn drops_yet_to_be_yielded_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert!(actual.eq([1, 3, 5]));
+                }
+
+                #[test]
+                fn combines_trailing_retained_with_beginning_retained() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
+
+                    let mut iter = actual.withdraw(|element| element == &3 || element == &4);
+
+                    // Create two regions of retained elements: the first
+                    // region contains [0, 1, 2]; the element with value '3'
+                    // has been dropped and is not initialized; the second
+                    // region contains [5, 6, 7]. Both ends of the iterator
+                    // have been exhausted, yet the underlying buffer contains
+                    // a gap between two groups of retained elements.
+                    let _ = iter.next_back().expect("the element with value '4'");
+                    let _ = iter.next().expect("the element with value '3'");
+
+                    // The above means it is now the responsibility of `drop`
+                    // to combine these two regions thereby fixing the state of
+                    // the underlying buffer for future use.
+                    drop(iter);
                 }
             }
         }

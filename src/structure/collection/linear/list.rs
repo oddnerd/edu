@@ -5,7 +5,7 @@ use super::Linear;
 /// A modifiable [`Linear`] [`super::Collection`].
 ///
 /// Unlike the base [`Linear`] trait, implementors of [`Self`] provide methods
-/// to alter the total [`Collection::count`] of elements.
+/// to alter the total [`super::Collection::count`] of elements.
 ///
 /// # Insertion
 ///
@@ -15,11 +15,12 @@ use super::Linear;
 ///
 /// # Removal
 ///
-/// The [`List::first`] element can be removed via [`Self::front`] whereas the
-/// [`List::last`] element can be removed via [`Self::back`]. Elements at any
-/// given index can be removed via [`Self::remove`]. Elements can either be
+/// The [`Linear::first`] element can be removed via [`Self::front`] whereas
+/// the [`Linear::last`] element can be removed via [`Self::back`]. Elements at
+/// any given index can be removed via [`Self::remove`]. Elements can either be
 /// [retained](`Self::retain`) or [withdrawn](`Self::withdraw`) based on a
-/// given predicate. And all elements can be removed via [`Self::clear`].
+/// given predicate. Elements within an index range can be moved out via
+/// [`Self::drain`] and all elements can be removed via [`Self::clear`].
 pub trait List<'a>:
     Linear<'a>
     + IntoIterator<Item = Self::Element>
@@ -65,6 +66,17 @@ pub trait List<'a>:
     /// Insert an element such that is becomes the last.
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.insert(self.len(), element)
+    }
+
+    /// Remove the elements within a given index `range`.
+    fn drain(&mut self, range: impl std::ops::RangeBounds<usize>) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator;
+
+    /// Remove all elements matching some `predicate`.
+    fn withdraw(&mut self, predicate: impl FnMut(&Self::Element) -> bool) -> impl DoubleEndedIterator<Item = Self::Element>;
+
+    /// Keep only the elements matching some `predicate`.
+    fn retain(&mut self, mut predicate: impl FnMut(&Self::Element) -> bool) {
+        self.withdraw(|element| !predicate(element)).for_each(drop)
     }
 
     /// Drop all elements.
