@@ -743,6 +743,103 @@ impl<T> Dynamic<T> {
         self.withdraw(|element| !predicate(element)).for_each(drop)
     }
 
+    /// Remove an element by swapping it with the first element.
+    ///
+    /// In contrast to [`Self::remove`], this method takes constant time and
+    /// does _NOT_ preserve order.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.remove_via_front(3), Some(3));
+    /// assert_eq!(instance.capacity_front(), 1);
+    /// assert_eq!(instance[2], 0);
+    /// ```
+    pub fn remove_via_front(&mut self, index: usize) -> Option<T> {
+        if index >= self.initialized {
+            None
+        } else {
+            let element: T;
+
+            unsafe {
+                let front = self.as_mut_ptr();
+
+                // SAFETY: index is in bounds => aligned within the allocated object.
+                let index = front.add(index);
+
+                // SAFETY:
+                // * both pointers are valid for reads and write.
+                // * both pointers are aligned.
+                // * no aliasing restrictions.
+                std::ptr::swap(front, index);
+
+                // SAFETY: this takes ownership (moved out of buffer).
+                element = front.read();
+            }
+
+            self.initialized -= 1;
+            self.pre_capacity += 1;
+
+            Some(element)
+        }
+    }
+
+    /// Remove an element by swapping it with the last element.
+    ///
+    /// In contrast to [`Self::remove`], this method takes constant time and
+    /// does _NOT_ preserve order.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.remove_via_back(3), Some(3));
+    /// assert_eq!(instance.capacity_back(), 1);
+    /// assert_eq!(instance[3], 5);
+    /// ```
+    pub fn remove_via_back(&mut self, index: usize) -> Option<T> {
+        if index >= self.initialized {
+            None
+        } else {
+            let element: T;
+
+            unsafe {
+                let ptr = self.as_mut_ptr();
+
+                // SAFETY: at least one element => aligned within the allocated object.
+                let last = ptr.add(self.initialized - 1);
+
+                // SAFETY: index is in bounds => aligned within the allocated object.
+                let index = ptr.add(index);
+
+                // SAFETY:
+                // * both pointers are valid for reads and write.
+                // * both pointers are aligned.
+                // * no aliasing restrictions.
+                std::ptr::swap(last, index);
+
+                // SAFETY: this takes ownership (moved out of buffer).
+                element = last.read()
+            }
+
+            self.post_capacity += 1;
+            self.initialized -= 1;
+
+            Some(element)
+        }
+    }
+
     /// (Re)allocate the buffer to modify [`capacity_back`] by `capacity`.
     ///
     /// This method will increase [`capacity_back`] by `capacity` if positive,
@@ -3689,6 +3786,156 @@ mod test {
                 actual.retain(|element| element % 2 == 0);
 
                 assert_eq!(actual.as_ptr(), expected);
+            }
+        }
+
+        mod remove_via_front {
+            use super::*;
+
+            #[test]
+            fn yields_none_when_out_of_bounds() {
+                let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let actual = underlying.remove_via_front(underlying.len());
+
+                assert_eq!(actual, None);
+            }
+
+            #[test]
+            fn yields_element_when_in_bounds() {
+                let underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                for index in 1..underlying.len() {
+                    let mut underlying = underlying.clone();
+
+                    let actual = underlying.remove_via_front(index);
+
+                    assert_eq!(actual, Some(index));
+                }
+            }
+
+            #[test]
+            fn removed_becomes_first_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_front(3).expect("element with value '3'");
+
+                assert_eq!(actual[2], 0);
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_front(1);
+
+                assert!(actual.eq([0, 2, 3, 4, 5]));
+            }
+
+            #[test]
+            fn increases_front_capacity() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_front(5);
+
+                assert_eq!(actual.capacity_front(), 1);
+            }
+
+            #[test]
+            fn when_front_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let removed = actual.remove_via_front(0);
+
+                assert_eq!(removed, Some(0));
+                assert_eq!(actual.capacity_front(), 1);
+                assert!(actual.eq([1, 2, 3, 4, 5]));
+            }
+
+            #[test]
+            fn when_only_one_element() {
+                let mut actual = Dynamic::from_iter([0]);
+
+                let removed = actual.remove_via_front(0);
+
+                assert_eq!(removed, Some(0));
+                assert_eq!(actual.capacity_front(), 1);
+                assert_eq!(actual.len(), 0);
+            }
+        }
+
+        mod remove_via_back {
+            use super::*;
+
+            #[test]
+            fn yields_none_when_out_of_bounds() {
+                let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let actual = underlying.remove_via_back(underlying.len());
+
+                assert_eq!(actual, None);
+            }
+
+            #[test]
+            fn yields_element_when_in_bounds() {
+                let underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                for index in 1..underlying.len() {
+                    let mut underlying = underlying.clone();
+
+                    let actual = underlying.remove_via_back(index);
+
+                    assert_eq!(actual, Some(index));
+                }
+            }
+
+            #[test]
+            fn removed_becomes_last_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_back(3).expect("element with value '3'");
+
+                assert_eq!(actual[3], 5);
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_back(4);
+
+                assert!(actual.eq([0, 1, 2, 3, 5]));
+            }
+
+            #[test]
+            fn increases_back_capacity() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let _ = actual.remove_via_back(0);
+
+                assert_eq!(actual.capacity_back(), 1);
+            }
+
+            #[test]
+            fn when_back_element() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let removed = actual.remove_via_back(5);
+
+                assert_eq!(removed, Some(5));
+                assert_eq!(actual.capacity_back(), 1);
+                assert!(actual.eq([0, 1, 2, 3, 4]));
+            }
+
+            #[test]
+            fn when_only_one_element() {
+                let mut actual = Dynamic::from_iter([0]);
+
+                let removed = actual.remove_via_back(0);
+
+                assert_eq!(removed, Some(0));
+                assert_eq!(actual.capacity_back(), 1);
+                assert_eq!(actual.len(), 0);
             }
         }
 
