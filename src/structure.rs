@@ -1,6 +1,17 @@
-//! [Data structures](https://en.wikipedia.org/wiki/Data_structure) are
-//! organizations of related variables into encapsulated objects which have
-//! associated behaviour.
+//! Data structures.
+//!
+//! Contained within are [traits][trait] which describe associated behaviour,
+//! and [structs][struct] which relate variables. These types exist to
+//! [encapsulate][encapsulate] (group together) methods (functions) that act
+//! upon [objects][object] (instances of some cohesive _thing_).
+//!
+//! See also: [Wikipedia][wikipedia].
+//!
+//! [trait]: https://doc.rust-lang.org/reference/items/traits.html
+//! [struct]: https://doc.rust-lang.org/reference/items/structs.html
+//! [encapsulate]: https://en.wikipedia.org/wiki/Encapsulation_(computer_programming)
+//! [object]: https://en.wikipedia.org/wiki/Object_(computer_science)
+//! [wikipedia]: https://en.wikipedia.org/wiki/Data_structure
 
 pub mod collection;
 
