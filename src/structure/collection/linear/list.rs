@@ -69,10 +69,16 @@ pub trait List<'a>:
     }
 
     /// Remove the elements within a given index `range`.
-    fn drain(&mut self, range: impl std::ops::RangeBounds<usize>) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator;
+    fn drain(
+        &mut self,
+        range: impl std::ops::RangeBounds<usize>,
+    ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator;
 
     /// Remove all elements matching some `predicate`.
-    fn withdraw(&mut self, predicate: impl FnMut(&Self::Element) -> bool) -> impl DoubleEndedIterator<Item = Self::Element>;
+    fn withdraw(
+        &mut self,
+        predicate: impl FnMut(&Self::Element) -> bool,
+    ) -> impl DoubleEndedIterator<Item = Self::Element>;
 
     /// Keep only the elements matching some `predicate`.
     fn retain(&mut self, mut predicate: impl FnMut(&Self::Element) -> bool) {
