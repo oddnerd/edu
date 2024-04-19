@@ -1585,7 +1585,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// once only when the iterator has been dropped.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// This method takes O(N) time and consumes O(N) memory for the result.
     ///
     /// # Examples
     /// ```
@@ -1655,7 +1655,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// maintaining order.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// This method takes O(N) time and consumes O(N) memory for the result.
     ///
     /// # Examples
     /// ```
