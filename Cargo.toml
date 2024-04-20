@@ -1,8 +1,24 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [package]
 name = "rust"
 version = "0.5.2"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Tyler St. Onge <tyler@stonge.dev>"]
+
+description = "Hand-written implementations in Rust for personal reference"
+
+readme = "README.md"
+
+repository = "https://github.com/oddnerd/rust"
+
+license = "Unlicense"
+license-file = "LICENSE"
+
+keywords = ["algoirhtm", "data structure", "reference"]
+categories = ["algorithms", "data-structures", "rust-patterns", "mathematics"]
+
+publish = false
 
 [dependencies]
