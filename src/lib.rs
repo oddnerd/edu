@@ -5,6 +5,15 @@
     // Enable all external static analysis warnings.
     clippy::all,
 
+    // Prefer using `core` namespace over `std`.
+    clippy::std_instead_of_core,
+
+    // Prefer using `core` namespace over `alloc`.
+    clippy::alloc_instead_of_core,
+
+    // Prefer using `alloc` namespace over `std`.
+    clippy::std_instead_of_alloc,
+
     // Prevent `::symbol` for crate local symbols.
     absolute_paths_not_starting_with_crate,
 

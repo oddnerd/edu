@@ -14,8 +14,8 @@
 /// ```
 #[derive(Debug)]
 pub struct MergeIter<T: Ord, Iter: Iterator<Item = T>> {
-    first: std::iter::Peekable<Iter>,
-    second: std::iter::Peekable<Iter>,
+    first: core::iter::Peekable<Iter>,
+    second: core::iter::Peekable<Iter>,
 }
 
 impl<T: Ord, Iter: Iterator<Item = T>> MergeIter<T, Iter> {

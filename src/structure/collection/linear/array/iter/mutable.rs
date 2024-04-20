@@ -4,13 +4,13 @@
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(in super::super) struct IterMut<'a, T> {
     /// Pointer to the hypothetical next element.
-    ptr: std::ptr::NonNull<T>,
+    ptr: core::ptr::NonNull<T>,
 
     /// Number of elements yet to be yielded.
     count: usize,
 
     /// Constrain to lifetime of the underlying object.
-    lifetime: std::marker::PhantomData<&'a T>,
+    lifetime: core::marker::PhantomData<&'a T>,
 }
 
 impl<'a, T: 'a> IterMut<'a, T> {
@@ -23,11 +23,11 @@ impl<'a, T: 'a> IterMut<'a, T> {
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
-    pub(in super::super) unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
+    pub(in super::super) unsafe fn new(ptr: core::ptr::NonNull<T>, count: usize) -> Self {
         Self {
             ptr,
             count,
-            lifetime: std::marker::PhantomData,
+            lifetime: core::marker::PhantomData,
         }
     }
 }
@@ -51,7 +51,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
                 let ptr = self.ptr.as_ptr().add(1);
 
                 // SAFETY: `add` maintains the non-null requirement.
-                std::ptr::NonNull::new_unchecked(ptr)
+                core::ptr::NonNull::new_unchecked(ptr)
             };
             self.count -= 1;
 
@@ -70,7 +70,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::iter::FusedIterator for IterMut<'a, T> {}
+impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 
@@ -98,14 +98,14 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     }
 }
 
-impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for IterMut<'a, T> {
+impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for IterMut<'a, T> {
     /// Obtain the next element from the back.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         // SAFETY: points to `count` initialized instance of `T`.
-        let slice = unsafe { std::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
+        let slice = unsafe { core::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
         f.debug_list().entries(slice).finish()
     }
 }
@@ -126,7 +126,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -140,7 +140,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -159,7 +159,7 @@ mod test {
 
             let actual = unsafe {
                 let ptr = expected.as_mut_ptr();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                 IterMut::new(ptr, expected.len())
             };
@@ -173,7 +173,7 @@ mod test {
 
             let actual = unsafe {
                 let ptr = expected.as_mut_ptr();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                 IterMut::new(ptr, expected.len())
             };
@@ -190,7 +190,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -204,7 +204,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -222,7 +222,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -236,7 +236,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -254,7 +254,7 @@ mod test {
 
                 let mut actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };
@@ -274,7 +274,7 @@ mod test {
 
                 let mut actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
 
                     IterMut::new(ptr, expected.len())
                 };

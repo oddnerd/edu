@@ -27,7 +27,7 @@ pub trait List<'a>:
     + Iterator<Item = Self::Element>
     + DoubleEndedIterator<Item = Self::Element>
     + ExactSizeIterator
-    + std::iter::FusedIterator
+    + core::iter::FusedIterator
     + FromIterator<Self::Element>
 {
     /// Insert an `element` at `index`.
@@ -71,7 +71,7 @@ pub trait List<'a>:
     /// Remove the elements within a given index `range`.
     fn drain(
         &mut self,
-        range: impl std::ops::RangeBounds<usize>,
+        range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator;
 
     /// Remove all elements matching some `predicate`.

@@ -49,24 +49,24 @@ use super::Collection;
 /// The methods [`Self::at`] and [`Self::at_mut`] provide access to the element
 /// at some given index, but will do bounds checking which means they are safe
 /// to input indexes which are past the last element likely at the cost of some
-///  performance. In contrast, [`std::ops::Index`] and [`std::ops::IndexMut`]
+///  performance. In contrast, [`core::ops::Index`] and [`core::ops::IndexMut`]
 /// do _not_ bounds check instead causing undefined behaviour if an out of
 /// bounds index is provided, but this allows you to have external logic
 /// associating indexes to elements which prevents erroneous inputs.
 ///
 /// [zbi]: https://en.wikipedia.org/wiki/Zero-based_numbering
-pub trait Linear<'a>: Collection<'a> + std::ops::IndexMut<usize, Output = Self::Element> {
+pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator;
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
-           + std::iter::FusedIterator;
+           + core::iter::FusedIterator;
 
     /// Obtain an immutable reference to the element at `index`, bounds checked.
     fn at(&self, index: usize) -> Option<&Self::Element> {

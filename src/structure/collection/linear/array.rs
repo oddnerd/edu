@@ -39,11 +39,11 @@ pub trait Array<'a>: Linear<'a> {
 
     /// Obtain an immutable slice to the elements.
     fn as_slice(&self) -> &[Self::Element] {
-        unsafe { std::slice::from_raw_parts(self.as_ptr(), self.count()) }
+        unsafe { core::slice::from_raw_parts(self.as_ptr(), self.count()) }
     }
 
     /// Obtain a mutable slice to the elements.
     fn as_mut_slice(&mut self) -> &mut [Self::Element] {
-        unsafe { std::slice::from_raw_parts_mut(self.as_mut_ptr(), self.count()) }
+        unsafe { core::slice::from_raw_parts_mut(self.as_mut_ptr(), self.count()) }
     }
 }

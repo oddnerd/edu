@@ -5,6 +5,8 @@ use super::Array;
 use super::Collection;
 use super::Linear;
 
+use std::alloc;
+
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
 /// This is (mostly) equivalent to Rust's [`Vec`] or C++'s `std::vector`.
@@ -37,7 +39,7 @@ use super::Linear;
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
     /// Underlying buffer storing initialized _and_ uninitialized elements.
-    buffer: std::ptr::NonNull<std::mem::MaybeUninit<T>>,
+    buffer: core::ptr::NonNull<core::mem::MaybeUninit<T>>,
 
     /// The number of uninitialized elements before the initialized ones.
     pre_capacity: usize,
@@ -558,7 +560,7 @@ impl<T> Dynamic<T> {
         let source = self.as_mut_ptr();
 
         match offset.cmp(&0) {
-            std::cmp::Ordering::Less => {
+            core::cmp::Ordering::Less => {
                 if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
                     return Err(OutOfBounds);
                 }
@@ -566,7 +568,7 @@ impl<T> Dynamic<T> {
                 self.pre_capacity -= offset.unsigned_abs();
                 self.post_capacity += offset.unsigned_abs();
             }
-            std::cmp::Ordering::Greater => {
+            core::cmp::Ordering::Greater => {
                 if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
                     return Err(OutOfBounds);
                 }
@@ -574,7 +576,7 @@ impl<T> Dynamic<T> {
                 self.pre_capacity += offset.unsigned_abs();
                 self.post_capacity -= offset.unsigned_abs();
             }
-            std::cmp::Ordering::Equal => return Ok(self),
+            core::cmp::Ordering::Equal => return Ok(self),
         }
 
         unsafe {
@@ -585,7 +587,7 @@ impl<T> Dynamic<T> {
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(source, destination, self.initialized);
+            core::ptr::copy(source, destination, self.initialized);
         }
 
         Ok(self)
@@ -625,7 +627,7 @@ impl<T> Dynamic<T> {
                 // * both pointers are valid for reads and write.
                 // * both pointers are aligned.
                 // * no aliasing restrictions.
-                std::ptr::swap(front, index);
+                core::ptr::swap(front, index);
 
                 // SAFETY: this takes ownership (moved out of buffer).
                 element = front.read();
@@ -675,7 +677,7 @@ impl<T> Dynamic<T> {
                 // * both pointers are valid for reads and write.
                 // * both pointers are aligned.
                 // * no aliasing restrictions.
-                std::ptr::swap(last, index);
+                core::ptr::swap(last, index);
 
                 // SAFETY: this takes ownership (moved out of buffer).
                 element = last.read()
@@ -713,7 +715,7 @@ impl<T> Dynamic<T> {
             .ok_or(FailedAllocation)?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
-        if std::mem::size_of::<T>() == 0 {
+        if core::mem::size_of::<T>() == 0 {
             self.post_capacity = capacity;
 
             return Ok(self);
@@ -727,7 +729,7 @@ impl<T> Dynamic<T> {
         let new_layout = {
             let total = front.checked_add(capacity).ok_or(FailedAllocation)?;
 
-            match std::alloc::Layout::array::<T>(total) {
+            match core::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
                 Err(_) => return Err(FailedAllocation),
             }
@@ -738,17 +740,18 @@ impl<T> Dynamic<T> {
             if total == 0 {
                 if new_layout.size() > 0 {
                     // SAFETY: layout has non-zero size.
-                    unsafe { std::alloc::alloc(new_layout).cast::<T>() }
+                    unsafe {
+                        alloc::alloc(new_layout).cast::<T>() }
                 } else {
                     debug_assert_eq!(capacity, 0);
 
                     // SAFETY: empty state => pointer will not be read/write.
-                    std::ptr::NonNull::<T>::dangling().as_ptr()
+                    core::ptr::NonNull::<T>::dangling().as_ptr()
                 }
             }
             // Modify an existing buffer allocation.
             else {
-                let existing_layout = match std::alloc::Layout::array::<T>(total) {
+                let existing_layout = match core::alloc::Layout::array::<T>(total) {
                     Ok(layout) => layout,
                     Err(_) => return Err(FailedAllocation),
                 };
@@ -763,10 +766,10 @@ impl<T> Dynamic<T> {
                         // * `existing_layout` is currently allocated at `ptr`.
                         // * `new_layout` has non-zero size.
                         // * `Layout` guarantees `new_size.size() <= isize::MAX`.
-                        std::alloc::dealloc(ptr, existing_layout);
+                        alloc::dealloc(ptr, existing_layout);
 
                         // SAFETY: empty state => pointer will not read/write.
-                        std::ptr::NonNull::<T>::dangling().as_ptr()
+                        core::ptr::NonNull::<T>::dangling().as_ptr()
                     }
                     // Reallocate.
                     else {
@@ -775,16 +778,16 @@ impl<T> Dynamic<T> {
                         // * `existing_layout` is currently allocated at `ptr`.
                         // * `new_layout` has non-zero size.
                         // * `Layout` guarantees `new_size.size() <= isize::MAX`.
-                        std::alloc::realloc(ptr, existing_layout, new_layout.size()).cast::<T>()
+                        alloc::realloc(ptr, existing_layout, new_layout.size()).cast::<T>()
                     }
                 }
             }
         };
 
         // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
-        let ptr = ptr.cast::<std::mem::MaybeUninit<T>>();
+        let ptr = ptr.cast::<core::mem::MaybeUninit<T>>();
 
-        self.buffer = match std::ptr::NonNull::new(ptr) {
+        self.buffer = match core::ptr::NonNull::new(ptr) {
             Some(ptr) => ptr,
             None => return Err(FailedAllocation),
         };
@@ -811,7 +814,7 @@ impl<T> Drop for Dynamic<T> {
     /// instance.next();      // Consumes the element with value `0`.
     /// instance.next_back(); // Consumes the element with value `5`.
     ///
-    /// std::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
+    /// core::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
         for index in 0..self.initialized {
@@ -867,7 +870,7 @@ impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
     }
 }
 
-impl<T> std::ops::Index<usize> for Dynamic<T> {
+impl<T> core::ops::Index<usize> for Dynamic<T> {
     type Output = T;
 
     /// Query the initialized element `index` positions from the start.
@@ -887,7 +890,7 @@ impl<T> std::ops::Index<usize> for Dynamic<T> {
     /// let actual = Dynamic::from_iter(expected.iter().copied());
     ///
     /// for index in 0..expected.len() {
-    ///     use std::ops::Index;
+    ///     use core::ops::Index;
     ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
@@ -909,7 +912,7 @@ impl<T> std::ops::Index<usize> for Dynamic<T> {
     }
 }
 
-impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
+impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
@@ -927,7 +930,7 @@ impl<T> std::ops::IndexMut<usize> for Dynamic<T> {
     /// let mut actual = Dynamic::from_iter(expected.iter().copied());
     ///
     /// for index in 0..expected.len() {
-    ///     use std::ops::IndexMut;
+    ///     use core::ops::IndexMut;
     ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
@@ -1053,7 +1056,7 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
 
 impl<T> ExactSizeIterator for Dynamic<T> {}
 
-impl<T> std::iter::FusedIterator for Dynamic<T> {}
+impl<T> core::iter::FusedIterator for Dynamic<T> {}
 
 impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
@@ -1153,7 +1156,7 @@ impl<T> Default for Dynamic<T> {
     /// ```
     fn default() -> Self {
         Self {
-            buffer: std::ptr::NonNull::dangling(),
+            buffer: core::ptr::NonNull::dangling(),
             pre_capacity: 0,
             initialized: 0,
             post_capacity: 0,
@@ -1222,7 +1225,7 @@ impl<T: PartialEq> PartialEq for Dynamic<T> {
 
 impl<T: Eq> Eq for Dynamic<T> {}
 
-impl<T: std::fmt::Debug> std::fmt::Debug for Dynamic<T> {
+impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     /// List the elements referenced to/contained.
     ///
     /// # Performance
@@ -1237,12 +1240,12 @@ impl<T: std::fmt::Debug> std::fmt::Debug for Dynamic<T> {
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
 }
 
-impl<T> std::fmt::Pointer for Dynamic<T> {
+impl<T> core::fmt::Pointer for Dynamic<T> {
     /// Display the underlying address pointed to.
     ///
     /// # Performance
@@ -1254,11 +1257,11 @@ impl<T> std::fmt::Pointer for Dynamic<T> {
     ///
     /// let instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert_eq!(format!("{instance:p}"), format!("{:p}", std::ptr::from_ref(&instance[0])));
+    /// assert_eq!(format!("{instance:p}"), format!("{:p}", core::ptr::from_ref(&instance[0])));
     /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         // SAFETY: the address of the pointer it read, not the pointer itself.
-        std::fmt::Pointer::fmt(&self.as_ptr(), f)
+        core::fmt::Pointer::fmt(&self.as_ptr(), f)
     }
 }
 
@@ -1305,7 +1308,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         unsafe {
             // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
@@ -1315,7 +1318,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
             let ptr = ptr.add(self.pre_capacity);
 
             // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-            let ptr = std::ptr::NonNull::new_unchecked(ptr);
+            let ptr = core::ptr::NonNull::new_unchecked(ptr);
 
             // SAFETY: `ptr` is dangling if and only if no elements have been
             // initialized, in which case the pointer will not be read.
@@ -1344,7 +1347,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
-           + std::iter::FusedIterator {
+           + core::iter::FusedIterator {
         unsafe {
             // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
             let ptr = self.buffer.cast::<T>().as_ptr();
@@ -1353,7 +1356,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
             let ptr = ptr.add(self.pre_capacity);
 
             // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-            let ptr = std::ptr::NonNull::new_unchecked(ptr);
+            let ptr = core::ptr::NonNull::new_unchecked(ptr);
 
             // SAFETY: `ptr` is dangling if and only if no elements have been
             // initialized, in which case the pointer will not be read.
@@ -1388,7 +1391,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// let expected = std::ptr::from_ref(&instance[0]);
+    /// let expected = core::ptr::from_ref(&instance[0]);
     /// let actual = unsafe { instance.as_ptr() };
     ///
     /// assert_eq!(actual, expected);
@@ -1428,7 +1431,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// let expected = std::ptr::from_ref(&instance[0]).cast_mut();
+    /// let expected = core::ptr::from_ref(&instance[0]).cast_mut();
     /// let actual = unsafe { instance.as_mut_ptr() };
     ///
     /// assert_eq!(actual, expected);
@@ -1504,7 +1507,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(ptr, destination, self.initialized - index);
+                core::ptr::copy(ptr, destination, self.initialized - index);
             }
 
             self.post_capacity -= 1;
@@ -1567,7 +1570,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(source, destination, self.initialized - index - 1);
+                core::ptr::copy(source, destination, self.initialized - index - 1);
             }
 
             self.post_capacity += 1;
@@ -1597,22 +1600,22 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// let mut drain = instance.drain(..2);
     /// assert_eq!(drain.next(), Some(0));
     /// assert_eq!(drain.next_back(), Some(1));
-    /// std::mem::drop(drain);
+    /// core::mem::drop(drain);
     ///
     /// let mut drain = instance.drain(0..2);
     /// assert_eq!(drain.next(), Some(2));
     /// assert_eq!(drain.next_back(), Some(3));
-    /// std::mem::drop(drain);
+    /// core::mem::drop(drain);
     ///
     /// let mut drain = instance.drain(0..=1);
     /// assert_eq!(drain.next(), Some(4));
     /// assert_eq!(drain.next_back(), Some(5));
-    /// std::mem::drop(drain);
+    /// core::mem::drop(drain);
     ///
     /// let mut drain = instance.drain(0..);
     /// assert_eq!(drain.next(), Some(6));
     /// assert_eq!(drain.next_back(), Some(7));
-    /// std::mem::drop(drain);
+    /// core::mem::drop(drain);
     ///
     /// let mut drain = instance.drain(..);
     /// assert_eq!(drain.next(), None);
@@ -1620,18 +1623,18 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// ```
     fn drain(
         &mut self,
-        range: impl std::ops::RangeBounds<usize>,
+        range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
         let start = match range.start_bound() {
-            std::ops::Bound::Included(start) => *start,
-            std::ops::Bound::Excluded(start) => *start + 1,
-            std::ops::Bound::Unbounded => 0,
+            core::ops::Bound::Included(start) => *start,
+            core::ops::Bound::Excluded(start) => *start + 1,
+            core::ops::Bound::Unbounded => 0,
         };
 
         let end = match range.end_bound() {
-            std::ops::Bound::Included(end) => *end + 1,
-            std::ops::Bound::Excluded(end) => *end,
-            std::ops::Bound::Unbounded => self.len(),
+            core::ops::Bound::Included(end) => *end + 1,
+            core::ops::Bound::Excluded(end) => *end,
+            core::ops::Bound::Unbounded => self.len(),
         };
 
         let start = self.len().min(start);
@@ -1678,10 +1681,10 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = Self::Element> {
         let head = if self.initialized == 0 {
             // SAFETY: this pointer will not be modified or read.
-            std::ptr::NonNull::dangling()
+            core::ptr::NonNull::dangling()
         } else {
             // SAFETY: at least one element exist => pointer cannot be null.
-            unsafe { std::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
+            unsafe { core::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
         };
 
         let tail = if self.initialized == 0 {
@@ -1696,7 +1699,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 let ptr = head.as_ptr().add(offset);
 
                 // SAFETY: `head` cannot be null => pointer cannot be null.
-                std::ptr::NonNull::new_unchecked(ptr)
+                core::ptr::NonNull::new_unchecked(ptr)
             }
         };
 
@@ -1758,10 +1761,10 @@ struct Drain<'a, T> {
     underlying: &'a mut Dynamic<T>,
 
     /// The index range of elements being drained.
-    range: std::ops::Range<usize>,
+    range: core::ops::Range<usize>,
 
     /// The index range of elements being drained that have yet to be yielded.
-    next: std::ops::Range<usize>,
+    next: core::ops::Range<usize>,
 }
 
 impl<T> Drop for Drain<'_, T> {
@@ -1782,7 +1785,7 @@ impl<T> Drop for Drain<'_, T> {
     /// drain.next();      // Consumes the element with value `2`.
     /// drain.next_back(); // Consumes the element with value `4`.
     ///
-    /// std::mem::drop(drain); // Drops the element with value '3'.
+    /// core::mem::drop(drain); // Drops the element with value '3'.
     ///
     /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
     /// ```
@@ -1853,7 +1856,7 @@ impl<T> Drop for Drain<'_, T> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                std::ptr::copy(source, destination, count);
+                core::ptr::copy(source, destination, count);
             }
         }
 
@@ -1969,14 +1972,14 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
 
 impl<T> ExactSizeIterator for Drain<'_, T> {}
 
-impl<T> std::iter::FusedIterator for Drain<'_, T> {}
+impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
-impl<T: std::fmt::Debug> std::fmt::Debug for Drain<'_, T> {
+impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
     /// List the elements being drained.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let ptr = self.underlying.as_ptr();
 
         let mut list = f.debug_list();
@@ -2000,16 +2003,16 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     predicate: F,
 
     /// Where to write the next retained element to.
-    retained: std::ptr::NonNull<T>,
+    retained: core::ptr::NonNull<T>,
 
     /// How many element are left to query with the predicate.
     remaining: usize,
 
     /// The next (front) element to query with the predicate.
-    head: std::ptr::NonNull<T>,
+    head: core::ptr::NonNull<T>,
 
     /// The next (back) element to query with the predicate.
-    tail: std::ptr::NonNull<T>,
+    tail: core::ptr::NonNull<T>,
 
     /// The number of retained elements at the end because of `next_back`.
     trailing: usize,
@@ -2050,7 +2053,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(trailing, self.retained.as_ptr(), self.trailing)
+            core::ptr::copy(trailing, self.retained.as_ptr(), self.trailing)
         };
     }
 }
@@ -2086,7 +2089,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            std::ptr::copy(src, dst, count);
+            core::ptr::copy(src, dst, count);
         };
 
         while self.remaining != 0 {
@@ -2100,12 +2103,12 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 let ptr = self.head.as_ptr().add(1);
 
                 // SAFETY: `head` is not null => pointer is not null.
-                std::ptr::NonNull::new_unchecked(ptr)
+                core::ptr::NonNull::new_unchecked(ptr)
             };
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
-                let element = unsafe { std::ptr::read(current) };
+                let element = unsafe { core::ptr::read(current) };
 
                 // Increase pre-capacity rather than shift into it when the
                 // first element is being withdrawn, this ensures the first
@@ -2118,7 +2121,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                         let ptr = self.retained.as_ptr().add(1);
 
                         // SAFETY: `retained` is not null => pointer is not null.
-                        std::ptr::NonNull::new_unchecked(ptr)
+                        core::ptr::NonNull::new_unchecked(ptr)
                     };
                 } else {
                     self.underlying.post_capacity += 1;
@@ -2135,7 +2138,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     let ptr = self.retained.as_ptr().add(consecutive_retained);
 
                     // SAFETY: `retained` is not null => pointer is not null.
-                    std::ptr::NonNull::new_unchecked(ptr)
+                    core::ptr::NonNull::new_unchecked(ptr)
                 };
 
                 self.underlying.initialized -= 1;
@@ -2166,7 +2169,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             let ptr = self.retained.as_ptr().add(consecutive_retained);
 
             // SAFETY: `retained` is not null => pointer is not null.
-            std::ptr::NonNull::new_unchecked(ptr)
+            core::ptr::NonNull::new_unchecked(ptr)
         };
 
         None
@@ -2226,14 +2229,14 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                         let ptr = self.tail.as_ptr().sub(1);
 
                         // SAFETY: `retained` is not null => pointer is not null.
-                        std::ptr::NonNull::new_unchecked(ptr)
+                        core::ptr::NonNull::new_unchecked(ptr)
                     };
                 }
             }
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
-                let element = unsafe { std::ptr::read(current) };
+                let element = unsafe { core::ptr::read(current) };
 
                 self.underlying.initialized -= 1;
                 self.underlying.post_capacity += 1;
@@ -2254,7 +2257,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                unsafe { std::ptr::copy(src, dst, self.trailing) };
+                unsafe { core::ptr::copy(src, dst, self.trailing) };
 
                 return Some(element);
             } else {
@@ -2266,9 +2269,9 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     }
 }
 
-impl<T, F: FnMut(&T) -> bool> std::iter::FusedIterator for Withdraw<'_, T, F> {}
+impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {}
 
-impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
+impl<T, F: FnMut(&T) -> bool> core::fmt::Debug for Withdraw<'_, T, F> {
     /// Output what indexes are being pointed to in the underlying buffer.
     ///
     /// Note that these indexes are _NOT_ based on the first initialized
@@ -2277,7 +2280,7 @@ impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let origin = self.underlying.buffer.as_ptr().cast::<T>();
 
         // SAFETY: both pointers are aligned within the allocated object.
@@ -2303,12 +2306,12 @@ impl<T, F: FnMut(&T) -> bool> std::fmt::Debug for Withdraw<'_, T, F> {
 #[derive(Debug, Clone, Copy)]
 pub struct FailedAllocation;
 
-impl std::fmt::Display for FailedAllocation {
+impl core::fmt::Display for FailedAllocation {
     /// Write a human-facing description of the error.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "memory allocation failed")
     }
 }
@@ -2319,12 +2322,12 @@ impl std::error::Error for FailedAllocation {}
 #[derive(Debug, Clone, Copy)]
 pub struct OutOfBounds;
 
-impl std::fmt::Display for OutOfBounds {
+impl core::fmt::Display for OutOfBounds {
     /// Write a human-facing description of the error.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "index is outside the bounds of initialized elements")
     }
 }
@@ -3680,7 +3683,7 @@ mod test {
 
     mod index {
         use super::*;
-        use std::ops::Index;
+        use core::ops::Index;
 
         #[test]
         fn correct_element() {
@@ -3703,7 +3706,7 @@ mod test {
 
     mod index_mut {
         use super::*;
-        use std::ops::IndexMut;
+        use core::ops::IndexMut;
 
         #[test]
         fn correct_element() {
@@ -3728,7 +3731,7 @@ mod test {
         use super::*;
 
         struct FaultySizeHintIter<I> {
-            data: std::iter::Copied<I>,
+            data: core::iter::Copied<I>,
         }
 
         impl<'a, T: 'a + Copy, I> Iterator for FaultySizeHintIter<I>
@@ -3895,7 +3898,7 @@ mod test {
 
             #[test]
             fn empty() {
-                let actual = Dynamic::<()>::from_iter(std::iter::empty());
+                let actual = Dynamic::<()>::from_iter(core::iter::empty());
 
                 assert_eq!(actual.pre_capacity, 0);
                 assert_eq!(actual.initialized, 0);
@@ -4051,7 +4054,7 @@ mod test {
             fn empty() {
                 let mut actual = Dynamic::<()>::default();
 
-                actual.extend(std::iter::empty());
+                actual.extend(core::iter::empty());
 
                 assert_eq!(actual.pre_capacity, 0);
                 assert_eq!(actual.initialized, 0);

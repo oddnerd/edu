@@ -54,8 +54,8 @@ impl<T: Default, const N: usize> Default for Fixed<T, N> {
     /// ```
     fn default() -> Self {
         // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
-        let mut uninitialized: [std::mem::MaybeUninit<T>; N] =
-            unsafe { std::mem::MaybeUninit::uninit().assume_init() };
+        let mut uninitialized: [core::mem::MaybeUninit<T>; N] =
+            unsafe { core::mem::MaybeUninit::uninit().assume_init() };
 
         for element in uninitialized.iter_mut() {
             let _ = element.write(Default::default());
@@ -70,7 +70,7 @@ impl<T: Default, const N: usize> Default for Fixed<T, N> {
     }
 }
 
-impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
+impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     type Output = T;
 
     /// Query the element `index` positions from the start.
@@ -90,7 +90,7 @@ impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
     /// let actual = Fixed::from(expected.clone());
     ///
     /// for index in 0..expected.len() {
-    /// use std::ops::Index;
+    /// use core::ops::Index;
     ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
@@ -104,7 +104,7 @@ impl<T, const N: usize> std::ops::Index<usize> for Fixed<T, N> {
     }
 }
 
-impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
+impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
@@ -122,7 +122,7 @@ impl<T, const N: usize> std::ops::IndexMut<usize> for Fixed<T, N> {
     /// let mut actual = Fixed::from(expected.clone());
     ///
     /// for index in 0..expected.len() {
-    ///     use std::ops::IndexMut;
+    ///     use core::ops::IndexMut;
     ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
@@ -162,7 +162,7 @@ impl<'a, T: 'a, const N: usize> IntoIterator for Fixed<T, N> {
             data: unsafe {
                 self.data
                     .as_ptr()
-                    .cast::<[std::mem::ManuallyDrop<T>; N]>()
+                    .cast::<[core::mem::ManuallyDrop<T>; N]>()
                     .read()
             },
 
@@ -171,7 +171,7 @@ impl<'a, T: 'a, const N: usize> IntoIterator for Fixed<T, N> {
     }
 }
 
-impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
+impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for Fixed<T, N> {
     /// List the elements referenced to/contained.
     ///
     /// # Performance
@@ -186,7 +186,7 @@ impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for Fixed<T, N> {
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
 }
@@ -234,14 +234,14 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         unsafe {
             // SAFETY: will never be written to.
             let ptr = self.data.as_ptr().cast_mut();
 
             // SAFETY: `data` exists => `ptr` is non-null.
-            let ptr = std::ptr::NonNull::new_unchecked(ptr);
+            let ptr = core::ptr::NonNull::new_unchecked(ptr);
 
             super::Iter::new(ptr, N)
         }
@@ -268,12 +268,12 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
-           + std::iter::FusedIterator {
+           + core::iter::FusedIterator {
         unsafe {
             let ptr = self.data.as_mut_ptr();
 
             // SAFETY: `data` exists => `ptr` is non-null.
-            let ptr = std::ptr::NonNull::new_unchecked(ptr);
+            let ptr = core::ptr::NonNull::new_unchecked(ptr);
 
             super::IterMut::new(ptr, N)
         }
@@ -298,7 +298,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-    /// let actual = unsafe { std::slice::from_raw_parts(expected.as_ptr(), expected.count()) };
+    /// let actual = unsafe { core::slice::from_raw_parts(expected.as_ptr(), expected.count()) };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
@@ -322,7 +322,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = unsafe { std::slice::from_raw_parts_mut(expected.as_mut_ptr(), expected.count()) };
+    /// let mut actual = unsafe { core::slice::from_raw_parts_mut(expected.as_mut_ptr(), expected.count()) };
     ///
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
@@ -334,13 +334,13 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
 /// By-value [`Iterator`] over a [`Fixed`].
 pub struct IntoIter<T, const N: usize> {
     /// Ownership of the underlying array.
-    data: [std::mem::ManuallyDrop<T>; N],
+    data: [core::mem::ManuallyDrop<T>; N],
 
     /// Elements within the range have yet to be yielded.
-    next: std::ops::Range<usize>,
+    next: core::ops::Range<usize>,
 }
 
-impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for IntoIter<T, N> {
+impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for IntoIter<T, N> {
     /// Print out the element yet to be yielded.
     ///
     /// # Examples
@@ -355,7 +355,7 @@ impl<T: std::fmt::Debug, const N: usize> std::fmt::Debug for IntoIter<T, N> {
     ///
     /// assert_eq!(format!("{instance:?}"), format!("[1, 2, 3, 4]"));
     /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut list = f.debug_list();
 
         let ptr = self.data.as_ptr().cast_mut();
@@ -390,7 +390,7 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
     /// iter.next();      // Consumes the element with value `0`.
     /// iter.next_back(); // Consumes the element with value `5`.
     ///
-    /// std::mem::drop(iter); // Drops the elements with values `[1, 2, 3, 4]`.
+    /// core::mem::drop(iter); // Drops the elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
         for offset in self.next.clone() {
@@ -444,7 +444,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
                 // SAFETY: within bounds => pointing to initialized value.
                 let owned = unsafe { element.read() };
 
-                Some(std::mem::ManuallyDrop::into_inner(owned))
+                Some(core::mem::ManuallyDrop::into_inner(owned))
             }
             None => None,
         }
@@ -499,7 +499,7 @@ impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
                 let element = unsafe { array.add(index) };
 
                 // SAFETY: within bounds => pointing to initialized value.
-                Some(std::mem::ManuallyDrop::into_inner(unsafe {
+                Some(core::mem::ManuallyDrop::into_inner(unsafe {
                     element.read()
                 }))
             }
@@ -510,7 +510,7 @@ impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
 
 impl<'a, T: 'a, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 
-impl<'a, T: 'a, const N: usize> std::iter::FusedIterator for IntoIter<T, N> {}
+impl<'a, T: 'a, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 
 #[cfg(test)]
 mod test {
@@ -534,7 +534,7 @@ mod test {
 
     mod index {
         use super::*;
-        use std::ops::Index;
+        use core::ops::Index;
 
         #[test]
         fn correct_element() {
@@ -557,7 +557,7 @@ mod test {
 
     mod index_mut {
         use super::*;
-        use std::ops::IndexMut;
+        use core::ops::IndexMut;
 
         #[test]
         fn correct_element() {

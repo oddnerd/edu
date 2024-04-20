@@ -233,7 +233,7 @@ fn inplace_merge<T>(
     right_end: usize,
     output: usize,
 ) where
-    T: Ord + std::fmt::Debug,
+    T: Ord + core::fmt::Debug,
 {
     match (slice[..left_end].get(left), slice[..right_end].get(right)) {
         (Some(first), Some(second)) => {
@@ -265,7 +265,7 @@ fn inplace_merge<T>(
 /// entried of `into`.
 fn inplace_into<T>(from: &mut [T], into: &mut [T])
 where
-    T: Ord + std::fmt::Debug,
+    T: Ord + core::fmt::Debug,
 {
     if from.len() > 1 {
         let middle = from.len() / 2;
@@ -276,10 +276,10 @@ where
         crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut())
             .zip(into.iter_mut())
             .for_each(|(smallest, output)| {
-                std::mem::swap(smallest, output);
+                core::mem::swap(smallest, output);
             });
     } else if let (Some(mut from), Some(mut into)) = (from.first(), into.first()) {
-        std::mem::swap(&mut from, &mut into);
+        core::mem::swap(&mut from, &mut into);
     }
 }
 
@@ -304,7 +304,7 @@ where
 /// ```
 pub fn inplace<T>(slice: &mut [T])
 where
-    T: Ord + std::fmt::Debug,
+    T: Ord + core::fmt::Debug,
 {
     if slice.len() > 1 {
         let mut middle = (slice.len() + 1) / 2;

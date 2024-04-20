@@ -18,13 +18,13 @@ use super::Linear;
 #[derive(Clone, Copy, Hash)]
 pub struct Dope<'a, T> {
     /// Pointer to the start of the array.
-    ptr: std::ptr::NonNull<T>,
+    ptr: core::ptr::NonNull<T>,
 
     /// Number of elements within the array.
     count: usize,
 
     /// Bind lifetime to underlying memory buffer.
-    lifetime: std::marker::PhantomData<&'a mut T>,
+    lifetime: core::marker::PhantomData<&'a mut T>,
 }
 
 impl<'a, T: 'a> Dope<'a, T> {
@@ -45,16 +45,16 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
-    pub unsafe fn new(ptr: std::ptr::NonNull<T>, count: usize) -> Self {
+    pub unsafe fn new(ptr: core::ptr::NonNull<T>, count: usize) -> Self {
         Self {
             ptr,
             count,
-            lifetime: std::marker::PhantomData,
+            lifetime: core::marker::PhantomData,
         }
     }
 }
@@ -71,7 +71,7 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
@@ -82,15 +82,15 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
                 let ptr = slice.as_ptr().cast_mut();
 
                 // SAFETY: `slice` exists => pointer is non-null.
-                unsafe { std::ptr::NonNull::new_unchecked(ptr) }
+                unsafe { core::ptr::NonNull::new_unchecked(ptr) }
             },
             count: slice.len(),
-            lifetime: std::marker::PhantomData,
+            lifetime: core::marker::PhantomData,
         }
     }
 }
 
-impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
+impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
     /// Query the element `index` positions from the start.
@@ -107,11 +107,11 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// for index in 0..expected.len() {
-    ///     use std::ops::Index;
+    ///     use core::ops::Index;
     ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
@@ -129,7 +129,7 @@ impl<'a, T: 'a> std::ops::Index<usize> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
+impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
@@ -144,11 +144,11 @@ impl<'a, T: 'a> std::ops::IndexMut<usize> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// for index in 0..expected.len() {
-    ///     use std::ops::IndexMut;
+    ///     use core::ops::IndexMut;
     ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
@@ -201,7 +201,7 @@ impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
 
 impl<'a, T: 'a + Eq> Eq for Dope<'a, T> {}
 
-impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
+impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Dope<'a, T> {
     /// List the elements referenced to/contained.
     ///
     /// # Performance
@@ -212,12 +212,12 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_list().entries(self.iter()).finish()
     }
 }
@@ -257,7 +257,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// for (actual, expected) in actual.iter().zip(expected.iter()) {
@@ -266,7 +266,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + std::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         unsafe { super::Iter::new(self.ptr, self.count) }
     }
@@ -282,7 +282,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+    /// let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
     /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// for (actual, expected) in actual.iter_mut().zip(expected.iter_mut()) {
@@ -293,7 +293,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
-           + std::iter::FusedIterator {
+           + core::iter::FusedIterator {
         unsafe { super::IterMut::new(self.ptr, self.count) }
     }
 }
@@ -360,7 +360,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual = {
                     let ptr = expected.as_ptr().cast_mut();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -372,7 +372,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual = {
                     let ptr = expected.as_ptr().cast_mut();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -407,14 +407,14 @@ mod test {
 
     mod index {
         use super::*;
-        use std::ops::Index;
+        use core::ops::Index;
 
         #[test]
         fn correct_element() {
             let expected = [0, 1, 2, 3, 4, 5];
             let actual = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -435,14 +435,14 @@ mod test {
 
     mod index_mut {
         use super::*;
-        use std::ops::IndexMut;
+        use core::ops::IndexMut;
 
         #[test]
         fn correct_element() {
             let mut expected = [0, 1, 2, 3, 4, 5];
             let mut actual = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -494,13 +494,13 @@ mod test {
 
             let first = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let second = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -512,14 +512,14 @@ mod test {
             let underlying = [1];
             let first = {
                 let ptr = underlying.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, underlying.len()) }
             };
 
             let underlying = [0];
             let second = {
                 let ptr = underlying.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, underlying.len()) }
             };
 
@@ -532,13 +532,13 @@ mod test {
 
             let first = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let second = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -553,19 +553,19 @@ mod test {
 
             let first = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let second = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let third = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -581,7 +581,7 @@ mod test {
 
             let actual = {
                 let ptr = expected.as_ptr().cast_mut();
-                let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                let ptr = core::ptr::NonNull::new(ptr).unwrap();
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -598,7 +598,7 @@ mod test {
             #[test]
             fn is_elements() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
-                let ptr = std::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
+                let ptr = core::ptr::NonNull::new(expected.as_mut_ptr()).unwrap();
                 let actual = unsafe { Dope::new(ptr, expected.len()) };
 
                 assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
@@ -617,7 +617,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual = {
                     let ptr = expected.as_ptr().cast_mut();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -654,7 +654,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual = {
                     let ptr = expected.as_ptr().cast_mut();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -677,7 +677,7 @@ mod test {
                     let expected = [0, 1, 2, 3, 4, 5];
                     let actual = {
                         let ptr = expected.as_ptr().cast_mut();
-                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        let ptr = core::ptr::NonNull::new(ptr).unwrap();
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -693,7 +693,7 @@ mod test {
                     let expected = [0, 1, 2, 3, 4, 5];
                     let actual = {
                         let ptr = expected.as_ptr().cast_mut();
-                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        let ptr = core::ptr::NonNull::new(ptr).unwrap();
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -708,7 +708,7 @@ mod test {
                     let expected = [0, 1, 2, 3, 4, 5];
                     let actual = {
                         let ptr = expected.as_ptr().cast_mut();
-                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        let ptr = core::ptr::NonNull::new(ptr).unwrap();
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -770,7 +770,7 @@ mod test {
                 let mut expected = [0, 1, 2, 3, 4, 5];
                 let mut actual = {
                     let ptr = expected.as_ptr().cast_mut();
-                    let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -793,7 +793,7 @@ mod test {
                     let mut expected = [0, 1, 2, 3, 4, 5];
                     let mut actual = {
                         let ptr = expected.as_ptr().cast_mut();
-                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        let ptr = core::ptr::NonNull::new(ptr).unwrap();
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -809,7 +809,7 @@ mod test {
                     let expected = [0, 1, 2, 3, 4, 5];
                     let mut actual = {
                         let ptr = expected.as_ptr().cast_mut();
-                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        let ptr = core::ptr::NonNull::new(ptr).unwrap();
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -824,7 +824,7 @@ mod test {
                     let expected = [0, 1, 2, 3, 4, 5];
                     let mut actual = {
                         let ptr = expected.as_ptr().cast_mut();
-                        let ptr = std::ptr::NonNull::new(ptr).unwrap();
+                        let ptr = core::ptr::NonNull::new(ptr).unwrap();
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
