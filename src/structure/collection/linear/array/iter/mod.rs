@@ -1,4 +1,4 @@
-//! Iterators over contigious memory buffers of consecutive elements; [`super::Array`].
+//! Iterators over [`Array`](`super::Array`).
 
 mod immutable;
 pub(super) use immutable::Iter;
