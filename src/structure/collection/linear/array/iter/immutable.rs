@@ -1,10 +1,12 @@
 //! Implementation of [`Iter`].
 
+use core::ptr::NonNull;
+
 /// Immutable reference [`Iterator`] over an [`super::super::Array`].
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(in super::super) struct Iter<'a, T> {
     /// Pointer to the hypothetical next element.
-    ptr: core::ptr::NonNull<T>,
+    ptr: NonNull<T>,
 
     /// Number of elements yet to be yielded.
     count: usize,
@@ -23,7 +25,7 @@ impl<'a, T: 'a> Iter<'a, T> {
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
-    pub(in super::super) unsafe fn new(ptr: core::ptr::NonNull<T>, count: usize) -> Self {
+    pub(in super::super) unsafe fn new(ptr: NonNull<T>, count: usize) -> Self {
         Self {
             ptr,
             count,
@@ -51,7 +53,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
                 let ptr = unsafe { self.ptr.as_ptr().add(1) };
 
                 // SAFETY: `add` maintains the non-null requirement.
-                unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+                unsafe { NonNull::new_unchecked(ptr) }
             };
 
             self.count = self.count.saturating_sub(1);
@@ -125,7 +127,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -139,7 +141,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -158,7 +160,7 @@ mod test {
 
             let actual = unsafe {
                 let ptr = expected.as_mut_ptr();
-                let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                let ptr = NonNull::new(ptr).unwrap();
 
                 Iter::new(ptr, expected.len())
             };
@@ -172,7 +174,7 @@ mod test {
 
             let actual = unsafe {
                 let ptr = expected.as_mut_ptr();
-                let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                let ptr = NonNull::new(ptr).unwrap();
 
                 Iter::new(ptr, expected.len())
             };
@@ -189,7 +191,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -203,7 +205,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -221,7 +223,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -235,7 +237,7 @@ mod test {
 
                 let actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -253,7 +255,7 @@ mod test {
 
                 let mut actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
@@ -273,7 +275,7 @@ mod test {
 
                 let mut actual = unsafe {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = core::ptr::NonNull::new(ptr).unwrap();
+                    let ptr = NonNull::new(ptr).unwrap();
 
                     Iter::new(ptr, expected.len())
                 };
