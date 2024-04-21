@@ -9,18 +9,19 @@ use super::Linear;
 ///
 /// # Insertion
 ///
-/// Elements can be placed before [`Linear::first`] via [`Self::prepend`], and
-/// elements can be placed after [`Linear::last`] via [`Self::append`]. Elements
-/// can be inserted at any given index via [`Self::insert`].
+/// * Elements can be placed before [`Linear::first`] via [`Self::prepend`].
+/// * Elements can be placed after [`Linear::last`] via [`Self::append`].
+/// * Elements can be inserted at any given index via [`Self::insert`].
 ///
 /// # Removal
 ///
-/// The [`Linear::first`] element can be removed via [`Self::front`] whereas
-/// the [`Linear::last`] element can be removed via [`Self::back`]. Elements at
-/// any given index can be removed via [`Self::remove`]. Elements can either be
-/// [retained](`Self::retain`) or [withdrawn](`Self::withdraw`) based on a
-/// given predicate. Elements within an index range can be moved out via
-/// [`Self::drain`] and all elements can be removed via [`Self::clear`].
+/// * [First](`Linear::first`) can be removed via [`front`](`Self::front`).
+/// * [Last](`Linear::last`) can be removed via [`back`](`Self::back`).
+/// * Any given index can be removed via [`remove`](`Self::remove`).
+/// * Elements can be [`retain`](`Self::retain`) or
+///   [`withdraw`](`Self::withdraw`) given a predicate.
+/// * An index range can be moved out via [`drain`](`Self::drain`).
+/// * All elements can be removed via [`clear`](`Self::clear`).
 pub trait List<'a>:
     Linear<'a>
     + IntoIterator<Item = Self::Element>
