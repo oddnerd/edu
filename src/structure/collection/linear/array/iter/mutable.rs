@@ -243,6 +243,24 @@ mod test {
 
                 assert_eq!(actual.len(), expected.len());
             }
+            #[test]
+            fn updates() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = {
+                    let ptr = expected.as_mut_ptr();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
+
+                    unsafe { IterMut::new(ptr, expected.len()) }
+                };
+
+                (0..expected.len()).rev().for_each(|len| {
+                    _ = actual.next();
+
+                    assert_eq!(actual.size_hint(), (len, Some(len)));
+                });
+            }
+
         }
 
         mod fused {
