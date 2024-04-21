@@ -40,25 +40,24 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
     fn next(&mut self) -> Option<Self::Item> {
-        if self.count > 0 {
+        (self.count > 0).then(|| {
             // SAFETY:
             // * points to initialized element.
             // * lifetime bound to underlying input.
             let result = unsafe { self.ptr.as_ref() };
 
-            self.ptr = unsafe {
+            self.ptr = {
                 // SAFETY: either within the allocated object or one byte past.
-                let ptr = self.ptr.as_ptr().add(1);
+                let ptr = unsafe { self.ptr.as_ptr().add(1) };
 
                 // SAFETY: `add` maintains the non-null requirement.
-                core::ptr::NonNull::new_unchecked(ptr)
+                unsafe { core::ptr::NonNull::new_unchecked(ptr) }
             };
-            self.count -= 1;
 
-            Some(result)
-        } else {
-            None
-        }
+            self.count = self.count.saturating_sub(1);
+
+            result
+        })
     }
 
     /// Query how many elements have yet to be yielded.
