@@ -25,6 +25,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
+    #[must_use]
     pub(in super::super) unsafe fn new(ptr: NonNull<T>, count: usize) -> Self {
         Self {
             ptr,
