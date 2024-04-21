@@ -36,6 +36,9 @@ pub trait List<'a>:
     /// The elements `[..index]` remain unmodified whereas elements `[index..]`
     /// are shifted to the right such that they become `[index + 1..]`, and the
     /// element at `index` is the `element` being inserted.
+    ///
+    /// # Errors
+    /// If cannot insert the element.
     fn insert(
         &mut self,
         index: usize,
@@ -60,11 +63,17 @@ pub trait List<'a>:
     }
 
     /// Insert an element such that it becomes the first.
+    ///
+    /// # Errors
+    /// If cannot insert the element.
     fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.insert(0, element)
     }
 
     /// Insert an element such that is becomes the last.
+    ///
+    /// # Errors
+    /// If cannot insert the element.
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.insert(self.len(), element)
     }
@@ -82,14 +91,15 @@ pub trait List<'a>:
     ) -> impl DoubleEndedIterator<Item = Self::Element>;
 
     /// Keep only the elements matching some `predicate`.
+    ///
+    /// # Errors
+    /// If cannot insert the element.
     fn retain(&mut self, mut predicate: impl FnMut(&Self::Element) -> bool) {
-        self.withdraw(|element| !predicate(element)).for_each(drop)
+        self.withdraw(|element| !predicate(element)).for_each(drop);
     }
 
     /// Drop all elements.
     fn clear(&mut self) {
-        for _ in 0..self.count() {
-            let _element = self.remove(0).expect("element to remove");
-        }
+        (0..self.count()).for_each(|index| drop(self.remove(index)));
     }
 }
