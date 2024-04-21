@@ -81,21 +81,19 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.count > 0 {
-            self.count -= 1;
+        (self.count > 0).then(|| {
+            self.count = self.count.saturating_sub(1);
 
-            Some(unsafe {
-                // SAFETY: points to final element within the allocated object.
-                let ptr = self.ptr.as_ptr().add(self.count);
+            let ptr = self.ptr.as_ptr();
 
-                // SAFETY:
-                // * points to initialized element.
-                // * lifetime bound to underlying input.
-                ptr.as_ref().unwrap_unchecked()
-            })
-        } else {
-            None
-        }
+            // SAFETY: points to final element within the allocated object.
+            let ptr = unsafe { ptr.add(self.count) };
+
+            // SAFETY:
+            // * points to initialized element.
+            // * lifetime bound to underlying input.
+            unsafe { &*ptr }
+        })
     }
 }
 
