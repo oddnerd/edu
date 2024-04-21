@@ -38,14 +38,14 @@ pub trait List<'a>:
     /// element at `index` is the `element` being inserted.
     ///
     /// # Errors
-    /// If cannot insert the element.
+    /// Yields the `element` when it cannot be inserted.
     fn insert(
         &mut self,
         index: usize,
         element: Self::Element,
     ) -> Result<&mut Self::Element, Self::Element>;
 
-    /// Remove the element at `index`.
+    /// Remove the element at `index`, bounds checked.
     ///
     /// The elements at `[..index]` remain unmodified, the element at `index`
     /// is dropped, and the elements `[index + 1..]` are shifted to the left
@@ -73,7 +73,7 @@ pub trait List<'a>:
     /// Insert an element such that is becomes the last.
     ///
     /// # Errors
-    /// If cannot insert the element.
+    /// Yields the `element` when it cannot be inserted.
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.insert(self.len(), element)
     }
@@ -93,7 +93,7 @@ pub trait List<'a>:
     /// Keep only the elements matching some `predicate`.
     ///
     /// # Errors
-    /// If cannot insert the element.
+    /// Yields the `element` when it cannot be inserted.
     fn retain(&mut self, mut predicate: impl FnMut(&Self::Element) -> bool) {
         self.withdraw(|element| !predicate(element)).for_each(drop);
     }
