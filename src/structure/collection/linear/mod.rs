@@ -49,7 +49,7 @@ use super::Collection;
 /// The methods [`Self::at`] and [`Self::at_mut`] provide access to the element
 /// at some given index, but will do bounds checking which means they are safe
 /// to input indexes which are past the last element likely at the cost of some
-///  performance. In contrast, [`core::ops::Index`] and [`core::ops::IndexMut`]
+/// performance. In contrast, [`core::ops::Index`] and [`core::ops::IndexMut`]
 /// do _not_ bounds check instead causing undefined behaviour if an out of
 /// bounds index is provided, but this allows you to have external logic
 /// associating indexes to elements which prevents erroneous inputs.
@@ -69,21 +69,15 @@ pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self:
            + core::iter::FusedIterator;
 
     /// Obtain an immutable reference to the element at `index`, bounds checked.
+    #[allow(clippy::indexing_slicing)]
     fn at(&self, index: usize) -> Option<&Self::Element> {
-        if index < self.count() {
-            Some(&self[index])
-        } else {
-            None
-        }
+        (index < self.count()).then(|| &self[index])
     }
 
     /// Obtain a mutable reference to the element at `index`, bounds checked.
+    #[allow(clippy::indexing_slicing)]
     fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
-        if index < self.count() {
-            Some(&mut self[index])
-        } else {
-            None
-        }
+        (index < self.count()).then(|| &mut self[index])
     }
 
     /// Query the element considered to be at the front, the first element.
@@ -93,7 +87,7 @@ pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self:
 
     /// Query the element considered to be at the back, the last element.
     fn last(&self) -> Option<&Self::Element> {
-        self.at(self.count() - 1)
+        self.at(self.count().saturating_sub(1))
     }
 
     /// Obtain a reference to the element at the front, the first element.
@@ -103,6 +97,6 @@ pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self:
 
     /// Obtain a reference to the element at the back, the last element.
     fn last_mut(&mut self) -> Option<&mut Self::Element> {
-        self.at_mut(self.count() - 1)
+        self.at_mut(self.count().saturating_sub(1))
     }
 }
