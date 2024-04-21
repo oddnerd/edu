@@ -14,16 +14,17 @@ use super::Collection;
 ///
 /// This trait does not enforce the layout of memory, it instead denotes a
 /// logical layout of elements. The primary characteristic of this trait
-/// is that such [`Collection`] have exactly one (bidirectional) method of
-/// iteration ([`Self::iter`]/[`Self::iter_mut`]) that allows access to all
-/// contained elements.
+/// is that such [collections](`Collection`) have exactly one (bidirectional)
+/// method of iteration ([`iter`](`Self::iter`)/[`iter_mut`](`Self::iter_mut`))
+/// that allows access to all contained elements.
 ///
-/// The elements are arranged such that starting from the [`Self::first`]
-/// element, there exists exactly one element after it, and exactly one element
-/// after that element, iterating to the element after through every contained
-/// element. Likewise starting from the  [`Self::last`] element, there exists
-/// exactly one element before it, and exactly one element before that element,
-/// iterating to the element before through every contained element.
+/// The elements are arranged such that starting from the
+/// [`first`](`Self::first`) element, there exists exactly one element after
+/// it, and exactly one element after that element, iterating to the element
+/// after through every contained element. Likewise starting from the
+/// [`last`](`Self::last`) element, there exists exactly one element before it,
+/// and exactly one element before that element, iterating to the element
+/// before through every contained element.
 ///
 /// # Indexing
 ///
@@ -37,22 +38,24 @@ use super::Collection;
 /// +-----------+-------------+-------------+-------------+-----+------+
 /// ```
 ///
-/// The [`Self::first`] and [`Self::last`] element are the ends of a line made
-/// up of elements connected end-to-end. This means the elements inherently
-/// have some specific ordering which can be leveraged to uniquely index each
-/// element. Denoted above within parenthesis is the index scheme used by
-/// implementors of this trait. If we arbitrarily denote the [`Self::first`]
-/// element to have index of value zero ([zero-based indexing][zbi]), then each
-/// subsequent element can have index one greater than the element before it,
-/// hence the index increments by one for each element.
+/// The [`first`](`Self::first`) and [`last`](`Self::last`) element are the
+/// ends of a line made up of elements connected end-to-end. This means the
+/// elements inherently have some specific ordering which can be leveraged to
+/// uniquely index each element. Denoted above within parenthesis is the index
+/// scheme used by implementors of this trait. If we arbitrarily denote the
+/// [`first`](`Self::first`) element to have index of value zero
+/// ([zero-based indexing][zbi]), then each subsequent element can have index
+/// one greater than the element before it, hence the index increments by one
+/// for each element.
 ///
-/// The methods [`Self::at`] and [`Self::at_mut`] provide access to the element
-/// at some given index, but will do bounds checking which means they are safe
-/// to input indexes which are past the last element likely at the cost of some
-/// performance. In contrast, [`core::ops::Index`] and [`core::ops::IndexMut`]
-/// do _not_ bounds check instead causing undefined behaviour if an out of
-/// bounds index is provided, but this allows you to have external logic
-/// associating indexes to elements which prevents erroneous inputs.
+/// The methods [`at`](`Self::at`)/[`at_mut`](`Self::at_mut`) provide access to
+/// the element at some given index, but will do bounds checking which means
+/// they are safe to input indexes which are past the last element likely at
+/// the cost of some performance. In contrast, [`index`](`core::ops::Index`)
+/// and [`index_mut`](`core::ops::IndexMut`) do _not_ bounds check instead
+/// causing undefined behaviour if an out of bounds index is provided, but this
+/// allows you to have external logic associating indexes to elements which
+/// prevents erroneous inputs.
 ///
 /// [zbi]: https://en.wikipedia.org/wiki/Zero-based_numbering
 pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self::Element> {
@@ -68,13 +71,13 @@ pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self:
            + ExactSizeIterator
            + core::iter::FusedIterator;
 
-    /// Obtain an immutable reference to the element at `index`, bounds checked.
+    /// Obtain an immutable reference to them `index` element, bounds checked.
     #[allow(clippy::indexing_slicing)]
     fn at(&self, index: usize) -> Option<&Self::Element> {
         (index < self.count()).then(|| &self[index])
     }
 
-    /// Obtain a mutable reference to the element at `index`, bounds checked.
+    /// Obtain a mutable reference to the `index` element, bounds checked.
     #[allow(clippy::indexing_slicing)]
     fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
         (index < self.count()).then(|| &mut self[index])
