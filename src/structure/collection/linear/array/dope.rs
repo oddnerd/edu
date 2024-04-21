@@ -354,6 +354,8 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
     /// let ptr = expected.as_mut_ptr();
