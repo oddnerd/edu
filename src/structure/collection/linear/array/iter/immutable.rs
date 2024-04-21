@@ -2,7 +2,7 @@
 
 use core::ptr::NonNull;
 
-/// Immutable reference [`Iterator`] over an [`super::super::Array`].
+/// Immutable reference [`Iterator`] over an [`Array`](`super::super::Array`).
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(in super::super) struct Iter<'a, T> {
     /// Pointer to the hypothetical next element.
@@ -114,6 +114,11 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Iter<'a, T> {
 }
 
 #[cfg(test)]
+#[allow(
+    clippy::undocumented_unsafe_blocks,
+    clippy::unwrap_used,
+    clippy::expect_used
+)]
 mod test {
     use super::*;
 
@@ -127,11 +132,11 @@ mod test {
             fn sets_pointer() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = unsafe {
+                let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
+                    unsafe { Iter::new(ptr, expected.len()) }
                 };
 
                 assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
@@ -141,11 +146,11 @@ mod test {
             fn sets_elements_count() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = unsafe {
+                let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
+                    unsafe { Iter::new(ptr, expected.len()) }
                 };
 
                 assert_eq!(actual.count, expected.len());
@@ -160,11 +165,11 @@ mod test {
         fn element_count() {
             let mut expected = [0, 1, 2, 3, 4, 5];
 
-            let actual = unsafe {
+            let actual = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = NonNull::new(ptr).unwrap();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                Iter::new(ptr, expected.len())
+                unsafe { Iter::new(ptr, expected.len()) }
             };
 
             assert_eq!(actual.count(), expected.len());
@@ -174,11 +179,11 @@ mod test {
         fn in_order() {
             let mut expected = [0, 1, 2, 3, 4, 5];
 
-            let actual = unsafe {
+            let actual = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = NonNull::new(ptr).unwrap();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                Iter::new(ptr, expected.len())
+                unsafe { Iter::new(ptr, expected.len()) }
             };
 
             assert!(actual.eq(expected.iter()));
@@ -191,28 +196,30 @@ mod test {
             fn element_count() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = unsafe {
+                let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
-                };
+                    unsafe { Iter::new(ptr, expected.len()) }
+                }
+                .rev();
 
-                assert_eq!(actual.rev().count(), expected.len());
+                assert_eq!(actual.count(), expected.len());
             }
 
             #[test]
             fn in_order() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = unsafe {
+                let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
-                };
+                    unsafe { Iter::new(ptr, expected.len()) }
+                }
+                .rev();
 
-                assert!(actual.rev().eq(expected.iter().rev()));
+                assert!(actual.eq(expected.iter().rev()));
             }
         }
 
@@ -223,11 +230,11 @@ mod test {
             fn hint() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = unsafe {
+                let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
+                    unsafe { Iter::new(ptr, expected.len()) }
                 };
 
                 assert_eq!(actual.size_hint(), (expected.len(), Some(expected.len())));
@@ -237,11 +244,11 @@ mod test {
             fn len() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = unsafe {
+                let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
+                    unsafe { Iter::new(ptr, expected.len()) }
                 };
 
                 assert_eq!(actual.len(), expected.len());
@@ -273,11 +280,11 @@ mod test {
             fn empty() {
                 let mut expected: [(); 0] = [];
 
-                let mut actual = unsafe {
+                let mut actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
+                    unsafe { Iter::new(ptr, expected.len()) }
                 };
 
                 // Yields `None` at least once.
@@ -293,15 +300,15 @@ mod test {
             fn exhausted() {
                 let mut expected = [0];
 
-                let mut actual = unsafe {
+                let mut actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = NonNull::new(ptr).unwrap();
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    Iter::new(ptr, expected.len())
+                    unsafe { Iter::new(ptr, expected.len()) }
                 };
 
                 // Exhaust the elements.
-                let _ = actual.next().expect("the one element");
+                _ = actual.next().expect("the one element");
 
                 // Yields `None` at least once.
                 assert_eq!(actual.next(), None);
