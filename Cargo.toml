@@ -90,10 +90,10 @@ as_underscore         = "warn" # Prefer explicit type over `as _`.
 pattern_type_mismatch = "warn" # Prevent implicit casts in pattern matching.
 
 # Error Handling
-unwrap_used = {level = "warn", allow-unwrap-in-tests = true} # Prevent `unwrap`.
-expect_used = {level = "warn", allow-expect-in-tests = true} # Prevent `expect`.
 assertions_on_result_states = "warn" # Prevent asserting `is_ok`/`is_err`.
-if_then_some_else_none      = "warn" # Prefer Boolean `then` inplace of if/else.
+if_then_some_else_none      = "warn" # Prefer Boolean `then`.
+unwrap_used                 = "warn" # Prevent `unwrap`.
+expect_used                 = "warn" # Prevent `expect`.
 indexing_slicing            = "warn" # Prefer failable `get` over indexing.
 try_err                     = "deny" # Prevent using question mark on error.
 error_impl_error            = "deny" # Prevent naming errors `Error`.
@@ -110,8 +110,8 @@ unreachable   = "deny" # Prevent `unreachable!()`.
 unimplemented = "deny" # Prevent `unimplemented!()`.
 
 # Misleading calls
-rc_buffer         = {level = "warn", avoid-breaking-exported-api = false} # Prevent `Rc<Vec/String>`.
-rc_mutex          = {level = "warn", avoid-breaking-exported-api = false} # Prevent `Rc<Mutex>`.
+rc_buffer                  = "warn" # Prevent `Rc<Vec/String>`.
+rc_mutex                   = "warn" # Prevent `Rc<Mutex>`.
 mutex_atomic               = "warn" # Prefer atomics over mutex.
 clone_on_ref_ptr           = "deny" # Prefer `Rc::clone()`.
 str_to_string              = "deny" # Prefer `to_owned()`.
@@ -119,10 +119,10 @@ string_to_string           = "deny" # Prefer `clone()`.
 suspicious_xor_used_as_pow = "deny" # Prevent XOR decimal numbers.
 
 # Safety
-multiple_unsafe_ops_per_block   = "warn" # Prefer block for each unsafe operation.
-undocumented_unsafe_blocks      = "deny" # Require safety comment.
-unnecessary_safety_comment      = "deny" # Prevent erroneous safety comment.
-unnecessary_safety_doc = {level = "deny", check-private-items = true} # Safe code does not need safety section.
+multiple_unsafe_ops_per_block = "warn" # Prefer seperate unsafe blocks.
+undocumented_unsafe_blocks    = "deny" # Require safety comment.
+unnecessary_safety_comment    = "deny" # Prevent erroneous safety comment.
+unnecessary_safety_doc        = "deny" # Safe code does not need safety section.
 
 # Strings
 non_ascii_literal    = "warn" # Restrict literals to ASCII.
@@ -140,17 +140,17 @@ ref_patterns  = "deny" # Prevent using `ref` keyword.
 # Style restrictions
 missing_docs_in_private_items   = "warn" # Require documenting private items.
 default_union_representation    = "warn" # Prefer C ABI unions over Rust's.
-arithmetic_side_effects         = "warn" # Explicitly handle underflow/overflow.
+arithmetic_side_effects         = "warn" # Explicitly underflow/overflow.
 let_underscore_must_use         = "warn" # Prevent ignoring must use.
 lossy_float_literal             = "warn" # Prevent unstorable float literals.
 verbose_file_reads              = "warn" # Prefer reading via filesystem.
 shadow_unrelated                = "deny" # Prevent name shadowing.
-else_if_without_else            = "deny" # Explicitly else branch for if chains.
+else_if_without_else            = "deny" # Else branch for if chains.
 semicolon_inside_block          = "deny" # Prevent semicolon after block.
-unneeded_field_pattern          = "deny" # Prefer elipses (`..`) over underscore (`_`).
-let_underscore_untyped          = "deny" # Prefer ignoring type of ignored values.
-fn_to_numeric_cast_any          = "deny" # Prevent casting function pointers to numbers.
-wildcard_enum_match_arm         = "deny" # Prefer explicitly matching enum values.
+unneeded_field_pattern          = "deny" # Prefer `..` over `_`.
+let_underscore_untyped          = "deny" # Prefer ignoring type.
+fn_to_numeric_cast_any          = "deny" # Prevent casting function pointers.
+wildcard_enum_match_arm         = "deny" # Explicitly matching enum values.
 redundant_type_annotations      = "deny" # Prevent repeating type.
 unseparated_literal_suffix      = "deny" # Prefer underscore in `literal_type`.
 mixed_read_write_in_expression  = "deny" # Prefer explicit order of operations.
