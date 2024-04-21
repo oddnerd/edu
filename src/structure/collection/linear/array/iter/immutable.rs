@@ -103,8 +103,12 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Iter<'a, T> {
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // SAFETY: points to `count` initialized instance of `T`.
-        let slice = unsafe { core::slice::from_raw_parts(self.ptr.as_ptr(), self.count) };
+        let data = self.ptr.as_ptr();
+        let len = self.count;
+
+        // SAFETY: points to `len` aligned and initialized instance of `T`.
+        let slice = unsafe { core::slice::from_raw_parts(data, len) };
+
         f.debug_list().entries(slice).finish()
     }
 }
