@@ -124,7 +124,7 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        debug_assert!(index < self.count, "`index` out of bounds");
+        assert!(index < self.count, "index out of bounds");
 
         let ptr = {
             let ptr = self.ptr.as_ptr();
@@ -166,7 +166,7 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        debug_assert!(index < self.count, "`index` out of bounds");
+        assert!(index < self.count, "index out of bounds");
 
         let ptr = {
             let ptr = self.ptr.as_ptr();
