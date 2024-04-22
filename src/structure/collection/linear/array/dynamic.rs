@@ -123,7 +123,7 @@ impl<T> Dynamic<T> {
         self.front_capacity
             .checked_add(self.back_capacity)
             .map_or_else(
-                || unreachable!("more than `isize::MAX` bytes"),
+                || unreachable!("allocated more than `isize::MAX` bytes"),
                 |capacity| capacity,
             )
     }
@@ -260,11 +260,11 @@ impl<T> Dynamic<T> {
         // Reclaim any front capacity.
         if self.initialized > 0 {
             let Ok(offset) = isize::try_from(self.front_capacity) else {
-                unreachable!("should not be able to exceed `isize::MAX`");
+                unreachable!("allocated more than `isize::MAX` bytes");
             };
 
             let Ok(_) = self.shift(offset) else {
-                unreachable!("exactly enough front capacity to shift into");
+                unreachable!("not enough front capacity to shift into");
             };
         }
 
@@ -323,7 +323,7 @@ impl<T> Dynamic<T> {
 
         if self.initialized > 0 {
             let Ok(_) = self.shift(capacity) else {
-                unreachable!("enough back capacity to shift into");
+                unreachable!("not enough back capacity to shift into");
             };
         }
 
@@ -460,16 +460,16 @@ impl<T> Dynamic<T> {
         };
 
         let Ok(extra) = isize::try_from(extra) else {
-            unreachable!("cannot allocate more than `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         };
 
         let Some(extra) = extra.checked_neg() else {
-            unreachable!("extra capacity is non-negative");
+            unreachable!("negative extra capacity");
         };
 
         if self.initialized > 0 {
             let Ok(_) = self.shift(extra) else {
-                unreachable!("enough front capacity to shift into");
+                unreachable!("not enough front capacity to shift into");
             };
         }
 
@@ -521,7 +521,7 @@ impl<T> Dynamic<T> {
         };
 
         let Ok(extra) = isize::try_from(extra) else {
-            unreachable!("cannot allocate more than `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         };
 
         let Some(extra) = extra.checked_neg() else {
@@ -590,7 +590,7 @@ impl<T> Dynamic<T> {
                 if let Some(capacity) = self.front_capacity.checked_add(offset.unsigned_abs()) {
                     self.back_capacity = capacity;
                 } else {
-                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    unreachable!("allocated more than `isize::MAX` bytes");
                 }
             }
             core::cmp::Ordering::Greater => {
@@ -608,7 +608,7 @@ impl<T> Dynamic<T> {
                 if let Some(capacity) = self.front_capacity.checked_add(offset.unsigned_abs()) {
                     self.front_capacity = capacity;
                 } else {
-                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    unreachable!("allocated more than `isize::MAX` bytes");
                 }
             }
             core::cmp::Ordering::Equal => return Ok(self),
@@ -617,7 +617,7 @@ impl<T> Dynamic<T> {
         let destination = self.as_mut_ptr();
 
         let Some(offset) = offset.checked_neg() else {
-            unreachable!("would be out of bounds");
+            unreachable!("offset out of bounds");
         };
 
         // SAFETY: offset is in bounds => aligned within the allocated object.
@@ -676,13 +676,13 @@ impl<T> Dynamic<T> {
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
         } else {
-            unreachable!("there was an initialized element to remove");
+            unreachable!("no initialized element to remove");
         }
 
         if let Some(incremented) = self.front_capacity.checked_add(1) {
             self.front_capacity = incremented;
         } else {
-            unreachable!("cannot allocate more that `isize::MAX` bytes");
+            unreachable!("allocated more that `isize::MAX` bytes");
         }
 
         Some(element)
@@ -715,7 +715,7 @@ impl<T> Dynamic<T> {
 
         let last = {
             let Some(offset) = self.initialized.checked_sub(1) else {
-                unreachable!("there is at least one element");
+                unreachable!("no initialized element to remove");
             };
 
             // SAFETY: points to the final element contained.
@@ -739,13 +739,13 @@ impl<T> Dynamic<T> {
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
         } else {
-            unreachable!("there was an initialized element to remove");
+            unreachable!("no initialized element to remove");
         }
 
         if let Some(incremented) = self.back_capacity.checked_add(1) {
             self.back_capacity = incremented;
         } else {
-            unreachable!("cannot allocate more that `isize::MAX` bytes");
+            unreachable!("allocated more that `isize::MAX` bytes");
         }
 
         Some(element)
@@ -782,7 +782,7 @@ impl<T> Dynamic<T> {
         }
 
         let Some(unchanged) = self.front_capacity.checked_add(self.initialized) else {
-            unreachable!("total allocated object under `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         };
 
         let new = {
@@ -795,7 +795,7 @@ impl<T> Dynamic<T> {
         };
 
         let Some(total) = unchanged.checked_add(self.back_capacity) else {
-            unreachable!("total allocated object under `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         };
 
         let ptr = {
@@ -901,11 +901,11 @@ impl<T> Drop for Dynamic<T> {
         if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
             self.back_capacity = capacity;
         } else {
-            unreachable!("cannot allocate more than `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         }
 
         let Ok(_) = self.shrink(None) else {
-            unreachable!("deallocation failure implies corrupted state/logic");
+            unreachable!("deallocation failure");
         };
     }
 }
@@ -969,7 +969,7 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
         let ptr = self.buffer.as_ptr();
 
         let Some(offset) = self.front_capacity.checked_add(index) else {
-            unreachable!("cannot allocate more than `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         };
 
         // SAFETY: index within bounds => stays within the allocated object.
@@ -1013,7 +1013,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
         let ptr = self.buffer.as_ptr();
 
         let Some(offset) = self.front_capacity.checked_add(index) else {
-            unreachable!("cannot allocate more than `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         };
 
         // SAFETY: index within bounds => stays within the allocated object.
@@ -1062,13 +1062,13 @@ impl<T> Iterator for Dynamic<T> {
             if let Some(decremented) = self.initialized.checked_sub(1) {
                 self.initialized = decremented;
             } else {
-                unreachable!("there was an initialized element to remove");
+                unreachable!("no initialized element to remove");
             };
 
             if let Some(incremented) = self.front_capacity.checked_add(1) {
                 self.front_capacity = incremented;
             } else {
-                unreachable!("cannot allocate more than `isize::MAX` bytes");
+                unreachable!("allocated more than `isize::MAX` bytes");
             };
 
             // SAFETY: the `MaybeUninit<T>` is initialized.
@@ -1124,11 +1124,11 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
             let ptr = self.buffer.as_ptr();
 
             let Some(offset) = self.initialized.checked_sub(1) else {
-                unreachable!("there was an element to remove");
+                unreachable!("no initialized element to remove");
             };
 
             let Some(offset) = self.front_capacity.checked_add(offset) else {
-                unreachable!("cannot allocate more than `isize::MAX` bytes");
+                unreachable!("allocated more than `isize::MAX` bytes");
             };
 
             // SAFETY: stays aligned within the allocated object.
@@ -1137,13 +1137,13 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
             if let Some(decremented) = self.initialized.checked_sub(1) {
                 self.initialized = decremented;
             } else {
-                unreachable!("there was an initialized element to remove");
+                unreachable!("no initialized element to remove");
             };
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
             } else {
-                unreachable!("cannot allocate more than `isize::MAX` bytes");
+                unreachable!("allocated more than `isize::MAX` bytes");
             };
 
             // SAFETY: the `MaybeUninit<T>` is initialized.
@@ -1578,7 +1578,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         if index == 0 && self.capacity_front() > 0 {
             ptr = {
                 let Some(offset) = self.capacity_front().checked_sub(1) else {
-                    unreachable!("there exists front capacity")
+                    unreachable!("zero front capacity")
                 };
 
                 // SAFETY: the last uninitialized element in the front.
@@ -1590,7 +1590,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 if let Some(capacity) = self.front_capacity.checked_add(self.back_capacity) {
                     self.front_capacity = capacity;
                 } else {
-                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    unreachable!("allocated more than `isize::MAX` bytes");
                 };
 
                 self.back_capacity = 0;
@@ -1599,14 +1599,14 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             if let Some(decremented) = self.front_capacity.checked_sub(1) {
                 self.front_capacity = decremented;
             } else {
-                unreachable!("front capacity being inserted into");
+                unreachable!("no front capacity to insert into");
             };
         }
         // consume back capacity.
         else if self.reserve(1).is_ok() {
             ptr = {
                 let Some(offset) = self.front_capacity.checked_add(index) else {
-                    unreachable!("index is in bounds");
+                    unreachable!("index out of bounds");
                 };
 
                 // SAFETY: the uninitialized element to insert into.
@@ -1619,7 +1619,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 let destination = unsafe { ptr.add(1) };
 
                 let Some(count) = self.initialized.checked_sub(index) else {
-                    unreachable!("index is in bound");
+                    unreachable!("index out of bound");
                 };
 
                 // SAFETY:
@@ -1634,7 +1634,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             if let Some(decrement) = self.back_capacity.checked_sub(1) {
                 self.back_capacity = decrement;
             } else {
-                unreachable!("back capacity being inserted into");
+                unreachable!("no back capacity to insert into");
             };
         } else {
             debug_assert_eq!(self.capacity(), 0, "no capacity to insert into");
@@ -1645,7 +1645,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         if let Some(increment) = self.initialized.checked_add(1) {
             self.initialized = increment;
         } else {
-            unreachable!("cannot allocate more that `isize::MAX` bytes");
+            unreachable!("allocated more that `isize::MAX` bytes");
         };
 
         // SAFETY: the `MaybeUninit<T>` is initialized even if the `T` isn't.
@@ -1685,7 +1685,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             if let Some(decremented) = self.initialized.checked_sub(1) {
                 self.initialized = decremented;
             } else {
-                unreachable!("the element being removed was initialized");
+                unreachable!("no initialized element to remove");
             };
 
             // SAFETY:
@@ -1700,7 +1700,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             if let Some(incremented) = self.front_capacity.checked_add(1) {
                 self.front_capacity = incremented;
             } else {
-                unreachable!("cannot allocate more that `isize::MAX` bytes");
+                unreachable!("allocated more that `isize::MAX` bytes");
             };
         }
         // Increase back capacity.
@@ -1714,7 +1714,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 let source = unsafe { destination.add(1) };
 
                 let Some(count) = self.initialized.checked_sub(index) else {
-                    unreachable!("index is in bounds");
+                    unreachable!("index out of bounds");
                 };
 
                 // SAFETY:
@@ -1729,7 +1729,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
             } else {
-                unreachable!("cannot allocate more that `isize::MAX` bytes");
+                unreachable!("allocated more that `isize::MAX` bytes");
             };
         }
 
@@ -1902,7 +1902,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
             self.back_capacity = capacity;
         } else {
-            unreachable!("cannot allocate more than `isize::MAX` bytes");
+            unreachable!("allocated more than `isize::MAX` bytes");
         }
 
         self.initialized = 0;
@@ -1966,13 +1966,13 @@ impl<T> Drop for Drain<'_, T> {
             if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
                 self.underlying.front_capacity = capacity;
             } else {
-                unreachable!("cannot allocate more than `isize::MAX` bytes");
+                unreachable!("allocated more than `isize::MAX` bytes");
             }
         } else if self.range.start == 0 {
             if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
                 self.underlying.back_capacity = capacity;
             } else {
-                unreachable!("cannot allocate more than `isize::MAX` bytes");
+                unreachable!("allocated more than `isize::MAX` bytes");
             }
         } else {
             let only_front_capacity =
@@ -1985,7 +1985,7 @@ impl<T> Drop for Drain<'_, T> {
                 let leading = self.range.start;
 
                 let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
-                    unreachable!("elements within the range were initialized");
+                    unreachable!("not enough initialized elements to remove");
                 };
 
                 let (source, count) =
@@ -2021,7 +2021,7 @@ impl<T> Drop for Drain<'_, T> {
         if let Some(initialized) = self.underlying.initialized.checked_sub(self.range.len()) {
             self.underlying.initialized = initialized;
         } else {
-            unreachable!("the elements drained that were initialized")
+            unreachable!("not enough initialized elements to remove")
         }
     }
 }
@@ -2260,7 +2260,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             if let Some(remaining) = self.remaining.checked_sub(1) {
                 self.remaining = remaining;
             } else {
-                unreachable!("there is at least one remaining element");
+                unreachable!("no remaining element");
             }
 
             // SAFETY: the element is initialized.
@@ -2283,7 +2283,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     if let Some(incremented) = self.underlying.front_capacity.checked_add(1) {
                         self.underlying.front_capacity = incremented;
                     } else {
-                        unreachable!("cannot allocate more than `isize::MAX` bytes");
+                        unreachable!("allocated more than `isize::MAX` bytes");
                     }
 
                     // The current element will be left uninitialized.
@@ -2299,7 +2299,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     if let Some(incremented) = self.underlying.back_capacity.checked_add(1) {
                         self.underlying.back_capacity = incremented;
                     } else {
-                        unreachable!("cannot allocate more than `isize::MAX` bytes");
+                        unreachable!("allocated more than `isize::MAX` bytes");
                     }
                 }
 
@@ -2320,7 +2320,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 if let Some(decremented) = self.underlying.initialized.checked_add(1) {
                     self.underlying.initialized = decremented;
                 } else {
-                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    unreachable!("allocated more than `isize::MAX` bytes");
                 }
 
                 return Some(element);
@@ -2329,7 +2329,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             if let Some(incremented) = consecutive_retained.checked_add(1) {
                 consecutive_retained = incremented;
             } else {
-                unreachable!("cannot allocate more than `isize::MAX` bytes")
+                unreachable!("allocated more than `isize::MAX` bytes")
             }
         }
 
@@ -2403,7 +2403,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             if let Some(decremented) = self.remaining.checked_sub(1) {
                 self.remaining = decremented;
             } else {
-                unreachable!("there is at least one remaining element");
+                unreachable!("no remaining element");
             }
 
             // SAFETY: the element is initialized.
@@ -2427,13 +2427,13 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
                     self.underlying.initialized = decremented;
                 } else {
-                    unreachable!("yielding an initialized element");
+                    unreachable!("no initialized element to remove");
                 }
 
                 if let Some(incremented) = self.underlying.back_capacity.checked_add(1) {
                     self.underlying.back_capacity = incremented;
                 } else {
-                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    unreachable!("allocated more than `isize::MAX` bytes");
                 }
 
                 let src = {
@@ -2462,7 +2462,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             if let Some(incremented) = self.trailing.checked_add(1) {
                 self.trailing = incremented;
             } else {
-                unreachable!("cannot allocate more than `isize::MAX`");
+                unreachable!("allocated more than `isize::MAX`");
             };
         }
 
