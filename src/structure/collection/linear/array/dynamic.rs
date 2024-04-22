@@ -263,6 +263,10 @@ impl<T> Dynamic<T> {
                 unreachable!("allocated more than `isize::MAX` bytes");
             };
 
+            let Some(offset) = offset.checked_neg() else {
+                unreachable!("negative amount of front capacity");
+            };
+
             let Ok(_) = self.shift(offset) else {
                 unreachable!("not enough front capacity to shift into");
             };
