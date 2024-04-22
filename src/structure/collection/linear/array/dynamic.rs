@@ -167,7 +167,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::list::List;
     ///
     /// // Constructing with generic capacity.
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     /// assert_eq!(instance.capacity_back(), 256);
     ///
     /// // Reserving for specific end of the buffer.
@@ -378,19 +378,19 @@ impl<T> Dynamic<T> {
     ///
     /// // Fill with elements.
     /// for element in 0..256 {
-    ///     instance.append(element);
+    ///     instance.append(element).expect("enough capacity");
     /// }
     ///
     /// // Create capacity at the front.
-    /// instance.reserve_front(256);
+    /// instance.reserve_front(256).expect("successful allocation");
     ///
     /// // Shrink to have capacity of 128 elements at the back.
-    /// instance.shrink(Some(128));
+    /// instance.shrink(Some(128)).expect("successful reallocation");
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 128);
     ///
     /// // Shrink to have no capacity (shrink to fit).
-    /// instance.shrink(None);
+    /// instance.shrink(None).expect("successful deallocation");
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
@@ -435,18 +435,18 @@ impl<T> Dynamic<T> {
     ///
     /// // Half fill with elements.
     /// for element in 0..128 {
-    ///     instance.prepend(element);
+    ///     instance.prepend(element).expect("enough capacity");
     /// }
     /// assert_eq!(instance.capacity_front(), 128);
     /// assert_eq!(instance.capacity_back(), 0);
     ///
     /// // Shrink to have capacity of 64 elements at the front.
-    /// instance.shrink_front(Some(64));
+    /// instance.shrink_front(Some(64)).expect("successful reallocation");
     /// assert_eq!(instance.capacity_front(), 64);
     /// assert_eq!(instance.capacity_back(), 0);
     ///
     /// // Shrink to have no capacity (shrink to fit).
-    /// instance.shrink_front(None);
+    /// instance.shrink_front(None);.expect("successful reallocation")
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
@@ -488,18 +488,18 @@ impl<T> Dynamic<T> {
     ///
     /// // Half fill with elements.
     /// for element in 0..128 {
-    ///     instance.append(element);
+    ///     instance.append(element).expect("enough capacity");
     /// }
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 128);
     ///
     /// // Shrink to have capacity of 64 elements at the front.
-    /// instance.shrink_back(Some(64));
+    /// instance.shrink_back(Some(64)).expect("successful reallocation");
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 64);
     ///
     /// // Shrink to have no capacity (shrink to fit).
-    /// instance.shrink_back(None);
+    /// instance.shrink_back(None).expect("successful reallocation");
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
@@ -541,11 +541,11 @@ impl<T> Dynamic<T> {
     ///
     /// // Fill with elements.
     /// for element in 0..256 {
-    ///     instance.append(element);
+    ///     instance.append(element).expect("enough capacity");
     /// }
     ///
     /// // Allocate capacity at both ends.
-    /// instance.reserve_front(256);
+    /// instance.reserve_front(256).expect("successful allocation");
     /// instance.reserve_back(256);
     ///
     /// // Shift initialized elements to the front of the buffer.
