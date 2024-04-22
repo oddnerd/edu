@@ -65,7 +65,7 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
+    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// if let Ok(instance) = Dynamic::<i32>::with_capacity(256) {
