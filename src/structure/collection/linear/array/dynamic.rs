@@ -9,32 +9,39 @@ use std::alloc;
 
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
-/// This is (mostly) equivalent to Rust's [`Vec`] or C++'s `std::vector`.
+/// This is (mostly) equivalent to Rust's [`Vec`] or C++'s
+/// [`std::vector`](https://en.cppreference.com/w/cpp/container/vector).
 ///
-/// Contigious memory is heap-allocated with alignment and size to store
-/// elements of type `T`, referred to as the buffer. The front of the buffer
-/// (potentially) contains uninitialized elements, then all initialized
-/// elements in the order they were inserted, and finally at the back
-/// (potentially) other uninitialized elements.
+/// Contigious memory (one single allocated object) is heap-allocated with
+/// alignment and size to store elements of type `T`, referred to as the
+/// buffer. The front of the buffer (potentially) contains uninitialized
+/// elements, then all initialized elements in the order they were inserted,
+/// and finally at the back (potentially) other uninitialized elements.
 ///
 /// The term 'capacity' refers to pre-allocated memory containing those
 /// uninitialized elements into which new elements can be added without
-/// additional memory allocation. This means [`Self::capacity`] elements can be
-/// [`Self::insert`] without invalidating pointers to the buffer. Note that
-/// pointers to specific elements may no longer point to the same element/point
-/// to an uninitialized element as the pre-existing elements may be moved
-/// within the buffer (maintaining order, see [`Self::shift`]) to utilize said
-/// capacity. In contrast, using end-specific capacity via [`Self::prepend`] or
-/// [`Self::append`] alongside [`Self::capacity_back`] or
-/// [`Self::capacity_back`] _will_ maintain pointers to specific elements.
+/// altering the allocation. This means [`capacity`](`Self::capacity`)
+/// elements can be [`insert`](`Self::insert`) without invalidating pointers to
+/// the buffer. Note that pointers to specific elements may no longer point to
+/// the same element/point to an uninitialized element as the pre-existing
+/// elements may be moved within the buffer (maintaining order, see
+/// [`shift`](`Self::shift`)) to utilize said capacity. In contrast, using
+/// end-specific capacity via [`prepend`](`Self::prepend`) or
+/// [`append`](`Self::append`) alongside
+/// [`capacity_front`](`Self::capacity_front`) or
+/// [`capacity_back`](`Self::capacity_back`) _will_ maintain pointers to
+/// specific elements.
 ///
-/// Capacity may be manually allocated via [`Self::with_capacity`] and
-/// [`Self::reserve`], or end-specific [`Self::reserve_front`] and
-/// [`Self::reserve_back`] methods which will reallocate thereby invaliding all
-/// pointers. Furthermore, capacity can be deallocated (retaining initialized
-/// elements) via [`Self::shrink`], or end-specific [`Self::shrink_front`]
-/// and [`Self::shrink_back`]. Shrinking when no elements are initialized will
-/// deallocate freeing all memory.
+/// Capacity may be manually allocated via
+/// [`with_capacity`](`Self::with_capacity`) and
+/// [`reserve`](`Self::reserve`), or end-specific
+/// [`reserve_front`](`Self::reserve_front`) and
+/// [`reserve_back`](`Self::reserve_back`) methods which will reallocate
+/// thereby invaliding all pointers. Furthermore, capacity can be reallocated
+/// (retaining initialized elements) via [`shrink`](`Self::shrink`),
+/// or end-specific [`shrink_front`](`Self::shrink_front`) and
+/// [`shrink_back`](`Self::shrink_back`). Shrinking when no elements are
+/// initialized will deallocate freeing all memory.
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
@@ -42,13 +49,13 @@ pub struct Dynamic<T> {
     buffer: core::ptr::NonNull<core::mem::MaybeUninit<T>>,
 
     /// The number of uninitialized elements before the initialized ones.
-    pre_capacity: usize,
+    front_capacity: usize,
 
     /// The number of elements which are initialized.
     initialized: usize,
 
     /// The number of uninitialized elements after the initialized ones.
-    post_capacity: usize,
+    back_capacity: usize,
 }
 
 impl<T> Dynamic<T> {
@@ -110,8 +117,12 @@ impl<T> Dynamic<T> {
     /// ```
     #[must_use]
     pub fn capacity(&self) -> usize {
-        // SAFETY: Global allocator API => addition cannot overflow.
-        self.pre_capacity + self.post_capacity
+        self.front_capacity
+            .checked_add(self.back_capacity)
+            .map_or_else(
+                || unreachable!("more than `isize::MAX` bytes"),
+                |capacity| capacity,
+            )
     }
 
     /// How many elements can [`Self::prepend`] in constant time/without
@@ -127,7 +138,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::List;
     ///
     /// // Constructing with generic capacity.
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
+    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     /// assert_eq!(instance.capacity_front(), 256);
     ///
     /// // Reserving for specific end of the buffer.
@@ -148,9 +159,9 @@ impl<T> Dynamic<T> {
     #[must_use]
     pub fn capacity_front(&self) -> usize {
         if self.initialized == 0 {
-            self.pre_capacity + self.post_capacity
+            self.capacity()
         } else {
-            self.pre_capacity
+            self.front_capacity
         }
     }
 
@@ -188,9 +199,9 @@ impl<T> Dynamic<T> {
     #[must_use]
     pub fn capacity_back(&self) -> usize {
         if self.initialized == 0 {
-            self.pre_capacity + self.post_capacity
+            self.capacity()
         } else {
-            self.post_capacity
+            self.back_capacity
         }
     }
 
@@ -241,34 +252,32 @@ impl<T> Dynamic<T> {
     /// // Shifts elements to consume capacity at the front of the buffer.
     /// instance.reserve_front(256).expect("successful allocation");
     /// assert!(instance.reserve(512).is_ok()); // No reallocation, just shift.
-    /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
-    /// }
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
-        let total_size = self
-            .initialized
-            .checked_add(capacity)
-            .ok_or(FailedAllocation)?;
-
-        let offset = isize::try_from(self.pre_capacity).expect("cannot exceed isize::MAX");
-
+        // Reclaim any front capacity.
         if self.initialized > 0 {
-            let _ = self.shift(-offset).expect("front capacity to shift into");
+            let Ok(offset) = isize::try_from(self.front_capacity) else {
+                unreachable!("should not be able to exceed `isize::MAX`");
+            };
+
+            let Ok(_) = self.shift(offset) else {
+                unreachable!("exactly enough front capacity to shift into");
+            };
         }
 
-        if self.capacity_back() >= capacity {
-            // Shifting initialized elements has created enough capacity.
+        // https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
+        let amortized = {
+            let Some(total) = self.initialized.checked_add(capacity) else {
+                return Err(FailedAllocation);
+            };
+
+            total.checked_next_power_of_two().unwrap_or(capacity)
+        };
+
+        if self.reserve_back(amortized).is_ok() {
             Ok(self)
         } else {
-            // See: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-            let amortized = total_size.checked_next_power_of_two().unwrap_or(capacity);
-
-            if self.reserve_back(amortized).is_ok() {
-                Ok(self)
-            } else {
-                self.reserve_back(capacity)
-            }
+            self.reserve_back(capacity)
         }
     }
 
@@ -299,22 +308,20 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
-        if self.capacity_front() > capacity {
+        let Some(capacity) = capacity.checked_sub(self.capacity_front()) else {
+            debug_assert!(self.capacity_front() > capacity, "enough capacity");
+
             return Ok(self);
-        }
+        };
 
-        let capacity = capacity
-            .checked_sub(self.capacity_front())
-            .ok_or(FailedAllocation)?;
+        let capacity = isize::try_from(capacity).map_err(|_| FailedAllocation)?;
 
-        // Allocator API ensures total allocation size in bytes will fit into
-        // `isize`, so this number of elements allocated will too.
-        let capacity = isize::try_from(capacity).unwrap();
-
-        let _ = self.resize(capacity)?;
+        _ = self.resize(capacity)?;
 
         if self.initialized > 0 {
-            let _ = self.shift(capacity).expect("back capacity to shift into");
+            let Ok(_) = self.shift(capacity) else {
+                unreachable!("enough back capacity to shift into");
+            };
         }
 
         Ok(self)
@@ -347,28 +354,18 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
-        if self.capacity_back() > capacity {
+        let Some(capacity) = capacity.checked_sub(self.capacity_back()) else {
+            debug_assert!(self.capacity_back() > capacity, "enough capacity");
+
             return Ok(self);
-        }
+        };
 
-        let capacity = capacity
-            .checked_sub(self.capacity_back())
-            .ok_or(FailedAllocation)?;
+        let capacity = isize::try_from(capacity).map_err(|_| FailedAllocation)?;
 
-        if let Ok(capacity) = isize::try_from(capacity) {
-            self.resize(capacity)
-        } else {
-            Err(FailedAllocation)
-        }
+        self.resize(capacity)
     }
 
     /// Attempt to reduce [`Self::capacity`] to exactly `capacity`, or none/zero.
-    ///
-    /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// In contrast to [`Self::shrink_back`], this method will [`Self::shift`]
     /// the elements to the front of the buffer, _always_ shrinking
@@ -412,28 +409,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
-        // Allocator API ensures total allocation size in bytes will fit into
-        // `isize`, so this number of elements allocated will too.
-        let offset = isize::try_from(self.capacity_front()).unwrap();
-
-        if self.initialized > 0 {
-            let _ = self.shift(-offset).expect("front capacity to shift into");
-        } else {
-            self.post_capacity += self.pre_capacity;
-            self.pre_capacity = 0;
-        }
-
-        let capacity = capacity.unwrap_or(0);
-        let extra_capacity = self
-            .capacity_back()
-            .checked_sub(capacity)
-            .ok_or(FailedAllocation)?;
-
-        // Allocator API ensures total allocation size in bytes will fit into
-        // `isize`, so this number of elements allocated will too.
-        let extra_capacity = isize::try_from(extra_capacity).unwrap();
-
-        self.resize(-extra_capacity)
+        self.shrink_front(None)?.shrink_back(capacity)
     }
 
     /// Reallocate to reduce [`Self::capacity_front`] to exactly `capacity`.
@@ -474,22 +450,27 @@ impl<T> Dynamic<T> {
     pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self
-            .capacity_front()
-            .checked_sub(capacity)
-            .ok_or(FailedAllocation)?;
+        let Some(extra) = self.capacity_front().checked_sub(capacity) else {
+            debug_assert!(self.capacity_front() < capacity, "small enough");
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
-        let extra_capacity = isize::try_from(extra_capacity).unwrap();
+            return Ok(self);
+        };
+
+        let Ok(extra) = isize::try_from(extra) else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        };
+
+        let Some(extra) = extra.checked_neg() else {
+            unreachable!("extra capacity is non-negative");
+        };
 
         if self.initialized > 0 {
-            let _ = self
-                .shift(-extra_capacity)
-                .expect("front capacity to shift into");
+            let Ok(_) = self.shift(extra) else {
+                unreachable!("enough front capacity to shift into");
+            };
         }
 
-        self.resize(-extra_capacity)
+        self.resize(extra)
     }
 
     /// Reallocate to reduce back capacity to exactly `capacity` elements.
@@ -530,16 +511,21 @@ impl<T> Dynamic<T> {
     pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let capacity = capacity.unwrap_or(0);
 
-        let extra_capacity = self
-            .capacity_back()
-            .checked_sub(capacity)
-            .ok_or(FailedAllocation)?;
+        let Some(extra) = self.capacity_back().checked_sub(capacity) else {
+            debug_assert!(self.capacity_back() < capacity, "small enough");
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so this number of elements allocated will too.
-        let extra_capacity = isize::try_from(extra_capacity).unwrap();
+            return Ok(self);
+        };
 
-        self.resize(-extra_capacity)
+        let Ok(extra) = isize::try_from(extra) else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        };
+
+        let Some(extra) = extra.checked_neg() else {
+            unreachable!("extra capacity is non-negative");
+        };
+
+        self.resize(extra)
     }
 
     /// Shift the initialized elements `offset` positions within the buffer.
@@ -585,44 +571,60 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, OutOfBounds> {
-        if self.initialized == 0 {
-            return if offset == 0 {
-                Ok(self)
-            } else {
-                Err(OutOfBounds)
-            };
-        }
-
-        let source = self.as_mut_ptr();
-
         match offset.cmp(&0) {
             core::cmp::Ordering::Less => {
-                if offset.unsigned_abs() > self.pre_capacity || self.pre_capacity == 0 {
+                if let Some(capacity) = self.front_capacity.checked_sub(offset.unsigned_abs()) {
+                    self.front_capacity = capacity;
+                } else {
+                    debug_assert!(
+                        offset.unsigned_abs() > self.front_capacity,
+                        "not enough capacity to shift into"
+                    );
+
                     return Err(OutOfBounds);
                 }
 
-                self.pre_capacity -= offset.unsigned_abs();
-                self.post_capacity += offset.unsigned_abs();
+                if let Some(capacity) = self.front_capacity.checked_add(offset.unsigned_abs()) {
+                    self.back_capacity = capacity;
+                } else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                }
             }
             core::cmp::Ordering::Greater => {
-                if offset.unsigned_abs() > self.post_capacity || self.post_capacity == 0 {
+                if let Some(capacity) = self.back_capacity.checked_sub(offset.unsigned_abs()) {
+                    self.back_capacity = capacity;
+                } else {
+                    debug_assert!(
+                        offset.unsigned_abs() > self.back_capacity,
+                        "not enough capacity to shift into"
+                    );
+
                     return Err(OutOfBounds);
                 }
 
-                self.pre_capacity += offset.unsigned_abs();
-                self.post_capacity -= offset.unsigned_abs();
+                if let Some(capacity) = self.front_capacity.checked_add(offset.unsigned_abs()) {
+                    self.front_capacity = capacity;
+                } else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                }
             }
             core::cmp::Ordering::Equal => return Ok(self),
         }
 
-        unsafe {
-            // SAFETY: aligned within the allocated object.
-            let destination = self.as_mut_ptr();
+        let destination = self.as_mut_ptr();
 
-            // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
+        let Some(offset) = offset.checked_neg() else {
+            unreachable!("would be out of bounds");
+        };
+
+        // SAFETY: offset is in bounds => aligned within the allocated object.
+        let source = unsafe { destination.offset(offset) };
+
+        // SAFETY:
+        // * owned memory => source/destination valid for read/writes.
+        // * no aliasing restrictions => source and destination can overlap.
+        // * underlying buffer is aligned => both pointers are aligned.
+        unsafe {
             core::ptr::copy(source, destination, self.initialized);
         }
 
@@ -649,31 +651,38 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn remove_via_front(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
-            None
-        } else {
-            let element: T;
-
-            unsafe {
-                let front = self.as_mut_ptr();
-
-                // SAFETY: index is in bounds => aligned within the allocated object.
-                let index = front.add(index);
-
-                // SAFETY:
-                // * both pointers are valid for reads and write.
-                // * both pointers are aligned.
-                // * no aliasing restrictions.
-                core::ptr::swap(front, index);
-
-                // SAFETY: this takes ownership (moved out of buffer).
-                element = front.read();
-            }
-
-            self.initialized -= 1;
-            self.pre_capacity += 1;
-
-            Some(element)
+            return None;
         }
+
+        let front = self.as_mut_ptr();
+
+        // SAFETY: index in bounds => aligned within the allocated object.
+        let index = unsafe { front.add(index) };
+
+        // SAFETY:
+        // * both pointers are valid for reads and write.
+        // * both pointers are aligned.
+        // * no aliasing restrictions.
+        unsafe {
+            core::ptr::swap(front, index);
+        }
+
+        // SAFETY: this takes ownership (moved out of buffer).
+        let element = unsafe { front.read() };
+
+        if let Some(decremented) = self.initialized.checked_sub(1) {
+            self.initialized = decremented;
+        } else {
+            unreachable!("there was an initialized element to remove");
+        }
+
+        if let Some(incremented) = self.front_capacity.checked_add(1) {
+            self.front_capacity = incremented;
+        } else {
+            unreachable!("cannot allocate more that `isize::MAX` bytes");
+        }
+
+        Some(element)
     }
 
     /// Remove an element by swapping it with the last element.
@@ -696,39 +705,52 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn remove_via_back(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
-            None
-        } else {
-            let element: T;
-
-            unsafe {
-                let ptr = self.as_mut_ptr();
-
-                // SAFETY: at least one element => aligned within the allocated object.
-                let last = ptr.add(self.initialized - 1);
-
-                // SAFETY: index is in bounds => aligned within the allocated object.
-                let index = ptr.add(index);
-
-                // SAFETY:
-                // * both pointers are valid for reads and write.
-                // * both pointers are aligned.
-                // * no aliasing restrictions.
-                core::ptr::swap(last, index);
-
-                // SAFETY: this takes ownership (moved out of buffer).
-                element = last.read()
-            }
-
-            self.post_capacity += 1;
-            self.initialized -= 1;
-
-            Some(element)
+            return None;
         }
+
+        let ptr = self.as_mut_ptr();
+
+        let last = {
+            let Some(offset) = self.initialized.checked_sub(1) else {
+                unreachable!("there is at least one element");
+            };
+
+            // SAFETY: points to the final element contained.
+            unsafe { ptr.add(offset) }
+        };
+
+        // SAFETY: index is in bounds => aligned within the allocated object.
+        let index = unsafe { ptr.add(index) };
+
+        // SAFETY:
+        // * both pointers are valid for reads and write.
+        // * both pointers are aligned.
+        // * no aliasing restrictions.
+        unsafe {
+            core::ptr::swap(last, index);
+        }
+
+        // SAFETY: this takes ownership (moved out of buffer).
+        let element = unsafe { last.read() };
+
+        if let Some(decremented) = self.initialized.checked_sub(1) {
+            self.initialized = decremented;
+        } else {
+            unreachable!("there was an initialized element to remove");
+        }
+
+        if let Some(incremented) = self.back_capacity.checked_add(1) {
+            self.back_capacity = incremented;
+        } else {
+            unreachable!("cannot allocate more that `isize::MAX` bytes");
+        }
+
+        Some(element)
     }
 
-    /// (Re)allocate the buffer to modify `post_capacity` by `capacity`.
+    /// (Re)allocate the buffer to modify back capacity by `capacity`.
     ///
-    /// This method will increase `post_capacity` by `capacity` if positive,
+    /// This method will increase back capacity by `capacity` if positive,
     /// and decrease by `capacity` if negative, (re)allocating if necessary.
     ///
     /// Note that failed allocation will _NOT_ modify the underlying buffer.
@@ -739,31 +761,29 @@ impl<T> Dynamic<T> {
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
     fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
-        // Treat all capacity as back capacity when empty.
-        if self.initialized == 0 {
-            self.post_capacity += self.pre_capacity;
-            self.pre_capacity = 0;
-        }
-
         let capacity = self
-            .post_capacity
+            .capacity_back()
             .checked_add_signed(capacity)
             .ok_or(FailedAllocation)?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if core::mem::size_of::<T>() == 0 {
-            self.post_capacity = capacity;
+            // Global allocator API limits allocation to `isize:MAX` bytes.
+            if capacity > isize::MAX as usize {
+                return Err(FailedAllocation);
+            }
+
+            self.back_capacity = capacity;
 
             return Ok(self);
         }
 
-        // SAFETY: Allocator API ensures total allocation size in bytes will
-        // fit into `isize`, so these number of elements allocated will too.
-        let front = self.pre_capacity + self.initialized;
-        let total = front + self.post_capacity;
+        let Some(unchanged) = self.front_capacity.checked_add(self.initialized) else {
+            unreachable!("total allocated object under `isize::MAX` bytes");
+        };
 
-        let new_layout = {
-            let total = front.checked_add(capacity).ok_or(FailedAllocation)?;
+        let new = {
+            let total = unchanged.checked_add(capacity).ok_or(FailedAllocation)?;
 
             match core::alloc::Layout::array::<T>(total) {
                 Ok(layout) => layout,
@@ -771,56 +791,60 @@ impl<T> Dynamic<T> {
             }
         };
 
+        let Some(total) = unchanged.checked_add(self.back_capacity) else {
+            unreachable!("total allocated object under `isize::MAX` bytes");
+        };
+
         let ptr = {
             // No previous allocation exists, so create one.
             if total == 0 {
-                if new_layout.size() > 0 {
+                if new.size() > 0 {
                     // SAFETY: layout has non-zero size.
-                    unsafe {
-                        alloc::alloc(new_layout).cast::<T>() }
+                    unsafe { alloc::alloc(new) }.cast::<T>()
                 } else {
-                    debug_assert_eq!(capacity, 0);
+                    debug_assert_eq!(capacity, 0, "otherwise occupies memory");
 
-                    // SAFETY: empty state => pointer will not be read/write.
+                    // empty => The pointer will _NOT_ be read/written to.
                     core::ptr::NonNull::<T>::dangling().as_ptr()
                 }
             }
             // Modify an existing buffer allocation.
             else {
-                let existing_layout = match core::alloc::Layout::array::<T>(total) {
-                    Ok(layout) => layout,
-                    Err(_) => return Err(FailedAllocation),
+                let Ok(existing) = core::alloc::Layout::array::<T>(total) else {
+                    return Err(FailedAllocation);
                 };
 
-                unsafe {
+                {
                     let ptr = self.buffer.as_ptr().cast::<u8>();
 
                     // Deallocate.
-                    if front == 0 && capacity == 0 {
+                    if unchanged == 0 && capacity == 0 {
                         // SAFETY:
-                        // * `ptr` was allocated using the corresponding allocator.
-                        // * `existing_layout` is currently allocated at `ptr`.
+                        // * allocated using the corresponding allocator.
+                        // * `existing_layout` is currently allocated.
                         // * `new_layout` has non-zero size.
-                        // * `Layout` guarantees `new_size.size() <= isize::MAX`.
-                        alloc::dealloc(ptr, existing_layout);
+                        // * `Layout` => `new.size() <= isize::MAX`.
+                        unsafe {
+                            alloc::dealloc(ptr, existing);
+                        }
 
-                        // SAFETY: empty state => pointer will not read/write.
+                        // empty state => will _NOT_ be read/written to.
                         core::ptr::NonNull::<T>::dangling().as_ptr()
                     }
                     // Reallocate.
                     else {
                         // SAFETY:
-                        // * `ptr` was allocated using the corresponding allocator.
-                        // * `existing_layout` is currently allocated at `ptr`.
+                        // * allocated using the corresponding allocator.
+                        // * `existing_layout` is currently allocated.
                         // * `new_layout` has non-zero size.
-                        // * `Layout` guarantees `new_size.size() <= isize::MAX`.
-                        alloc::realloc(ptr, existing_layout, new_layout.size()).cast::<T>()
+                        // * `Layout` => `new.size() <= isize::MAX`.
+                        unsafe { alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
                     }
                 }
             }
         };
 
-        // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
+        // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = ptr.cast::<core::mem::MaybeUninit<T>>();
 
         self.buffer = match core::ptr::NonNull::new(ptr) {
@@ -828,7 +852,7 @@ impl<T> Dynamic<T> {
             None => return Err(FailedAllocation),
         };
 
-        self.post_capacity = capacity;
+        self.back_capacity = capacity;
 
         Ok(self)
     }
@@ -854,26 +878,32 @@ impl<T> Drop for Dynamic<T> {
     /// ```
     fn drop(&mut self) {
         for index in 0..self.initialized {
+            let ptr = self.buffer.as_ptr();
+
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(self.front_capacity) };
+
+            // SAFETY: index is within bounds, so within allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY: the `MaybeUninit<T>` is initialized.
+            let element = unsafe { &mut *ptr };
+
+            // SAFETY: The `T` is initialized => safe drop.
             unsafe {
-                let ptr = self.buffer.as_ptr().add(self.pre_capacity);
-
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = ptr.add(index);
-
-                // SAFETY:
-                // * The `MaybeUninit<T>` is initialized => safe deref.
-                // * The `T` is initialized => safe drop.
-                (*ptr).assume_init_drop()
-            };
+                element.assume_init_drop();
+            }
         }
 
-        self.post_capacity += self.initialized;
-        self.initialized = 0;
+        if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
+            self.back_capacity = capacity;
+        } else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        }
 
-        self.post_capacity += self.pre_capacity;
-        self.pre_capacity = 0;
-
-        let _ = self.resize(0).expect("deallocation cannot fail");
+        let Ok(_) = self.shrink(None) else {
+            unreachable!("deallocation failure implies corrupted state/logic");
+        };
     }
 }
 
@@ -931,20 +961,24 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        assert!(index < self.initialized);
+        assert!(index < self.initialized, "index out of bounds");
 
-        unsafe {
-            // SAFETY: `buffer` is aligned => `ptr` is aligned.
-            let ptr = self.buffer.as_ptr();
+        let ptr = self.buffer.as_ptr();
 
-            // SAFETY: index within bounds => stays within the allocated object.
-            let ptr = ptr.add(self.pre_capacity + index);
+        let Some(offset) = self.front_capacity.checked_add(index) else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        };
 
-            // SAFETY:
-            // * the underlying `T` is initialized.
-            // * lifetime bound to self => valid lifetime to return.
-            (*ptr).assume_init_ref()
-        }
+        // SAFETY: index within bounds => stays within the allocated object.
+        let ptr = unsafe { ptr.add(offset) };
+
+        // SAFETY: the `MaybeUninit<T>` is initialized.
+        let element = unsafe { &mut *ptr };
+
+        // SAFETY:
+        // * the underlying `T` is initialized.
+        // * lifetime bound to self => valid lifetime to return.
+        unsafe { element.assume_init_ref() }
     }
 }
 
@@ -971,20 +1005,24 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        assert!(index < self.initialized);
+        assert!(index < self.initialized, "index out of bounds");
 
-        unsafe {
-            // SAFETY: `buffer` is aligned => `ptr` is aligned.
-            let ptr = self.buffer.as_ptr();
+        let ptr = self.buffer.as_ptr();
 
-            // SAFETY: index within bounds => stays within the allocated object.
-            let ptr = ptr.add(self.pre_capacity + index);
+        let Some(offset) = self.front_capacity.checked_add(index) else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        };
 
-            // SAFETY:
-            // * the underlying `T` is initialized.
-            // * lifetime bound to self => valid lifetime to return.
-            (*ptr).assume_init_mut()
-        }
+        // SAFETY: index within bounds => stays within the allocated object.
+        let ptr = unsafe { ptr.add(offset) };
+
+        // SAFETY: the `MaybeUninit<T>` is initialized.
+        let element = unsafe { &mut *ptr };
+
+        // SAFETY:
+        // * the underlying `T` is initialized.
+        // * lifetime bound to self => valid lifetime to return.
+        unsafe { element.assume_init_mut() }
     }
 }
 
@@ -1012,22 +1050,30 @@ impl<T> Iterator for Dynamic<T> {
     /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        if self.initialized > 0 {
+        (self.initialized > 0).then(|| {
             let ptr = self.buffer.as_ptr();
 
             // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(self.pre_capacity) };
+            let ptr = unsafe { ptr.add(self.front_capacity) };
 
-            self.initialized -= 1;
-            self.pre_capacity += 1;
+            if let Some(decremented) = self.initialized.checked_sub(1) {
+                self.initialized = decremented;
+            } else {
+                unreachable!("there was an initialized element to remove");
+            };
 
-            // SAFETY:
-            // * `self.buffer` is non-null => `ptr` is non-null.
-            // * The underlying `T` is initialized.
-            Some(unsafe { (*ptr).assume_init_read() })
-        } else {
-            None
-        }
+            if let Some(incremented) = self.front_capacity.checked_add(1) {
+                self.front_capacity = incremented;
+            } else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            };
+
+            // SAFETY: the `MaybeUninit<T>` is initialized.
+            let element = unsafe { &mut *ptr };
+
+            // SAFETY: the underlying `T` is initialized.
+            unsafe { element.assume_init_read() }
+        })
     }
 
     /// Query how many elements have yet to be yielded.
@@ -1071,22 +1117,38 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.initialized > 0 {
+        (self.initialized > 0).then(|| {
             let ptr = self.buffer.as_ptr();
 
+            let Some(offset) = self.initialized.checked_sub(1) else {
+                unreachable!("there was an element to remove");
+            };
+
+            let Some(offset) = self.front_capacity.checked_add(offset) else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            };
+
             // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(self.pre_capacity + self.initialized - 1) };
+            let ptr = unsafe { ptr.add(offset) };
 
-            self.initialized -= 1;
-            self.post_capacity += 1;
+            if let Some(decremented) = self.initialized.checked_sub(1) {
+                self.initialized = decremented;
+            } else {
+                unreachable!("there was an initialized element to remove");
+            };
 
-            // SAFETY:
-            // * `self.buffer` is non-null => `ptr` is non-null.
-            // * The underlying `T` is initialized.
-            Some(unsafe { (*ptr).assume_init_read() })
-        } else {
-            None
-        }
+            if let Some(incremented) = self.back_capacity.checked_add(1) {
+                self.back_capacity = incremented;
+            } else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            };
+
+            // SAFETY: the `MaybeUninit<T>` is initialized.
+            let element = unsafe { &mut *ptr };
+
+            // SAFETY: the underlying `T` is initialized.
+            unsafe { element.assume_init_read() }
+        })
     }
 }
 
@@ -1157,19 +1219,16 @@ impl<T> Extend<T> for Dynamic<T> {
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
         let iter = iter.into_iter();
 
-        // SAFETY: `size_hint` can _NOT_ be trusted to exact size.
+        // `size_hint` can _NOT_ be trusted to exact size.
         let count = {
             let (min, max) = iter.size_hint();
             max.unwrap_or(min)
         };
 
-        // It is okay if this fails, lazy allocate for each individual element.
-        let _ = self.reserve_back(count);
+        assert!(self.reserve_back(count).is_ok(), "allocation failed");
 
         for element in iter {
-            if self.append(element).is_err() {
-                panic!("allocation failed, could not append element");
-            }
+            assert!(self.append(element).is_ok(), "allocation failed");
         }
     }
 }
@@ -1193,9 +1252,9 @@ impl<T> Default for Dynamic<T> {
     fn default() -> Self {
         Self {
             buffer: core::ptr::NonNull::dangling(),
-            pre_capacity: 0,
+            front_capacity: 0,
             initialized: 0,
-            post_capacity: 0,
+            back_capacity: 0,
         }
     }
 }
@@ -1218,7 +1277,9 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// assert_eq!(expected.clone(), expected)
     /// ```
     fn clone(&self) -> Self {
-        let mut clone = Self::with_capacity(self.count()).expect("successful allocation");
+        let Ok(mut clone) = Self::with_capacity(self.count()) else {
+            panic!("allocation failed");
+        };
 
         clone.extend(self.iter().cloned());
 
@@ -1245,17 +1306,7 @@ impl<T: PartialEq> PartialEq for Dynamic<T> {
     /// assert_eq!(left, right);
     /// ```
     fn eq(&self, other: &Self) -> bool {
-        if self.initialized != other.initialized {
-            return false;
-        }
-
-        for index in 0..self.count() {
-            if self[index] != other[index] {
-                return false;
-            }
-        }
-
-        true
+        self.iter().eq(other.iter())
     }
 }
 
@@ -1296,7 +1347,7 @@ impl<T> core::fmt::Pointer for Dynamic<T> {
     /// assert_eq!(format!("{instance:p}"), format!("{:p}", core::ptr::from_ref(&instance[0])));
     /// ```
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // SAFETY: the address of the pointer it read, not the pointer itself.
+        // the address of the pointer it read, not the pointer itself.
         core::fmt::Pointer::fmt(&self.as_ptr(), f)
     }
 }
@@ -1346,20 +1397,18 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
         &self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
-        unsafe {
-            // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
-            let ptr = self.buffer.cast::<T>().as_ptr();
+        // `MaybeUninit<T>` has the same memory layout as `T`.
+        let ptr = self.buffer.cast::<T>().as_ptr();
 
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = ptr.add(self.pre_capacity);
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe { ptr.add(self.front_capacity) };
 
-            // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-            let ptr = core::ptr::NonNull::new_unchecked(ptr);
+        // SAFETY: `self.buffer` is non-null => `ptr` is non-null
+        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
 
-            // SAFETY: `ptr` is dangling if and only if no elements have been
-            // initialized, in which case the pointer will not be read.
-            super::Iter::new(ptr, self.initialized)
-        }
+        // SAFETY: `ptr` is dangling if and only if no elements have been
+        // initialized, in which case the pointer will not be read.
+        unsafe { super::Iter::new(ptr, self.initialized) }
     }
 
     /// Create a mutable iterator over the initialized elements.
@@ -1384,20 +1433,18 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
-        unsafe {
-            // SAFETY: `MaybeUninit<T>` has the same memory layout as `T`.
-            let ptr = self.buffer.cast::<T>().as_ptr();
+        // `MaybeUninit<T>` has the same memory layout as `T`.
+        let ptr = self.buffer.cast::<T>().as_ptr();
 
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = ptr.add(self.pre_capacity);
+        // SAFETY: stays aligned within the allocated object.
+        let ptr = unsafe { ptr.add(self.front_capacity) };
 
-            // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-            let ptr = core::ptr::NonNull::new_unchecked(ptr);
+        // SAFETY: `self.buffer` is non-null => `ptr` is non-null
+        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
 
-            // SAFETY: `ptr` is dangling if and only if no elements have been
-            // initialized, in which case the pointer will not be read.
-            super::IterMut::new(ptr, self.initialized)
-        }
+        // SAFETY: `ptr` is dangling if and only if no elements have been
+        // initialized, in which case the pointer will not be read.
+        unsafe { super::IterMut::new(ptr, self.initialized) }
     }
 }
 
@@ -1432,15 +1479,18 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
+    #[allow(clippy::arithmetic_side_effects)]
     fn as_ptr(&self) -> *const Self::Element {
-        // If no allocation then the pointer is dangling and meaningless.
-        assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
+        assert!(
+            self.front_capacity + self.initialized + self.back_capacity > 0,
+            "if no allocation then the pointer is dangling and meaningless"
+        );
 
-        // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
+        // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = self.buffer.cast::<T>().as_ptr().cast_const();
 
         // SAFETY: Stays aligned within the allocated object.
-        unsafe { ptr.add(self.pre_capacity) }
+        unsafe { ptr.add(self.front_capacity) }
     }
 
     /// Obtain a mutable pointer to the underlying contigious memory.
@@ -1472,15 +1522,18 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
+    #[allow(clippy::arithmetic_side_effects)]
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
-        // If no allocation then the pointer is dangling and meaningless.
-        assert!(self.pre_capacity + self.initialized + self.post_capacity > 0);
+        assert!(
+            self.front_capacity + self.initialized + self.back_capacity > 0,
+            "if no allocation then the pointer is dangling and meaningless"
+        );
 
-        // SAFETY: `MaybeUninit<T>` has the same layout as `T`.
+        // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = self.buffer.cast::<T>().as_ptr();
 
         // SAFETY: Stays aligned within the allocated object.
-        unsafe { ptr.add(self.pre_capacity) }
+        unsafe { ptr.add(self.front_capacity) }
     }
 }
 
@@ -1518,44 +1571,85 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 
         let mut ptr = self.buffer.as_ptr();
 
-        if index == 0 && self.capacity_front() != 0 {
+        // consume front capacity.
+        if index == 0 && self.capacity_front() > 0 {
+            ptr = {
+                let Some(offset) = self.capacity_front().checked_sub(1) else {
+                    unreachable!("there exists front capacity")
+                };
+
+                // SAFETY: the last uninitialized element in the front.
+                unsafe { ptr.add(offset) }
+            };
+
+            // Shift all capacity to front capacity.
             if self.initialized == 0 {
-                self.pre_capacity += self.post_capacity;
-                self.post_capacity = 0;
+                if let Some(capacity) = self.front_capacity.checked_add(self.back_capacity) {
+                    self.front_capacity = capacity;
+                } else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                };
+
+                self.back_capacity = 0;
             }
 
-            // SAFETY: aligned within the allocated object.
-            ptr = unsafe { ptr.add(self.pre_capacity - 1) };
+            if let Some(decremented) = self.front_capacity.checked_sub(1) {
+                self.front_capacity = decremented;
+            } else {
+                unreachable!("front capacity being inserted into");
+            };
+        }
+        // consume back capacity.
+        else if self.reserve(1).is_ok() {
+            ptr = {
+                let Some(offset) = self.front_capacity.checked_add(index) else {
+                    unreachable!("index is in bounds");
+                };
 
-            self.pre_capacity -= 1;
-        } else if self.reserve(1).is_ok() {
-            ptr = self.buffer.as_ptr();
+                // SAFETY: the uninitialized element to insert into.
+                unsafe { ptr.add(offset) }
+            };
 
             // Shift elements `[index..]` one position to the right.
-            unsafe {
-                // SAFETY: aligned within the allocated object.
-                ptr = ptr.add(self.pre_capacity + index);
-
+            {
                 // SAFETY: reserved memory => within the allocated object.
-                let destination = ptr.add(1);
+                let destination = unsafe { ptr.add(1) };
+
+                let Some(count) = self.initialized.checked_sub(index) else {
+                    unreachable!("index is in bound");
+                };
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                core::ptr::copy(ptr, destination, self.initialized - index);
+                unsafe {
+                    core::ptr::copy(ptr, destination, count);
+                }
             }
 
-            self.post_capacity -= 1;
+            if let Some(decrement) = self.back_capacity.checked_sub(1) {
+                self.back_capacity = decrement;
+            } else {
+                unreachable!("back capacity being inserted into");
+            };
         } else {
+            debug_assert_eq!(self.capacity(), 0, "no capacity to insert into");
+
             return Err(element);
         }
 
-        self.initialized += 1;
+        if let Some(increment) = self.initialized.checked_add(1) {
+            self.initialized = increment;
+        } else {
+            unreachable!("cannot allocate more that `isize::MAX` bytes");
+        };
 
-        // SAFETY: the `MaybeUninit<T>` is initialized, even though the
-        // underlying `T` is unutilized.
-        Ok(unsafe { ptr.as_mut().unwrap_unchecked().write(element) })
+        // SAFETY: the `MaybeUninit<T>` is initialized even if the `T` isn't.
+        let uninit_element = unsafe { &mut *ptr };
+
+        // the underlying `T` is unutilized.
+        Ok(uninit_element.write(element))
     }
 
     /// Remove the element at `index`.
@@ -1581,38 +1675,60 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             return None;
         }
 
-        let element = unsafe {
+        let element = {
             // SAFETY: index within bounds => aligned within allocated object.
-            let ptr = self.as_ptr().add(index);
+            let ptr = unsafe { self.as_ptr().add(index) };
+
+            if let Some(decremented) = self.initialized.checked_sub(1) {
+                self.initialized = decremented;
+            } else {
+                unreachable!("the element being removed was initialized");
+            };
 
             // SAFETY:
             // * owned memory => `ptr` is valid for reads.
             // * Underlying `T` is initialized.
-            // * This takes ownership.
-            ptr.read()
+            // * This takes ownership (move out of the buffer).
+            unsafe { ptr.read() }
         };
 
+        // Increase front capacity.
         if index == 0 {
-            self.pre_capacity += 1;
-        } else {
-            unsafe {
+            if let Some(incremented) = self.front_capacity.checked_add(1) {
+                self.front_capacity = incremented;
+            } else {
+                unreachable!("cannot allocate more that `isize::MAX` bytes");
+            };
+        }
+        // Increase back capacity.
+        else {
+            // Shift elements `[index + 1..]` one position to the right.
+            {
                 // SAFETY: index within bounds => aligned within allocated object.
-                let destination = self.as_mut_ptr().add(index);
+                let destination = unsafe { self.as_mut_ptr().add(index) };
 
                 // SAFETY: aligned within the allocated object.
-                let source = destination.add(1);
+                let source = unsafe { destination.add(1) };
+
+                let Some(count) = self.initialized.checked_sub(index) else {
+                    unreachable!("index is in bounds");
+                };
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                core::ptr::copy(source, destination, self.initialized - index - 1);
+                unsafe {
+                    core::ptr::copy(source, destination, count);
+                }
             }
 
-            self.post_capacity += 1;
+            if let Some(incremented) = self.back_capacity.checked_add(1) {
+                self.back_capacity = incremented;
+            } else {
+                unreachable!("cannot allocate more that `isize::MAX` bytes");
+            };
         }
-
-        self.initialized -= 1;
 
         Some(element)
     }
@@ -1663,25 +1779,24 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
         let start = match range.start_bound() {
             core::ops::Bound::Included(start) => *start,
-            core::ops::Bound::Excluded(start) => *start + 1,
+            core::ops::Bound::Excluded(start) => start.saturating_add(1),
             core::ops::Bound::Unbounded => 0,
-        };
+        }
+        .min(self.len());
 
         let end = match range.end_bound() {
-            core::ops::Bound::Included(end) => *end + 1,
+            core::ops::Bound::Included(end) => end.saturating_add(1),
             core::ops::Bound::Excluded(end) => *end,
             core::ops::Bound::Unbounded => self.len(),
-        };
+        }
+        .min(self.len());
 
-        let start = self.len().min(start);
-        let end = self.len().min(end);
-
-        let range = start..end;
+        let normalized = start..end;
 
         Drain {
             underlying: self,
-            range: range.clone(),
-            next: range.clone(),
+            range: normalized.clone(),
+            next: normalized.clone(),
         }
     }
 
@@ -1716,27 +1831,23 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         predicate: impl FnMut(&T) -> bool,
     ) -> impl DoubleEndedIterator<Item = Self::Element> {
         let head = if self.initialized == 0 {
-            // SAFETY: this pointer will not be modified or read.
+            // is empty => this pointer will _NOT_ be modified or read.
             core::ptr::NonNull::dangling()
         } else {
             // SAFETY: at least one element exist => pointer cannot be null.
             unsafe { core::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
         };
 
-        let tail = if self.initialized == 0 {
-            head
-        } else {
-            // SAFETY: stays aligned within the allocated object.
-            unsafe {
-                // SAFETY: at least one element exists => cannot underflow.
-                let offset = self.initialized - 1;
+        let tail = {
+            let ptr = {
+                let offset = self.initialized.saturating_sub(1);
 
                 // SAFETY: stays aligned within the allocated object.
-                let ptr = head.as_ptr().add(offset);
+                unsafe { head.as_ptr().add(offset) }
+            };
 
-                // SAFETY: `head` cannot be null => pointer cannot be null.
-                core::ptr::NonNull::new_unchecked(ptr)
-            }
+            // SAFETY: `head` cannot be null => pointer cannot be null.
+            unsafe { core::ptr::NonNull::new_unchecked(ptr) }
         };
 
         let remaining = self.initialized;
@@ -1770,21 +1881,27 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// assert_eq!(instance.capacity(), 6);
     /// ```
     fn clear(&mut self) {
-        let ptr = self.buffer.as_ptr();
-
-        // SAFETY: initialized elements are after pre-capacity, so this stays
-        // aligned within the allocation object pointing to the first
-        // initialized element, if there exists one.
-        let ptr = unsafe { ptr.add(self.pre_capacity) };
+        let ptr = self.as_mut_ptr().cast::<core::mem::MaybeUninit<T>>();
 
         for index in 0..self.initialized {
-            // SAFETY: stays aligned within the allocated object.
+            // SAFETY: index in bounds => aligned within the allocated object.
             let ptr = unsafe { ptr.add(index) };
 
-            unsafe { (*ptr).assume_init_drop() };
+            // SAFETY: the `MaybeUninit<T>` is initialized.
+            let element = unsafe { &mut *ptr };
+
+            // SAFETY: the underlying `T` is initialized.
+            unsafe {
+                element.assume_init_drop();
+            }
         }
 
-        self.post_capacity += self.initialized;
+        if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
+            self.back_capacity = capacity;
+        } else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        }
+
         self.initialized = 0;
     }
 }
@@ -1826,77 +1943,86 @@ impl<T> Drop for Drain<'_, T> {
     /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
     /// ```
     fn drop(&mut self) {
+        let ptr = self
+            .underlying
+            .as_mut_ptr()
+            .cast::<core::mem::MaybeUninit<T>>();
+
+        // Drop the elements yet to be yielded.
         for index in self.next.clone() {
+            // SAFETY: index in bounds => aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY: the `MaybeUninit<T>` is initialized.
+            let element = unsafe { &mut *ptr };
+
+            // SAFETY: the underlying `T` is initialized.
             unsafe {
-                let ptr = self.underlying.buffer.as_ptr();
-
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = ptr.add(self.underlying.pre_capacity);
-
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = ptr.add(index);
-
-                // SAFETY:
-                // * The `MaybeUninit<T>` is initialized => safe deref.
-                // * The `T` is initialized => safe drop.
-                (*ptr).assume_init_drop();
+                element.assume_init_drop();
             }
         }
 
         if self.range.end == self.underlying.initialized {
-            self.underlying.post_capacity += self.range.len();
+            if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
+                self.underlying.front_capacity = capacity;
+            } else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            }
         } else if self.range.start == 0 {
-            self.underlying.pre_capacity += self.range.len();
+            if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
+                self.underlying.back_capacity = capacity;
+            } else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            }
         } else {
-            let leading = self.range.start;
-            let trailing = self.underlying.initialized - self.range.end;
-
             let only_front_capacity =
-                self.underlying.pre_capacity != 0 && self.underlying.post_capacity == 0;
+                self.underlying.front_capacity != 0 && self.underlying.back_capacity == 0;
             let only_back_capacity =
-                self.underlying.pre_capacity == 0 && self.underlying.post_capacity != 0;
+                self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
-            unsafe {
-                let ptr = self.underlying.as_mut_ptr();
+            // Shift the elements `[self.range.end..]` to the remaining left.
+            {
+                let leading = self.range.start;
 
-                let source: *mut T;
-                let destination: *mut T;
-                let count: usize;
+                let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
+                    unreachable!("elements within the range were initialized");
+                };
 
-                if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                    // [pre_capacity] [remain] [drained] [shift] [post_capacity]
+                let (source, count) =
+                    if only_front_capacity || (!only_back_capacity && trailing > leading) {
+                        // [front capacity] [remain] [drained] [shift] [back capacity]
 
-                    self.underlying.post_capacity = self.range.len();
+                        self.underlying.back_capacity = self.range.len();
 
-                    count = trailing;
+                        // SAFETY: the first right initialized element.
+                        (unsafe { ptr.add(self.range.end) }, trailing)
+                    } else {
+                        // [front capacity] [shift] [drained] [remain] [back capacity]
 
-                    // SAFETY: stays aligned within the allocated object.
-                    source = ptr.add(self.range.end);
+                        self.underlying.front_capacity = self.range.len();
 
-                    // SAFETY: stays aligned within the allocated object.
-                    destination = ptr.add(self.range.start);
-                } else {
-                    // [pre_capacity] [shift] [drained] [remain] [post_capacity]
+                        // the first initialized element on the left.
+                        (ptr, leading)
+                    };
 
-                    self.underlying.pre_capacity = self.range.len();
-
-                    count = leading;
-
-                    source = ptr;
-
-                    // SAFETY: stays aligned within the allocated object.
-                    destination = ptr.add(self.range.len());
-                }
+                // SAFETY: points to the first uninitialized element.
+                let destination = unsafe { ptr.add(self.range.start) };
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                core::ptr::copy(source, destination, count);
+                unsafe {
+                    core::ptr::copy(source, destination, count);
+                }
             }
         }
 
-        self.underlying.initialized -= self.range.len();
+        if let Some(initialized) = self.underlying.initialized.checked_sub(self.range.len()) {
+            self.underlying.initialized = initialized;
+        } else {
+            unreachable!("the elements drained that were initialized")
+        }
     }
 }
 
@@ -1926,22 +2052,24 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        let ptr = self.underlying.buffer.as_ptr();
+        self.next.next().map_or_else(
+            || None,
+            |index| {
+                let ptr = self
+                    .underlying
+                    .as_mut_ptr()
+                    .cast::<core::mem::MaybeUninit<T>>();
 
-        // SAFETY: stays aligned within the allocated object.
-        let ptr = unsafe { ptr.add(self.underlying.pre_capacity) };
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = unsafe { ptr.add(index) };
 
-        if let Some(index) = self.next.next() {
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(index) };
+                // SAFETY: index in bounds => aligned within the allocated object.
+                let element = unsafe { &mut *ptr };
 
-            // SAFETY:
-            // * `ptr` is valid => safe to dereference.
-            // * underlying `T` is initialized.
-            Some(unsafe { (*ptr).assume_init_read() })
-        } else {
-            None
-        }
+                // SAFETY: takes ownership of underlying initialized `T` (move).
+                Some(unsafe { element.assume_init_read() })
+            },
+        )
     }
 
     /// Query how many elements have yet to be yielded.
@@ -1987,22 +2115,24 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        let ptr = self.underlying.buffer.as_ptr();
+        self.next.next_back().map_or_else(
+            || None,
+            |index| {
+                let ptr = self
+                    .underlying
+                    .as_mut_ptr()
+                    .cast::<core::mem::MaybeUninit<T>>();
 
-        // SAFETY: stays aligned within the allocated object.
-        let ptr = unsafe { ptr.add(self.underlying.pre_capacity) };
+                // SAFETY: stays aligned within the allocated object.
+                let ptr = unsafe { ptr.add(index) };
 
-        if let Some(index) = self.next.next_back() {
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(index) };
+                // SAFETY: index in bounds => aligned within the allocated object.
+                let element = unsafe { &mut *ptr };
 
-            // SAFETY:
-            // * `ptr` is valid => safe to dereference.
-            // * underlying `T` is initialized.
-            Some(unsafe { (*ptr).assume_init_read() })
-        } else {
-            None
-        }
+                // SAFETY: takes ownership of underlying initialized `T` (move).
+                Some(unsafe { element.assume_init_read() })
+            },
+        )
     }
 }
 
@@ -2016,15 +2146,17 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let ptr = self.underlying.as_ptr();
-
         let mut list = f.debug_list();
 
-        for index in self.next.clone() {
-            let _ = list.entry(unsafe { &*ptr.add(index) });
-        }
+        let slice = {
+            // SAFETY: index in bounds => aligned within the allocated object.
+            let ptr = unsafe { self.underlying.as_ptr().add(self.next.start) };
 
-        list.finish()
+            // SAFETY: points to yet to be yielded slice.
+            unsafe { core::slice::from_raw_parts(ptr, self.next.len()) }
+        };
+
+        list.entries(slice).finish()
     }
 }
 
@@ -2081,16 +2213,18 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
         self.for_each(drop);
 
         // Shift any string of trailing retained elements into position.
-        unsafe {
+        {
             // SAFETY: aligned within the allocated object, or one byte past.
-            let trailing = self.tail.as_ptr().add(1);
+            let trailing = unsafe { self.tail.as_ptr().add(1) };
 
             // SAFETY:
             // * owned memory => source/destination valid for read/writes.
             // * no aliasing restrictions => source and destination can overlap.
             // * underlying buffer is aligned => both pointers are aligned.
-            core::ptr::copy(trailing, self.retained.as_ptr(), self.trailing)
-        };
+            unsafe {
+                core::ptr::copy(trailing, self.retained.as_ptr(), self.trailing);
+            }
+        }
     }
 }
 
@@ -2119,48 +2253,60 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         let first_retained = self.head;
         let mut consecutive_retained = 0;
 
-        // Shift the current run of retained elements to the left.
+        // SAFETY:
+        // * owned memory => source/destination valid for read/writes.
+        // * no aliasing restrictions => source and destination can overlap.
+        // * underlying buffer is aligned => both pointers are aligned.
         let shift_retained = |src: *mut T, dst: *mut T, count| unsafe {
-            // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
+            // Shift the current run of retained elements to the left.
             core::ptr::copy(src, dst, count);
         };
 
         while self.remaining != 0 {
-            self.remaining -= 1;
+            if let Some(remaining) = self.remaining.checked_sub(1) {
+                self.remaining = remaining;
+            } else {
+                unreachable!("there is at least one remaining element");
+            }
 
             // SAFETY: the element is initialized.
             let current = unsafe { self.head.as_ref() };
 
-            self.head = unsafe {
+            self.head = {
                 // SAFETY: aligned within the allocated object, or one byte past.
-                let ptr = self.head.as_ptr().add(1);
+                let ptr = unsafe { self.head.as_ptr().add(1) };
 
                 // SAFETY: `head` is not null => pointer is not null.
-                core::ptr::NonNull::new_unchecked(ptr)
+                unsafe { core::ptr::NonNull::new_unchecked(ptr) }
             };
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
                 let element = unsafe { core::ptr::read(current) };
 
-                // Increase pre-capacity rather than shift into it when the
-                // first element is being withdrawn, this ensures the first
-                // retained element does not move.
                 if self.underlying.as_ptr() == current {
-                    self.underlying.pre_capacity += 1;
+                    // Will not shift, instead increasing front capacity.
+                    if let Some(incremented) = self.underlying.front_capacity.checked_add(1) {
+                        self.underlying.front_capacity = incremented;
+                    } else {
+                        unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    }
 
-                    self.retained = unsafe {
-                        // SAFETY: aligned within the allocated object, or one byte past.
-                        let ptr = self.retained.as_ptr().add(1);
+                    // The current element will be left uninitialized.
+                    self.retained = {
+                        // SAFETY: at most one byte past the allocated object.
+                        let ptr = unsafe { self.retained.as_ptr().add(1) };
 
                         // SAFETY: `retained` is not null => pointer is not null.
-                        core::ptr::NonNull::new_unchecked(ptr)
+                        unsafe { core::ptr::NonNull::new_unchecked(ptr) }
                     };
                 } else {
-                    self.underlying.post_capacity += 1;
+                    // will shift elements to increase back capacity.
+                    if let Some(incremented) = self.underlying.back_capacity.checked_add(1) {
+                        self.underlying.back_capacity = incremented;
+                    } else {
+                        unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    }
                 }
 
                 shift_retained(
@@ -2169,19 +2315,27 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     consecutive_retained,
                 );
 
-                self.retained = unsafe {
-                    // SAFETY: aligned within the allocated object, or one byte past.
-                    let ptr = self.retained.as_ptr().add(consecutive_retained);
+                self.retained = {
+                    // SAFETY: next uninitialized element, or one byte past.
+                    let ptr = unsafe { self.retained.as_ptr().add(consecutive_retained) };
 
                     // SAFETY: `retained` is not null => pointer is not null.
-                    core::ptr::NonNull::new_unchecked(ptr)
+                    unsafe { core::ptr::NonNull::new_unchecked(ptr) }
                 };
 
-                self.underlying.initialized -= 1;
+                if let Some(decremented) = self.underlying.initialized.checked_add(1) {
+                    self.underlying.initialized = decremented;
+                } else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                }
 
                 return Some(element);
+            }
+
+            if let Some(incremented) = consecutive_retained.checked_add(1) {
+                consecutive_retained = incremented;
             } else {
-                consecutive_retained += 1;
+                unreachable!("cannot allocate more than `isize::MAX` bytes")
             }
         }
 
@@ -2200,12 +2354,12 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             consecutive_retained,
         );
 
-        self.retained = unsafe {
-            // SAFETY: aligned within the allocated object, or one byte past.
-            let ptr = self.retained.as_ptr().add(consecutive_retained);
+        self.retained = {
+            // SAFETY: at most one byte past the allocated object.
+            let ptr = unsafe { self.retained.as_ptr().add(consecutive_retained) };
 
             // SAFETY: `retained` is not null => pointer is not null.
-            core::ptr::NonNull::new_unchecked(ptr)
+            unsafe { core::ptr::NonNull::new_unchecked(ptr) }
         };
 
         None
@@ -2252,30 +2406,41 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         while self.remaining != 0 {
-            self.remaining -= 1;
+            if let Some(decremented) = self.remaining.checked_sub(1) {
+                self.remaining = decremented;
+            } else {
+                unreachable!("there is at least one remaining element");
+            }
 
             // SAFETY: the element is initialized.
             let current = unsafe { self.tail.as_ref() };
 
-            unsafe {
-                // SAFETY: prevent moving the pointer to before the allocated object.
-                if self.remaining != 0 {
-                    self.tail = {
-                        // SAFETY: aligned within the allocated object.
-                        let ptr = self.tail.as_ptr().sub(1);
+            // Do _NOT_ moved the pointer _before_ the allocated object.
+            if self.remaining != 0 {
+                self.tail = {
+                    // SAFETY: aligned within the allocated object.
+                    let ptr = unsafe { self.tail.as_ptr().sub(1) };
 
-                        // SAFETY: `retained` is not null => pointer is not null.
-                        core::ptr::NonNull::new_unchecked(ptr)
-                    };
-                }
+                    // SAFETY: `retained` is not null => pointer is not null.
+                    unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+                };
             }
 
             if (self.predicate)(current) {
                 // SAFETY: this takes ownership (moved out of buffer).
                 let element = unsafe { core::ptr::read(current) };
 
-                self.underlying.initialized -= 1;
-                self.underlying.post_capacity += 1;
+                if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
+                    self.underlying.initialized = decremented;
+                } else {
+                    unreachable!("yielding an initialized element");
+                }
+
+                if let Some(incremented) = self.underlying.back_capacity.checked_add(1) {
+                    self.underlying.back_capacity = incremented;
+                } else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                }
 
                 let src = {
                     let current: *const T = current;
@@ -2293,12 +2458,16 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 // * owned memory => source/destination valid for read/writes.
                 // * no aliasing restrictions => source and destination can overlap.
                 // * underlying buffer is aligned => both pointers are aligned.
-                unsafe { core::ptr::copy(src, dst, self.trailing) };
+                unsafe { core::ptr::copy(src, dst, self.trailing); }
 
                 return Some(element);
-            } else {
-                self.trailing += 1;
             }
+
+            if let Some(incremented) = self.trailing.checked_add(1) {
+                self.trailing = incremented;
+            } else {
+                unreachable!("cannot allocate more than `isize::MAX`");
+            };
         }
 
         None
@@ -2371,6 +2540,11 @@ impl core::fmt::Display for OutOfBounds {
 impl std::error::Error for OutOfBounds {}
 
 #[cfg(test)]
+#[allow(
+    clippy::undocumented_unsafe_blocks,
+    clippy::unwrap_used,
+    clippy::expect_used
+)]
 mod test {
     use super::*;
 
@@ -2481,12 +2655,12 @@ mod test {
             use super::*;
 
             #[test]
-            fn is_pre_capacity() {
+            fn is_front_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 let _ = actual.reserve_front(256).expect("successful allocation");
 
-                assert_eq!(actual.capacity_front(), actual.pre_capacity);
+                assert_eq!(actual.capacity_front(), actual.front_capacity);
             }
 
             #[test]
@@ -2526,12 +2700,12 @@ mod test {
             use super::*;
 
             #[test]
-            fn is_post_capacity() {
+            fn is_back_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 let _ = actual.reserve_back(256).expect("successful allocation");
 
-                assert_eq!(actual.capacity_back(), actual.post_capacity);
+                assert_eq!(actual.capacity_back(), actual.back_capacity);
             }
 
             #[test]
@@ -3256,18 +3430,18 @@ mod test {
             use super::*;
 
             #[test]
-            fn left_increases_post_capacity_and_decreases_pre_capacity() {
+            fn left_increases_back_capacity_and_decreases_front_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
                 let _ = actual.reserve_front(256).expect("successful allocation");
 
                 for _ in 0..256 {
-                    let pre_capacity = actual.pre_capacity;
-                    let post_capacity = actual.post_capacity;
+                    let front_capacity = actual.front_capacity;
+                    let back_capacity = actual.back_capacity;
 
                     assert!(actual.shift(-1).is_ok());
 
-                    assert_eq!(actual.pre_capacity, pre_capacity - 1);
-                    assert_eq!(actual.post_capacity, post_capacity + 1);
+                    assert_eq!(actual.front_capacity, front_capacity - 1);
+                    assert_eq!(actual.back_capacity, back_capacity + 1);
                 }
             }
 
@@ -3287,18 +3461,18 @@ mod test {
             }
 
             #[test]
-            fn right_increases_pre_capacity_and_decreases_post_capacity() {
+            fn right_increases_front_capacity_and_decreases_back_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
                 let _ = actual.reserve_back(256).expect("successful allocation");
 
                 for _ in 0..256 {
-                    let pre_capacity = actual.pre_capacity;
-                    let post_capacity = actual.post_capacity;
+                    let front_capacity = actual.front_capacity;
+                    let back_capacity = actual.back_capacity;
 
                     assert!(actual.shift(1).is_ok());
 
-                    assert_eq!(actual.pre_capacity, pre_capacity + 1);
-                    assert_eq!(actual.post_capacity, post_capacity - 1);
+                    assert_eq!(actual.front_capacity, front_capacity + 1);
+                    assert_eq!(actual.back_capacity, back_capacity - 1);
                 }
             }
 
@@ -3503,41 +3677,41 @@ mod test {
             }
 
             #[test]
-            fn increases_post_capacity() {
+            fn increases_back_capacity() {
                 let mut actual = Dynamic::<usize>::default();
 
                 let _ = actual.resize(256).expect("successful allocation");
 
-                assert_eq!(actual.post_capacity, 256);
+                assert_eq!(actual.back_capacity, 256);
             }
 
             #[test]
-            fn does_not_increase_pre_capacity() {
+            fn does_not_increase_front_capacity() {
                 let mut actual = Dynamic::<usize>::default();
 
                 let _ = actual.resize(256).expect("successful allocation");
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.front_capacity, 0);
             }
 
             #[test]
-            fn decreases_post_capacity() {
+            fn decreases_back_capacity() {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
                 let _ = actual.resize(-128).expect("successful allocation");
 
-                assert_eq!(actual.post_capacity, 128);
+                assert_eq!(actual.back_capacity, 128);
             }
 
             #[test]
-            fn does_not_decrease_pre_capacity() {
+            fn does_not_decrease_front_capacity() {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
                 let _ = actual.resize(-128).expect("successful allocation");
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.front_capacity, 0);
             }
 
             #[test]
@@ -3671,7 +3845,7 @@ mod test {
             let expected = [0, 1, 2, 3, 4, 5];
             let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
 
-            assert_eq!(actual.pre_capacity, 0);
+            assert_eq!(actual.front_capacity, 0);
         }
 
         #[test]
@@ -3679,7 +3853,7 @@ mod test {
             let expected = [0, 1, 2, 3, 4, 5];
             let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
 
-            assert_eq!(actual.post_capacity, 0);
+            assert_eq!(actual.back_capacity, 0);
         }
 
         #[test]
@@ -3889,14 +4063,14 @@ mod test {
             fn does_not_allocate_front_capacity() {
                 let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.front_capacity, 0);
             }
 
             #[test]
             fn does_not_allocate_back_capacity() {
                 let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert_eq!(actual.post_capacity, 0);
+                assert_eq!(actual.back_capacity, 0);
             }
 
             #[test]
@@ -3936,9 +4110,9 @@ mod test {
             fn empty() {
                 let actual = Dynamic::<()>::from_iter(core::iter::empty());
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.front_capacity, 0);
                 assert_eq!(actual.initialized, 0);
-                assert_eq!(actual.post_capacity, 0);
+                assert_eq!(actual.back_capacity, 0);
             }
 
             #[test]
@@ -3962,7 +4136,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 actual.extend(expected);
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.front_capacity, 0);
             }
 
             #[test]
@@ -3972,7 +4146,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 actual.extend(expected);
 
-                assert_eq!(actual.post_capacity, 0);
+                assert_eq!(actual.back_capacity, 0);
             }
 
             #[test]
@@ -4092,9 +4266,9 @@ mod test {
 
                 actual.extend(core::iter::empty());
 
-                assert_eq!(actual.pre_capacity, 0);
+                assert_eq!(actual.front_capacity, 0);
                 assert_eq!(actual.initialized, 0);
-                assert_eq!(actual.post_capacity, 0);
+                assert_eq!(actual.back_capacity, 0);
             }
 
             #[test]
@@ -4118,14 +4292,14 @@ mod test {
         fn does_not_allocate_front_capacity() {
             let actual = Dynamic::<usize>::default();
 
-            assert_eq!(actual.pre_capacity, 0);
+            assert_eq!(actual.front_capacity, 0);
         }
 
         #[test]
         fn does_not_allocate_back_capacity() {
             let actual = Dynamic::<usize>::default();
 
-            assert_eq!(actual.post_capacity, 0);
+            assert_eq!(actual.back_capacity, 0);
         }
 
         #[test]
@@ -4143,14 +4317,14 @@ mod test {
         fn does_not_allocate_front_capacity() {
             let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).clone().clone();
 
-            assert_eq!(actual.pre_capacity, 0);
+            assert_eq!(actual.front_capacity, 0);
         }
 
         #[test]
         fn does_not_allocate_back_capacity() {
             let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).clone().clone();
 
-            assert_eq!(actual.post_capacity, 0);
+            assert_eq!(actual.back_capacity, 0);
         }
 
         #[test]
