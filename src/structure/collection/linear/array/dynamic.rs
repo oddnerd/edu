@@ -55,7 +55,10 @@ impl<T> Dynamic<T> {
     /// Attempt to allocate enough memory to store exactly `count` elements.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory allocation fails.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(N) memory for the result.
