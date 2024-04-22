@@ -7,8 +7,8 @@ use super::Linear;
 
 use std::alloc;
 
-use core::ptr::NonNull;
 use core::mem::MaybeUninit;
+use core::ptr::NonNull;
 
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
@@ -1486,7 +1486,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     fn as_ptr(&self) -> *const Self::Element {
         assert!(
             self.front_capacity + self.initialized + self.back_capacity > 0,
-            "if no allocation then the pointer is dangling and meaningless"
+            "no allocation to point to"
         );
 
         // `MaybeUninit<T>` has the same layout as `T`.
@@ -1529,7 +1529,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
         assert!(
             self.front_capacity + self.initialized + self.back_capacity > 0,
-            "if no allocation then the pointer is dangling and meaningless"
+            "no allocation to point to"
         );
 
         // `MaybeUninit<T>` has the same layout as `T`.
@@ -1946,10 +1946,7 @@ impl<T> Drop for Drain<'_, T> {
     /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
     /// ```
     fn drop(&mut self) {
-        let ptr = self
-            .underlying
-            .as_mut_ptr()
-            .cast::<MaybeUninit<T>>();
+        let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
 
         // Drop the elements yet to be yielded.
         for index in self.next.clone() {
@@ -2058,10 +2055,7 @@ impl<T> Iterator for Drain<'_, T> {
         self.next.next().map_or_else(
             || None,
             |index| {
-                let ptr = self
-                    .underlying
-                    .as_mut_ptr()
-                    .cast::<MaybeUninit<T>>();
+                let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
 
                 // SAFETY: stays aligned within the allocated object.
                 let ptr = unsafe { ptr.add(index) };
@@ -2121,10 +2115,7 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
         self.next.next_back().map_or_else(
             || None,
             |index| {
-                let ptr = self
-                    .underlying
-                    .as_mut_ptr()
-                    .cast::<MaybeUninit<T>>();
+                let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
 
                 // SAFETY: stays aligned within the allocated object.
                 let ptr = unsafe { ptr.add(index) };
