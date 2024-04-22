@@ -7,6 +7,9 @@ use super::Linear;
 
 use std::alloc;
 
+use core::ptr::NonNull;
+use core::mem::MaybeUninit;
+
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
 /// This is (mostly) equivalent to Rust's [`Vec`] or C++'s
@@ -46,7 +49,7 @@ use std::alloc;
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
     /// Underlying buffer storing initialized _and_ uninitialized elements.
-    buffer: core::ptr::NonNull<core::mem::MaybeUninit<T>>,
+    buffer: NonNull<MaybeUninit<T>>,
 
     /// The number of uninitialized elements before the initialized ones.
     front_capacity: usize,
@@ -805,7 +808,7 @@ impl<T> Dynamic<T> {
                     debug_assert_eq!(capacity, 0, "otherwise occupies memory");
 
                     // empty => The pointer will _NOT_ be read/written to.
-                    core::ptr::NonNull::<T>::dangling().as_ptr()
+                    NonNull::<T>::dangling().as_ptr()
                 }
             }
             // Modify an existing buffer allocation.
@@ -829,7 +832,7 @@ impl<T> Dynamic<T> {
                         }
 
                         // empty state => will _NOT_ be read/written to.
-                        core::ptr::NonNull::<T>::dangling().as_ptr()
+                        NonNull::<T>::dangling().as_ptr()
                     }
                     // Reallocate.
                     else {
@@ -845,9 +848,9 @@ impl<T> Dynamic<T> {
         };
 
         // `MaybeUninit<T>` has the same layout as `T`.
-        let ptr = ptr.cast::<core::mem::MaybeUninit<T>>();
+        let ptr = ptr.cast::<MaybeUninit<T>>();
 
-        self.buffer = match core::ptr::NonNull::new(ptr) {
+        self.buffer = match NonNull::new(ptr) {
             Some(ptr) => ptr,
             None => return Err(FailedAllocation),
         };
@@ -1251,7 +1254,7 @@ impl<T> Default for Dynamic<T> {
     /// ```
     fn default() -> Self {
         Self {
-            buffer: core::ptr::NonNull::dangling(),
+            buffer: NonNull::dangling(),
             front_capacity: 0,
             initialized: 0,
             back_capacity: 0,
@@ -1404,7 +1407,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
         let ptr = unsafe { ptr.add(self.front_capacity) };
 
         // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+        let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
         // SAFETY: `ptr` is dangling if and only if no elements have been
         // initialized, in which case the pointer will not be read.
@@ -1440,7 +1443,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
         let ptr = unsafe { ptr.add(self.front_capacity) };
 
         // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+        let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
         // SAFETY: `ptr` is dangling if and only if no elements have been
         // initialized, in which case the pointer will not be read.
@@ -1832,10 +1835,10 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = Self::Element> {
         let head = if self.initialized == 0 {
             // is empty => this pointer will _NOT_ be modified or read.
-            core::ptr::NonNull::dangling()
+            NonNull::dangling()
         } else {
             // SAFETY: at least one element exist => pointer cannot be null.
-            unsafe { core::ptr::NonNull::new_unchecked(self.as_mut_ptr()) }
+            unsafe { NonNull::new_unchecked(self.as_mut_ptr()) }
         };
 
         let tail = {
@@ -1847,7 +1850,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             };
 
             // SAFETY: `head` cannot be null => pointer cannot be null.
-            unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+            unsafe { NonNull::new_unchecked(ptr) }
         };
 
         let remaining = self.initialized;
@@ -1881,7 +1884,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// assert_eq!(instance.capacity(), 6);
     /// ```
     fn clear(&mut self) {
-        let ptr = self.as_mut_ptr().cast::<core::mem::MaybeUninit<T>>();
+        let ptr = self.as_mut_ptr().cast::<MaybeUninit<T>>();
 
         for index in 0..self.initialized {
             // SAFETY: index in bounds => aligned within the allocated object.
@@ -1946,7 +1949,7 @@ impl<T> Drop for Drain<'_, T> {
         let ptr = self
             .underlying
             .as_mut_ptr()
-            .cast::<core::mem::MaybeUninit<T>>();
+            .cast::<MaybeUninit<T>>();
 
         // Drop the elements yet to be yielded.
         for index in self.next.clone() {
@@ -2058,7 +2061,7 @@ impl<T> Iterator for Drain<'_, T> {
                 let ptr = self
                     .underlying
                     .as_mut_ptr()
-                    .cast::<core::mem::MaybeUninit<T>>();
+                    .cast::<MaybeUninit<T>>();
 
                 // SAFETY: stays aligned within the allocated object.
                 let ptr = unsafe { ptr.add(index) };
@@ -2121,7 +2124,7 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
                 let ptr = self
                     .underlying
                     .as_mut_ptr()
-                    .cast::<core::mem::MaybeUninit<T>>();
+                    .cast::<MaybeUninit<T>>();
 
                 // SAFETY: stays aligned within the allocated object.
                 let ptr = unsafe { ptr.add(index) };
@@ -2171,16 +2174,16 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     predicate: F,
 
     /// Where to write the next retained element to.
-    retained: core::ptr::NonNull<T>,
+    retained: NonNull<T>,
 
     /// How many element are left to query with the predicate.
     remaining: usize,
 
     /// The next (front) element to query with the predicate.
-    head: core::ptr::NonNull<T>,
+    head: NonNull<T>,
 
     /// The next (back) element to query with the predicate.
-    tail: core::ptr::NonNull<T>,
+    tail: NonNull<T>,
 
     /// The number of retained elements at the end because of `next_back`.
     trailing: usize,
@@ -2277,7 +2280,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 let ptr = unsafe { self.head.as_ptr().add(1) };
 
                 // SAFETY: `head` is not null => pointer is not null.
-                unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+                unsafe { NonNull::new_unchecked(ptr) }
             };
 
             if (self.predicate)(current) {
@@ -2298,7 +2301,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                         let ptr = unsafe { self.retained.as_ptr().add(1) };
 
                         // SAFETY: `retained` is not null => pointer is not null.
-                        unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+                        unsafe { NonNull::new_unchecked(ptr) }
                     };
                 } else {
                     // will shift elements to increase back capacity.
@@ -2320,7 +2323,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     let ptr = unsafe { self.retained.as_ptr().add(consecutive_retained) };
 
                     // SAFETY: `retained` is not null => pointer is not null.
-                    unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+                    unsafe { NonNull::new_unchecked(ptr) }
                 };
 
                 if let Some(decremented) = self.underlying.initialized.checked_add(1) {
@@ -2359,7 +2362,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             let ptr = unsafe { self.retained.as_ptr().add(consecutive_retained) };
 
             // SAFETY: `retained` is not null => pointer is not null.
-            unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+            unsafe { NonNull::new_unchecked(ptr) }
         };
 
         None
@@ -2422,7 +2425,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                     let ptr = unsafe { self.tail.as_ptr().sub(1) };
 
                     // SAFETY: `retained` is not null => pointer is not null.
-                    unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+                    unsafe { NonNull::new_unchecked(ptr) }
                 };
             }
 
