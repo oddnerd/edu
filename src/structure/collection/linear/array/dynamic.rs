@@ -105,7 +105,7 @@ impl<T> Dynamic<T> {
     /// instance.reserve_back(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 256);
     ///
-    /// instance.reserve_front(256);
+    /// instance.reserve_front(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 512);
     /// ```
     pub fn capacity(&self) -> usize {
