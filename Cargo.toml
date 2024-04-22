@@ -119,7 +119,7 @@ string_to_string           = "deny" # Prefer `clone()`.
 suspicious_xor_used_as_pow = "deny" # Prevent XOR decimal numbers.
 
 # Safety
-multiple_unsafe_ops_per_block = "warn" # Prefer seperate unsafe blocks.
+multiple_unsafe_ops_per_block = "deny" # Prefer seperate unsafe blocks.
 undocumented_unsafe_blocks    = "deny" # Require safety comment.
 unnecessary_safety_comment    = "deny" # Prevent erroneous safety comment.
 unnecessary_safety_doc        = "deny" # Safe code does not need safety section.
