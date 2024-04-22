@@ -278,7 +278,13 @@ impl<T> Dynamic<T> {
                 return Err(FailedAllocation);
             };
 
-            total.checked_next_power_of_two().unwrap_or(capacity)
+            let total = total.checked_next_power_of_two().unwrap_or(capacity);
+
+            let Some(amortized) = total.checked_sub(self.initialized) else {
+                unreachable!("next power of two was smaller");
+            };
+
+            amortized
         };
 
         if self.reserve_back(amortized).is_ok() {
@@ -1194,6 +1200,7 @@ impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
         // the error will be propagated once a necessary allocation fails.
         let mut instance = Dynamic::<T>::with_capacity(count).unwrap_or_default();
 
+
         instance.extend(iter);
 
         instance
@@ -1235,6 +1242,13 @@ impl<T> Extend<T> for Dynamic<T> {
         assert!(self.reserve_back(count).is_ok(), "allocation failed");
 
         for element in iter {
+
+            // SAFETY: TODO
+            eprintln!("ITERATION {:?}", unsafe { &*core::ptr::addr_of!(element).cast::<i32>() });
+            eprintln!("\t {:?}", self.front_capacity);
+            eprintln!("\t {:?}", self.initialized);
+            eprintln!("\t {:?}", self.back_capacity);
+
             assert!(self.append(element).is_ok(), "allocation failed");
         }
     }
