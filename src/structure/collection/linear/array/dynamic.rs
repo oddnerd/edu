@@ -212,7 +212,10 @@ impl<T> Dynamic<T> {
     /// the [`Self::shift`].
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
@@ -272,7 +275,10 @@ impl<T> Dynamic<T> {
     /// Allocate space for exactly `capacity` elements to be prepended.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Examples
     /// ```
@@ -317,7 +323,10 @@ impl<T> Dynamic<T> {
     /// Allocate space for exactly `capacity` elements to be appended.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Examples
     /// ```
@@ -368,6 +377,15 @@ impl<T> Dynamic<T> {
     ///
     /// See also: [`Self::shrink_front`] or [`Self::shrink_back`] to shrink a
     /// specific end of the buffer without shifting initialized elements.
+    ///
+    /// # Panics
+    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// # Examples
     /// ```
@@ -421,7 +439,10 @@ impl<T> Dynamic<T> {
     /// Reallocate to reduce [`Self::capacity_front`] to exactly `capacity`.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
@@ -475,6 +496,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
@@ -710,7 +734,7 @@ impl<T> Dynamic<T> {
     /// Note that failed allocation will _NOT_ modify the underlying buffer.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
@@ -859,7 +883,7 @@ impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
     /// Construct by cloning elements from an existing slice.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory for the result.
@@ -1111,7 +1135,7 @@ impl<T> Extend<T> for Dynamic<T> {
     /// Append elements of an iterator in order.
     ///
     /// # Panics
-    /// The Rust runtime might `abort` if allocation fails, panics otherwise.
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
@@ -1180,7 +1204,7 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// Construct an instance with no elements and no capacity/allocation.
     ///
     /// # Panics
-    /// The Rust runtime might `abort` if allocation fails, panics otherwise.
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
@@ -1464,7 +1488,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// Insert an `element` at `index`.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
