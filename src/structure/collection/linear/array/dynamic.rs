@@ -114,7 +114,8 @@ impl<T> Dynamic<T> {
         self.pre_capacity + self.post_capacity
     }
 
-    /// How many elements can [`Self::prepend`] in constant time/without reallocation.
+    /// How many elements can [`Self::prepend`] in constant time/without
+    /// reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -152,7 +153,8 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// How many elements can [`Self::append`] in constant time/without reallocation.
+    /// How many elements can [`Self::append`] in constant time/without
+    /// reallocation.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
