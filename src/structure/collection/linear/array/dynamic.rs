@@ -274,6 +274,11 @@ impl<T> Dynamic<T> {
 
         // https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
         let amortized = {
+            // Do not do amortized growth if already big enough.
+            if self.capacity_back() >= capacity {
+                return Ok(self);
+            }
+
             let Some(total) = self.initialized.checked_add(capacity) else {
                 return Err(FailedAllocation);
             };
@@ -1242,13 +1247,6 @@ impl<T> Extend<T> for Dynamic<T> {
         assert!(self.reserve_back(count).is_ok(), "allocation failed");
 
         for element in iter {
-
-            // SAFETY: TODO
-            eprintln!("ITERATION {:?}", unsafe { &*core::ptr::addr_of!(element).cast::<i32>() });
-            eprintln!("\t {:?}", self.front_capacity);
-            eprintln!("\t {:?}", self.initialized);
-            eprintln!("\t {:?}", self.back_capacity);
-
             assert!(self.append(element).is_ok(), "allocation failed");
         }
     }
