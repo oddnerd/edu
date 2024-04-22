@@ -205,7 +205,7 @@ impl<T> Dynamic<T> {
     ///
     /// See also: [`Self::reserve_front`] or [`Self::reserve_back`] to reserve
     /// an exact amount of elements at a specific end of the buffer without
-    /// [`Self::shift`].
+    /// the [`Self::shift`].
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
