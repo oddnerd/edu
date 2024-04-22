@@ -106,7 +106,6 @@ print_stdout  = "warn" # Prevent `eprintln!()`.
 dbg_macro     = "warn" # Prevent `dbg!()`.
 use_debug     = "warn" # Prevent `{:?}` formatting.
 todo          = "warn" # Prevent `todo!()`.
-unreachable   = "deny" # Prevent `unreachable!()`.
 unimplemented = "deny" # Prevent `unimplemented!()`.
 
 # Misleading calls
