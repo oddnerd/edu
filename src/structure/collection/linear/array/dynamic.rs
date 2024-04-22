@@ -516,10 +516,14 @@ impl<T> Dynamic<T> {
 
     /// Shift the initialized elements `offset` positions within the buffer.
     ///
-    /// The buffer first contains uninitialized pre-capacity, then initialized
-    /// elements, and finally uninitialized post-capacity. This method maintains
-    /// the order of initialized elements, but shifts them thereby converting
-    /// some portion of the pre-capacity to post-capacity, or visa versa.
+    /// The buffer first contains uninitialized [`Self::capacity_front`], then
+    /// initialized elements, and finally uninitialized
+    /// [`Self::capacity_back`]. This method  maintains the order of
+    /// initialized elements, but shifts them thereby converting some portion
+    /// of the capacity from front to back, or vice versa.
+    ///
+    /// # Errors
+    /// Yields [`OutOfBounds`] is there is not enough capacity to shift into.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
