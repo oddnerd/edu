@@ -133,7 +133,7 @@ impl<T> Dynamic<T> {
     /// instance.reserve_front(512).expect("successful allocation");
     /// assert_eq!(instance.capacity_front(), 512);
     ///
-    /// // Reserving for wrong end of the buffer, but be empty.
+    /// // Reserving for opposite end of the buffer, but be empty.
     /// instance.reserve_back(1024).expect("successful allocation");
     /// assert_eq!(instance.capacity_front(), 1024);
     ///
