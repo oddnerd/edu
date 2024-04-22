@@ -145,6 +145,7 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
+    #[must_use]
     pub fn capacity_front(&self) -> usize {
         if self.initialized == 0 {
             self.pre_capacity + self.post_capacity
@@ -184,6 +185,7 @@ impl<T> Dynamic<T> {
     /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
+    #[must_use]
     pub fn capacity_back(&self) -> usize {
         if self.initialized == 0 {
             self.pre_capacity + self.post_capacity
