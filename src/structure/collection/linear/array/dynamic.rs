@@ -108,6 +108,7 @@ impl<T> Dynamic<T> {
     /// instance.reserve_front(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 512);
     /// ```
+    #[must_use]
     pub fn capacity(&self) -> usize {
         // SAFETY: Global allocator API => addition cannot overflow.
         self.pre_capacity + self.post_capacity
