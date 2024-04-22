@@ -123,8 +123,8 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::array::Array;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::List;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).unwrap();
@@ -163,8 +163,8 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::array::Array;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::List;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
@@ -223,8 +223,8 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::array::Array;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -283,8 +283,8 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::array::Array;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -331,8 +331,8 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::array::Array;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -390,7 +390,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -450,7 +450,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -506,7 +506,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -559,7 +559,7 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -842,7 +842,7 @@ impl<T> Drop for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
@@ -919,7 +919,7 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -959,7 +959,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -998,7 +998,7 @@ impl<T> Iterator for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
@@ -1057,7 +1057,7 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
@@ -1182,7 +1182,7 @@ impl<T> Default for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
+    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance = Dynamic::<()>::default();
@@ -1311,7 +1311,7 @@ impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
+    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -1332,7 +1332,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -1369,7 +1369,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -1422,7 +1422,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
@@ -1462,7 +1462,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
@@ -1495,7 +1495,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::default();
@@ -1565,7 +1565,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
