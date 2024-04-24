@@ -211,7 +211,7 @@ impl<T> Dynamic<T> {
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// (0..instance.capacity_back()).for_each(|element| {
-    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    ///     assert!(instance.append(element).is_ok()) // Cannot fail.
     /// });
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
@@ -274,7 +274,7 @@ impl<T> Dynamic<T> {
     /// // That many elements can be inserted without invalidating pointers.
     /// let ptr = instance.as_ptr();
     /// (0..instance.capacity_back()).for_each(|element| {
-    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    ///     assert!(instance.append(element).is_ok()) // Cannot fail.
     /// });
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
@@ -323,6 +323,10 @@ impl<T> Dynamic<T> {
 
     /// Allocate space for exactly `capacity` elements to be prepended.
     ///
+    /// If this is okay, that many element can be prepended in constant time
+    /// without possibility of error. Moreover, this maintains pointer validity
+    /// even to specific elements.
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
@@ -337,14 +341,14 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
-    /// // From empty instance.
     /// instance.reserve_front(256).expect("successful allocation");
+    /// assert_eq!(instance.capacity_front(), 256);
     ///
     /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.prepend(12345).is_ok()); // cannot fail.
-    /// }
+    /// (0..instance.capacity_front()).for_each(|element| {
+    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    /// });
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
@@ -369,6 +373,10 @@ impl<T> Dynamic<T> {
 
     /// Allocate space for exactly `capacity` elements to be appended.
     ///
+    /// If this is okay, that many element can be appended in constant time
+    /// without possibility of error. Moreover, this maintains pointer validity
+    /// even to specific elements.
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
@@ -383,14 +391,14 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
-    /// // From empty instance.
     /// instance.reserve_back(256).expect("successful allocation");
+    /// assert_eq!(instance.capacity_back(), 256);
     ///
-    /// // That many elements can be prepended without invalidating pointers.
+    /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.append(12345).is_ok()); // cannot fail.
-    /// }
+    /// (0..instance.capacity_back()).for_each(|element| {
+    ///     assert!(instance.append(element).is_ok()) // Cannot fail.
+    /// });
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
