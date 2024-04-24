@@ -2050,13 +2050,13 @@ impl<T> Drop for Drain<'_, T> {
 
         if self.range.end == self.underlying.initialized {
             if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
-                self.underlying.front_capacity = capacity;
+                self.underlying.back_capacity = capacity;
             } else {
                 unreachable!("allocated more than `isize::MAX` bytes");
             }
         } else if self.range.start == 0 {
             if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
-                self.underlying.back_capacity = capacity;
+                self.underlying.front_capacity = capacity;
             } else {
                 unreachable!("allocated more than `isize::MAX` bytes");
             }
