@@ -1691,7 +1691,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 };
 
                 // SAFETY: the uninitialized element to insert into.
-                unsafe { ptr.add(offset) }
+                unsafe { self.buffer.as_ptr().add(offset) }
             };
 
             // Shift elements `[index..]` one position to the right.
