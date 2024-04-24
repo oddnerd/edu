@@ -794,6 +794,9 @@ impl<T> Dynamic<T> {
     /// # Safety
     /// The `range` must be within bounds, even when shifted by `offset`.
     ///
+    /// # Panics
+    /// If the end bound is before the start bound.
+    ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     unsafe fn shift_range(&mut self, range: impl std::ops::RangeBounds<usize>, offset: isize) {
