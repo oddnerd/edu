@@ -828,7 +828,7 @@ impl<T> Dynamic<T> {
         // SAFETY:
         // * start/end in bounds => source/destination valid for read/write.
         // * ranges can overlap => no aliasing restrictions.
-        std::ptr::copy(source, destination, elements);
+        unsafe { std::ptr::copy(source, destination, elements); }
     }
 
     /// (Re)allocate the buffer to modify back capacity by `capacity`.
