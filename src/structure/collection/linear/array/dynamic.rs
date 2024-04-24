@@ -789,6 +789,44 @@ impl<T> Dynamic<T> {
         capacity.checked_next_power_of_two()
     }
 
+    /// Shift the elements within `range` left or right by `offset`.
+    ///
+    /// # Safety
+    /// The `range` must be within bounds, even when shifted by `offset`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    unsafe fn shift_range(&mut self, range: impl std::ops::RangeBounds<usize>, offset: isize) {
+        let start = match range.start_bound() {
+            core::ops::Bound::Unbounded => 0,
+            core::ops::Bound::Included(start) => *start,
+            core::ops::Bound::Excluded(start) => *start + 1,
+        };
+
+        let end = match range.end_bound() {
+            core::ops::Bound::Unbounded => self.len(),
+            core::ops::Bound::Included(end) => *end + 1,
+            core::ops::Bound::Excluded(end) => *end,
+        };
+
+        let Some(elements) = end.checked_sub(start) else {
+            panic!("range had end index before start index")
+        };
+
+        // SAFETY: points to the where the first initialized element goes.
+        let ptr = unsafe { self.buffer.as_ptr().add(self.front_capacity) };
+
+        // SAFETY: caller promises this will stay in bounds.
+        let source = unsafe { ptr.add(start) };
+
+        // SAFETY: caller promises this will stay in bounds.
+        let destination = unsafe { source.offset(offset) };
+
+        // SAFETY:
+        // * start/end in bounds => source/destination valid for read/write.
+        // * ranges can overlap => no aliasing restrictions.
+        std::ptr::copy(source, destination, elements);
+    }
 
     /// (Re)allocate the buffer to modify back capacity by `capacity`.
     ///
