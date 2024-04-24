@@ -2416,7 +2416,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     unsafe { NonNull::new_unchecked(ptr) }
                 };
 
-                if let Some(decremented) = self.underlying.initialized.checked_add(1) {
+                if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
                     self.underlying.initialized = decremented;
                 } else {
                     unreachable!("allocated more than `isize::MAX` bytes");
