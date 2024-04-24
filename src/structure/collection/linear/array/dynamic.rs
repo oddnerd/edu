@@ -828,7 +828,9 @@ impl<T> Dynamic<T> {
         // SAFETY:
         // * start/end in bounds => source/destination valid for read/write.
         // * ranges can overlap => no aliasing restrictions.
-        unsafe { std::ptr::copy(source, destination, elements); }
+        unsafe {
+            std::ptr::copy(source, destination, elements);
+        }
     }
 
     /// (Re)allocate the buffer to modify back capacity by `capacity`.
@@ -1269,7 +1271,6 @@ impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
         // allocation can occur later when inserting actual elements, otherwise
         // the error will be propagated once a necessary allocation fails.
         let mut instance = Dynamic::<T>::with_capacity(count).unwrap_or_default();
-
 
         instance.extend(iter);
 
@@ -2097,7 +2098,7 @@ impl<T> Drop for Drain<'_, T> {
                     };
 
                 // SAFETY: points to the first uninitialized element.
-                let destination = unsafe { ptr.add(self.range.start) };
+                let destination = unsafe { ptr.add(self.range.len()) };
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
