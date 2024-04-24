@@ -138,8 +138,11 @@ impl<T> Dynamic<T> {
             )
     }
 
-    /// How many elements can [`Self::prepend`] in constant time/without
-    /// reallocation.
+    /// How many elements can [`Self::prepend`] in without reallocation.
+    ///
+    /// This many end-specific insertions will be constant time without
+    /// possibility of error. Moreover, this maintains pointer validity
+    /// even to specific elements.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -162,11 +165,11 @@ impl<T> Dynamic<T> {
     /// instance.reserve_back(1024).expect("successful allocation");
     /// assert_eq!(instance.capacity_front(), 1024);
     ///
-    /// // That many elements can be prepended without invalidating pointers.
+    /// // This many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.capacity_back() {
-    ///     assert!(instance.prepend(12345).is_ok()) // Cannot fail.
-    /// }
+    /// (0..instance.capacity_front()).for_each(|element| {
+    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    /// })
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -178,8 +181,11 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// How many elements can [`Self::append`] in constant time/without
-    /// reallocation.
+    /// How many elements can [`Self::append`] in without reallocation.
+    ///
+    /// This many end-specific insertions will be constant time without
+    /// possibility of error. Moreover, this maintains pointer validity
+    /// even to specific elements.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -204,9 +210,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.capacity_back() {
-    ///     assert!(instance.append(12345).is_ok()) // Cannot fail.
-    /// }
+    /// (0..instance.capacity_back()).for_each(|element| {
+    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    /// })
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
