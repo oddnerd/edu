@@ -2072,7 +2072,7 @@ impl<T> Drop for Drain<'_, T> {
             let only_back_capacity =
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
-            // Shift the elements `[self.range.end..]` to the remaining left.
+            // Shift to combine the two divided regions of retained elements.
             {
                 let leading = self.range.start;
 
@@ -2080,25 +2080,32 @@ impl<T> Drop for Drain<'_, T> {
                     unreachable!("not enough initialized elements to remove");
                 };
 
-                let (source, count) =
+                let (source, destination, count) =
                     if only_front_capacity || (!only_back_capacity && trailing > leading) {
                         // [front capacity] [remain] [drained] [shift] [back capacity]
 
                         self.underlying.back_capacity = self.range.len();
 
-                        // SAFETY: the first right initialized element.
-                        (unsafe { ptr.add(self.range.end) }, trailing)
+                        // SAFETY: first initialized element of right group.
+                        let source = unsafe { ptr.add(self.range.end) };
+
+                        // SAFETY: where the first drained element was.
+                        let destination = unsafe { ptr.add(self.range.start) };
+
+                        (source, destination, trailing)
                     } else {
                         // [front capacity] [shift] [drained] [remain] [back capacity]
 
                         self.underlying.front_capacity = self.range.len();
 
-                        // the first initialized element on the left.
-                        (ptr, leading)
-                    };
+                        // first initialized element of left group.
+                        let source = ptr;
 
-                // SAFETY: points to the first uninitialized element.
-                let destination = unsafe { ptr.add(self.range.len()) };
+                        // SAFETY: rightward amount of drained elements.
+                        let destination = unsafe { ptr.add(self.range.len()) };
+
+                        (source, destination, leading)
+                    };
 
                 // SAFETY:
                 // * owned memory => source/destination valid for read/writes.
