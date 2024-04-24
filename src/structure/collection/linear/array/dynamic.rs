@@ -109,12 +109,22 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Dynamic::<i32>::with_capacity(6).expect("successful allocation");
+    ///
+    /// // Won't double count capacity.
+    /// assert_eq!(instance.capacity(), 6);
+    /// assert_eq!(instance.capacity_front(), 6);
+    /// assert_eq!(instance.capacity_back(), 6);
+    ///
+    /// // Reflects when capacity is exhausted.
+    /// instance.extend([0, 1, 2, 3, 4, 5]);
     /// assert_eq!(instance.capacity(), 0);
     ///
+    /// // Will count any end specific capacity.
     /// instance.reserve_back(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 256);
     ///
+    /// // Will include both ends' capacity.
     /// instance.reserve_front(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 512);
     /// ```
