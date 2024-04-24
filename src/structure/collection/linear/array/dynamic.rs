@@ -19,7 +19,7 @@ use core::ptr::NonNull;
 /// alignment and size to store elements of type `T`, referred to as the
 /// buffer. The front of the buffer (potentially) contains uninitialized
 /// elements, then all initialized elements in the order they were inserted,
-/// and finally at the back (potentially) other uninitialized elements.
+/// and finally the back is (potentially) other uninitialized elements.
 ///
 /// The term 'capacity' refers to pre-allocated memory containing those
 /// uninitialized elements into which new elements can be added without
@@ -40,7 +40,7 @@ use core::ptr::NonNull;
 /// [`reserve`](`Self::reserve`), or end-specific
 /// [`reserve_front`](`Self::reserve_front`) and
 /// [`reserve_back`](`Self::reserve_back`) methods which will reallocate
-/// thereby invaliding all pointers. Furthermore, capacity can be reallocated
+/// thereby invaliding all pointers. Furthermore, capacity can be deallocated
 /// (retaining initialized elements) via [`shrink`](`Self::shrink`),
 /// or end-specific [`shrink_front`](`Self::shrink_front`) and
 /// [`shrink_back`](`Self::shrink_back`). Shrinking when no elements are
