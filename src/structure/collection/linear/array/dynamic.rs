@@ -169,7 +169,7 @@ impl<T> Dynamic<T> {
     /// let ptr = instance.as_ptr();
     /// (0..instance.capacity_front()).for_each(|element| {
     ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// })
+    /// });
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -212,7 +212,7 @@ impl<T> Dynamic<T> {
     /// let ptr = instance.as_ptr();
     /// (0..instance.capacity_back()).for_each(|element| {
     ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// })
+    /// });
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -224,22 +224,26 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// Attempt to allocate space for at least `capacity` additional elements.
+    /// Allocate space for _at least_ `capacity` additional elements.
     ///
-    /// In contrast to [`Self::reserve_back`], this method will [`Self::shift`]
-    /// the elements to the front of the buffer to create space (thereby making
-    /// [`Self::capacity_front`] zero), (re)allocating if necessary to increase
-    /// [`Self::capacity_back`].
+    /// This method emulates the behaviour of Rust's [`Vec::reserve`].
     ///
-    /// This method increases the size of buffer by a geometric progression
-    /// with a growth factor of two (2), hence the buffer could ideally contain
-    /// a power of two (2) number of elements. This means it may allocate more
-    /// memory than explicitly requested, but will attempt to recover when
-    /// exactly `capacity` can be allocated, but not more.
+    /// In contrast to [`Self::reserve_back`], this method will shift the
+    /// initialized elements to consume [`Self::capacity_front`] (thereby
+    /// making it zero) before (re)allocating additional
+    /// [`Self::capacity_back`] if necessary to have at least `capacity`.
+    ///
+    /// Furthermore, this method increases the size of buffer by a geometric
+    /// progression with a growth factor of two (2), hence the buffer could
+    /// ideally contain a power of two (2) number of elements. This means it
+    /// may allocate more memory than explicitly requested, but will attempt
+    /// to recover when exactly `capacity` can be allocated, but not more. This
+    /// means you can apply
+    /// [amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis).
     ///
     /// See also: [`Self::reserve_front`] or [`Self::reserve_back`] to reserve
-    /// an exact amount of elements at a specific end of the buffer without
-    /// the [`Self::shift`].
+    /// an exact amount of elements at a specific end of the buffer whilst
+    /// preserving existing capacity at the other end.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
@@ -256,21 +260,23 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
     ///
-    /// let mut instance = Dynamic::<usize>::default();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// // From empty instance.
-    /// instance.reserve(256).expect("successful allocation");
-    ///
-    /// // That many elements can be appended without invalidating pointers.
-    /// let ptr = instance.as_ptr();
-    /// for _ in 0..instance.capacity() {
-    ///     assert!(instance.append(12345).is_ok()); // cannot fail.
-    /// }
-    /// assert_eq!(instance.as_ptr(), ptr);
-    ///
-    /// // Shifts elements to consume capacity at the front of the buffer.
+    /// // Reclaims front capacity before reallocation.
     /// instance.reserve_front(256).expect("successful allocation");
-    /// assert!(instance.reserve(512).is_ok()); // No reallocation, just shift.
+    /// assert!(instance.reserve(256).is_ok()); // Cannot fail.
+    /// assert_eq!(instance.capacity_back(), 256); // Reuses the allocation.
+    ///
+    /// // Will allocate additional memory if needed.
+    /// instance.reserve(512).expect("successful allocation");
+    /// assert_eq!(instance.capacity_back(), 1024); // Not 512! Amortized!
+    ///
+    /// // That many elements can be inserted without invalidating pointers.
+    /// let ptr = instance.as_ptr();
+    /// (0..instance.capacity_back()).for_each(|element| {
+    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    /// });
+    /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         // Reclaim any front capacity.
