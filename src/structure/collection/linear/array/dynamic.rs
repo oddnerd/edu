@@ -766,6 +766,30 @@ impl<T> Dynamic<T> {
         Some(element)
     }
 
+    /// How many total elements to allocate to apply amortized analysis.
+    ///
+    /// Including unchanged front capacity _and_ initialized elements, if
+    /// back capacity was modified to be at least `capacity`, how many elements
+    /// in total ought to be allocated for [amortized analysis][amortized].
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// [amortized]: https://en.wikipedia.org/wiki/Amortized_analysis
+    /// [dynamic]: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
+    fn amortized(&self, capacity: Option<usize>) -> Option<usize> {
+        let Some(existing) = self.front_capacity.checked_add(self.initialized) else {
+            unreachable!("allocated more the `isize::MAX` bytes");
+        };
+
+        let Some(capacity) = existing.checked_add(capacity.unwrap_or(0)) else {
+            return None;
+        };
+
+        capacity.checked_next_power_of_two()
+    }
+
+
     /// (Re)allocate the buffer to modify back capacity by `capacity`.
     ///
     /// This method will increase back capacity by `capacity` if positive,
