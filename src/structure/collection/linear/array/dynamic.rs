@@ -98,8 +98,9 @@ impl<T> Dynamic<T> {
     /// Query how many elements could be added without reallocation.
     ///
     /// Note that adding this many elements might still require rearranging the
-    /// underlying buffer in non-constant time; however, no memory reallocation
-    /// will occur so pointers to elements remain valid.
+    /// underlying buffer in non-constant time. This means that although
+    /// pointers to the buffer remain valid, they may not point to an
+    /// initialized element let alone the element they were assigned to.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
