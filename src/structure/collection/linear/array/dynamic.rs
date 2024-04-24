@@ -1309,7 +1309,8 @@ impl<T> Extend<T> for Dynamic<T> {
             max.unwrap_or(min)
         };
 
-        assert!(self.reserve_back(count).is_ok(), "allocation failed");
+        // Append will allocate for each realized element reserve if fails.
+        drop(self.reserve_back(count));
 
         for element in iter {
             assert!(self.append(element).is_ok(), "allocation failed");
