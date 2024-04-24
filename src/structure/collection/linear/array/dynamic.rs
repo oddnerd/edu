@@ -26,11 +26,10 @@ use core::ptr::NonNull;
 /// altering the allocation. This means [`capacity`](`Self::capacity`)
 /// elements can be [`insert`](`Self::insert`) without invalidating pointers to
 /// the buffer. Note that pointers to specific elements may no longer point to
-/// the same element/point to an uninitialized element as the pre-existing
-/// elements may be moved within the buffer (maintaining order, see
-/// [`shift`](`Self::shift`)) to utilize said capacity. In contrast, using
-/// end-specific capacity via [`prepend`](`Self::prepend`) or
-/// [`append`](`Self::append`) alongside
+/// the that element or might point to an uninitialized element as
+/// the pre-existing elements may be moved within the buffer to utilize said
+/// capacity. In contrast, consuming end-specific capacity via
+/// [`prepend`](`Self::prepend`) or [`append`](`Self::append`) alongside
 /// [`capacity_front`](`Self::capacity_front`) or
 /// [`capacity_back`](`Self::capacity_back`) _will_ maintain pointers to
 /// specific elements.
