@@ -1966,6 +1966,10 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     /// assert_eq!(instance.capacity(), 6);
     /// ```
     fn clear(&mut self) {
+        if self.initialized == 0 {
+            return;
+        }
+
         let ptr = self.as_mut_ptr().cast::<MaybeUninit<T>>();
 
         for index in 0..self.initialized {
