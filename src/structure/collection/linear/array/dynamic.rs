@@ -1064,22 +1064,15 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     fn index(&self, index: usize) -> &Self::Output {
         assert!(index < self.initialized, "index out of bounds");
 
-        let ptr = self.buffer.as_ptr();
-
-        let Some(offset) = self.front_capacity.checked_add(index) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
-        };
+        let ptr = self.as_ptr();
 
         // SAFETY: index within bounds => stays within the allocated object.
-        let ptr = unsafe { ptr.add(offset) };
-
-        // SAFETY: the `MaybeUninit<T>` is initialized.
-        let element = unsafe { &mut *ptr };
+        let ptr = unsafe { ptr.add(index) };
 
         // SAFETY:
         // * the underlying `T` is initialized.
         // * lifetime bound to self => valid lifetime to return.
-        unsafe { element.assume_init_ref() }
+        unsafe { & *ptr }
     }
 }
 
@@ -1108,22 +1101,15 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         assert!(index < self.initialized, "index out of bounds");
 
-        let ptr = self.buffer.as_ptr();
-
-        let Some(offset) = self.front_capacity.checked_add(index) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
-        };
+        let ptr = self.as_mut_ptr();
 
         // SAFETY: index within bounds => stays within the allocated object.
-        let ptr = unsafe { ptr.add(offset) };
-
-        // SAFETY: the `MaybeUninit<T>` is initialized.
-        let element = unsafe { &mut *ptr };
+        let ptr = unsafe { ptr.add(index) };
 
         // SAFETY:
         // * the underlying `T` is initialized.
         // * lifetime bound to self => valid lifetime to return.
-        unsafe { element.assume_init_mut() }
+        unsafe { &mut *ptr }
     }
 }
 
