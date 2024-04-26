@@ -703,7 +703,10 @@ impl<T> Dynamic<T> {
             core::ptr::swap(front, index);
         }
 
-        // SAFETY: this takes ownership (moved out of buffer).
+        // SAFETY:
+        // * owned memory => pointer is valid for reads.
+        // * Underlying `T` is initialized.
+        // * This takes ownership (moved out of the buffer).
         let element = unsafe { front.read() };
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
@@ -766,7 +769,10 @@ impl<T> Dynamic<T> {
             core::ptr::swap(last, index);
         }
 
-        // SAFETY: this takes ownership (moved out of buffer).
+        // SAFETY:
+        // * owned memory => pointer is valid for reads.
+        // * Underlying `T` is initialized.
+        // * This takes ownership (moved out of the buffer).
         let element = unsafe { last.read() };
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
@@ -1152,7 +1158,10 @@ impl<T> Iterator for Dynamic<T> {
                 unreachable!("allocated more than `isize::MAX` bytes");
             };
 
-            // SAFETY: this takes ownership (moved out of the buffer).
+            // SAFETY:
+            // * owned memory => pointer is valid for reads.
+            // * Underlying `T` is initialized.
+            // * This takes ownership (moved out of the buffer).
             unsafe { element.read() }
         })
     }
@@ -1215,7 +1224,10 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
             // SAFETY: final initialized element in the allocated object.
             let element = unsafe { ptr.add(self.initialized) };
 
-            // SAFETY: this takes ownership (moved out of the buffer).
+            // SAFETY:
+            // * owned memory => pointer is valid for reads.
+            // * Underlying `T` is initialized.
+            // * This takes ownership (moved out of the buffer).
             unsafe { element.read() }
         })
     }
@@ -1703,9 +1715,9 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             };
 
             // SAFETY:
-            // * owned memory => `ptr` is valid for reads.
+            // * owned memory => pointer is valid for reads.
             // * Underlying `T` is initialized.
-            // * This takes ownership (move out of the buffer).
+            // * This takes ownership (moved out of the buffer).
             unsafe { ptr.read() }
         };
 
@@ -1719,25 +1731,11 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         }
         // Increase back capacity.
         else {
-            // Shift elements `[index + 1..]` one position to the right.
-            {
-                // SAFETY: index within bounds => aligned within allocated object.
-                let destination = unsafe { self.as_mut_ptr().add(index) };
-
-                // SAFETY: aligned within the allocated object.
-                let source = unsafe { destination.add(1) };
-
-                let Some(count) = self.initialized.checked_sub(index) else {
-                    unreachable!("index out of bounds");
-                };
-
-                // SAFETY:
-                // * owned memory => source/destination valid for read/writes.
-                // * no aliasing restrictions => source and destination can overlap.
-                // * underlying buffer is aligned => both pointers are aligned.
-                unsafe {
-                    core::ptr::copy(source, destination, count);
-                }
+            if let Some(next) = index.checked_add(1) {
+                // SAFETY: there is back capacity to shift into.
+                unsafe { self.shift_range(next.., 1); }
+            } else {
+                unreachable!("allocated more than `isize::MAX` bytes");
             }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
@@ -2093,7 +2091,10 @@ impl<T> Iterator for Drain<'_, T> {
                 // SAFETY: index in bounds => aligned within the allocated object.
                 let element = unsafe { &mut *ptr };
 
-                // SAFETY: takes ownership of underlying initialized `T` (move).
+                // SAFETY:
+                // * owned memory => pointer is valid for reads.
+                // * Underlying `T` is initialized.
+                // * This takes ownership (moved out of the buffer).
                 Some(unsafe { element.assume_init_read() })
             },
         )
@@ -2153,7 +2154,10 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
                 // SAFETY: index in bounds => aligned within the allocated object.
                 let element = unsafe { &mut *ptr };
 
-                // SAFETY: takes ownership of underlying initialized `T` (move).
+                // SAFETY:
+                // * owned memory => pointer is valid for reads.
+                // * Underlying `T` is initialized.
+                // * This takes ownership (moved out of the buffer).
                 Some(unsafe { element.assume_init_read() })
             },
         )
@@ -2305,7 +2309,10 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             };
 
             if (self.predicate)(current) {
-                // SAFETY: this takes ownership (moved out of buffer).
+                // SAFETY:
+                // * owned memory => pointer is valid for reads.
+                // * Underlying `T` is initialized.
+                // * This takes ownership (moved out of the buffer).
                 let element = unsafe { core::ptr::read(current) };
 
                 if self.underlying.as_ptr() == current {
@@ -2451,7 +2458,10 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             }
 
             if (self.predicate)(current) {
-                // SAFETY: this takes ownership (moved out of buffer).
+                // SAFETY:
+                // * owned memory => pointer is valid for reads.
+                // * Underlying `T` is initialized.
+                // * This takes ownership (moved out of the buffer).
                 let element = unsafe { core::ptr::read(current) };
 
                 if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
