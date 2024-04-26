@@ -432,13 +432,12 @@ impl<T> Dynamic<T> {
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
-    /// // Fill with elements.
-    /// for element in 0..256 {
-    ///     instance.append(element).expect("enough capacity");
+    /// // Half fill with elements.
+    /// for element in 0..128 {
+    ///     instance.prepend(element).expect("enough capacity");
     /// }
-    ///
-    /// // Create capacity at the front.
-    /// instance.reserve_front(256).expect("successful allocation");
+    /// assert_eq!(instance.capacity_front(), 128);
+    /// assert_eq!(instance.capacity_back(), 0);
     ///
     /// // Shrink to have capacity of 128 elements at the back.
     /// instance.shrink(Some(128)).expect("successful reallocation");
@@ -484,7 +483,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     ///
     /// // Shrink to have no capacity (shrink to fit).
-    /// instance.shrink_front(None);.expect("successful reallocation")
+    /// instance.shrink_front(None).expect("successful reallocation");
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
