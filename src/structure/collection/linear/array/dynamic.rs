@@ -823,16 +823,16 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
-    unsafe fn shift_range(&mut self, range: impl std::ops::RangeBounds<usize>, offset: isize) {
+    unsafe fn shift_range(&mut self, range: impl core::ops::RangeBounds<usize>, offset: isize) {
         let start = match range.start_bound() {
             core::ops::Bound::Unbounded => 0,
             core::ops::Bound::Included(start) => *start,
-            core::ops::Bound::Excluded(start) => *start + 1,
+            core::ops::Bound::Excluded(start) => start.saturating_add(1),
         };
 
         let end = match range.end_bound() {
             core::ops::Bound::Unbounded => self.len(),
-            core::ops::Bound::Included(end) => *end + 1,
+            core::ops::Bound::Included(end) => end.saturating_add(1),
             core::ops::Bound::Excluded(end) => *end,
         };
 
