@@ -560,7 +560,7 @@ impl<T> Dynamic<T> {
         };
 
         let Some(extra) = extra.checked_neg() else {
-            unreachable!("extra capacity is non-negative");
+            unreachable!("extra capacity is negative");
         };
 
         self.resize(extra)
