@@ -353,10 +353,9 @@ impl<T> Dynamic<T> {
         _ = self.resize(capacity)?;
 
         if self.initialized > 0 {
-            // SAFETY: at least this much capacity was allocated to shift into.
-            unsafe {
-                self.shift_range(.., capacity);
-            }
+            let Ok(_) = self.shift(capacity) else {
+                unreachable!("not enough back capacity to shift into");
+            };
         }
 
         Ok(self)
