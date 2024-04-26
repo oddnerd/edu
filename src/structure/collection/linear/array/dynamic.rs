@@ -1327,7 +1327,7 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
     ///
     /// # Examples
     /// ```
@@ -1338,9 +1338,7 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// assert_eq!(expected.clone(), expected)
     /// ```
     fn clone(&self) -> Self {
-        let Ok(mut clone) = Self::with_capacity(self.count()) else {
-            panic!("allocation failed");
-        };
+        let mut clone = Self::default();
 
         clone.extend(self.iter().cloned());
 
