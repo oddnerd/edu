@@ -804,27 +804,25 @@ impl<T> Dynamic<T> {
         Some(element)
     }
 
-    /// How many total elements to allocate to apply amortized analysis.
+    /// Exactly how much back capacity to allocate to apply amortized analysis.
     ///
-    /// Including unchanged front capacity _and_ initialized elements, if
-    /// back capacity was modified to be at least `capacity`, how many elements
-    /// in total ought to be allocated for [amortized analysis][amortized].
+    /// See also: [amortized analysis][amortized] and [dynamic array application][dynamic].
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
     ///
     /// [amortized]: https://en.wikipedia.org/wiki/Amortized_analysis
     /// [dynamic]: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-    fn amortized(&self, capacity: Option<usize>) -> Option<usize> {
-        let Some(existing) = self.front_capacity.checked_add(self.initialized) else {
+    fn amortized(&self, capacity: usize) -> Option<usize> {
+        let Some(retained) = self.front_capacity.checked_add(self.initialized) else {
             unreachable!("allocated more the `isize::MAX` bytes");
         };
 
-        let Some(capacity) = existing.checked_add(capacity.unwrap_or(0)) else {
-            return None;
-        };
+        let total = retained.checked_add(capacity)?;
 
-        capacity.checked_next_power_of_two()
+        let total = total.checked_next_power_of_two()?;
+
+        total.checked_sub(retained)
     }
 
     /// Shift the elements within `range` left or right by `offset`.
