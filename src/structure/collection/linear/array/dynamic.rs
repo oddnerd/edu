@@ -406,7 +406,7 @@ impl<T> Dynamic<T> {
 
     /// Attempt to reduce capacity to exactly `capacity`, or none/zero.
     ///
-    /// This method emulates the behaviour of Rust's [`Vec::shrink`].
+    /// This method emulates the behaviour of Rust's [`Vec::shrink_to`].
     ///
     /// In contrast to [`Self::shrink_back`], this method will shift the
     /// initialized elements to consume [`Self::capacity_front`] (thereby
