@@ -1481,7 +1481,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
 }
 
 impl<'a, T: 'a> Array<'a> for Dynamic<T> {
-    /// Obtain an immutable pointer to the underlying contigious memory.
+    /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// The pointer starts at the first initialized element.
     ///
@@ -1525,7 +1525,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
         unsafe { ptr.add(self.front_capacity) }
     }
 
-    /// Obtain a mutable pointer to the underlying contigious memory.
+    /// Obtain a mutable pointer to the underlying contigious memory buffer.
     ///
     /// The pointer starts at the first initialized element.
     ///
