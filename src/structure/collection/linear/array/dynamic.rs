@@ -1198,24 +1198,11 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.initialized > 0).then(|| {
-            let ptr = self.buffer.as_ptr();
-
-            let Some(offset) = self.initialized.checked_sub(1) else {
-                unreachable!("no initialized element to remove");
-            };
-
-            let Some(offset) = self.front_capacity.checked_add(offset) else {
-                unreachable!("allocated more than `isize::MAX` bytes");
-            };
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(offset) };
-
             if let Some(decremented) = self.initialized.checked_sub(1) {
                 self.initialized = decremented;
             } else {
                 unreachable!("no initialized element to remove");
-            };
+            }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
@@ -1223,11 +1210,13 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
                 unreachable!("allocated more than `isize::MAX` bytes");
             };
 
-            // SAFETY: the `MaybeUninit<T>` is initialized.
-            let element = unsafe { &mut *ptr };
+            let ptr = self.as_mut_ptr();
 
-            // SAFETY: the underlying `T` is initialized.
-            unsafe { element.assume_init_read() }
+            // SAFETY: final initialized element in the allocated object.
+            let element = unsafe { ptr.add(self.initialized) };
+
+            // SAFETY: this takes ownership (moved out of the buffer).
+            unsafe { element.read() }
         })
     }
 }
