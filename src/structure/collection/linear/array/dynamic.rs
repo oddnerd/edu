@@ -404,18 +404,18 @@ impl<T> Dynamic<T> {
         self.resize(capacity)
     }
 
-    /// Attempt to reduce [`Self::capacity`] to exactly `capacity`, or none/zero.
+    /// Attempt to reduce capacity to exactly `capacity`, or none/zero.
     ///
-    /// In contrast to [`Self::shrink_back`], this method will [`Self::shift`]
-    /// the elements to the front of the buffer, _always_ shrinking
-    /// [`Self::capacity_front`] to zero, reallocating if necessary to decrease
+    /// In contrast to [`Self::shrink_back`], this method will shift the
+    /// initialized elements to consume [`Self::capacity_front`] (thereby
+    /// making it zero) before reallocating if necessary to reduce
     /// [`Self::capacity_back`].
     ///
     /// See also: [`Self::shrink_front`] or [`Self::shrink_back`] to shrink a
     /// specific end of the buffer without shifting initialized elements.
     ///
     /// # Panics
-    /// The Rust runtime might panic or otherwise `abort` if allocation fails.
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
