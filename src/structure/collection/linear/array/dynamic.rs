@@ -1186,15 +1186,15 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
     ///
-    /// assert_eq!(actual.next_back(), Some(5));
-    /// assert_eq!(actual.next_back(), Some(4));
-    /// assert_eq!(actual.next_back(), Some(3));
-    /// assert_eq!(actual.next_back(), Some(2));
-    /// assert_eq!(actual.next_back(), Some(1));
-    /// assert_eq!(actual.next_back(), Some(0));
-    /// assert_eq!(actual.next_back(), None);
+    /// assert_eq!(instance.next_back(), Some(5));
+    /// assert_eq!(instance.next_back(), Some(4));
+    /// assert_eq!(instance.next_back(), Some(3));
+    /// assert_eq!(instance.next_back(), Some(2));
+    /// assert_eq!(instance.next_back(), Some(1));
+    /// assert_eq!(instance.next_back(), Some(0));
+    /// assert_eq!(instance.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.initialized > 0).then(|| {
