@@ -1347,7 +1347,7 @@ impl<T: Clone> Clone for Dynamic<T> {
 }
 
 impl<T: PartialEq> PartialEq for Dynamic<T> {
-    /// Query if the elements referenced to/contained are the same as `other`.
+    /// Query if the elements contained are the same as `other`.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(1) memory.
@@ -1372,7 +1372,7 @@ impl<T: PartialEq> PartialEq for Dynamic<T> {
 impl<T: Eq> Eq for Dynamic<T> {}
 
 impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
-    /// List the elements referenced to/contained.
+    /// List the elements contained.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
