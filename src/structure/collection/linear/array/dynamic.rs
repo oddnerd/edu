@@ -302,25 +302,7 @@ impl<T> Dynamic<T> {
             }
         }
 
-        // https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
-        let amortized = {
-            // Do not do amortized growth if already big enough.
-            if self.capacity_back() >= capacity {
-                return Ok(self);
-            }
-
-            let Some(total) = self.initialized.checked_add(capacity) else {
-                return Err(FailedAllocation);
-            };
-
-            let total = total.checked_next_power_of_two().unwrap_or(capacity);
-
-            let Some(amortized) = total.checked_sub(self.initialized) else {
-                unreachable!("next power of two was smaller");
-            };
-
-            amortized
-        };
+        let amortized = self.amortized(capacity).unwrap_or(capacity);
 
         if self.reserve_back(amortized).is_ok() {
             Ok(self)
