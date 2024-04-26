@@ -289,9 +289,17 @@ impl<T> Dynamic<T> {
                 unreachable!("negative amount of front capacity");
             };
 
-            let Ok(_) = self.shift(offset) else {
-                unreachable!("not enough front capacity to shift into");
-            };
+            // SAFETY: there is exactly enough front capacity to shift into.
+            unsafe {
+                self.shift_range(.., offset);
+            }
+
+            if let Some(total) = self.back_capacity.checked_add(self.front_capacity) {
+                self.front_capacity = 0;
+                self.back_capacity = total;
+            } else {
+                unreachable!("allocated more than `isize::MAX` bytes");
+            }
         }
 
         // https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
@@ -820,6 +828,8 @@ impl<T> Dynamic<T> {
     }
 
     /// Shift the elements within `range` left or right by `offset`.
+    ///
+    /// Note this does _NOT_ modify internal capacity state.
     ///
     /// # Safety
     /// The `range` must be within bounds, even when shifted by `offset`.
