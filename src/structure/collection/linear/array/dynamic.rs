@@ -1229,7 +1229,7 @@ impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
     ///
     /// # Panics
-    /// The Rust runtime might `abort` if allocation fails, panics otherwise.
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory for the result.
@@ -1239,7 +1239,8 @@ impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let mut actual = Dynamic::from_iter(expected.clone());
+    ///
+    /// let actual: Dynamic<_> = expected.clone().into_iter().collect();
     ///
     /// assert!(actual.eq(expected))
     /// ```
