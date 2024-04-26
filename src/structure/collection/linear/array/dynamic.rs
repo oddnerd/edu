@@ -1247,15 +1247,7 @@ impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
         let iter = iter.into_iter();
 
-        let count = {
-            let (min, max) = iter.size_hint();
-            max.unwrap_or(min)
-        };
-
-        // Iterators may provide erroneous hints, so a smaller successful
-        // allocation can occur later when inserting actual elements, otherwise
-        // the error will be propagated once a necessary allocation fails.
-        let mut instance = Dynamic::<T>::with_capacity(count).unwrap_or_default();
+        let mut instance = Self::default();
 
         instance.extend(iter);
 
@@ -1276,15 +1268,13 @@ impl<T> Extend<T> for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let original = vec![0, 1, 2, 3, 4, 5];
+    /// let expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let mut expected = std::vec::Vec::from_iter(original.clone());
-    /// let mut actual = Dynamic::from_iter(original.clone());
+    /// let mut instance = Dynamic::<i32>::default();
     ///
-    /// expected.extend(original.clone());
-    /// actual.extend(original.clone());
+    /// instance.extend(expected.iter().cloned());
     ///
-    /// assert!(actual.eq(expected))
+    /// assert!(instance.eq(expected))
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
         let iter = iter.into_iter();
