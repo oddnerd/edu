@@ -1391,26 +1391,6 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     }
 }
 
-impl<T> core::fmt::Pointer for Dynamic<T> {
-    /// Display the underlying address pointed to.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    ///
-    /// assert_eq!(format!("{instance:p}"), format!("{:p}", core::ptr::from_ref(&instance[0])));
-    /// ```
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // the address of the pointer it read, not the pointer itself.
-        core::fmt::Pointer::fmt(&self.as_ptr(), f)
-    }
-}
-
 impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
     type Element = T;
 
