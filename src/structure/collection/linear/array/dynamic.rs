@@ -917,32 +917,30 @@ impl<T> Dynamic<T> {
                     return Err(FailedAllocation);
                 };
 
-                {
-                    let ptr = self.buffer.as_ptr().cast::<u8>();
+                let ptr = self.buffer.as_ptr().cast::<u8>();
 
-                    // Deallocate.
-                    if unchanged == 0 && capacity == 0 {
-                        // SAFETY:
-                        // * allocated using the corresponding allocator.
-                        // * `existing_layout` is currently allocated.
-                        // * `new_layout` has non-zero size.
-                        // * `Layout` => `new.size() <= isize::MAX`.
-                        unsafe {
-                            alloc::dealloc(ptr, existing);
-                        }
+                // Deallocate.
+                if unchanged == 0 && capacity == 0 {
+                    // SAFETY:
+                    // * allocated using the corresponding allocator.
+                    // * `existing_layout` is currently allocated.
+                    // * `new_layout` has non-zero size.
+                    // * `Layout` => `new.size() <= isize::MAX`.
+                    unsafe {
+                        alloc::dealloc(ptr, existing);
+                    }
 
-                        // empty state => will _NOT_ be read/written to.
-                        NonNull::<T>::dangling().as_ptr()
-                    }
-                    // Reallocate.
-                    else {
-                        // SAFETY:
-                        // * allocated using the corresponding allocator.
-                        // * `existing_layout` is currently allocated.
-                        // * `new_layout` has non-zero size.
-                        // * `Layout` => `new.size() <= isize::MAX`.
-                        unsafe { alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
-                    }
+                    // empty state => will _NOT_ be read/written to.
+                    NonNull::<T>::dangling().as_ptr()
+                }
+                // Reallocate.
+                else {
+                    // SAFETY:
+                    // * allocated using the corresponding allocator.
+                    // * `existing_layout` is currently allocated.
+                    // * `new_layout` has non-zero size.
+                    // * `Layout` => `new.size() <= isize::MAX`.
+                    unsafe { alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
                 }
             }
         };
