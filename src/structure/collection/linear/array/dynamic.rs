@@ -1642,23 +1642,8 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 unsafe { self.buffer.as_ptr().add(offset) }
             };
 
-            // Shift elements `[index..]` one position to the right.
-            {
-                // SAFETY: reserved memory => within the allocated object.
-                let destination = unsafe { ptr.add(1) };
-
-                let Some(count) = self.initialized.checked_sub(index) else {
-                    unreachable!("index out of bound");
-                };
-
-                // SAFETY:
-                // * owned memory => source/destination valid for read/writes.
-                // * no aliasing restrictions => source and destination can overlap.
-                // * underlying buffer is aligned => both pointers are aligned.
-                unsafe {
-                    core::ptr::copy(ptr, destination, count);
-                }
-            }
+            // SAFETY: there is back capacity to shift into.
+            unsafe { self.shift_range(index.., 1); }
 
             if let Some(decrement) = self.back_capacity.checked_sub(1) {
                 self.back_capacity = decrement;
