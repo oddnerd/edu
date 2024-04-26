@@ -289,10 +289,9 @@ impl<T> Dynamic<T> {
                 unreachable!("negative amount of front capacity");
             };
 
-            // SAFETY: there is exactly enough front capacity to shift into.
-            unsafe {
-                self.shift_range(.., offset);
-            }
+            let Ok(_) = self.shift(offset) else {
+                unreachable!("not enough front capacity to shift into");
+            };
 
             if let Some(total) = self.back_capacity.checked_add(self.front_capacity) {
                 self.front_capacity = 0;
