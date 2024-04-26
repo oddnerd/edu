@@ -1813,11 +1813,11 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
 
     /// Remove the elements which match some `predicate`.
     ///
-    /// The `predicate` is called exactly once per each element, in order.
-    /// Elements for which the `predicate` is true are removed in order from
-    /// left to right. Elements for which the `predicate` is false are shifted
-    /// left to immediately after the previously retained element, thereby
-    /// maintaining order.
+    /// The `predicate` is called exactly once per each element, in order of
+    /// iteration. Elements for which the `predicate` is true are removed in
+    /// order from left to right. Elements for which the `predicate` is false
+    /// are shifted left to immediately after the previously retained element,
+    /// thereby maintaining order.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory for the result.
