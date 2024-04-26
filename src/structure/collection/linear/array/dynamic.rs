@@ -1436,11 +1436,8 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
         &self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
-        // `MaybeUninit<T>` has the same memory layout as `T`.
-        let ptr = self.buffer.cast::<T>().as_ptr();
-
-        // SAFETY: stays aligned within the allocated object.
-        let ptr = unsafe { ptr.add(self.front_capacity) };
+        // The pointer will only ever be read, no written to.
+        let ptr = self.as_ptr().cast_mut();
 
         // SAFETY: `self.buffer` is non-null => `ptr` is non-null
         let ptr = unsafe { NonNull::new_unchecked(ptr) };
@@ -1472,11 +1469,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
-        // `MaybeUninit<T>` has the same memory layout as `T`.
-        let ptr = self.buffer.cast::<T>().as_ptr();
-
-        // SAFETY: stays aligned within the allocated object.
-        let ptr = unsafe { ptr.add(self.front_capacity) };
+        let ptr = self.as_mut_ptr();
 
         // SAFETY: `self.buffer` is non-null => `ptr` is non-null
         let ptr = unsafe { NonNull::new_unchecked(ptr) };
