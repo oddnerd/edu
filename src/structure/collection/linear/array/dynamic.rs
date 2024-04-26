@@ -1731,12 +1731,8 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         }
         // Increase back capacity.
         else {
-            if let Some(next) = index.checked_add(1) {
-                // SAFETY: there is back capacity to shift into.
-                unsafe { self.shift_range(next.., 1); }
-            } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
-            }
+            // SAFETY: there is back capacity to shift into.
+            unsafe { self.shift_range(index.saturating_add(1).., 1); }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
