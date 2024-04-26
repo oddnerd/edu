@@ -568,11 +568,9 @@ impl<T> Dynamic<T> {
 
     /// Shift the initialized elements `offset` positions within the buffer.
     ///
-    /// The buffer first contains uninitialized [`Self::capacity_front`], then
-    /// initialized elements, and finally uninitialized
-    /// [`Self::capacity_back`]. This method  maintains the order of
-    /// initialized elements, but shifts them thereby converting some portion
-    /// of the capacity from front to back, or vice versa.
+    /// This method  maintains the order of initialized elements, but shifts
+    /// them thereby converting some portion of the capacity from front to
+    /// back, or vice versa.
     ///
     /// # Errors
     /// Yields [`OutOfBounds`] is there is not enough capacity to shift into.
@@ -594,7 +592,7 @@ impl<T> Dynamic<T> {
     ///
     /// // Allocate capacity at both ends.
     /// instance.reserve_front(256).expect("successful allocation");
-    /// instance.reserve_back(256);
+    /// instance.reserve_back(256).expect("successful allocation");
     ///
     /// // Shift initialized elements to the front of the buffer.
     /// instance.shift(-256).expect("offset <= capacity_front()");
