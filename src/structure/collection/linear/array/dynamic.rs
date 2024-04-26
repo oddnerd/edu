@@ -1126,15 +1126,15 @@ impl<T> Iterator for Dynamic<T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
     ///
-    /// assert_eq!(actual.next(), Some(0));
-    /// assert_eq!(actual.next(), Some(1));
-    /// assert_eq!(actual.next(), Some(2));
-    /// assert_eq!(actual.next(), Some(3));
-    /// assert_eq!(actual.next(), Some(4));
-    /// assert_eq!(actual.next(), Some(5));
-    /// assert_eq!(actual.next(), None);
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), Some(1));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(3));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(5));
+    /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         (self.initialized > 0).then(|| {
@@ -1172,10 +1172,9 @@ impl<T> Iterator for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let mut actual = Dynamic::from_iter(expected.clone()).into_iter();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
     ///
-    /// assert_eq!(actual.size_hint(), expected.into_iter().size_hint());
+    /// assert_eq!(instance.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.initialized, Some(self.initialized))
