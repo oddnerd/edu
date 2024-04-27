@@ -1078,7 +1078,7 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
         // SAFETY:
         // * the underlying `T` is initialized.
         // * lifetime bound to self => valid lifetime to return.
-        unsafe { & *ptr }
+        unsafe { &*ptr }
     }
 }
 
@@ -1655,7 +1655,9 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             };
 
             // SAFETY: there is back capacity to shift into.
-            unsafe { self.shift_range(index.., 1); }
+            unsafe {
+                self.shift_range(index.., 1);
+            }
 
             if let Some(decrement) = self.back_capacity.checked_sub(1) {
                 self.back_capacity = decrement;
@@ -1732,7 +1734,9 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         // Increase back capacity.
         else {
             // SAFETY: there is back capacity to shift into.
-            unsafe { self.shift_range(index.saturating_add(1).., 1); }
+            unsafe {
+                self.shift_range(index.saturating_add(1).., 1);
+            }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
@@ -1979,6 +1983,7 @@ impl<T> Drop for Drain<'_, T> {
             }
         }
 
+        // Update capacity.
         if self.range.end == self.underlying.initialized {
             if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
                 self.underlying.back_capacity = capacity;
@@ -1991,53 +1996,45 @@ impl<T> Drop for Drain<'_, T> {
             } else {
                 unreachable!("allocated more than `isize::MAX` bytes");
             }
-        } else {
+        }
+        // Shift to combine retained elements.
+        else {
+            let leading = self.range.start;
+
+            let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
+                unreachable!("not enough initialized elements to remove");
+            };
+
+            let Ok(offset) = isize::try_from(self.range.len()) else {
+                unreachable!("allocated more than `isize::MAX` bytes");
+            };
+
             let only_front_capacity =
                 self.underlying.front_capacity != 0 && self.underlying.back_capacity == 0;
             let only_back_capacity =
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
-            // Shift to combine the two divided regions of retained elements.
-            {
-                let leading = self.range.start;
+            if only_front_capacity || (!only_back_capacity && trailing > leading) {
+                self.underlying.back_capacity = self.range.len();
 
-                let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
-                    unreachable!("not enough initialized elements to remove");
+                let Some(offset) = offset.checked_neg() else {
+                    unreachable!("negative amount of elements");
                 };
 
-                let (source, destination, count) =
-                    if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                        // [front capacity] [remain] [drained] [shift] [back capacity]
+                let Some(end) = self.range.end.checked_add(trailing) else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
 
-                        self.underlying.back_capacity = self.range.len();
-
-                        // SAFETY: first initialized element of right group.
-                        let source = unsafe { ptr.add(self.range.end) };
-
-                        // SAFETY: where the first drained element was.
-                        let destination = unsafe { ptr.add(self.range.start) };
-
-                        (source, destination, trailing)
-                    } else {
-                        // [front capacity] [shift] [drained] [remain] [back capacity]
-
-                        self.underlying.front_capacity = self.range.len();
-
-                        // first initialized element of left group.
-                        let source = ptr;
-
-                        // SAFETY: rightward amount of drained elements.
-                        let destination = unsafe { ptr.add(self.range.len()) };
-
-                        (source, destination, leading)
-                    };
-
-                // SAFETY:
-                // * owned memory => source/destination valid for read/writes.
-                // * no aliasing restrictions => source and destination can overlap.
-                // * underlying buffer is aligned => both pointers are aligned.
+                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
                 unsafe {
-                    core::ptr::copy(source, destination, count);
+                    self.underlying.shift_range(self.range.end..end, offset);
+                }
+            } else {
+                self.underlying.front_capacity = self.range.len();
+
+                // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
+                unsafe {
+                    self.underlying.shift_range(0..self.range.start, offset);
                 }
             }
         }
