@@ -269,7 +269,7 @@ impl<T> Dynamic<T> {
     ///
     /// // Will allocate additional memory if needed.
     /// instance.reserve(512).expect("successful allocation");
-    /// assert_eq!(instance.capacity_back(), 1024); // Not 512! Amortized!
+    /// assert_eq!(instance.capacity_back(), 1018); // Not 512 - 6! Amortized!
     ///
     /// // That many elements can be inserted without invalidating pointers.
     /// let ptr = instance.as_ptr();
