@@ -158,7 +158,7 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     ///
     /// let ptr = expected.as_mut_ptr();
     /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// for index in 0..expected.len() {
     ///     use core::ops::IndexMut;
@@ -300,7 +300,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///
     /// let ptr = expected.as_mut_ptr();
     /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
