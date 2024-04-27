@@ -354,13 +354,14 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
     /// let ptr = expected.as_mut_ptr();
     /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert_eq!(actual.as_mut_ptr(), expected.as_mut_ptr());
     /// ```
