@@ -4939,7 +4939,6 @@ mod test {
                 _ = actual.remove(INDEX);
 
                 for index in INDEX..expected.len() - 1 {
-                    eprintln!("{index:?}");
                     assert_eq!(actual[index], expected[index + 1]);
                 }
             }
