@@ -1,0 +1,175 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "rust"
+version = "0.2.0"
+edition = "2021"
+
+authors = ["Tyler St. Onge <tyler@stonge.dev>"]
+description = "Hand-written implementations in Rust for personal reference"
+license = "Unlicense"
+
+readme = "README.md"
+repository = "https://github.com/oddnerd/rust"
+
+keywords = ["reference"]
+categories = ["algorithms", "data-structures", "rust-patterns", "mathematics"]
+
+publish = false
+
+[dependencies]
+
+# None!
+
+[lints.rust]
+# https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
+
+missing_abi                    = "warn" # Prefer explicit ABI linkage.
+missing_docs                   = "warn" # Require documenting public items.
+trivial_casts                  = "warn" # Prefer coercion over explicit cast.
+ffi_unwind_calls               = "warn" # Prevent using unwinding ABIs.
+unused_lifetimes               = "warn" # Prevent naming inferable lifetimes.
+unused_macro_rules             = "warn" # Prevent unused `macro_rules`.
+let_underscore_drop            = "warn" # Prevent expensive implicit dropping.
+single_use_lifetimes           = "warn" # Prefer placeholder lifetime.
+meta_variable_misuse           = "warn" # Prevent undeclared in macros.
+macro_use_extern_crate         = "warn" # Prefer explicitly importing macros.
+variant_size_differences       = "warn" # Prevent big variant memory disparity.
+unused_crate_dependencies      = "warn" # Prevent unused dependencies.
+missing_copy_implementations   = "warn" # Prefer deriving `Copy`.
+missing_debug_implementations  = "warn" # Debug formatting for public items.
+explicit_outlives_requirements = "warn" # Prefer lifetimes on types.
+
+unit_bindings             = "deny" # Prevent binding variables to unit type.
+keyword_idents            = "deny" # Prevent using reserved keywords.
+unused_results            = "deny" # Prefer explicitly handling `Result`.
+unreachable_pub           = "deny" # Prevent inaccessible public items.
+non_ascii_idents          = "deny" # Prefer ASCII source code.
+unstable_features         = "deny" # Prevent unstable features.
+unused_qualifications     = "deny" # Prefer names in scope.
+trivial_numeric_casts     = "deny" # Prevent casting to same type.
+unsafe_op_in_unsafe_fn    = "deny" # Require unsafe block in unsafe function.
+elided_lifetimes_in_paths = "deny" # Prefer explicit lifetimes.
+absolute_paths_not_starting_with_crate = "deny" # Prefer `crate::`.
+
+[lints.clippy]
+# https://rust-lang.github.io/rust-clippy/master/index.html
+
+# Cargo configuration.
+cargo_common_metadata   = "deny" # Require declaring package metadata.
+negative_feature_names  = "deny" # Prefer features which add functionally.
+redundant_feature_names = "deny" # Prevent restating they are features.
+
+# Prefer good coding practices over technically valid code.
+pedantic = "warn"
+
+# Dependencies
+wildcard_dependencies    = "deny" # Prefer specific version over any.
+unnecessary_self_imports = "deny" # Prevent importing `::{self}`.
+
+# Namespaces
+std_instead_of_core   = "deny" # Prefer using `core` over `std` module.
+std_instead_of_alloc  = "deny" # Prefer using `alloc` over `std` module.
+alloc_instead_of_core = "deny" # Prefer using `core` over `alloc` module.
+
+# Modules
+pub_without_shorthand     = "deny" # Prefer not using `in`.
+self_named_module_files   = "deny" # Prefer 'mod.rs'.
+tests_outside_test_module = "deny" # Require module for tests.
+
+# Types
+partial_pub_fields                = "warn" # Prefer interfaces and POD types.
+same_name_method                  = "warn" # Prefer uniquely named methods.
+empty_drop                        = "deny" # Prevent empty destructors.
+multiple_inherent_impl            = "deny" # Prevent multiple impl blocks.
+empty_structs_with_brackets       = "deny" # Prevent empty struct body.
+empty_enum_variants_with_brackets = "deny" # Prevent empty enum varients.
+
+# Casting
+as_underscore         = "warn" # Prefer explicit type over `as _`.
+pattern_type_mismatch = "warn" # Prevent implicit casts in pattern matching.
+
+# Error Handling
+assertions_on_result_states = "warn" # Prevent asserting `is_ok`/`is_err`.
+if_then_some_else_none      = "warn" # Prefer Boolean `then`.
+unwrap_used                 = "warn" # Prevent `unwrap`.
+expect_used                 = "warn" # Prevent `expect`.
+indexing_slicing            = "warn" # Prefer failable `get` over indexing.
+try_err                     = "deny" # Prevent using question mark on error.
+error_impl_error            = "deny" # Prevent naming errors `Error`.
+panic_in_result_fn          = "deny" # Prefer erroring instead of panic.
+missing_assert_message      = "deny" # Require explanation for asserts.
+
+# Vestigial Debugging
+print_stderr  = "warn" # Prevent `prinln!()`.
+print_stdout  = "warn" # Prevent `eprintln!()`.
+dbg_macro     = "warn" # Prevent `dbg!()`.
+use_debug     = "warn" # Prevent `{:?}` formatting.
+todo          = "warn" # Prevent `todo!()`.
+unimplemented = "deny" # Prevent `unimplemented!()`.
+
+# Misleading calls
+rc_buffer                  = "warn" # Prevent `Rc<Vec/String>`.
+rc_mutex                   = "warn" # Prevent `Rc<Mutex>`.
+mutex_atomic               = "warn" # Prefer atomics over mutex.
+clone_on_ref_ptr           = "deny" # Prefer `Rc::clone()`.
+str_to_string              = "deny" # Prefer `to_owned()`.
+string_to_string           = "deny" # Prefer `clone()`.
+suspicious_xor_used_as_pow = "deny" # Prevent XOR decimal numbers.
+
+# Safety
+multiple_unsafe_ops_per_block = "deny" # Prefer seperate unsafe blocks.
+undocumented_unsafe_blocks    = "deny" # Require safety comment.
+unnecessary_safety_comment    = "deny" # Prevent erroneous safety comment.
+unnecessary_safety_doc        = "deny" # Safe code does not need safety section.
+
+# Strings
+non_ascii_literal    = "warn" # Restrict literals to ASCII.
+string_slice         = "warn" # Prevent naively slicing UTF-8.
+format_push_string   = "deny" # Prefer `write!()`.
+needless_raw_strings = "deny" # Prefer plain string literals.
+string_lit_chars_any = "deny" # Prefer `matches!()`.
+
+# Restricted features
+exit          = "deny" # Prevent crashing via `exit`.
+mem_forget    = "deny" # Prevent leaking memory.
+infinite_loop = "deny" # Prevent infinite loops.
+ref_patterns  = "deny" # Prevent using `ref` keyword.
+
+# Style restrictions
+missing_docs_in_private_items   = "warn" # Require documenting private items.
+default_union_representation    = "warn" # Prefer C ABI unions over Rust's.
+arithmetic_side_effects         = "warn" # Explicitly underflow/overflow.
+let_underscore_must_use         = "warn" # Prevent ignoring must use.
+lossy_float_literal             = "warn" # Prevent unstorable float literals.
+verbose_file_reads              = "warn" # Prefer reading via filesystem.
+shadow_unrelated                = "deny" # Prevent name shadowing.
+else_if_without_else            = "deny" # Else branch for if chains.
+semicolon_inside_block          = "deny" # Prevent semicolon after block.
+unneeded_field_pattern          = "deny" # Prefer `..` over `_`.
+let_underscore_untyped          = "deny" # Prefer ignoring type.
+fn_to_numeric_cast_any          = "deny" # Prevent casting function pointers.
+wildcard_enum_match_arm         = "deny" # Explicitly matching enum values.
+redundant_type_annotations      = "deny" # Prevent repeating type.
+unseparated_literal_suffix      = "deny" # Prefer underscore in `literal_type`.
+mixed_read_write_in_expression  = "deny" # Prefer explicit order of operations.
+rest_pat_in_fully_bound_structs = "deny" # Prevent empty elipses.
+
+# Nursery (relatively likely to be false positives)
+branches_sharing_code         = "warn" # Prevent code duplication.
+cognitive_complexity          = "warn" # Prefer small/simple methods.
+imprecise_flops               = "warn" # Prefer accurate floating point math.
+needless_pass_by_ref_mut      = "warn" # Prefer immutable borrow.
+option_if_let_else            = "warn" # Prefer `map_or(_else)()`.
+suboptimal_flops              = "warn" # Prefer specific flotating point.
+debug_assert_with_mut_call    = "deny" # Prevent debug/release divergence.
+derive_partial_eq_without_eq  = "deny" # Derive `Eq` when possible.
+empty_line_after_doc_comments = "deny" # Prevent space after documentation.
+empty_line_after_outer_attr   = "deny" # Prevent space after attributes.
+equatable_if_let              = "deny" # Prevent Yoda (backwards) conditions.
+large_stack_frames            = "deny" # Restrict stack space per call frame.
+manual_clamp                  = "deny" # Prefer `clamp`.
+mutex_integer                 = "deny" # Prefer atomics over mutex.
+or_fun_call                   = "deny" # Prefer short-circuiting.
+trait_duplication_in_bounds   = "deny" # Prevent duplicating traits.
+useless_let_if_seq            = "deny" # Prefer inline if/else assignment.
