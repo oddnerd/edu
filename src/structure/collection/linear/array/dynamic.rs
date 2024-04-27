@@ -1967,21 +1967,7 @@ impl<T> Drop for Drain<'_, T> {
             return;
         }
 
-        let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
-
-        // Drop the elements yet to be yielded.
-        for index in self.next.clone() {
-            // SAFETY: index in bounds => aligned within the allocated object.
-            let ptr = unsafe { ptr.add(index) };
-
-            // SAFETY: the `MaybeUninit<T>` is initialized.
-            let element = unsafe { &mut *ptr };
-
-            // SAFETY: the underlying `T` is initialized.
-            unsafe {
-                element.assume_init_drop();
-            }
-        }
+        self.for_each(drop);
 
         // Update capacity.
         if self.range.end == self.underlying.initialized {
@@ -2037,12 +2023,6 @@ impl<T> Drop for Drain<'_, T> {
                     self.underlying.shift_range(0..self.range.start, offset);
                 }
             }
-        }
-
-        if let Some(initialized) = self.underlying.initialized.checked_sub(self.range.len()) {
-            self.underlying.initialized = initialized;
-        } else {
-            unreachable!("not enough initialized elements to remove")
         }
     }
 }
