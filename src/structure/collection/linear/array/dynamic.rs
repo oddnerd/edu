@@ -1881,7 +1881,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::list::List;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
