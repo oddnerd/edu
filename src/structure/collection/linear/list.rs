@@ -9,18 +9,19 @@ use super::Linear;
 ///
 /// # Insertion
 ///
-/// Elements can be placed before [`Linear::first`] via [`Self::prepend`], and
-/// elements can be placed after [`Linear::last`] via [`Self::append`]. Elements
-/// can be inserted at any given index via [`Self::insert`].
+/// * Elements can be placed before [`Linear::first`] via [`Self::prepend`].
+/// * Elements can be placed after [`Linear::last`] via [`Self::append`].
+/// * Elements can be inserted at any given index via [`Self::insert`].
 ///
 /// # Removal
 ///
-/// The [`Linear::first`] element can be removed via [`Self::front`] whereas
-/// the [`Linear::last`] element can be removed via [`Self::back`]. Elements at
-/// any given index can be removed via [`Self::remove`]. Elements can either be
-/// [retained](`Self::retain`) or [withdrawn](`Self::withdraw`) based on a
-/// given predicate. Elements within an index range can be moved out via
-/// [`Self::drain`] and all elements can be removed via [`Self::clear`].
+/// * [First](`Linear::first`) can be removed via [`front`](`Self::front`).
+/// * [Last](`Linear::last`) can be removed via [`back`](`Self::back`).
+/// * Any given index can be removed via [`remove`](`Self::remove`).
+/// * Elements can be [`retain`](`Self::retain`) or
+///   [`withdraw`](`Self::withdraw`) given a predicate.
+/// * An index range can be moved out via [`drain`](`Self::drain`).
+/// * All elements can be removed via [`clear`](`Self::clear`).
 pub trait List<'a>:
     Linear<'a>
     + IntoIterator<Item = Self::Element>
@@ -35,13 +36,16 @@ pub trait List<'a>:
     /// The elements `[..index]` remain unmodified whereas elements `[index..]`
     /// are shifted to the right such that they become `[index + 1..]`, and the
     /// element at `index` is the `element` being inserted.
+    ///
+    /// # Errors
+    /// Yields the `element` when it cannot be inserted.
     fn insert(
         &mut self,
         index: usize,
         element: Self::Element,
     ) -> Result<&mut Self::Element, Self::Element>;
 
-    /// Remove the element at `index`.
+    /// Remove the element at `index`, bounds checked.
     ///
     /// The elements at `[..index]` remain unmodified, the element at `index`
     /// is dropped, and the elements `[index + 1..]` are shifted to the left
@@ -59,11 +63,17 @@ pub trait List<'a>:
     }
 
     /// Insert an element such that it becomes the first.
+    ///
+    /// # Errors
+    /// If cannot insert the element.
     fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.insert(0, element)
     }
 
     /// Insert an element such that is becomes the last.
+    ///
+    /// # Errors
+    /// Yields the `element` when it cannot be inserted.
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.insert(self.len(), element)
     }
@@ -81,14 +91,15 @@ pub trait List<'a>:
     ) -> impl DoubleEndedIterator<Item = Self::Element>;
 
     /// Keep only the elements matching some `predicate`.
+    ///
+    /// # Errors
+    /// Yields the `element` when it cannot be inserted.
     fn retain(&mut self, mut predicate: impl FnMut(&Self::Element) -> bool) {
-        self.withdraw(|element| !predicate(element)).for_each(drop)
+        self.withdraw(|element| !predicate(element)).for_each(drop);
     }
 
     /// Drop all elements.
     fn clear(&mut self) {
-        for _ in 0..self.count() {
-            let _element = self.remove(0).expect("element to remove");
-        }
+        (0..self.count()).for_each(|index| drop(self.remove(index)));
     }
 }

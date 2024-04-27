@@ -24,26 +24,20 @@ use super::Linear;
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Array_(data_type)).
 pub trait Array<'a>: Linear<'a> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
-    ///
-    /// # Safety
-    /// * The object this pointer is derived from must outlive said pointer.
-    /// * The pointer must not be invalidated by modifying the object.
     fn as_ptr(&self) -> *const Self::Element;
 
     /// Obtain a mutable pointer to the underlying contigious memory buffer.
-    ///
-    /// # Safety
-    /// * The object this pointer is derived from must outlive said pointer.
-    /// * The pointer must not be invalidated by modifying the object.
     fn as_mut_ptr(&mut self) -> *mut Self::Element;
 
     /// Obtain an immutable slice to the elements.
     fn as_slice(&self) -> &[Self::Element] {
+        // SAFETY: points to count many initialized elements.
         unsafe { core::slice::from_raw_parts(self.as_ptr(), self.count()) }
     }
 
     /// Obtain a mutable slice to the elements.
     fn as_mut_slice(&mut self) -> &mut [Self::Element] {
+        // SAFETY: points to count many initialized elements.
         unsafe { core::slice::from_raw_parts_mut(self.as_mut_ptr(), self.count()) }
     }
 }

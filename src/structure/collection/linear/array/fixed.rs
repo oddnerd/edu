@@ -6,9 +6,11 @@ use super::Linear;
 
 /// Fixed size (statically stack allocated) [`Array`].
 ///
-/// [`Fixed`] is equivalent to Rust's primitive array (`[T; N]`) or C++'s
-/// smart array (`std::array`) which interprets the underlying array as being
-/// 'dumb' that eagerly decays to a pointer and wraps it in a object.
+/// [`Fixed`] is equivalent to Rust's primitive array ([`[T; N]`](array)) or
+/// C++'s smart array
+/// ([`std::array`](https://en.cppreference.com/w/cpp/container/array))
+/// which interprets the underlying array as being 'dumb' that eagerly decays
+/// to a pointer and wraps it in a object.
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Fixed<T, const N: usize> {
     /// Underlying memory buffer.
@@ -23,7 +25,7 @@ impl<T, const N: usize> From<[T; N]> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -57,8 +59,8 @@ impl<T: Default, const N: usize> Default for Fixed<T, N> {
         let mut uninitialized: [core::mem::MaybeUninit<T>; N] =
             unsafe { core::mem::MaybeUninit::uninit().assume_init() };
 
-        for element in uninitialized.iter_mut() {
-            let _ = element.write(Default::default());
+        for element in &mut uninitialized {
+            _ = element.write(Default::default());
         }
 
         // SAFETY:
@@ -83,24 +85,29 @@ impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
     /// let actual = Fixed::from(expected.clone());
     ///
     /// for index in 0..expected.len() {
-    /// use core::ops::Index;
+    ///     use core::ops::Index;
     ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        debug_assert!(index < N);
+        debug_assert!(index < N, "index out of bounds");
+
+        let ptr = self.data.as_ptr();
+
+        // SAFETY: index in bounds => aligned within allocated object.
+        let ptr = unsafe { ptr.add(index) };
+
         // SAFETY:
-        // * `index` index bounds => pointer is aligned within allocated object.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &*self.data.as_ptr().add(index) }
+        unsafe { &*ptr }
     }
 }
 
@@ -115,7 +122,7 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -127,12 +134,17 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        debug_assert!(index < N);
+        debug_assert!(index < N, "index out of bounds");
+
+        let ptr = self.data.as_mut_ptr();
+
+        // SAFETY: index in bounds => aligned within allocated object.
+        let ptr = unsafe { ptr.add(index) };
+
         // SAFETY:
-        // * `index` index bounds => pointer is aligned within allocated object.
         // * underlying object is initialized => points to initialized `T`.
         // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &mut *self.data.as_mut_ptr().add(index) }
+        unsafe { &mut *ptr }
     }
 }
 
@@ -148,7 +160,7 @@ impl<'a, T: 'a, const N: usize> IntoIterator for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -158,14 +170,19 @@ impl<'a, T: 'a, const N: usize> IntoIterator for Fixed<T, N> {
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
-            // SAFETY: [`ManuallyDrop<T>`] has same memory layout as `T`.
-            data: unsafe {
-                self.data
-                    .as_ptr()
-                    .cast::<[core::mem::ManuallyDrop<T>; N]>()
-                    .read()
-            },
+            data: {
+                let ptr = self.data.as_ptr();
 
+                // `ManuallyDrop<T>` has same memory layout as `T`.
+                let ptr = ptr.cast::<[core::mem::ManuallyDrop<T>; N]>();
+
+                // SAFETY:
+                // * Pointer is not null.
+                // * Pointer is aligned.
+                // * Points to initialized object.
+                // * This takes ownership (move).
+                unsafe { ptr.read() }
+            },
             next: 0..N,
         }
     }
@@ -201,7 +218,7 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
+    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -222,7 +239,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -236,15 +253,19 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
         &self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
-        unsafe {
-            // SAFETY: will never be written to.
+        let ptr = {
+            // This pointer will _never_ be written to.
             let ptr = self.data.as_ptr().cast_mut();
 
             // SAFETY: `data` exists => `ptr` is non-null.
-            let ptr = core::ptr::NonNull::new_unchecked(ptr);
+            unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+        };
 
-            super::Iter::new(ptr, N)
-        }
+        // SAFETY:
+        // * Pointer is aligned.
+        // * Pointer points to one allocated object.
+        // * Points to `N` initialized instance of `T`.
+        unsafe { super::Iter::new(ptr, N) }
     }
 
     /// Mutably iterate the elements in order.
@@ -254,7 +275,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -269,36 +290,41 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
-        unsafe {
-            let ptr = self.data.as_mut_ptr();
+        let ptr = {
+            // This pointer will _never_ be written to.
+            let ptr = self.data.as_ptr().cast_mut();
 
             // SAFETY: `data` exists => `ptr` is non-null.
-            let ptr = core::ptr::NonNull::new_unchecked(ptr);
+            unsafe { core::ptr::NonNull::new_unchecked(ptr) }
+        };
 
-            super::IterMut::new(ptr, N)
-        }
+        // SAFETY:
+        // * Pointer is aligned.
+        // * Pointer points to one allocated object.
+        // * Points to `N` initialized instance of `T`.
+        unsafe { super::IterMut::new(ptr, N) }
     }
 }
 
 impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
-    /// # Safety
-    /// * `self` must outlive the resultant pointer.
-    /// * Cannot write to resultant pointer or any pointer derived from it.
-    ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
-    /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::Collection;
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-    /// let actual = unsafe { core::slice::from_raw_parts(expected.as_ptr(), expected.count()) };
+    /// let actual = {
+    ///     let ptr = expected.as_ptr();
+    ///     let len = expected.count();
+    ///     unsafe { core::slice::from_raw_parts(ptr, len) }
+    /// };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
@@ -306,23 +332,24 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
         self.data.as_ptr()
     }
 
-    /// Obtain an immutable pointer to the underlying contigious memory buffer.
-    ///
-    /// # Safety
-    /// * `self` must outlive the resultant pointer.
+    /// Obtain an mutable pointer to the underlying contigious memory buffer.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Collection;
-    /// use rust::structure::collection::linear::Linear;
-    /// use rust::structure::collection::linear::array::Array;
+    /// use rust::structure::Collection;
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = unsafe { core::slice::from_raw_parts_mut(expected.as_mut_ptr(), expected.count()) };
+    /// let mut actual = {
+    ///     let ptr = expected.as_mut_ptr();
+    ///     let len = expected.count();
+    ///     unsafe { core::slice::from_raw_parts_mut(ptr, len) }
+    /// };
     ///
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
@@ -356,18 +383,26 @@ impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for IntoIter<T, N> {
     /// assert_eq!(format!("{instance:?}"), format!("[1, 2, 3, 4]"));
     /// ```
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut list = f.debug_list();
+        let mut list = &mut f.debug_list();
 
-        let ptr = self.data.as_ptr().cast_mut();
+        let ptr = {
+            // Will _never_ write to this pointer.
+            let ptr = self.data.as_ptr().cast_mut();
 
-        // SAFETY: `ManuallyDrop<T>` has the same memory layout at `T`.
-        let ptr = ptr.cast::<T>();
+            // `ManuallyDrop<T>` has the same memory layout at `T`.
+            ptr.cast::<T>()
+        };
 
         for index in self.next.clone() {
             // SAFETY: stays aligned within the allocated object.
             let ptr = unsafe { ptr.add(index) };
 
-            let _ = list.entry(unsafe { &*ptr });
+            // SAFETY:
+            // * Pointer is non-null.
+            // * Points to initialized instance of `T`.
+            let element = unsafe { &*ptr };
+
+            list = list.entry(element);
         }
 
         list.finish()
@@ -396,7 +431,7 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
         for offset in self.next.clone() {
             let ptr = self.data.as_mut_ptr();
 
-            // SAFETY: `T` has the same memory layout as [`ManuallyDrop<T>`].
+            // `T` has the same memory layout as [`ManuallyDrop<T>`].
             let ptr = ptr.cast::<T>();
 
             // SAFETY: stays aligned within the allocated object.
@@ -405,7 +440,9 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
             // SAFETY:
             // * owns underlying array => valid for reads and writes.
             // * within `self.next` => pointing to initialized value.
-            unsafe { ptr.drop_in_place() };
+            unsafe {
+                ptr.drop_in_place();
+            }
         }
     }
 }
@@ -420,7 +457,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
@@ -434,20 +471,17 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        match self.next.next() {
-            Some(index) => {
-                let array = self.data.as_mut_ptr();
+        self.next.next().map(|index| {
+            let array = self.data.as_mut_ptr();
 
-                // SAFETY: stays aligned within the allocated object.
-                let element = unsafe { array.add(index) };
+            // SAFETY: stays aligned within the allocated object.
+            let element = unsafe { array.add(index) };
 
-                // SAFETY: within bounds => pointing to initialized value.
-                let owned = unsafe { element.read() };
+            // SAFETY: this takes ownership (move).
+            let owned = unsafe { element.read() };
 
-                Some(core::mem::ManuallyDrop::into_inner(owned))
-            }
-            None => None,
-        }
+            core::mem::ManuallyDrop::into_inner(owned)
+        })
     }
 
     /// Query how many elements have yet to be yielded.
@@ -477,7 +511,7 @@ impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
@@ -491,20 +525,17 @@ impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        match self.next.next_back() {
-            Some(index) => {
-                let array = self.data.as_mut_ptr();
+        self.next.next_back().map(|index| {
+            let array = self.data.as_mut_ptr();
 
-                // SAFETY: stays aligned within the allocated object.
-                let element = unsafe { array.add(index) };
+            // SAFETY: stays aligned within the allocated object.
+            let element = unsafe { array.add(index) };
 
-                // SAFETY: within bounds => pointing to initialized value.
-                Some(core::mem::ManuallyDrop::into_inner(unsafe {
-                    element.read()
-                }))
-            }
-            None => None,
-        }
+            // SAFETY: this takes ownership (move).
+            let owned = unsafe { element.read() };
+
+            core::mem::ManuallyDrop::into_inner(owned)
+        })
     }
 }
 
@@ -513,6 +544,11 @@ impl<'a, T: 'a, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 impl<'a, T: 'a, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 
 #[cfg(test)]
+#[allow(
+    clippy::undocumented_unsafe_blocks,
+    clippy::unwrap_used,
+    clippy::expect_used
+)]
 mod test {
     use super::*;
 
@@ -525,7 +561,7 @@ mod test {
             #[test]
             fn initializes_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert_eq!(actual.data, expected);
             }
@@ -539,19 +575,19 @@ mod test {
         #[test]
         fn correct_element() {
             let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Fixed::from(expected.clone());
+            let actual = Fixed::from(expected);
 
-            for (index, expected) in expected.iter().enumerate() {
-                assert_eq!(actual.index(index), expected);
+            for (index, value) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), value);
             }
         }
 
         #[test]
-        #[should_panic]
+        #[should_panic = "index out of bounds"]
         fn panics_when_out_of_bounds() {
             let instance = Fixed::<(), 0>::default();
 
-            let _ = instance.index(0);
+            let _: &() = instance.index(0);
         }
     }
 
@@ -562,19 +598,19 @@ mod test {
         #[test]
         fn correct_element() {
             let mut expected = [0, 1, 2, 3, 4, 5];
-            let mut actual = Fixed::from(expected.clone());
+            let mut actual = Fixed::from(expected);
 
-            for (index, expected) in expected.iter_mut().enumerate() {
-                assert_eq!(actual.index_mut(index), expected);
+            for (index, value) in expected.iter_mut().enumerate() {
+                assert_eq!(actual.index_mut(index), value);
             }
         }
 
         #[test]
-        #[should_panic]
+        #[should_panic = "index out of bounds"]
         fn panics_when_out_of_bounds() {
             let mut instance = Fixed::<(), 0>::default();
 
-            let _ = instance.index_mut(0);
+            let _: &() = instance.index_mut(0);
         }
     }
 
@@ -587,7 +623,7 @@ mod test {
             #[test]
             fn element_count() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert_eq!(actual.into_iter().count(), expected.len());
             }
@@ -595,7 +631,7 @@ mod test {
             #[test]
             fn in_order() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert!(actual.into_iter().eq(expected.into_iter()));
             }
@@ -606,7 +642,7 @@ mod test {
                 #[test]
                 fn element_count() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert_eq!(actual.into_iter().rev().count(), expected.len());
                 }
@@ -614,7 +650,7 @@ mod test {
                 #[test]
                 fn in_order() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
                 }
@@ -626,7 +662,7 @@ mod test {
                 #[test]
                 fn hint() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert_eq!(
                         actual.into_iter().size_hint(),
@@ -637,9 +673,23 @@ mod test {
                 #[test]
                 fn len() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert_eq!(actual.into_iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected);
+
+                    let mut actual = actual.iter();
+
+                    (0..expected.len()).rev().for_each(|len| {
+                        _ = actual.next();
+
+                        assert_eq!(actual.size_hint(), (len, Some(len)));
+                    });
                 }
             }
 
@@ -666,7 +716,7 @@ mod test {
                     let mut actual = actual.into_iter();
 
                     // Exhaust the elements.
-                    actual.next().expect("the one element");
+                    let _: () = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -691,7 +741,7 @@ mod test {
         impl Default for Value {
             fn default() -> Self {
                 Value {
-                    underlying: 31415926,
+                    underlying: 31_415_926,
                 }
             }
         }
@@ -713,7 +763,7 @@ mod test {
         fn is_equivalent() {
             let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-            let actual = expected.clone();
+            let actual = expected;
 
             assert_eq!(actual, expected);
         }
@@ -726,8 +776,8 @@ mod test {
         fn eq_when_same_elements() {
             let expected = [0, 1, 2, 3, 4, 5];
 
-            let first = Fixed::from(expected.clone());
-            let second = Fixed::from(expected.clone());
+            let first = Fixed::from(expected);
+            let second = Fixed::from(expected);
 
             assert_eq!(first, second);
         }
@@ -744,8 +794,8 @@ mod test {
         fn is_symmetric() {
             let expected = [0, 1, 2, 3, 4, 5];
 
-            let first = Fixed::from(expected.clone());
-            let second = Fixed::from(expected.clone());
+            let first = Fixed::from(expected);
+            let second = Fixed::from(expected);
 
             // `first == second` <=> `second == first`
             assert_eq!(first, second);
@@ -756,9 +806,9 @@ mod test {
         fn is_transitive() {
             let expected = [0, 1, 2, 3, 4, 5];
 
-            let first = Fixed::from(expected.clone());
-            let second = Fixed::from(expected.clone());
-            let third = Fixed::from(expected.clone());
+            let first = Fixed::from(expected);
+            let second = Fixed::from(expected);
+            let third = Fixed::from(expected);
 
             // `first == second && second == third` => `first == third`
             assert_eq!(first, second);
@@ -783,7 +833,7 @@ mod test {
             #[test]
             fn is_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
             }
@@ -799,7 +849,7 @@ mod test {
             #[test]
             fn initialized_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert_eq!(Collection::count(&actual), expected.len());
             }
@@ -822,7 +872,7 @@ mod test {
             #[test]
             fn element_count() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert_eq!(actual.iter().count(), expected.len());
             }
@@ -830,7 +880,7 @@ mod test {
             #[test]
             fn in_order() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected.clone());
+                let actual = Fixed::from(expected);
 
                 assert!(actual.iter().eq(expected.iter()));
             }
@@ -841,7 +891,7 @@ mod test {
                 #[test]
                 fn element_count() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert_eq!(actual.iter().rev().count(), expected.len());
                 }
@@ -849,7 +899,7 @@ mod test {
                 #[test]
                 fn in_order() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert!(actual.iter().rev().eq(expected.iter().rev()));
                 }
@@ -861,7 +911,7 @@ mod test {
                 #[test]
                 fn hint() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert_eq!(
                         actual.iter().size_hint(),
@@ -872,9 +922,23 @@ mod test {
                 #[test]
                 fn len() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected.clone());
+                    let actual = Fixed::from(expected);
 
                     assert_eq!(actual.iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let actual = Fixed::from(expected);
+
+                    let mut actual = actual.iter();
+
+                    (0..expected.len()).rev().for_each(|len| {
+                        _ = actual.next();
+
+                        assert_eq!(actual.size_hint(), (len, Some(len)));
+                    });
                 }
             }
 
@@ -901,7 +965,7 @@ mod test {
                     let mut actual = actual.iter();
 
                     // Exhaust the elements.
-                    let _ = actual.next().expect("the one element");
+                    let _: &() = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -920,7 +984,7 @@ mod test {
             #[test]
             fn element_count() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Fixed::from(expected.clone());
+                let mut actual = Fixed::from(expected);
 
                 assert_eq!(actual.iter_mut().count(), expected.len());
             }
@@ -928,7 +992,7 @@ mod test {
             #[test]
             fn in_order() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Fixed::from(expected.clone());
+                let mut actual = Fixed::from(expected);
 
                 assert!(actual.iter_mut().eq(expected.iter_mut()));
             }
@@ -939,7 +1003,7 @@ mod test {
                 #[test]
                 fn element_count() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected.clone());
+                    let mut actual = Fixed::from(expected);
 
                     assert_eq!(actual.iter_mut().rev().count(), expected.len());
                 }
@@ -947,7 +1011,7 @@ mod test {
                 #[test]
                 fn in_order() {
                     let mut expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected.clone());
+                    let mut actual = Fixed::from(expected);
 
                     assert!(actual.iter_mut().rev().eq(expected.iter_mut().rev()));
                 }
@@ -959,7 +1023,7 @@ mod test {
                 #[test]
                 fn hint() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected.clone());
+                    let mut actual = Fixed::from(expected);
 
                     assert_eq!(
                         actual.iter_mut().size_hint(),
@@ -970,9 +1034,23 @@ mod test {
                 #[test]
                 fn len() {
                     let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected.clone());
+                    let mut actual = Fixed::from(expected);
 
                     assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    let mut actual = Fixed::from(expected);
+
+                    let mut actual = actual.iter_mut();
+
+                    (0..expected.len()).rev().for_each(|len| {
+                        _ = actual.next();
+
+                        assert_eq!(actual.size_hint(), (len, Some(len)));
+                    });
                 }
             }
 
@@ -999,7 +1077,7 @@ mod test {
                     let mut actual = actual.iter_mut();
 
                     // Exhaust the elements.
-                    let _ = actual.next().expect("the one element");
+                    let _: &() = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
