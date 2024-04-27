@@ -332,7 +332,7 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
         self.data.as_ptr()
     }
 
-    /// Obtain an immutable pointer to the underlying contigious memory buffer.
+    /// Obtain an mutable pointer to the underlying contigious memory buffer.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -344,11 +344,11 @@ impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
     /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
-    /// let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-    /// let actual = {
+    /// let mut expected = Fixed::from([0, 1, 2, 3, 4, 5]);
+    /// let mut actual = {
     ///     let ptr = expected.as_mut_ptr();
     ///     let len = expected.count();
-    ///     unsafe { core::slice::from_raw_parts(ptr, len) }
+    ///     unsafe { core::slice::from_raw_parts_mut(ptr, len) }
     /// };
     ///
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
