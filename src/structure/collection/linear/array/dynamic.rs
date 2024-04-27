@@ -1872,8 +1872,8 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             predicate,
             remaining,
             retained: head,
-            head,
-            tail,
+            next_front: head,
+            next_back: tail,
             trailing: 0,
         }
     }
@@ -1969,7 +1969,6 @@ impl<T> Drop for Drain<'_, T> {
 
         self.for_each(drop);
 
-        // Update capacity.
         if self.range.end == self.underlying.initialized {
             if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
                 self.underlying.back_capacity = capacity;
@@ -1982,9 +1981,7 @@ impl<T> Drop for Drain<'_, T> {
             } else {
                 unreachable!("allocated more than `isize::MAX` bytes");
             }
-        }
-        // Shift to combine retained elements.
-        else {
+        } else {
             let leading = self.range.start;
 
             let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
@@ -2178,10 +2175,10 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     remaining: usize,
 
     /// The next (front) element to query with the predicate.
-    head: NonNull<T>,
+    next_front: NonNull<T>,
 
     /// The next (back) element to query with the predicate.
-    tail: NonNull<T>,
+    next_back: NonNull<T>,
 
     /// The number of retained elements at the end because of `next_back`.
     trailing: usize,
@@ -2216,7 +2213,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
         // Shift any string of trailing retained elements into position.
         {
             // SAFETY: aligned within the allocated object, or one byte past.
-            let trailing = unsafe { self.tail.as_ptr().add(1) };
+            let trailing = unsafe { self.next_back.as_ptr().add(1) };
 
             // SAFETY:
             // * owned memory => source/destination valid for read/writes.
@@ -2251,7 +2248,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        let first_retained = self.head;
+        let first_retained = self.next_front;
         let mut consecutive_retained = 0;
 
         // SAFETY:
@@ -2271,11 +2268,11 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             }
 
             // SAFETY: the element is initialized.
-            let current = unsafe { self.head.as_ref() };
+            let current = unsafe { self.next_front.as_ref() };
 
-            self.head = {
+            self.next_front = {
                 // SAFETY: aligned within the allocated object, or one byte past.
-                let ptr = unsafe { self.head.as_ptr().add(1) };
+                let ptr = unsafe { self.next_front.as_ptr().add(1) };
 
                 // SAFETY: `head` is not null => pointer is not null.
                 unsafe { NonNull::new_unchecked(ptr) }
@@ -2417,13 +2414,13 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             }
 
             // SAFETY: the element is initialized.
-            let current = unsafe { self.tail.as_ref() };
+            let current = unsafe { self.next_back.as_ref() };
 
             // Do _NOT_ moved the pointer _before_ the allocated object.
             if self.remaining != 0 {
-                self.tail = {
+                self.next_back = {
                     // SAFETY: aligned within the allocated object.
-                    let ptr = unsafe { self.tail.as_ptr().sub(1) };
+                    let ptr = unsafe { self.next_back.as_ptr().sub(1) };
 
                     // SAFETY: `retained` is not null => pointer is not null.
                     unsafe { NonNull::new_unchecked(ptr) }
@@ -2498,13 +2495,13 @@ impl<T, F: FnMut(&T) -> bool> core::fmt::Debug for Withdraw<'_, T, F> {
         let origin = self.underlying.buffer.as_ptr().cast::<T>();
 
         // SAFETY: both pointers are aligned within the allocated object.
-        let head = unsafe { self.head.as_ptr().offset_from(origin) };
+        let head = unsafe { self.next_front.as_ptr().offset_from(origin) };
 
         // SAFETY: both pointers are aligned within the allocated object.
         let retained = unsafe { self.retained.as_ptr().offset_from(origin) };
 
         // SAFETY: both pointers are aligned within the allocated object.
-        let tail = unsafe { self.tail.as_ptr().offset_from(origin) };
+        let tail = unsafe { self.next_back.as_ptr().offset_from(origin) };
 
         f.debug_struct("Withdraw")
             .field("head index", &head)
