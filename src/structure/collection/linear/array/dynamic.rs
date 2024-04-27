@@ -301,6 +301,11 @@ impl<T> Dynamic<T> {
             }
         }
 
+        // Prevent amortized growth when unnecessary.
+        if self.back_capacity >= capacity {
+            return Ok(self);
+        }
+
         let amortized = self.amortized(capacity).unwrap_or(capacity);
 
         if self.reserve_back(amortized).is_ok() {
