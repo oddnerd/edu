@@ -2029,8 +2029,6 @@ impl<T> Drop for Drain<'_, T> {
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
             if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                self.underlying.back_capacity = self.range.len();
-
                 let Some(offset) = offset.checked_neg() else {
                     unreachable!("negative amount of elements");
                 };
@@ -2043,14 +2041,20 @@ impl<T> Drop for Drain<'_, T> {
                 unsafe {
                     self.underlying.shift_range(self.range.end..end, offset);
                 }
-            } else {
-                self.underlying.front_capacity = self.range.len();
 
+                self.underlying.back_capacity = self.range.len();
+            } else {
                 // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
                 unsafe {
                     self.underlying.shift_range(0..self.range.start, offset);
                 }
+
+                self.underlying.front_capacity = self.range.len();
             }
+        }
+
+        if let Some(decreased) = self.underlying.initialized.checked_sub(self.range.len()) {
+            self.underlying.initialized = decreased;
         }
     }
 }
