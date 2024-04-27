@@ -2,6 +2,9 @@
 
 use super::Linear;
 
+pub mod singly;
+pub use singly::Singly;
+
 /// A modifiable [`Linear`] [`super::Collection`].
 ///
 /// Unlike the base [`Linear`] trait, implementors of [`Self`] provide methods
