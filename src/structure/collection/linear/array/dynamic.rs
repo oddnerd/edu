@@ -3092,7 +3092,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                assert!(actual.shrink(Some(256)).is_err());
+                assert!(actual.shrink(Some(256)).is_ok());
+                assert_eq!(actual.capacity(), 64);
             }
 
             #[test]
@@ -3212,7 +3213,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                assert!(actual.shrink_front(Some(256)).is_err());
+                assert!(actual.shrink_front(Some(256)).is_ok());
+                assert_eq!(actual.capacity(), 64);
             }
 
             #[test]
@@ -3323,7 +3325,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                assert!(actual.shrink_back(Some(256)).is_err());
+                assert!(actual.shrink_back(Some(256)).is_ok());
+                assert_eq!(actual.capacity(), 64);
             }
 
             #[test]
