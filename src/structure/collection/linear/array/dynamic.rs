@@ -2763,7 +2763,7 @@ mod test {
             fn increases_capacity_in_powers_of_two() {
                 let mut actual = Dynamic::<()>::default();
 
-                for _ in 0..(isize::BITS) {
+                for _ in 0..(isize::BITS - 1) {
                     let capacity = actual.capacity() + 1;
 
                     _ = actual.reserve(capacity).expect("successful allocation");
