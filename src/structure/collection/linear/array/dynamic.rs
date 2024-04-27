@@ -620,7 +620,7 @@ impl<T> Dynamic<T> {
                     return Err(OutOfBounds);
                 }
 
-                if let Some(capacity) = self.front_capacity.checked_add(offset.unsigned_abs()) {
+                if let Some(capacity) = self.back_capacity.checked_add(offset.unsigned_abs()) {
                     self.back_capacity = capacity;
                 } else {
                     unreachable!("allocated more than `isize::MAX` bytes");
