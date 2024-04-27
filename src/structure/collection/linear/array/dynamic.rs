@@ -1465,11 +1465,18 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
         &self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
-        // The pointer will only ever be read, no written to.
-        let ptr = self.as_ptr().cast_mut();
+        let ptr = if self.initialized > 0 {
+            // The pointer will only ever be read, no written to.
+            let ptr = self.as_ptr().cast_mut();
 
-        // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-        let ptr = unsafe { NonNull::new_unchecked(ptr) };
+            // SAFETY: initialized elements => `ptr` is non-null
+            unsafe { NonNull::new_unchecked(ptr) }
+        } else {
+            debug_assert_eq!(self.initialized, 0, "initialized elements");
+
+            // no initialized elements => The pointer will not be read.
+            NonNull::dangling()
+        };
 
         // SAFETY: `ptr` is dangling if and only if no elements have been
         // initialized, in which case the pointer will not be read.
@@ -1498,10 +1505,17 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
-        let ptr = self.as_mut_ptr();
+        let ptr = if self.initialized > 0 {
+            let ptr = self.as_mut_ptr();
 
-        // SAFETY: `self.buffer` is non-null => `ptr` is non-null
-        let ptr = unsafe { NonNull::new_unchecked(ptr) };
+            // SAFETY: initialized elements => `ptr` is non-null
+            unsafe { NonNull::new_unchecked(ptr) }
+        } else {
+            debug_assert_eq!(self.initialized, 0, "initialized elements");
+
+            // no initialized elements => The pointer will not be read.
+            NonNull::dangling()
+        };
 
         // SAFETY: `ptr` is dangling if and only if no elements have been
         // initialized, in which case the pointer will not be read.
@@ -1727,12 +1741,6 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
             // SAFETY: index within bounds => aligned within allocated object.
             let ptr = unsafe { self.as_ptr().add(index) };
 
-            if let Some(decremented) = self.initialized.checked_sub(1) {
-                self.initialized = decremented;
-            } else {
-                unreachable!("no initialized element to remove");
-            };
-
             // SAFETY:
             // * owned memory => pointer is valid for reads.
             // * Underlying `T` is initialized.
@@ -1752,7 +1760,7 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
         else {
             // SAFETY: there is back capacity to shift into.
             unsafe {
-                self.shift_range(index.saturating_add(1).., 1);
+                self.shift_range(index.saturating_add(1).., -1);
             }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
@@ -1761,6 +1769,12 @@ impl<'a, T: 'a> List<'a> for Dynamic<T> {
                 unreachable!("allocated more that `isize::MAX` bytes");
             };
         }
+
+        if let Some(decremented) = self.initialized.checked_sub(1) {
+            self.initialized = decremented;
+        } else {
+            unreachable!("no initialized element to remove");
+        };
 
         Some(element)
     }
@@ -4921,6 +4935,7 @@ mod test {
                 _ = actual.remove(INDEX);
 
                 for index in INDEX..expected.len() - 1 {
+                    eprintln!("{index:?}");
                     assert_eq!(actual[index], expected[index + 1]);
                 }
             }
