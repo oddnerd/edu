@@ -83,3 +83,31 @@ impl<'a, T: 'a> core::ops::Index<usize> for Singly<T> {
         &current.element
     }
 }
+
+impl<'a, T: 'a> core::ops::IndexMut<usize> for Singly<T> {
+    /// Query the element `index` positions from the start.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        let mut current = self;
+
+        for _ in 0..index {
+            if let Some(next) = &mut current.next {
+                current = next;
+            } else {
+                panic!("index out of bounds");
+            }
+        }
+
+        &mut current.element
+    }
+}
