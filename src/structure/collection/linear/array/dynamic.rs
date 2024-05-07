@@ -1462,7 +1462,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// }
     /// ```
     fn iter(
-        &self,
+        &'a self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = if self.initialized > 0 {
@@ -1501,7 +1501,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// }
     /// ```
     fn iter_mut(
-        &mut self,
+        &'a mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {

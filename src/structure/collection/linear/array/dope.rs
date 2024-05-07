@@ -276,7 +276,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// assert!(actual.iter().eq(expected.iter()))
     /// ```
     fn iter(
-        &self,
+        &'a self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         // SAFETY:
@@ -305,7 +305,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// assert!(actual.iter_mut().eq(expected.iter_mut()));
     /// ```
     fn iter_mut(
-        &mut self,
+        &'a mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {

@@ -250,7 +250,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// }
     /// ```
     fn iter(
-        &self,
+        &'a self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = {
@@ -286,7 +286,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// }
     /// ```
     fn iter_mut(
-        &mut self,
+        &'a mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
