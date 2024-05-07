@@ -9,7 +9,7 @@ use std::alloc;
 /// Independently allocated elements connected via a single link.
 ///
 /// Each element exists with a 'node', each of which are a separate allocated
-/// object. These nodes are logically arranged in [`Self::Linear`] fashion
+/// object. These nodes are logically arranged in [`super::Linear`] fashion
 /// where each element links to the element after it and nothing else.
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Linked_list).
