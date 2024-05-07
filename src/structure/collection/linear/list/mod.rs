@@ -1,6 +1,7 @@
 //! Implementations of [`List`].
 
 use super::Linear;
+use super::Collection;
 
 pub mod singly;
 pub use singly::Singly;

@@ -1,5 +1,7 @@
 //! Implementation of [`Singly`].
 
+use super::Collection;
+use super::Linear;
 use super::List;
 
 use std::alloc;
@@ -17,4 +19,25 @@ pub struct Singly<T> {
 
     /// The next element, if there is one.
     next: Option<Box<Singly<T>>>,
+}
+
+impl<'a, T: 'a> Collection<'a> for Singly<T> {
+    type Element = T;
+
+    fn count(&self) -> usize {
+        let mut current = self;
+        let mut count: usize = 1;
+
+        while let Some(next) = &current.next {
+            current = next;
+
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                panic!("too many elements to count");
+            }
+        }
+
+        count
+    }
 }
