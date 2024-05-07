@@ -21,39 +21,6 @@ pub struct Singly<T> {
     next: Option<Box<Singly<T>>>,
 }
 
-impl<'a, T: 'a> Collection<'a> for Singly<T> {
-    type Element = T;
-
-    /// Query how many elements are contained in the [`Collection`].
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
-    ///
-    /// # Panics
-    /// Panics if more than [`usize::MAX`] elements are contained.
-    ///
-    /// # Examples
-    /// ```
-    /// todo!();
-    /// ```
-    fn count(&self) -> usize {
-        let mut current = self;
-        let mut count: usize = 1;
-
-        while let Some(next) = &current.next {
-            current = next;
-
-            if let Some(incremented) = count.checked_add(1) {
-                count = incremented;
-            } else {
-                panic!("too many elements to count");
-            }
-        }
-
-        count
-    }
-}
-
 impl<'a, T: 'a> core::ops::Index<usize> for Singly<T> {
     type Output = T;
 
@@ -109,5 +76,38 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Singly<T> {
         }
 
         &mut current.element
+    }
+}
+
+impl<'a, T: 'a> Collection<'a> for Singly<T> {
+    type Element = T;
+
+    /// Query how many elements are contained in the [`Collection`].
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Panics
+    /// Panics if more than [`usize::MAX`] elements are contained.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!();
+    /// ```
+    fn count(&self) -> usize {
+        let mut current = self;
+        let mut count: usize = 1;
+
+        while let Some(next) = &current.next {
+            current = next;
+
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                panic!("too many elements to count");
+            }
+        }
+
+        count
     }
 }
