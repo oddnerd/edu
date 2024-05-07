@@ -53,3 +53,33 @@ impl<'a, T: 'a> Collection<'a> for Singly<T> {
         count
     }
 }
+
+impl<'a, T: 'a> core::ops::Index<usize> for Singly<T> {
+    type Output = T;
+
+    /// Query the element `index` positions from the start.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    fn index(&self, index: usize) -> &Self::Output {
+        let mut current = self;
+
+        for _ in 0..index {
+            if let Some(next) = &current.next {
+                current = next;
+            } else {
+                panic!("index out of bounds");
+            }
+        }
+
+        &current.element
+    }
+}
