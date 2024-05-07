@@ -24,6 +24,18 @@ pub struct Singly<T> {
 impl<'a, T: 'a> Collection<'a> for Singly<T> {
     type Element = T;
 
+    /// Query how many elements are contained in the [`Collection`].
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Panics
+    /// Panics if more than [`usize::MAX`] elements are contained.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!();
+    /// ```
     fn count(&self) -> usize {
         let mut current = self;
         let mut count: usize = 1;
