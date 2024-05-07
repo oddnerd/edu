@@ -98,7 +98,7 @@ impl<'a, T: 'a> Collection<'a> for Singly<T> {
         let mut current = self;
         let mut count: usize = 1;
 
-        while let Some(next) = &current.next {
+        while let Some(next) = current.next.as_ref() {
             current = next;
 
             if let Some(incremented) = count.checked_add(1) {
