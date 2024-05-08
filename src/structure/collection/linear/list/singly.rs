@@ -232,17 +232,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// # Performance
     /// This method take O(1) time and consumes O(1) memory.
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.map(|current| {
-            self.next = current.next.as_mut().map(core::convert::AsMut::as_mut);
-
-            if let (Some(next), Some(back)) = (self.next, self.previous_back) {
-                if core::ptr::addr_eq(next, back) {
-                    self.next = None;
-                }
-            }
-
-            &mut current.element
-        })
+        todo!("weird lifetime and multiple borrow issues");
     }
 
     /// Query how many elements have yet to be yielded.
@@ -268,13 +258,13 @@ impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn len(&self) -> usize {
-        let Some(mut current) = self.next else {
+        let Some(mut current) = self.next.as_deref() else {
             return 0;
         };
 
         let mut count: usize = 1;
 
-        while let Some(next) = current.next.as_mut() {
+        while let Some(next) = current.next.as_ref() {
             if let Some(back) = self.previous_back {
                 if core::ptr::addr_eq(next, back) {
                     break;
@@ -300,20 +290,29 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// # Performance
     /// This method take O(N) time and consumes O(1) memory.
     fn next_back(&mut self) -> Option<Self::Item> {
-        let mut current = self.next?;
+        todo!("weird lifetime and multiple borrow issues");
+    }
+}
 
-        while let Some(next) = current.next.as_mut() {
-            if let Some(back) = self.previous_back {
-                if core::ptr::addr_eq(next, back) {
-                    break;
-                }
-            }
-
-            current = next;
+impl<'a, T: 'a> Linear<'a> for Singly<T> {
+    fn iter(
+        &'a self,
+    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    {
+        Iter {
+            next: Some(self),
+            previous_back: None,
         }
+    }
 
-        self.previous_back = Some(current);
-
-        Some(&mut current.element)
+    fn iter_mut(
+        &'a mut self,
+    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+           + ExactSizeIterator
+           + core::iter::FusedIterator {
+        IterMut {
+            next: Some(self),
+            previous_back: None,
+        }
     }
 }
