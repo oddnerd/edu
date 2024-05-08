@@ -170,7 +170,23 @@ impl<'a, T: 'a> Collection<'a> for Singly<T> {
 }
 
 /// Immutable iterator over a [`Singly`].
-struct Iter<T> {
+struct Iter<'a, T> {
     /// The next element to yield, if any.
-    next: Option<Node<T>>,
+    next: Option<&'a Node<T>>,
+}
+
+impl<'a, T: 'a> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    /// Obtain the next element from the front, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|current| {
+            self.next = current.next.as_deref();
+
+            &current.element
+        })
+    }
 }
