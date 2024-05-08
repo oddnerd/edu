@@ -109,3 +109,28 @@ impl<T> core::ops::Index<usize> for Singly<T> {
         &current.element
     }
 }
+
+impl<T> core::ops::IndexMut<usize> for Singly<T> {
+    /// Obtain a mutable reference to the element at `index`.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        let Some(mut current) = self.elements.as_mut() else {
+            panic!("no elements contained");
+        };
+
+        for _ in 0..index {
+            if let Some(next) = current.next.as_mut() {
+                current = next;
+            } else {
+                panic!("index out of bounds");
+            }
+        }
+
+        &mut current.element
+    }
+}
