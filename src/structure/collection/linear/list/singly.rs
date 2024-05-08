@@ -249,40 +249,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
 
 impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
-impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {
-    /// Query how many elements have yet to be yielded.
-    ///
-    /// # Panics
-    /// This method panics if more than [`usize::MAX`] elements.
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
-    fn len(&self) -> usize {
-        let Some(mut current) = self.next.as_deref() else {
-            return 0;
-        };
-
-        let mut count: usize = 1;
-
-        while let Some(next) = current.next.as_ref() {
-            if let Some(back) = self.previous_back {
-                if core::ptr::addr_eq(next, back) {
-                    break;
-                }
-            }
-
-            current = next;
-
-            if let Some(incremented) = count.checked_add(1) {
-                count = incremented;
-            } else {
-                panic!("too many elements to count");
-            }
-        }
-
-        count
-    }
-}
+impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// Obtain the next element from the back.
