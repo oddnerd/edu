@@ -38,6 +38,13 @@ impl<T> Default for Singly<T> {
 }
 
 impl<T> Drop for Singly<T> {
+    /// Iteratively drop all contained elements.
+    ///
+    /// The default destructor implementation will _NOT_ be tail recursive,
+    /// hence this provided iterative method to prevent stack overflow.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
     fn drop(&mut self) {
         let mut current = self.elements.take();
 
