@@ -1,23 +1,23 @@
 //! Implementation of [`Singly`].
 
 pub struct Singly<T> {
-    head: Link<T>,
+    head: Option<Box<Node<T>>>,
 }
 
 impl<T> Singly<T> {
     pub fn prepend(&mut self, value: T) {
         let new = Box::new(Node {
             element: value,
-            next: core::mem::replace(&mut self.head, Link::Empty),
+            next: core::mem::replace(&mut self.head, None),
         });
 
-        self.head = Link::More(new);
+        self.head = Some(new);
     }
 
     pub fn remove_front(&mut self) -> Option<T> {
-        match core::mem::replace(&mut self.head, Link::Empty) {
-            Link::Empty => None,
-            Link::More(node) => {
+        match core::mem::replace(&mut self.head, None) {
+            None => None,
+            Some(node) => {
                 self.head = node.next;
                 Some(node.element)
             }
@@ -27,26 +27,21 @@ impl<T> Singly<T> {
 
 impl<T> Default for Singly<T> {
     fn default() -> Self {
-        Singly { head: Link::Empty }
+        Singly { head: None }
     }
 }
 
 impl<T> Drop for Singly<T> {
     fn drop(&mut self) {
-        let mut current = core::mem::replace(&mut self.head, Link::Empty);
+        let mut current = core::mem::replace(&mut self.head, None);
 
-        while let Link::More(mut next) = current {
-            current = core::mem::replace(&mut next.next, Link::Empty);
+        while let Some(mut next) = current {
+            current = core::mem::replace(&mut next.next, None);
         }
     }
 }
 
-enum Link<T> {
-    Empty,
-    More(Box<Node<T>>),
-}
-
 struct Node<T> {
     element: T,
-    next: Link<T>
+    next: Option<Box<Node<T>>>
 }
