@@ -4,6 +4,12 @@ pub struct Singly<T> {
     head: Link<T>,
 }
 
+impl<T> Default for Singly<T> {
+    fn default() -> Self {
+        Singly { head: Link::Empty }
+    }
+}
+
 enum Link<T> {
     Empty,
     More(Box<Node<T>>),
