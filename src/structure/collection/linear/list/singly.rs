@@ -18,8 +18,12 @@ pub struct Singly<T> {
     elements: Option<Box<Node<T>>>,
 }
 
+/// An independently allocated element contained within some [`Singly`].
 struct Node<T> {
+    /// The underlying contained value.
     element: T,
+
+    /// Link to the rest of the list.
     next: Option<Box<Node<T>>>
 }
 
