@@ -28,6 +28,10 @@ struct Node<T> {
 }
 
 impl<T> Default for Singly<T> {
+    /// Create an empty instance of [`Singly`].
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory for the result.
     fn default() -> Self {
         Singly { elements: None }
     }
