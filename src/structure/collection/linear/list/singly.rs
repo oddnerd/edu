@@ -1,18 +1,20 @@
 //! Implementation of [`Singly`].
 
-// Independently allocated elements connected via a single link.
+/// Independently allocated elements connected via a single link.
 ///
 /// Each element exists within separate allocated object, referred to as a
 /// node. Each node contains a single pointer which is said to 'link' to
-/// subsequent elements in a [`Linear`] sequence. Therefore, [`Self`] points to
-/// the first node (if any) and each subsequent node points to the next until
-/// the last element which points to nothing as visualized below:
+/// subsequent elements in a [`super::Linear`] sequence. Therefore, [`Self`]
+/// points to the first node (if any) and each subsequent node points to the
+/// next until the last element which points to nothing as visualized below:
 ///
 /// ```text
 ///         +-------+    +---------+    +---------+           +------+
 /// Self -> | first | -> | element | -> | element | -> ... -> | last |
 ///         +-------+    +---------+    +---------+           +------+
 /// ```
+///
+/// See also: [Wikipedia](https://en.wikipedia.org/wiki/Linked_list)
 pub struct Singly<T> {
     /// The contained elements.
     elements: Option<Box<Node<T>>>,
