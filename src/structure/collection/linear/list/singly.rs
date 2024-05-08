@@ -13,6 +13,16 @@ impl<T> Singly<T> {
 
         self.head = Link::More(new);
     }
+
+    pub fn remove_front(&mut self) -> Option<T> {
+        match core::mem::replace(&mut self.head, Link::Empty) {
+            Link::Empty => None,
+            Link::More(node) => {
+                self.head = node.next;
+                Some(node.element)
+            }
+        }
+    }
 }
 
 impl<T> Default for Singly<T> {
