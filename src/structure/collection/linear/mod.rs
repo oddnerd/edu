@@ -61,12 +61,12 @@ use super::Collection;
 pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
     fn iter(
-        &'a self,
+        &self,
     ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
     fn iter_mut(
-        &'a mut self,
+        &mut self,
     ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator;
