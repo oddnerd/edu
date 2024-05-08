@@ -1,18 +1,15 @@
 //! Implementation of [`Singly`].
 
-use super::Collection;
-use super::Linear;
-use super::List;
+pub struct Singly<T> {
+    head: Link<T>,
+}
 
-use std::alloc;
-
-pub enum Singly<T> {
+enum Link<T> {
     Empty,
     More(Box<Node<T>>),
 }
 
 struct Node<T> {
     element: T,
-
-    next: Singly<T>,
+    next: Link<T>
 }
