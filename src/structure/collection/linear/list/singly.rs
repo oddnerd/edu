@@ -31,6 +31,16 @@ impl<T> Default for Singly<T> {
     }
 }
 
+impl<T> Drop for Singly<T> {
+    fn drop(&mut self) {
+        let mut current = core::mem::replace(&mut self.head, Link::Empty);
+
+        while let Link::More(mut next) = current {
+            current = core::mem::replace(&mut next.next, Link::Empty);
+        }
+    }
+}
+
 enum Link<T> {
     Empty,
     More(Box<Node<T>>),
