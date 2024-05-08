@@ -82,3 +82,30 @@ impl<T> Singly<T> {
         self.elements.as_mut().map(|node| &mut node.element)
     }
 }
+
+impl<T> core::ops::Index<usize> for Singly<T> {
+    type Output = T;
+
+    /// Obtain an immutable reference to the element at `index`.
+    ///
+    /// # Panics
+    /// Panics if `index` is out of bounds.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn index(&self, index: usize) -> &Self::Output {
+        let Some(mut current) = self.elements.as_ref() else {
+            panic!("no elements contained");
+        };
+
+        for _ in 0..index {
+            if let Some(next) = current.next.as_ref() {
+                current = next;
+            } else {
+                panic!("index out of bounds");
+            }
+        }
+
+        &current.element
+    }
+}
