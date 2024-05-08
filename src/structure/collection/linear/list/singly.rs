@@ -173,6 +173,9 @@ impl<'a, T: 'a> Collection<'a> for Singly<T> {
 struct Iter<'a, T> {
     /// The next element to yield, if any.
     next: Option<&'a Node<T>>,
+
+    /// The previously yielded element from the back, if any.
+    previous_back: Option<&'a Node<T>>,
 }
 
 impl<'a, T: 'a> Iterator for Iter<'a, T> {
@@ -186,7 +189,43 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
         self.next.take().map(|current| {
             self.next = current.next.as_deref();
 
+            if let (Some(next), Some(sentinel)) = (self.next, self.previous_back) {
+                if core::ptr::addr_eq(next, sentinel) {
+                    self.next = None;
+                }
+            }
+
             &current.element
         })
+    }
+}
+
+impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
+    /// Obtain the next element from the back, if any.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let mut current = self.next?;
+
+        while let Some(next) = current.next.as_deref() {
+            if let Some(sentinel) = self.previous_back {
+                if core::ptr::addr_eq(next, sentinel) {
+                    break;
+                }
+            }
+
+            current = next;
+        }
+
+        self.previous_back = Some(current);
+
+        if let Some(next) = self.next {
+            if core::ptr::addr_eq(next, current) {
+                self.next = None;
+            }
+        }
+
+        Some(&current.element)
     }
 }
