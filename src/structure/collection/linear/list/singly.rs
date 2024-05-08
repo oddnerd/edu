@@ -50,8 +50,8 @@ impl<T> Drop for Singly<T> {
     fn drop(&mut self) {
         let mut current = self.elements.take();
 
-        while let Some(mut next) = current {
-            current = next.next.take();
+        while let Some(mut node) = current {
+            current = node.next.take();
         }
     }
 }
