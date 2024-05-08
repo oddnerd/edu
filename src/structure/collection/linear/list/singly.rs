@@ -1,5 +1,7 @@
 //! Implementation of [`Singly`].
 
+use super::Collection;
+
 /// Independently allocated elements connected via a single link.
 ///
 /// Each element exists within separate allocated object, referred to as a
@@ -132,5 +134,36 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
         }
 
         &mut current.element
+    }
+}
+
+impl<'a, T: 'a> Collection<'a> for Singly<T> {
+    type Element = T;
+
+    /// Query how many elements are contained.
+    ///
+    /// # Panics
+    /// Panics if the number of elements contained is more than [`usize::MAX`].
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn count(&self) -> usize {
+        let Some(mut current) = self.elements.as_ref() else {
+            return 0;
+        };
+
+        let mut count: usize = 1;
+
+        while let Some(next) = current.next.as_ref() {
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                panic!("too many elements for size type");
+            }
+
+            current = next;
+        }
+
+        count
     }
 }
