@@ -1,6 +1,7 @@
 //! Implementation of [`Singly`].
 
 use super::Collection;
+use super::Linear;
 
 /// Independently allocated elements connected via a single link.
 ///
@@ -166,4 +167,10 @@ impl<'a, T: 'a> Collection<'a> for Singly<T> {
 
         count
     }
+}
+
+/// Immutable iterator over a [`Singly`].
+struct Iter<T> {
+    /// The next element to yield, if any.
+    next: Option<Node<T>>,
 }
