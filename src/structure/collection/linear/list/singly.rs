@@ -24,9 +24,24 @@ struct Node<T> {
     element: T,
 
     /// Link to the rest of the list.
-    next: Option<Box<Node<T>>>
+    next: Option<Box<Node<T>>>,
 }
 
+impl<T> Default for Singly<T> {
+    fn default() -> Self {
+        Singly { elements: None }
+    }
+}
+
+impl<T> Drop for Singly<T> {
+    fn drop(&mut self) {
+        let mut current = self.elements.take();
+
+        while let Some(mut next) = current {
+            current = next.next.take();
+        }
+    }
+}
 
 impl<T> Singly<T> {
     pub fn prepend(&mut self, value: T) {
@@ -47,30 +62,10 @@ impl<T> Singly<T> {
     }
 
     pub fn peek_front(&self) -> Option<&T> {
-        self.elements.as_ref().map(|node| {
-            &node.element
-        })
+        self.elements.as_ref().map(|node| &node.element)
     }
 
     pub fn peek_front_mut(&mut self) -> Option<&mut T> {
-        self.elements.as_mut().map(|node| {
-            &mut node.element
-        })
-    }
-}
-
-impl<T> Default for Singly<T> {
-    fn default() -> Self {
-        Singly { elements: None }
-    }
-}
-
-impl<T> Drop for Singly<T> {
-    fn drop(&mut self) {
-        let mut current = self.elements.take();
-
-        while let Some(mut next) = current {
-            current = next.next.take();
-        }
+        self.elements.as_mut().map(|node| &mut node.element)
     }
 }
