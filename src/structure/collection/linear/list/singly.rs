@@ -8,20 +8,18 @@ impl<T> Singly<T> {
     pub fn prepend(&mut self, value: T) {
         let new = Box::new(Node {
             element: value,
-            next: core::mem::replace(&mut self.head, None),
+            next: self.head.take(),
         });
 
         self.head = Some(new);
     }
 
     pub fn remove_front(&mut self) -> Option<T> {
-        match core::mem::replace(&mut self.head, None) {
-            None => None,
-            Some(node) => {
-                self.head = node.next;
-                Some(node.element)
-            }
-        }
+        self.head.take().map(|node| {
+            self.head = node.next;
+
+            node.element
+        })
     }
 }
 
@@ -33,10 +31,10 @@ impl<T> Default for Singly<T> {
 
 impl<T> Drop for Singly<T> {
     fn drop(&mut self) {
-        let mut current = core::mem::replace(&mut self.head, None);
+        let mut current = self.head.take();
 
         while let Some(mut next) = current {
-            current = core::mem::replace(&mut next.next, None);
+            current = next.next.take();
         }
     }
 }
