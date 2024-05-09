@@ -264,3 +264,110 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
 impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for Iter<'a, T> {}
+
+/// Mutable iterator over a [`Singly`].
+struct IterMut<'a, T> {
+    /// The next element to yield, if any.
+    next: Option<&'a mut Node<T>>,
+
+    /// The previously yielded element from the back, if any.
+    previous_back: Option<*const Node<T>>,
+}
+
+impl<'a, T: 'a> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+
+    /// Obtain the next element from the front, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|current| {
+            self.next = current.next.as_deref_mut();
+
+            if let (Some(next), Some(sentinel)) = (self.next.as_deref(), self.previous_back) {
+                if core::ptr::addr_eq(next, sentinel) {
+                    self.next = None;
+                }
+            }
+
+            &mut current.element
+        })
+    }
+
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let Some(mut current) = self.next.as_deref() else {
+            return (0, Some(0));
+        };
+
+        let mut count: usize = 1;
+
+        while let Some(next) = current.next.as_deref() {
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                // Upper bound is larger than can be stored in `usize`.
+                return (usize::MAX, None);
+            }
+
+            if let Some(sentinel) = self.previous_back {
+                if core::ptr::addr_eq(next, sentinel) {
+                    break;
+                }
+            }
+
+            current = next;
+        }
+
+        (count, Some(count))
+    }
+}
+
+impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
+    /// Obtain the next element from the back, if any.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn next_back(&mut self) -> Option<Self::Item> {
+        // TODO(oddnerd): this whole method is using pointers to work around reference
+        // lifetime restrictions, therefore the validity of yielded references
+        // ought to be questioned. Unit testing will hopefully validate the
+        // quality of my assumptions?
+
+        let mut current = core::ptr::from_mut(self.next.as_deref_mut()?);
+
+        // SAFETY: the pointer non-null and aligned to an initialized object.
+        while let Some(next) = unsafe { &mut *current }.next.as_deref_mut() {
+            if let Some(sentinel) = self.previous_back {
+                if core::ptr::addr_eq(next, sentinel) {
+                    break;
+                }
+            }
+
+            current = next;
+        }
+
+        self.previous_back = Some(current);
+
+        if let Some(next) = self.next.as_deref_mut() {
+            if core::ptr::addr_eq(next, current) {
+                self.next = None;
+            }
+        }
+
+        // SAFETY:
+        // * we have a unique mutable reference to all elements of `Self`,
+        // * this will _NEVER_ yield multiple references to the same element,
+        //   (this includes preventing `next` (front) from referencing it)
+        // * the yielded references has lifetime of `Self`.
+        Some(&mut unsafe { &mut *current }.element)
+    }
+}
+
+impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
+
+impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
