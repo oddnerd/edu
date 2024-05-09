@@ -2,6 +2,7 @@
 
 use super::Collection;
 use super::Linear;
+use super::List;
 
 // TODO(oddnerd): examples for everything
 
@@ -139,6 +140,41 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
         &mut current.element
     }
 }
+
+impl<T> Iterator for Singly<T> {
+    type Item = T;
+
+    /// Obtain the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!("pop the front element");
+    }
+
+    /// Query how many elements are contained.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let count = self.count();
+        (count, Some(count))
+    }
+}
+
+impl<T> DoubleEndedIterator for Singly<T> {
+    /// Obtain the last element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn next_back(&mut self) -> Option<Self::Item> {
+        todo!("pop the last element");
+    }
+}
+
+impl<T> ExactSizeIterator for Singly<T> {}
+
+impl<T> core::iter::FusedIterator for Singly<T> {}
 
 impl<'a, T: 'a> Collection for Singly<T> {
     type Element = T;
