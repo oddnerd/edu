@@ -32,6 +32,7 @@ pub trait List:
     + DoubleEndedIterator<Item = Self::Element>
     + ExactSizeIterator
     + core::iter::FusedIterator
+    + Extend<Self::Element>
     + FromIterator<Self::Element>
 {
     /// Insert an `element` at `index`.
