@@ -29,7 +29,6 @@ pub use singly::Singly;
 pub trait List:
     Linear
     + IntoIterator<Item = Self::Element>
-    + Iterator<Item = Self::Element>
     + DoubleEndedIterator<Item = Self::Element>
     + ExactSizeIterator
     + core::iter::FusedIterator
