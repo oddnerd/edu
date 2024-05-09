@@ -176,6 +176,19 @@ impl<T> ExactSizeIterator for Singly<T> {}
 
 impl<T> core::iter::FusedIterator for Singly<T> {}
 
+impl<T> Extend<T> for Singly<T> {
+    /// Append each element.
+    ///
+    /// # Panics
+    /// This method panics if memory cannot be allocated.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory.
+    fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
+        todo!("append each element");
+    }
+}
+
 impl<'a, T: 'a> Collection for Singly<T> {
     type Element = T;
 
