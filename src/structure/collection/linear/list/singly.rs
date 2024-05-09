@@ -247,8 +247,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                // Upper bound is larger than can be stored in `usize`.
-                return (usize::MAX, None);
+                unreachable!("more than `usize::MAX` elements");
             }
 
             if let Some(sentinel) = self.previous_back {
@@ -343,8 +342,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                // Upper bound is larger than can be stored in `usize`.
-                return (usize::MAX, None);
+                unreachable!("more than `usize::MAX` elements");
             }
 
             if let Some(sentinel) = self.previous_back {
