@@ -189,6 +189,21 @@ impl<T> Extend<T> for Singly<T> {
     }
 }
 
+impl<T> FromIterator<T> for Singly<T> {
+    /// Construct an instance with elements from an iterator.
+    ///
+    /// # Panics
+    /// This method panics if memory cannot be allocated.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory for the result.
+    fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
+        let mut instance = Singly::<T>::default();
+        instance.extend(iter);
+        instance
+    }
+}
+
 impl<'a, T: 'a> Collection for Singly<T> {
     type Element = T;
 
