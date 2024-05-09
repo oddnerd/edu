@@ -306,7 +306,7 @@ impl<T, const N: usize> Linear for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Array for Fixed<T, N> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Performance

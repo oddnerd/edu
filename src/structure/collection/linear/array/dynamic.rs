@@ -1523,7 +1523,7 @@ impl<T> Linear for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Array<'a> for Dynamic<T> {
+impl<T> Array for Dynamic<T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// The pointer starts at the first initialized element.
@@ -1612,7 +1612,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> List<'a> for Dynamic<T> {
+impl<T> List for Dynamic<T> {
     /// Insert an `element` at `index`.
     ///
     /// # Panics

@@ -26,8 +26,8 @@ pub use singly::Singly;
 ///   [`withdraw`](`Self::withdraw`) given a predicate.
 /// * An index range can be moved out via [`drain`](`Self::drain`).
 /// * All elements can be removed via [`clear`](`Self::clear`).
-pub trait List<'a>:
-    Linear<'a>
+pub trait List:
+    Linear
     + IntoIterator<Item = Self::Element>
     + Iterator<Item = Self::Element>
     + DoubleEndedIterator<Item = Self::Element>

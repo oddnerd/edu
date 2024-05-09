@@ -317,7 +317,7 @@ impl<'a, T: 'a> Linear for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
+impl<'a, T: 'a> Array for Dope<'a, T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Safety

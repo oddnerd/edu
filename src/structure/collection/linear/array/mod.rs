@@ -22,7 +22,7 @@ use super::Linear;
 /// at appropriate alignment boundaries separated only by padding, if any.
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Array_(data_type)).
-pub trait Array<'a>: Linear<'a> {
+pub trait Array: Linear {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     fn as_ptr(&self) -> *const Self::Element;
 
