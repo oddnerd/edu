@@ -138,7 +138,7 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
     }
 }
 
-impl<'a, T: 'a> Collection<'a> for Singly<T> {
+impl<'a, T: 'a> Collection for Singly<T> {
     type Element = T;
 
     /// Query how many elements are contained.
@@ -166,6 +166,37 @@ impl<'a, T: 'a> Collection<'a> for Singly<T> {
         }
 
         count
+    }
+}
+
+impl<T> Linear for Singly<T> {
+    /// Iterate over the elements by immutable reference.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn iter(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    {
+        Iter {
+            next: self.elements.as_deref(),
+            previous_back: None,
+        }
+    }
+
+    /// Iterate over the elements by mutable reference.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn iter_mut(
+        &mut self,
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
+           + ExactSizeIterator
+           + core::iter::FusedIterator {
+        IterMut {
+            next: self.elements.as_deref_mut(),
+            previous_back: None,
+        }
     }
 }
 
