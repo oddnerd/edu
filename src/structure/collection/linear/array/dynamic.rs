@@ -1420,7 +1420,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
+impl<'a, T: 'a> Collection for Dynamic<T> {
     type Element = T;
 
     /// Query the number of initialized elements contained.
@@ -1443,7 +1443,7 @@ impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
+impl<T> Linear for Dynamic<T> {
     /// Create an immutable iterator over the initialized elements.
     ///
     /// # Performance
@@ -1463,7 +1463,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = if self.initialized > 0 {
             // The pointer will only ever be read, no written to.
@@ -1502,7 +1502,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
         let ptr = if self.initialized > 0 {
