@@ -3,6 +3,8 @@
 use super::Collection;
 use super::Linear;
 
+// TODO(oddnerd): examples for everything
+
 /// Independently allocated elements connected via a single link.
 ///
 /// Each element exists within separate allocated object, referred to as a
