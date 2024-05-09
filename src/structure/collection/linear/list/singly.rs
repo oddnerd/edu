@@ -198,6 +198,37 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
             &current.element
         })
     }
+
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let Some(mut current) = self.next else {
+            return (0, Some(0));
+        };
+
+        let mut count: usize = 1;
+
+        while let Some(next) = current.next.as_deref() {
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                // Upper bound is larger than can be stored in `usize`.
+                return (usize::MAX, None);
+            }
+
+            if let Some(sentinel) = self.previous_back {
+                if core::ptr::addr_eq(next, sentinel) {
+                    break;
+                }
+            }
+
+            current = next;
+        }
+
+        (count, Some(count))
+    }
 }
 
 impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
