@@ -260,3 +260,7 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
         Some(&current.element)
     }
 }
+
+impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
+
+impl<'a, T: 'a> core::iter::FusedIterator for Iter<'a, T> {}
