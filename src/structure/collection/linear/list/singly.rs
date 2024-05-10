@@ -266,6 +266,89 @@ impl<T> Linear for Singly<T> {
     }
 }
 
+impl<T> List for Singly<T> {
+    /// Move an `element` into a new node at `index`.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(N) times and consumes O(1) memory.
+    fn insert(
+        &mut self,
+        index: usize,
+        element: Self::Element,
+    ) -> Result<&mut Self::Element, Self::Element> {
+        let new = Box::new(Node {
+            element,
+            next: None,
+        });
+
+        if self.elements.is_none() && index == 0 {
+            let new = self.elements.insert(new);
+            return Ok(&mut new.element);
+        }
+
+        let mut current = self.elements.as_deref_mut();
+
+        for _ in 0..index {
+            current = current.and_then(|current| current.next.as_deref_mut());
+        }
+
+        if let Some(preceding) = current {
+            let succeeding = preceding.next.take();
+            let new = preceding.next.insert(new);
+            new.next = succeeding;
+
+            Ok(&mut new.element)
+        } else {
+            Err(new.element)
+        }
+    }
+
+    /// Move the element at `index` out, if it exists.
+    ///
+    /// # Performance
+    /// This method takes O(N) times and consumes O(1) memory.
+    fn remove(&mut self, index: usize) -> Option<Self::Element> {
+        if index == 0 {
+            let node = self.elements.take()?;
+            self.elements = node.next;
+            return Some(node.element);
+        }
+
+        let mut current = self.elements.as_deref_mut();
+
+        for _ in 0..index - 1 {
+            current = current.and_then(|current| current.next.as_deref_mut());
+        }
+
+        if let Some(preceding) = current {
+            let mut node = preceding.next.take()?;
+            let succeeding = node.next.take();
+            preceding.next = succeeding;
+
+            Some(node.element)
+        } else {
+            unreachable!("at least two elements");
+        }
+    }
+
+    fn drain(
+        &mut self,
+        range: impl core::ops::RangeBounds<usize>,
+    ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
+        todo!("create custom iterator");
+    }
+
+    fn withdraw(
+        &mut self,
+        predicate: impl FnMut(&Self::Element) -> bool,
+    ) -> impl DoubleEndedIterator<Item = Self::Element> {
+        todo!("create custom iterator");
+    }
+}
+
 /// Immutable iterator over a [`Singly`].
 struct Iter<'a, T> {
     /// The next element to yield, if any.
