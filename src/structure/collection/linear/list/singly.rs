@@ -334,11 +334,70 @@ impl<T> List for Singly<T> {
         }
     }
 
+    /// Efficiently remove the elements within the given index `range`.
+    ///
+    /// Using [`Self::remove`] would be inefficient because each removal would
+    /// require traversing the list to the given index which is O(N^2) time,
+    /// whereas this method traverses the list only once there being O(N).
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
     fn drain(
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
-        todo!("create custom iterator");
+        let start = match range.start_bound() {
+            core::ops::Bound::Included(start) => *start,
+            core::ops::Bound::Excluded(start) => match start.checked_add(1) {
+                Some(start) => start,
+                None => {
+                    // TODO: does this special case drop?
+                    return Drain {
+                        underlying: Some(self),
+                        preceding: None,
+                        next: None,
+                        remaining: 0,
+                    };
+                }
+            },
+            core::ops::Bound::Unbounded => 0,
+        };
+
+        let remaining = match range.end_bound() {
+            core::ops::Bound::Included(end) => (end - start).saturating_add(1),
+            core::ops::Bound::Excluded(end) => end - start,
+            core::ops::Bound::Unbounded => self.len() - start,
+        };
+
+        if start == 0 {
+            let next = self.elements.take();
+
+            return Drain {
+                underlying: Some(self),
+                preceding: None,
+                next,
+                remaining,
+            };
+        }
+
+        let mut current = self.elements.as_deref_mut();
+
+        for _ in 0..start {
+            current = current.and_then(|current| current.next.as_deref_mut());
+        }
+
+        if let Some(preceding) = current {
+            let next = preceding.next.take();
+
+            Drain {
+                underlying: None,
+                preceding: Some(preceding),
+                next,
+                remaining,
+            }
+        } else {
+            unreachable!("preceding elements");
+        }
     }
 
     fn withdraw(
@@ -549,3 +608,104 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
 impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
+
+/// By-value iterator over a range of indices.
+struct Drain<'a, T> {
+    /// The underlying elements being drained from.
+    underlying: Option<&'a mut Singly<T>>,
+
+    /// The node preceding those being drained, if any.
+    preceding: Option<&'a mut Node<T>>,
+
+    /// The remaining elements of the list, if any.
+    next: Option<Box<Node<T>>>,
+
+    /// The number of elements yet to be yielded.
+    remaining: usize,
+}
+
+impl<'a, T: 'a> Drop for Drain<'a, T> {
+    /// Remove elements yet to be drained and repair the underlying [`Singly`].
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn drop(&mut self) {
+        self.for_each(drop);
+
+        if let Some(preceding) = self.preceding.take() {
+            preceding.next = self.next.take();
+        } else {
+            let Some(underlying) = self.underlying.take() else {
+                unreachable!("constructor logic error");
+            };
+
+            underlying.elements = self.next.take();
+        }
+    }
+}
+
+impl<'a, T: 'a> Iterator for Drain<'a, T> {
+    type Item = T;
+
+    /// Obtain the next element from the front, if any exists.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    fn next(&mut self) -> Option<Self::Item> {
+        let mut current = self.next.take()?;
+
+        self.next = current.next.take();
+
+        self.remaining -= 1;
+
+        Some(current.element)
+    }
+
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let mut current = &self.next;
+
+        for count in 0..self.remaining {
+            let Some(node) = current else {
+                return (count, Some(count));
+            };
+
+            current = &node.next;
+        }
+
+        (self.remaining, Some(self.remaining))
+    }
+}
+
+impl<'a, T: 'a> DoubleEndedIterator for Drain<'a, T> {
+    /// Obtain the next element from the back, if any exists.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn next_back(&mut self) -> Option<Self::Item> {
+        let mut current = self.next.as_deref_mut();
+
+        for _ in 0..self.remaining - 1 {
+            current = current.and_then(|current| current.next.as_deref_mut());
+        }
+
+        if let Some(preceding) = current {
+            let mut node = preceding.next.take()?;
+            let succeeding = node.next.take();
+            preceding.next = succeeding;
+
+            self.remaining -= 1;
+
+            Some(node.element)
+        } else {
+            None
+        }
+    }
+}
+
+impl<'a, T: 'a> ExactSizeIterator for Drain<'a, T> {}
+
+impl<'a, T: 'a> core::iter::FusedIterator for Drain<'a, T> {}
