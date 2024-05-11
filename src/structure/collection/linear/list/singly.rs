@@ -443,31 +443,29 @@ impl<T> List for Singly<T> {
         index: usize,
         element: Self::Element,
     ) -> Result<&mut Self::Element, Self::Element> {
-        let new = Box::new(Node {
+        let mut next = &mut self.elements;
+
+        for _ in 0..index {
+            if let &mut Some(ref mut current) = next {
+                next = &mut current.next;
+            } else {
+                return Err(element);
+            }
+        }
+
+        let mut new = Box::new(Node {
             element,
             next: None,
         });
 
-        if self.elements.is_none() && index == 0 {
-            let new = self.elements.insert(new);
-            return Ok(&mut new.element);
-        }
-
-        let mut current = self.elements.as_deref_mut();
-
-        for _ in 0..index {
-            current = current.and_then(|current| current.next.as_deref_mut());
-        }
-
-        if let Some(preceding) = current {
-            let succeeding = preceding.next.take();
-            let new = preceding.next.insert(new);
-            new.next = succeeding;
-
-            Ok(&mut new.element)
+        let new = if let &mut Some(ref mut preceding) = next {
+            new.next = preceding.next.take();
+            preceding.next.insert(new)
         } else {
-            Err(new.element)
-        }
+            next.insert(new)
+        };
+
+        Ok(&mut new.element)
     }
 
     /// Move the element at `index` out, if it exists.
