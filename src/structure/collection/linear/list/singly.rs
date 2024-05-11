@@ -303,6 +303,16 @@ impl<T> FromIterator<T> for Singly<T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Singly::from_iter(expected.iter().copied());
+    ///
+    /// assert!(actual.iter().eq(expected));
+    /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
         let mut instance = Singly::<T>::default();
 
