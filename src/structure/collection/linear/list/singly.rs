@@ -59,12 +59,12 @@ impl<T> Drop for Singly<T> {
     /// core::mem::drop(instance);
     /// ```
     fn drop(&mut self) {
-        let mut current = self.elements.take();
+        let mut next = self.elements.take();
 
-        while let Some(mut node) = current {
-            current = node.next.take();
+        while let Some(mut current) = next {
+            next = current.next.take();
 
-            drop(node);
+            drop(current);
         }
     }
 }
