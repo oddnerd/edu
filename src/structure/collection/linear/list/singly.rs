@@ -435,7 +435,7 @@ impl<T> List for Singly<T> {
     ///
     /// let instance = Singly::from_iter([0, 1, 2, 4, 5]);
     ///
-    /// assert!(instance.insert(3, 3).is_ok_and(|inserted| inserted = &mut 3))
+    /// assert!(instance.insert(3, 3).is_ok_and(|inserted| inserted == &mut 3))
     /// assert!(instance.iter().eq([0, 1, 2, 3, 4, 5]);
     /// ```
     fn insert(
