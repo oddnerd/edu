@@ -289,7 +289,10 @@ impl<T> Extend<T> for Singly<T> {
         }
 
         for element in iter {
-            let element = Box::new(Node{element, next: None});
+            let element = Box::new(Node {
+                element,
+                next: None,
+            });
 
             current = &mut current.insert(element).next;
         }
