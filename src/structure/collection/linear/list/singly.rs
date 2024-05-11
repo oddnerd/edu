@@ -99,7 +99,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Singly<T> {
     /// use rust::structure::collection::linear::list::Singly;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Singly::from_iter(expected.iter());
+    /// let actual = Singly::from_iter(expected.iter().copied());
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
@@ -132,19 +132,17 @@ impl<T> core::ops::Index<usize> for Singly<T> {
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        let Some(mut current) = self.elements.as_ref() else {
-            panic!("no elements contained");
-        };
+        let mut next = self.elements.as_deref();
 
         for _ in 0..index {
-            if let Some(next) = current.next.as_ref() {
-                current = next;
+            if let Some(current) = next {
+                next = current.next.as_deref();
             } else {
-                panic!("index out of bounds");
+                break;
             }
         }
 
-        &current.element
+        next.map_or_else(|| panic!("index out of bounds"), |node| &node.element)
     }
 }
 
@@ -170,19 +168,17 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let Some(mut current) = self.elements.as_mut() else {
-            panic!("no elements contained");
-        };
+        let mut next = self.elements.as_deref_mut();
 
         for _ in 0..index {
-            if let Some(next) = current.next.as_mut() {
-                current = next;
+            if let Some(current) = next {
+                next = current.next.as_deref_mut();
             } else {
-                panic!("index out of bounds");
+                break;
             }
         }
 
-        &mut current.element
+        next.map_or_else(|| panic!("index out of bounds"), |node| &mut node.element)
     }
 }
 
