@@ -39,7 +39,8 @@ impl<T> Drop for Singly<T> {
     /// Iteratively drop all contained elements.
     ///
     /// The default destructor implementation will _NOT_ be tail recursive,
-    /// hence this provided iterative method to prevent stack overflow.
+    /// this means it will not optimize to an iterative implementation, hence
+    /// it could overflow the call stack if enough elements are contained.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
