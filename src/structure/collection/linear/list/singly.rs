@@ -329,7 +329,15 @@ impl<T> FromIterator<T> for Singly<T> {
     /// This method takes O(N) time and consumes O(N) memory for the result.
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
         let mut instance = Singly::<T>::default();
-        instance.extend(iter);
+
+        let mut current = &mut instance.elements;
+
+        for element in iter {
+            let element = Box::new(Node{element, next: None});
+
+            current = &mut current.insert(element).next;
+        }
+
         instance
     }
 }
