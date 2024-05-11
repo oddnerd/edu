@@ -327,7 +327,7 @@ impl<T> FromIterator<T> for Singly<T> {
     }
 }
 
-impl<'a, T: 'a> Collection for Singly<T> {
+impl<T> Collection for Singly<T> {
     type Element = T;
 
     /// Query how many elements are contained.
