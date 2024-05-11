@@ -63,6 +63,8 @@ impl<T> Drop for Singly<T> {
 
         while let Some(mut node) = current {
             current = node.next.take();
+
+            drop(node);
         }
     }
 }
