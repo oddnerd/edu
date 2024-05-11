@@ -185,10 +185,25 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
 impl<T> Iterator for Singly<T> {
     type Item = T;
 
-    /// Obtain the first element.
+    /// Obtain the first element by value via moving it out of [`Self`].
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), Some(1));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(3));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(5));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.front()
     }
