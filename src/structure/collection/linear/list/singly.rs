@@ -81,7 +81,7 @@ impl<T> Default for Singly<T> {
     ///
     /// let instance = Singly::<usize>::default();
     ///
-    /// assert_eq(instance.len(), 0);
+    /// assert_eq!(instance.len(), 0);
     /// ```
     fn default() -> Self {
         Singly { elements: None }
