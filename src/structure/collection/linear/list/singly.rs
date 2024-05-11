@@ -111,13 +111,26 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Singly<T> {
 impl<T> core::ops::Index<usize> for Singly<T> {
     type Output = T;
 
-    /// Obtain an immutable reference to the element at `index`.
+    /// Obtain an immutable reference to the element at position `index`.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that `index` is within bounds.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Singly::from_iter(expected.iter().copied());
+    ///
+    /// for index in 0..expected.len() {
+    ///     use core::ops::Index;
+    ///     assert_eq!(actual.index(index), expected.index(index));
+    /// }
+    /// ```
     fn index(&self, index: usize) -> &Self::Output {
         let Some(mut current) = self.elements.as_ref() else {
             panic!("no elements contained");
@@ -136,13 +149,26 @@ impl<T> core::ops::Index<usize> for Singly<T> {
 }
 
 impl<T> core::ops::IndexMut<usize> for Singly<T> {
-    /// Obtain a mutable reference to the element at `index`.
+    /// Obtain an mutable reference to the element at position `index`.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that `index` is within bounds.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Singly::from_iter(expected.iter().copied());
+    ///
+    /// for index in 0..expected.len() {
+    ///     use core::ops::IndexMut;
+    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
+    /// }
+    /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         let Some(mut current) = self.elements.as_mut() else {
             panic!("no elements contained");
