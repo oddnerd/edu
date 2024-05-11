@@ -473,27 +473,22 @@ impl<T> List for Singly<T> {
     /// # Performance
     /// This method takes O(N) times and consumes O(1) memory.
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
-        if index == 0 {
-            let node = self.elements.take()?;
-            self.elements = node.next;
-            return Some(node.element);
+        let mut next = &mut self.elements;
+
+        for _ in 0..index.saturating_sub(1) {
+            if let &mut Some(ref mut current) = next {
+                next = &mut current.next;
+            } else {
+                return None;
+            }
         }
 
-        let mut current = self.elements.as_deref_mut();
-
-        for _ in 0..index - 1 {
-            current = current.and_then(|current| current.next.as_deref_mut());
-        }
-
-        if let Some(preceding) = current {
-            let mut node = preceding.next.take()?;
-            let succeeding = node.next.take();
-            preceding.next = succeeding;
-
-            Some(node.element)
-        } else {
-            unreachable!("at least two elements");
-        }
+        next.as_deref_mut().and_then(|preceding| {
+            preceding.next.take().map(|removed| {
+                preceding.next = removed.next;
+                removed.element
+            })
+        })
     }
 
     /// Efficiently remove the elements within the given index `range`.
