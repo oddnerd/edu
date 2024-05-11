@@ -281,41 +281,17 @@ impl<T> Extend<T> for Singly<T> {
     /// assert!(instance.iter().eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let mut iter = iter.into_iter();
+        let mut current = &mut self.elements;
 
-        if self.elements.is_none() {
-            if let Some(first) = iter.next() {
-                let first = Box::new(Node {
-                    element: first,
-                    next: None,
-                });
-
-                self.elements = Some(first);
-            } else {
-                return;
-            }
+        while let &mut Some(ref mut next) = current {
+            current = &mut next.next;
         }
 
-        let mut next = self.elements.as_deref_mut();
+        for element in iter {
+            let element = Box::new(Node{element, next: None});
 
-        while let Some(mut current) = next {
-            if current.next.is_none() {
-                for element in iter {
-                    let element = Box::new(Node {
-                        element,
-                        next: None,
-                    });
-
-                    current = current.next.insert(element);
-                }
-
-                return;
-            }
-
-            next = current.next.as_deref_mut();
+            current = &mut current.insert(element).next;
         }
-
-        unreachable!("no first element");
     }
 }
 
