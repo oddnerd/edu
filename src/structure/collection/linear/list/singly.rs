@@ -272,6 +272,7 @@ impl<T> Extend<T> for Singly<T> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
     /// let instance = Singly::from_iter([0, 1, 2]);
@@ -306,6 +307,7 @@ impl<T> FromIterator<T> for Singly<T> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
