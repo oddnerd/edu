@@ -827,7 +827,6 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
         // TODO(oddnerd): this is the worst code I have ever written.
 
         while self.next.is_some() {
-
             if let Some(mut first) = self.next.take() {
                 if let Some(second) = first.next.take() {
                     if second.next.is_none() {
@@ -844,8 +843,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                             }
 
                             return Some(first.element);
-                        }
-                        else {
+                        } else {
                             first.next = Some(second);
 
                             if let Some(underlying) = self.underlying.take() {
@@ -876,13 +874,10 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 }
             }
 
-
             let mut current = self.next.as_deref_mut();
 
             while let Some(next) = current.take() {
-
                 if let Some(next_next) = next.next.as_deref_mut() {
-
                     if let Some(next_next_next) = next_next.next.as_deref_mut() {
                         if let Some(sentinel) = self.previous_back {
                             if core::ptr::addr_eq(next_next_next, sentinel) {
@@ -918,7 +913,6 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             } else {
                 self.previous_back = Some(last);
             }
-
         }
 
         None
