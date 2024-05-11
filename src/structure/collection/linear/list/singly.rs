@@ -93,8 +93,18 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Singly<T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory.
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_list().entries(self.iter()).finish()
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Singly::from_iter(expected.iter());
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+    /// ```
+    fn fmt(&self, output: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        output.debug_list().entries(self.iter()).finish()
     }
 }
 
