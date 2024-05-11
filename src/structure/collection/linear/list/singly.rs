@@ -384,8 +384,8 @@ impl<T> Linear for Singly<T> {
     ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         Iter {
-            next: self.elements.as_deref(),
-            previous_back: None,
+            next: &self.elements,
+            previous_back: core::ptr::null(),
         }
     }
 
@@ -586,10 +586,10 @@ impl<T> List for Singly<T> {
 /// Immutable iterator over a [`Singly`].
 struct Iter<'a, T> {
     /// The next element to yield, if any.
-    next: Option<&'a Node<T>>,
+    next: &'a Option<Box<Node<T>>>,
 
     /// The previously yielded element from the back, if any.
-    previous_back: Option<&'a Node<T>>,
+    previous_back: *const Node<T>,
 }
 
 impl<'a, T: 'a> Iterator for Iter<'a, T> {
@@ -616,16 +616,13 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// assert_eq!(iter.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.take().map(|current| {
-            self.next = current.next.as_deref();
-
-            if let (Some(next), Some(sentinel)) = (self.next, self.previous_back) {
-                if core::ptr::addr_eq(next, sentinel) {
-                    self.next = None;
-                }
+        self.next.as_deref().and_then(|current| {
+            if core::ptr::addr_eq(current, self.previous_back) {
+                None
+            } else {
+                self.next = &current.next;
+                Some(&current.element)
             }
-
-            &current.element
         })
     }
 
@@ -644,26 +641,18 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// assert_eq!(instance.iter().size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let Some(mut current) = self.next else {
-            return (0, Some(0));
-        };
+        let mut count: usize = 0;
 
-        let mut count: usize = 1;
+        let mut next = self.next;
 
-        while let Some(next) = current.next.as_deref() {
+        while let Some(current) = next.as_deref() {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than `usize::MAX` elements");
+                unreachable!("more than usize::MAX elements");
             }
 
-            if let Some(sentinel) = self.previous_back {
-                if core::ptr::addr_eq(next, sentinel) {
-                    break;
-                }
-            }
-
-            current = next;
+            next = &current.next;
         }
 
         (count, Some(count))
@@ -692,25 +681,18 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// assert_eq!(iter.next(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        let mut current = self.next?;
+
+        let mut current = self.next.as_deref()?;
 
         while let Some(next) = current.next.as_deref() {
-            if let Some(sentinel) = self.previous_back {
-                if core::ptr::addr_eq(next, sentinel) {
-                    break;
-                }
+            if core::ptr::addr_eq(next, self.previous_back) {
+                break;
             }
 
             current = next;
         }
 
-        self.previous_back = Some(current);
-
-        if let Some(next) = self.next {
-            if core::ptr::addr_eq(next, current) {
-                self.next = None;
-            }
-        }
+        self.previous_back = current;
 
         Some(&current.element)
     }
