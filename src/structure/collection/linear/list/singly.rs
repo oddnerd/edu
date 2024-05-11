@@ -190,7 +190,7 @@ impl<T> Iterator for Singly<T> {
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
     fn next(&mut self) -> Option<Self::Item> {
-        todo!("pop the front element");
+        self.front()
     }
 
     /// Query how many elements are contained.
