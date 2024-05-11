@@ -47,7 +47,6 @@ impl<T> Drop for Singly<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
@@ -75,6 +74,15 @@ impl<T> Default for Singly<T> {
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::<usize>::default();
+    ///
+    /// assert_eq(instance.len(), 0);
+    /// ```
     fn default() -> Self {
         Singly { elements: None }
     }
