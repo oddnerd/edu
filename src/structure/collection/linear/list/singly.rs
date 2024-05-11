@@ -234,7 +234,7 @@ impl<T> DoubleEndedIterator for Singly<T> {
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
     fn next_back(&mut self) -> Option<Self::Item> {
-        todo!("pop the last element");
+        self.back()
     }
 }
 
