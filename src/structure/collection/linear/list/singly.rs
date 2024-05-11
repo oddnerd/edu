@@ -214,6 +214,7 @@ impl<T> Iterator for Singly<T> {
     /// This method takes O(N) time and consumes O(1) memory.
     fn size_hint(&self) -> (usize, Option<usize>) {
         let count = self.count();
+
         (count, Some(count))
     }
 }
