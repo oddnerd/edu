@@ -315,7 +315,7 @@ impl<T> Extend<T> for Singly<T> {
             next = current.next.as_deref_mut();
         }
 
-        unreachable!("not a single element");
+        unreachable!("no first element");
     }
 }
 
