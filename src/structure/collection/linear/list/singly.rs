@@ -677,6 +677,22 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let underlying = Singly::from_iter([0, 1, 2, 4, 5]);
+    /// let instance = underlying.iter().rev();
+    ///
+    /// assert_eq!(iter.next(), Some(&5));
+    /// assert_eq!(iter.next(), Some(&4));
+    /// assert_eq!(iter.next(), Some(&3));
+    /// assert_eq!(iter.next(), Some(&2));
+    /// assert_eq!(iter.next(), Some(&1));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut current = self.next?;
 
