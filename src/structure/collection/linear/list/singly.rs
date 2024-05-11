@@ -318,13 +318,7 @@ impl<T> FromIterator<T> for Singly<T> {
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
         let mut instance = Singly::<T>::default();
 
-        let mut current = &mut instance.elements;
-
-        for element in iter {
-            let element = Box::new(Node{element, next: None});
-
-            current = &mut current.insert(element).next;
-        }
+        instance.extend(iter);
 
         instance
     }
