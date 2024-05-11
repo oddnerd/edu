@@ -43,6 +43,21 @@ impl<T> Drop for Singly<T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::<()>::default();
+    ///
+    /// for _ in 0..usize::MAX {
+    ///     instance.prepend(());
+    /// }
+    ///
+    /// core::mem::drop(instance);
+    /// ```
     fn drop(&mut self) {
         let mut current = self.elements.take();
 
