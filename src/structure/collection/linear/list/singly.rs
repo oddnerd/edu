@@ -258,13 +258,28 @@ impl<T> ExactSizeIterator for Singly<T> {}
 impl<T> core::iter::FusedIterator for Singly<T> {}
 
 impl<T> Extend<T> for Singly<T> {
-    /// Append each element.
+    /// Append the elements in `iter` maintaining order.
+    ///
+    /// Using [`Self::append`] directly would be O(N^2) since it is required to
+    /// traverse all existing elements for each insertion whereas this method
+    /// maintains a pointer to the last element thereby being more efficient.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2]);
+    ///
+    /// instance.extend([3, 4, 5]);
+    ///
+    /// assert!(instance.iter().eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
         todo!("append each element");
     }
