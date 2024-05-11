@@ -229,10 +229,25 @@ impl<T> Iterator for Singly<T> {
 }
 
 impl<T> DoubleEndedIterator for Singly<T> {
-    /// Obtain the last element.
+    /// Obtain the last element by value via moving it out of [`Self`].
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// assert_eq!(instance.next_back(), Some(5));
+    /// assert_eq!(instance.next_back(), Some(4));
+    /// assert_eq!(instance.next_back(), Some(3));
+    /// assert_eq!(instance.next_back(), Some(2));
+    /// assert_eq!(instance.next_back(), Some(1));
+    /// assert_eq!(instance.next_back(), Some(0));
+    /// assert_eq!(instance.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         self.back()
     }
