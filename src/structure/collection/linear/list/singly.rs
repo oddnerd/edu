@@ -472,6 +472,18 @@ impl<T> List for Singly<T> {
     ///
     /// # Performance
     /// This method takes O(N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert!(instance.remove(3).is_ok_and(|inserted| inserted == 3))
+    /// assert!(instance.iter().eq([0, 1, 2, 4, 5]);
+    /// ```
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
         let mut next = &mut self.elements;
 
