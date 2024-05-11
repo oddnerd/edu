@@ -232,7 +232,7 @@ impl<T> DoubleEndedIterator for Singly<T> {
     /// Obtain the last element.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// This method takes O(N) time and consumes O(1) memory.
     fn next_back(&mut self) -> Option<Self::Item> {
         self.back()
     }
