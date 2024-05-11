@@ -344,14 +344,12 @@ impl<T> Collection for Singly<T> {
     ///
     /// assert_eq!(instance.count(), 6);
     /// ```
-    #[allow(clippy::ref_patterns)]
-    #[allow(clippy::needless_borrowed_reference)]
     fn count(&self) -> usize {
         let mut count: usize = 0;
 
         let mut next = &self.elements;
 
-        while let &Some(ref current) = next {
+        while let Some(current) = next.as_deref() {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
