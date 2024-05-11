@@ -147,7 +147,7 @@ impl<T> core::ops::Index<usize> for Singly<T> {
 }
 
 impl<T> core::ops::IndexMut<usize> for Singly<T> {
-    /// Obtain an mutable reference to the element at position `index`.
+    /// Obtain a mutable reference to the element at position `index`.
     ///
     /// # Panics
     /// This method has the precondition that `index` is within bounds.
