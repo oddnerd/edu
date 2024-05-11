@@ -376,7 +376,7 @@ impl<T> Linear for Singly<T> {
     /// let expected = [0, 1, 2, 3, 4, 5];
     /// let instance = Singly::from_iter(expected.iter().copied());
     ///
-    /// assert!(instance.iter().eq(expected));
+    /// assert!(instance.iter().eq(expected.iter()));
     /// ```
     fn iter(
         &self,
@@ -392,6 +392,17 @@ impl<T> Linear for Singly<T> {
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut instance = Singly::from_iter(expected.iter().copied());
+    ///
+    /// assert!(instance.iter_mut().eq(expected.iter_mut()));
+    /// ```
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
