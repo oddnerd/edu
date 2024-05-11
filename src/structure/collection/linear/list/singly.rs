@@ -261,7 +261,7 @@ impl<T> Extend<T> for Singly<T> {
     /// Append each element.
     ///
     /// # Panics
-    /// This method panics if memory cannot be allocated.
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory.
@@ -274,7 +274,7 @@ impl<T> FromIterator<T> for Singly<T> {
     /// Construct an instance with elements from an iterator.
     ///
     /// # Panics
-    /// This method panics if memory cannot be allocated.
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory for the result.
