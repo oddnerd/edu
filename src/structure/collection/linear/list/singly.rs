@@ -635,6 +635,16 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 4, 5]).iter();
+    ///
+    /// assert_eq!(instance.iter().size_hint(), (6, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let Some(mut current) = self.next else {
             return (0, Some(0));
