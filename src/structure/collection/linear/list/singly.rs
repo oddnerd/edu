@@ -333,11 +333,18 @@ impl<'a, T: 'a> Collection for Singly<T> {
 
     /// Query how many elements are contained.
     ///
-    /// # Panics
-    /// Panics if the number of elements contained is more than [`usize::MAX`].
-    ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::Collection;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.count(), 6);
+    /// ```
     #[allow(clippy::ref_patterns)]
     #[allow(clippy::needless_borrowed_reference)]
     fn count(&self) -> usize {
