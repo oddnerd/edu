@@ -62,6 +62,16 @@ impl<T> Default for Singly<T> {
     }
 }
 
+impl<T: core::fmt::Debug> core::fmt::Debug for Singly<T> {
+    /// List the elements contained.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory.
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+
 impl<T> core::ops::Index<usize> for Singly<T> {
     type Output = T;
 
