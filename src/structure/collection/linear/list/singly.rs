@@ -35,16 +35,6 @@ struct Node<T> {
     next: Option<Box<Node<T>>>,
 }
 
-impl<T> Default for Singly<T> {
-    /// Create an empty instance of [`Singly`].
-    ///
-    /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory for the result.
-    fn default() -> Self {
-        Singly { elements: None }
-    }
-}
-
 impl<T> Drop for Singly<T> {
     /// Iteratively drop all contained elements.
     ///
@@ -62,30 +52,13 @@ impl<T> Drop for Singly<T> {
     }
 }
 
-impl<T> Singly<T> {
-    pub fn prepend(&mut self, value: T) {
-        let new = Box::new(Node {
-            element: value,
-            next: self.elements.take(),
-        });
-
-        self.elements = Some(new);
-    }
-
-    pub fn remove_front(&mut self) -> Option<T> {
-        self.elements.take().map(|node| {
-            self.elements = node.next;
-
-            node.element
-        })
-    }
-
-    pub fn peek_front(&self) -> Option<&T> {
-        self.elements.as_ref().map(|node| &node.element)
-    }
-
-    pub fn peek_front_mut(&mut self) -> Option<&mut T> {
-        self.elements.as_mut().map(|node| &mut node.element)
+impl<T> Default for Singly<T> {
+    /// Create an empty instance of [`Singly`].
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory for the result.
+    fn default() -> Self {
+        Singly { elements: None }
     }
 }
 
