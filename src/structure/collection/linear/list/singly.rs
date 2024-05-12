@@ -411,7 +411,7 @@ impl<T> Linear for Singly<T> {
            + core::iter::FusedIterator {
         IterMut {
             next: self.elements.as_deref_mut(),
-            previous_back: None,
+            previous_back: core::ptr::null(),
         }
     }
 }
@@ -681,7 +681,6 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// assert_eq!(iter.next(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-
         let mut current = self.next.as_deref()?;
 
         while let Some(next) = current.next.as_deref() {
@@ -708,7 +707,7 @@ struct IterMut<'a, T> {
     next: Option<&'a mut Node<T>>,
 
     /// The previously yielded element from the back, if any.
-    previous_back: Option<*const Node<T>>,
+    previous_back: *const Node<T>,
 }
 
 impl<'a, T: 'a> Iterator for IterMut<'a, T> {
@@ -719,16 +718,13 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.take().map(|current| {
-            self.next = current.next.as_deref_mut();
-
-            if let (Some(next), Some(sentinel)) = (self.next.as_deref(), self.previous_back) {
-                if core::ptr::addr_eq(next, sentinel) {
-                    self.next = None;
-                }
+        self.next.take().and_then(|current| {
+            if core::ptr::addr_eq(current, self.previous_back) {
+                None
+            } else {
+                self.next = current.next.as_deref_mut();
+                Some(&mut current.element)
             }
-
-            &mut current.element
         })
     }
 
@@ -737,26 +733,18 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let Some(mut current) = self.next.as_deref() else {
-            return (0, Some(0));
-        };
+        let mut count: usize = 0;
 
-        let mut count: usize = 1;
+        let mut next = self.next.as_deref();
 
-        while let Some(next) = current.next.as_deref() {
+        while let Some(current) = next.take() {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than `usize::MAX` elements");
+                unreachable!("more than usize::MAX elements");
             }
 
-            if let Some(sentinel) = self.previous_back {
-                if core::ptr::addr_eq(next, sentinel) {
-                    break;
-                }
-            }
-
-            current = next;
+            next = current.next.as_deref();
         }
 
         (count, Some(count))
@@ -769,38 +757,34 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn next_back(&mut self) -> Option<Self::Item> {
-        // TODO(oddnerd): this whole method is using pointers to work around reference
-        // lifetime restrictions, therefore the validity of yielded references
-        // ought to be questioned. Unit testing will hopefully validate the
-        // quality of my assumptions?
+        let mut current_ref = self.next.take()?;
+        let mut current_ptr = core::ptr::from_mut(current_ref);
 
-        let mut current = core::ptr::from_mut(self.next.as_deref_mut()?);
+        let next = current_ptr;
 
-        // SAFETY: the pointer non-null and aligned to an initialized object.
-        while let Some(next) = unsafe { &mut *current }.next.as_deref_mut() {
-            if let Some(sentinel) = self.previous_back {
-                if core::ptr::addr_eq(next, sentinel) {
-                    break;
-                }
+        while let Some(next) = current_ref.next.as_deref_mut() {
+            if core::ptr::addr_eq(next, self.previous_back) {
+                break;
             }
 
-            current = next;
-        }
-
-        self.previous_back = Some(current);
-
-        if let Some(next) = self.next.as_deref_mut() {
-            if core::ptr::addr_eq(next, current) {
-                self.next = None;
-            }
+            current_ptr = next;
+            current_ref = next;
         }
 
         // SAFETY:
-        // * we have a unique mutable reference to all elements of `Self`,
-        // * this will _NEVER_ yield multiple references to the same element,
-        //   (this includes preventing `next` (front) from referencing it)
-        // * the yielded references has lifetime of `Self`.
-        Some(&mut unsafe { &mut *current }.element)
+        // `self.previous_back` ensures multiple references to the same
+        // elements will not be yielded. However, `self.next` has mutable
+        // access to all subsequent elements including the last, hence a
+        // mutable reference to the next back cannot be returned without
+        // invalidating `self.next`. This exists for pointer misdirection
+        // where we manually enforce Rust's lifetime rules to create a mutable
+        // reference to the next front node after consuming it to derive the
+        // mutable reference to the last node and its element.
+        self.next = unsafe { next.as_mut() };
+
+        self.previous_back = current_ptr;
+
+        Some(&mut current_ref.element)
     }
 }
 
