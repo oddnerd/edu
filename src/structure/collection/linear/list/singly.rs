@@ -605,8 +605,8 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 4, 5]);
-    /// let instance = underlying.iter();
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.iter_mut();
     ///
     /// assert_eq!(iter.next(), Some(&1));
     /// assert_eq!(iter.next(), Some(&2));
@@ -636,7 +636,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 4, 5]).iter();
+    /// let instance = Singly::from_iter([0, 1, 2, 4, 4, 5]).iter();
     ///
     /// assert_eq!(instance.iter().size_hint(), (6, Some(6)));
     /// ```
@@ -717,6 +717,22 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.iter_mut();
+    ///
+    /// assert_eq!(iter.next(), Some(&mut 1));
+    /// assert_eq!(iter.next(), Some(&mut 2));
+    /// assert_eq!(iter.next(), Some(&mut 3));
+    /// assert_eq!(iter.next(), Some(&mut 4));
+    /// assert_eq!(iter.next(), Some(&mut 5));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.next.take().and_then(|current| {
             if core::ptr::addr_eq(current, self.previous_back) {
@@ -732,6 +748,16 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 4, 4, 5]).iter();
+    ///
+    /// assert_eq!(instance.iter_mut().size_hint(), (6, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
 
@@ -756,11 +782,27 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.iter_mut();
+    ///
+    /// assert_eq!(iter.next(), Some(&mut 5));
+    /// assert_eq!(iter.next(), Some(&mut 4));
+    /// assert_eq!(iter.next(), Some(&mut 3));
+    /// assert_eq!(iter.next(), Some(&mut 2));
+    /// assert_eq!(iter.next(), Some(&mut 1));
+    /// assert_eq!(iter.next(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut current_ref = self.next.take()?;
         let mut current_ptr = core::ptr::from_mut(current_ref);
 
-        let next = current_ptr;
+        let old_next = current_ptr;
 
         while let Some(next) = current_ref.next.as_deref_mut() {
             if core::ptr::addr_eq(next, self.previous_back) {
@@ -780,7 +822,7 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
         // where we manually enforce Rust's lifetime rules to create a mutable
         // reference to the next front node after consuming it to derive the
         // mutable reference to the last node and its element.
-        self.next = unsafe { next.as_mut() };
+        self.next = unsafe { old_next.as_mut() };
 
         self.previous_back = current_ptr;
 
