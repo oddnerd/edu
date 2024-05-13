@@ -882,6 +882,17 @@ impl<'a, T: 'a> Iterator for Drain<'a, T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.drain(1..=4);
+    ///
+    /// assert_eq!(instance.size_hint(), (4, Some(4)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
         let mut remaining = self.remaining;
