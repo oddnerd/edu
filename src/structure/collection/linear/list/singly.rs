@@ -838,6 +838,8 @@ impl<'a, T: 'a> Drop for Drain<'a, T> {
     /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// core::mem::drop(instance.drain(1..=4));
+    ///
+    /// assert!(instance.iter().eq([0, 5]));
     /// ```
     fn drop(&mut self) {
         self.for_each(drop);
