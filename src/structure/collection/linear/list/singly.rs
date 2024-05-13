@@ -513,20 +513,12 @@ impl<T> List for Singly<T> {
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
+
+
+
         let start = match range.start_bound() {
             core::ops::Bound::Included(start) => *start,
-            core::ops::Bound::Excluded(start) => match start.checked_add(1) {
-                Some(start) => start,
-                None => {
-                    // TODO: does this special case drop?
-                    return Drain {
-                        underlying: Some(self),
-                        preceding: None,
-                        next: None,
-                        remaining: 0,
-                    };
-                }
-            },
+            core::ops::Bound::Excluded(start) => start.saturating_add(1),
             core::ops::Bound::Unbounded => 0,
         };
 
@@ -536,34 +528,18 @@ impl<T> List for Singly<T> {
             core::ops::Bound::Unbounded => self.len() - start,
         };
 
-        if start == 0 {
-            let next = self.elements.take();
 
-            return Drain {
-                underlying: Some(self),
-                preceding: None,
-                next,
-                remaining,
-            };
-        }
-
-        let mut current = self.elements.as_deref_mut();
+        let mut next = &mut self.elements;
 
         for _ in 0..start {
-            current = current.and_then(|current| current.next.as_deref_mut());
+            if let &mut Some(ref mut current) = next {
+                next = &mut current.next;
+            }
         }
 
-        if let Some(preceding) = current {
-            let next = preceding.next.take();
-
-            Drain {
-                underlying: None,
-                preceding: Some(preceding),
-                next,
-                remaining,
-            }
-        } else {
-            unreachable!("preceding elements");
+        Drain {
+            next,
+            remaining,
         }
     }
 
@@ -836,14 +812,8 @@ impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
 /// By-value iterator over a range of indices.
 struct Drain<'a, T> {
-    /// The underlying elements being drained from.
-    underlying: Option<&'a mut Singly<T>>,
-
-    /// The node preceding those being drained, if any.
-    preceding: Option<&'a mut Node<T>>,
-
-    /// The remaining elements of the list, if any.
-    next: Option<Box<Node<T>>>,
+    /// The next element from the front to be yielded, if any.
+    next: &'a mut Option<Box<Node<T>>>,
 
     /// The number of elements yet to be yielded.
     remaining: usize,
@@ -856,16 +826,6 @@ impl<'a, T: 'a> Drop for Drain<'a, T> {
     /// This method takes O(N) time and consumes O(1) memory.
     fn drop(&mut self) {
         self.for_each(drop);
-
-        if let Some(preceding) = self.preceding.take() {
-            preceding.next = self.next.take();
-        } else {
-            let Some(underlying) = self.underlying.take() else {
-                unreachable!("constructor logic error");
-            };
-
-            underlying.elements = self.next.take();
-        }
     }
 }
 
@@ -877,13 +837,15 @@ impl<'a, T: 'a> Iterator for Drain<'a, T> {
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
     fn next(&mut self) -> Option<Self::Item> {
-        let mut current = self.next.take()?;
+        self.remaining.checked_sub(1).and_then(|decremented| {
+            self.remaining = decremented;
 
-        self.next = current.next.take();
+            let removed = self.next.take()?;
 
-        self.remaining -= 1;
+            *self.next = removed.next;
 
-        Some(current.element)
+            Some(removed.element)
+        })
     }
 
     /// Query how many elements have yet to be yielded.
@@ -891,17 +853,28 @@ impl<'a, T: 'a> Iterator for Drain<'a, T> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let mut current = &self.next;
+        let mut count: usize = 0;
+        let mut remaining = self.remaining;
 
-        for count in 0..self.remaining {
-            let Some(node) = current else {
-                return (count, Some(count));
-            };
+        let mut next = self.next.as_deref();
 
-            current = &node.next;
+        while let Some(current) = next.take() {
+            if let Some(decremented) = remaining.checked_sub(1) {
+                remaining = decremented;
+            } else {
+                break;
+            }
+
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                unreachable!("more than usize::MAX elements");
+            }
+
+            next = current.next.as_deref();
         }
 
-        (self.remaining, Some(self.remaining))
+        (count, Some(count))
     }
 }
 
@@ -911,23 +884,25 @@ impl<'a, T: 'a> DoubleEndedIterator for Drain<'a, T> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn next_back(&mut self) -> Option<Self::Item> {
-        let mut current = self.next.as_deref_mut();
-
-        for _ in 0..self.remaining - 1 {
-            current = current.and_then(|current| current.next.as_deref_mut());
+        if let Some(decremented) = self.remaining.checked_sub(1) {
+            self.remaining = decremented;
+        } else {
+            return None;
         }
 
-        if let Some(preceding) = current {
-            let mut node = preceding.next.take()?;
-            let succeeding = node.next.take();
+        let mut next = self.next.as_deref_mut();
+
+        for _ in 0..self.remaining {
+            next = next.and_then(|current| current.next.as_deref_mut());
+        }
+
+        next.and_then(|preceding| {
+            let mut removed = preceding.next.take()?;
+            let succeeding = removed.next.take();
             preceding.next = succeeding;
 
-            self.remaining -= 1;
-
-            Some(node.element)
-        } else {
-            None
-        }
+            Some(removed.element)
+        })
     }
 }
 
