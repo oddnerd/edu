@@ -924,6 +924,21 @@ impl<'a, T: 'a> DoubleEndedIterator for Drain<'a, T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.drain(1..=4);
+    ///
+    /// assert_eq!(instance.next_back(), Some(4));
+    /// assert_eq!(instance.next_back(), Some(3));
+    /// assert_eq!(instance.next_back(), Some(2));
+    /// assert_eq!(instance.next_back(), Some(1));
+    /// assert_eq!(instance.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         if let Some(decremented) = self.remaining.checked_sub(1) {
             self.remaining = decremented;
