@@ -513,34 +513,39 @@ impl<T> List for Singly<T> {
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
+        let (offset, remaining) = (|| {
+            let offset = match range.start_bound() {
+                core::ops::Bound::Included(start) => *start,
+                core::ops::Bound::Excluded(start) => {
+                    if let Some(incremented) = start.checked_add(1) {
+                        incremented
+                    } else {
+                        return (0, 0);
+                    }
+                }
+                core::ops::Bound::Unbounded => 0,
+            };
 
+            let remaining = match range.end_bound() {
+                core::ops::Bound::Included(end) => end.abs_diff(offset).saturating_add(1),
+                core::ops::Bound::Excluded(end) => end.abs_diff(offset),
+                core::ops::Bound::Unbounded => usize::MAX.abs_diff(offset),
+            };
 
-
-        let start = match range.start_bound() {
-            core::ops::Bound::Included(start) => *start,
-            core::ops::Bound::Excluded(start) => start.saturating_add(1),
-            core::ops::Bound::Unbounded => 0,
-        };
-
-        let remaining = match range.end_bound() {
-            core::ops::Bound::Included(end) => (end - start).saturating_add(1),
-            core::ops::Bound::Excluded(end) => end - start,
-            core::ops::Bound::Unbounded => self.len() - start,
-        };
-
+            (offset, remaining)
+        })();
 
         let mut next = &mut self.elements;
 
-        for _ in 0..start {
+        for _ in 0..offset {
             if let &mut Some(ref mut current) = next {
                 next = &mut current.next;
+            } else {
+                break;
             }
         }
 
-        Drain {
-            next,
-            remaining,
-        }
+        Drain { next, remaining }
     }
 
     fn withdraw(
