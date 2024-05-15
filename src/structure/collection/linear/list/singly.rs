@@ -1267,7 +1267,9 @@ mod test {
 
         #[test]
         fn has_no_elements() {
-            todo!()
+            let instance = Singly::<()>::default();
+
+            assert!(instance.elements.is_none());
         }
     }
 
