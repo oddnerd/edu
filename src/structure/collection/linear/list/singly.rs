@@ -1311,27 +1311,55 @@ mod test {
 
         #[test]
         fn eq_when_same_elements() {
-            todo!()
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let first: Singly<_> = elements.iter().copied().collect();
+            let second: Singly<_> = elements.iter().copied().collect();
+
+            assert_eq!(first, second);
         }
 
         #[test]
         fn ne_when_different_elements() {
-            todo!()
+            let first: Singly<_> = [0].into_iter().collect();
+            let second: Singly<_> = [1].into_iter().collect();
+
+            assert_ne!(first, second);
         }
 
         #[test]
         fn is_symmetric() {
-            todo!()
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let first: Singly<_> = elements.iter().copied().collect();
+            let second: Singly<_> = elements.iter().copied().collect();
+
+            // `first == second` <=> `second == first`
+            assert_eq!(first, second);
+            assert_eq!(second, first);
         }
 
+        #[test]
         fn is_transitive() {
-            todo!()
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let first:  Singly<_> = elements.iter().copied().collect();
+            let second: Singly<_> = elements.iter().copied().collect();
+            let third:  Singly<_> = elements.iter().copied().collect();
+
+            // `first == second && second == third` => `first == third`
+            assert_eq!(first, second);
+            assert_eq!(second, third);
+            assert_eq!(third, first);
         }
 
         #[test]
         fn is_reflexive() {
-            todo!()
+            let actual = Singly::<()>::default();
+
+            assert_eq!(actual, actual);
         }
+
     }
 
     mod fmt {
