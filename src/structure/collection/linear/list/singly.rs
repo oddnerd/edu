@@ -1386,34 +1386,56 @@ mod test {
 
         #[test]
         fn correct_element() {
-            todo!()
+            let expected = [0, 1, 2, 3, 4, 5];
+            let actual = Singly::from_iter(expected);
+
+            for (index, value) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), value);
+            }
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
         fn panics_when_out_of_bounds() {
-            todo!()
+            let instance = Singly::<()>::default();
+
+            let _: &() = instance.index(0);
         }
     }
 
     mod index_mut {
         use super::*;
-        use core::ops::Index;
+        use core::ops::IndexMut;
 
         #[test]
         fn correct_element() {
-            todo!()
+            let expected = [0, 1, 2, 3, 4, 5];
+            let mut actual = Singly::from_iter(expected);
+
+            for (index, value) in expected.iter().enumerate() {
+                assert_eq!(actual.index_mut(index), value);
+            }
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
         fn panics_when_out_of_bounds() {
-            todo!()
+            let mut instance = Singly::<()>::default();
+
+            let _: &() = instance.index_mut(0);
         }
 
         #[test]
         fn is_mutable() {
-            todo!("consider adding this test to existing structures")
+            let mut instance: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+            for index in 0..instance.len() {
+                *(instance.index_mut(index)) = 0;
+            }
+
+            for element in instance {
+                assert_eq!(element, 0);
+            }
         }
     }
 
