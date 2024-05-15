@@ -1278,23 +1278,24 @@ mod test {
 
         #[test]
         fn has_elements() {
-            let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+            let expected = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
-            let clone = original.clone();
+            let actual = expected.clone();
 
-            assert_eq!(clone.len(), original.len());
+            assert_eq!(actual.len(), expected.len());
         }
 
         #[test]
         fn is_equivalent() {
-            let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+            let expected = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
-            let clone = original.clone();
+            let actual = expected.clone();
 
-            assert_eq!(clone, original);
+            assert_eq!(actual, expected);
         }
 
         #[test]
+        #[allow(clippy::shadow_unrelated)]
         fn owns_elements() {
             let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
