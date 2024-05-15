@@ -86,6 +86,30 @@ impl<T> Default for Singly<T> {
     }
 }
 
+impl<T: Clone> Clone for Singly<T> {
+    /// Clone all contained elements into a new instance of [`Singly`].
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let clone = original.clone();
+    ///
+    /// assert_eq!(clone, original);
+    /// ```
+    fn clone(&self) -> Self {
+        self.iter().cloned().collect()
+    }
+}
+
 impl<T: core::fmt::Debug> core::fmt::Debug for Singly<T> {
     /// List the elements contained.
     ///
