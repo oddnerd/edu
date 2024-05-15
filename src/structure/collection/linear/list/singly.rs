@@ -2124,7 +2124,14 @@ mod test {
 
             #[test]
             fn none_when_out_of_bounds_range() {
-                todo!()
+                let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let mut actual = instance.drain(256..);
+
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                drop(actual);
             }
 
             mod iterator {
@@ -2132,12 +2139,18 @@ mod test {
 
                 #[test]
                 fn element_count() {
-                    todo!()
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.drain(1..4).count(), expected.drain(1..4).count());
                 }
 
                 #[test]
                 fn in_order() {
-                    todo!()
+                    let mut expected = vec![0, 1, 2, 3, 4, 5];
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert!(actual.drain(1..4).eq(expected.drain(1..4)));
                 }
 
                 mod double_ended {
@@ -2145,12 +2158,21 @@ mod test {
 
                     #[test]
                     fn element_count() {
-                        todo!()
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                        assert_eq!(
+                            actual.drain(1..4).rev().count(),
+                            expected.drain(1..4).rev().count()
+                        );
                     }
 
                     #[test]
                     fn in_order() {
-                        todo!()
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                        assert!(actual.drain(1..4).rev().eq(expected.drain(1..4).rev()));
                     }
                 }
 
@@ -2159,17 +2181,23 @@ mod test {
 
                     #[test]
                     fn hint() {
-                        todo!()
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                        let expected = expected.drain(1..4);
+
+                        assert_eq!(
+                            actual.drain(1..4).size_hint(),
+                            (expected.len(), Some(expected.len()))
+                        );
                     }
 
                     #[test]
                     fn len() {
-                        todo!()
-                    }
+                        let mut expected = vec![0, 1, 2, 3, 4, 5];
+                        let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                    #[test]
-                    fn updates() {
-                        todo!()
+                        assert_eq!(actual.drain(1..4).len(), expected.drain(1..4).len());
                     }
                 }
 
@@ -2178,12 +2206,33 @@ mod test {
 
                     #[test]
                     fn empty() {
-                        todo!()
+                        let mut actual = Singly::<()>::default();
+                        let mut actual = actual.drain(0..=0);
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
 
                     #[test]
                     fn exhausted() {
-                        todo!()
+                        let mut actual: Singly<_> = [()].into_iter().collect();
+                        let mut actual = actual.drain(0..=0);
+
+                        // Exhaust the elements.
+                        let _: () = actual.next().expect("the one element");
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
                 }
             }
@@ -2193,17 +2242,38 @@ mod test {
 
                 #[test]
                 fn removes_yielded_elements() {
-                    todo!()
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(..));
+
+                    assert_eq!(actual.len(), 0);
                 }
 
                 #[test]
                 fn does_not_modify_leading_elements() {
-                    todo!()
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(3..));
+
+                    assert!(actual.iter().eq([0, 1, 2].iter()));
                 }
 
                 #[test]
                 fn does_not_modify_trailing_elements() {
-                    todo!()
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(..3));
+
+                    assert!(actual.iter().eq([3, 4, 5].iter()));
+                }
+
+                #[test]
+                fn combines_leading_and_trailing_elements() {
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(1..=4));
+
+                    assert!(actual.iter().eq([0, 5].iter()));
                 }
             }
         }
@@ -2216,17 +2286,38 @@ mod test {
 
                 #[test]
                 fn element_count() {
-                    todo!()
+                    let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert_eq!(actual.count(), 3);
                 }
 
                 #[test]
                 fn in_order() {
-                    todo!()
+                    let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert!(actual.eq([0, 2, 4]));
+                }
+
+                #[test]
+                fn combines_retained_elements() {
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element == &1));
+
+                    assert!(actual.eq([0, 2, 3, 4, 5]));
                 }
 
                 #[test]
                 fn size_hint() {
-                    todo!()
+                    let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = underlying.withdraw(|element| element % 2 == 0);
+
+                    assert_eq!(actual.size_hint(), (0, Some(6)));
                 }
 
                 mod double_ended {
@@ -2234,17 +2325,43 @@ mod test {
 
                     #[test]
                     fn element_count() {
-                        todo!()
+                        let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
+
+                        assert_eq!(actual.count(), 3);
                     }
 
                     #[test]
                     fn in_order() {
-                        todo!()
+                        let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = underlying.withdraw(|element| element % 2 == 0).rev();
+
+                        assert!(actual.eq([4, 2, 0]));
                     }
 
                     #[test]
-                    fn prevents_querying_elements_more_than_once() {
-                        todo!()
+                    fn combines_retained_elements() {
+                        let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        drop(actual.withdraw(|element| element == &1).rev());
+
+                        assert!(actual.eq([0, 2, 3, 4, 5]));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once() {
+                        let mut underlying = Singly::from_iter([0, 1, 2, 0]);
+
+                        let mut actual = underlying.withdraw(|element| element != &0);
+
+                        // make head and tail meet.
+                        _ = actual.next().expect("the element with value '1'");
+                        _ = actual.next_back().expect("the element with value '2'");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
                 }
 
@@ -2253,12 +2370,33 @@ mod test {
 
                     #[test]
                     fn empty() {
-                        todo!()
+                        let mut underlying = Singly::from_iter([0]);
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Exhaust the elements.
+                        _ = actual.next().expect("the one element");
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
 
                     #[test]
                     fn exhausted() {
-                        todo!()
+                        let mut underlying = Singly::<usize>::default();
+                        let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Yields `None` at least once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
                 }
             }
@@ -2268,7 +2406,11 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
-                    todo!()
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert!(actual.eq([1, 3, 5]));
                 }
             }
         }
@@ -2278,13 +2420,20 @@ mod test {
 
             #[test]
             fn drop_all_elements() {
-                todo!()
+                let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                actual.clear();
+
+                assert_eq!(actual.len(), 0);
             }
 
             #[test]
             fn when_already_empty() {
-                todo!()
+                let mut actual = Singly::<usize>::default();
+
+                // Ideally this will panic or something in case of logic error.
+                actual.clear();
             }
         }
-    }
+   }
 }
