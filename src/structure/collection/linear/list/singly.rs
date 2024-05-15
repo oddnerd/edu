@@ -1261,6 +1261,75 @@ mod test {
         }
     }
 
+    mod default {
+        use super::*;
+
+        #[test]
+        fn has_no_elements() {
+            todo!()
+        }
+    }
+
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn has_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn is_equivalent() {
+            todo!()
+        }
+
+        #[test]
+        fn owns_elements() {
+            todo!()
+        }
+    }
+
+    mod equality {
+        use super::*;
+
+        #[test]
+        fn eq_when_same_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn ne_when_different_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn is_symmetric() {
+            todo!()
+        }
+
+        fn is_transitive() {
+            todo!()
+        }
+
+        #[test]
+        fn is_reflexive() {
+            todo!()
+        }
+    }
+
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                todo!()
+            }
+        }
+    }
+
     mod index {
         use super::*;
         use core::ops::Index;
@@ -1416,75 +1485,6 @@ mod test {
 
             #[test]
             fn does_not_trust_size_hint() {
-                todo!()
-            }
-        }
-    }
-
-    mod default {
-        use super::*;
-
-        #[test]
-        fn has_no_elements() {
-            todo!()
-        }
-    }
-
-    mod clone {
-        use super::*;
-
-        #[test]
-        fn has_elements() {
-            todo!()
-        }
-
-        #[test]
-        fn is_equivalent() {
-            todo!()
-        }
-
-        #[test]
-        fn owns_elements() {
-            todo!()
-        }
-    }
-
-    mod equality {
-        use super::*;
-
-        #[test]
-        fn eq_when_same_elements() {
-            todo!()
-        }
-
-        #[test]
-        fn ne_when_different_elements() {
-            todo!()
-        }
-
-        #[test]
-        fn is_symmetric() {
-            todo!()
-        }
-
-        fn is_transitive() {
-            todo!()
-        }
-
-        #[test]
-        fn is_reflexive() {
-            todo!()
-        }
-    }
-
-    mod fmt {
-        use super::*;
-
-        mod debug {
-            use super::*;
-
-            #[test]
-            fn is_elements() {
                 todo!()
             }
         }
