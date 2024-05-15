@@ -1469,7 +1469,7 @@ mod test {
 
                 let actual: Singly<_> = expected.iter().copied().collect();
 
-                assert_eq!(actual.into_iter().len(), expected.len());
+                assert_eq!(actual.into_iter().count(), expected.len());
             }
 
             #[test]
