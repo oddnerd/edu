@@ -4,8 +4,6 @@ use super::Collection;
 use super::Linear;
 use super::List;
 
-// TODO(oddnerd): examples for everything
-
 /// Independently allocated elements connected via a single link.
 ///
 /// Each element exists within separate allocated object, referred to as a
@@ -974,6 +972,7 @@ impl<'a, T: 'a> ExactSizeIterator for Drain<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for Drain<'a, T> {}
 
+// TODO: examples for withdraw
 /// By-value iterator over values which match some predicate.
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// The underlying elements being drained from.
@@ -1178,3 +1177,647 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 impl<T, F: FnMut(&T) -> bool> ExactSizeIterator for Withdraw<'_, T, F> {}
 
 impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {}
+
+#[cfg(test)]
+#[allow(
+    clippy::undocumented_unsafe_blocks,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::assertions_on_result_states,
+    clippy::indexing_slicing
+)]
+mod test {
+    use super::*;
+
+    mod drop {
+        use super::*;
+
+        #[test]
+        fn zero_size_type() {
+            todo!()
+        }
+
+        #[test]
+        fn empty() {
+            todo!()
+        }
+
+        #[test]
+        fn deallocates_nodes() {
+            todo!()
+        }
+
+        #[test]
+        fn prevents_call_stack_overflow() {
+            todo!()
+        }
+    }
+
+    mod index {
+        use super::*;
+        use core::ops::Index;
+
+        #[test]
+        fn correct_element() {
+            todo!()
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            todo!()
+        }
+    }
+
+    mod index_mut {
+        use super::*;
+        use core::ops::Index;
+
+        #[test]
+        fn correct_element() {
+            todo!()
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            todo!()
+        }
+
+        #[test]
+        fn is_mutable() {
+            todo!("consider adding this test to existing structures")
+        }
+    }
+
+    mod iterator {
+        use super::*;
+
+        mod into {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                todo!()
+            }
+
+            #[test]
+            fn in_order() {
+                todo!()
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    todo!()
+                }
+
+                #[test]
+                fn in_order() {
+                    todo!()
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    todo!()
+                }
+
+                #[test]
+                fn len() {
+                    todo!()
+                }
+
+                #[test]
+                fn updates() {
+                    todo!("consider adding this to other structures")
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    todo!()
+                }
+
+                #[test]
+                fn exhausted() {
+                    todo!()
+                }
+            }
+        }
+
+        mod from {
+            use super::*;
+
+            #[test]
+            fn has_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn initializes_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn empty() {
+                todo!()
+            }
+        }
+
+        mod extend {
+            use super::*;
+
+            #[test]
+            fn when_empty() {
+                todo!()
+            }
+
+            #[test]
+            fn has_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn initialized_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn appends_after_initialized_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn empty() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_trust_size_hint() {
+                todo!()
+            }
+        }
+    }
+
+    mod default {
+        use super::*;
+
+        #[test]
+        fn has_no_elements() {
+            todo!()
+        }
+    }
+
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn has_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn is_equivalent() {
+            todo!()
+        }
+
+        #[test]
+        fn owns_elements() {
+            todo!()
+        }
+    }
+
+    mod equality {
+        use super::*;
+
+        #[test]
+        fn eq_when_same_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn ne_when_different_elements() {
+            todo!()
+        }
+
+        #[test]
+        fn is_symmetric() {
+            todo!()
+        }
+
+        fn is_transitive() {
+            todo!()
+        }
+
+        #[test]
+        fn is_reflexive() {
+            todo!()
+        }
+    }
+
+    mod fmt {
+        use super::*;
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_elements() {
+                todo!()
+            }
+        }
+    }
+
+    mod collection {
+        use super::*;
+
+        mod count {
+            use super::*;
+
+            #[test]
+            fn number_of_elements() {
+                todo!()
+            }
+        }
+    }
+
+    mod linear {
+        use super::*;
+
+        mod iter {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                todo!()
+            }
+
+            #[test]
+            fn in_order() {
+                todo!()
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    todo!()
+                }
+
+                #[test]
+                fn in_order() {
+                    todo!()
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    todo!()
+                }
+
+                #[test]
+                fn len() {
+                    todo!()
+                }
+
+                #[test]
+                fn updates() {
+                    todo!()
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    todo!()
+                }
+
+                #[test]
+                fn exhausted() {
+                    todo!()
+                }
+            }
+        }
+
+        mod iter_mut {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                todo!()
+            }
+
+            #[test]
+            fn in_order() {
+                todo!()
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    todo!()
+                }
+
+                #[test]
+                fn in_order() {
+                    todo!()
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    todo!()
+                }
+
+                #[test]
+                fn len() {
+                    todo!()
+                }
+
+                #[test]
+                fn updates() {
+                    todo!()
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    todo!()
+                }
+
+                #[test]
+                fn exhausted() {
+                    todo!()
+                }
+            }
+        }
+    }
+
+    mod list {
+        use super::*;
+
+        mod insert {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                todo!()
+            }
+
+            #[test]
+            fn initializes_element() {
+                todo!()
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn when_empty() {
+                todo!()
+            }
+
+            #[test]
+            fn can_prepend() {
+                todo!()
+            }
+
+            #[test]
+            fn can_append() {
+                todo!()
+            }
+        }
+
+        mod remove {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                todo!()
+            }
+        }
+
+        mod drain {
+            use super::*;
+
+            #[test]
+            fn none_when_out_of_bounds_range() {
+                todo!()
+            }
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    todo!()
+                }
+
+                #[test]
+                fn in_order() {
+                    todo!()
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        todo!()
+                    }
+                }
+
+                mod exact_size {
+                    use super::*;
+
+                    #[test]
+                    fn hint() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn len() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn updates() {
+                        todo!()
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn empty() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn exhausted() {
+                        todo!()
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn removes_yielded_elements() {
+                    todo!()
+                }
+
+                #[test]
+                fn does_not_modify_leading_elements() {
+                    todo!()
+                }
+
+                #[test]
+                fn does_not_modify_trailing_elements() {
+                    todo!()
+                }
+            }
+        }
+
+        mod withdraw {
+            use super::*;
+
+            mod iterator {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    todo!()
+                }
+
+                #[test]
+                fn in_order() {
+                    todo!()
+                }
+
+                #[test]
+                fn size_hint() {
+                    todo!()
+                }
+
+                mod double_ended {
+                    use super::*;
+
+                    #[test]
+                    fn element_count() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn in_order() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn prevents_querying_elements_more_than_once() {
+                        todo!()
+                    }
+                }
+
+                mod fused {
+                    use super::*;
+
+                    #[test]
+                    fn empty() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn exhausted() {
+                        todo!()
+                    }
+                }
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn drops_yet_to_be_yielded_elements() {
+                    todo!()
+                }
+            }
+        }
+
+        mod clear {
+            use super::*;
+
+            #[test]
+            fn drop_all_elements() {
+                todo!()
+            }
+
+            #[test]
+            fn when_already_empty() {
+                todo!()
+            }
+        }
+    }
+}
