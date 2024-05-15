@@ -1616,37 +1616,80 @@ mod test {
 
             #[test]
             fn when_empty() {
-                todo!()
+                let mut actual = Singly::<usize>::default();
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                actual.extend(expected.iter().copied());
+
+                assert!(actual.eq(expected));
             }
 
             #[test]
             fn has_elements() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Singly::<usize>::default();
+
+                actual.extend(expected);
+
+                assert_eq!(actual.len(), expected.len());
             }
 
             #[test]
-            fn initialized_elements() {
-                todo!()
+            fn initializes_elements() {
+                let mut actual: Singly<_> = [0, 1, 2].into_iter().collect();
+
+                actual.extend([3, 4, 5]);
+
+                assert!(actual.eq([0, 1, 2, 3, 4, 5]));
             }
 
             #[test]
             fn does_not_modify_initialized_elements() {
-                todo!()
+                let expected = [0, 1, 2];
+
+                let mut actual: Singly<_> = expected.into_iter().collect();
+
+                actual.extend([3, 4, 5]);
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
             }
 
             #[test]
             fn appends_after_initialized_elements() {
-                todo!()
+                let initialized = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = initialized.iter().copied().collect();
+
+                let expected = [6, 7, 8, 9, 10];
+                actual.extend(expected.iter().copied());
+
+                for index in initialized.len()..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
             }
 
             #[test]
             fn empty() {
-                todo!()
+                let mut actual = Singly::<()>::default();
+
+                actual.extend(core::iter::empty());
+
+                assert!(actual.elements.is_none());
             }
 
             #[test]
             fn does_not_trust_size_hint() {
-                todo!()
+                let mut actual = Singly::<usize>::default();
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                // Ideally, this will panic if it uses the invalid size.
+                actual.extend(FaultySizeHintIter {
+                    data: expected.iter().copied(),
+                });
             }
         }
     }
