@@ -1490,7 +1490,7 @@ mod test {
 
                     let actual: Singly<_> = expected.iter().copied().collect();
 
-                    assert_eq!(actual.into_iter().rev().len(), expected.rev().len());
+                    assert_eq!(actual.into_iter().rev().len(), expected.len());
                 }
 
                 #[test]
@@ -1981,42 +1981,82 @@ mod test {
 
             #[test]
             fn adds_element() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.insert(2, 12345).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
             }
 
             #[test]
             fn initializes_element() {
-                todo!()
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                actual.insert(2, 12345);
+
+                assert_eq!(actual[2], 12345);
             }
 
             #[test]
             fn yields_inserted_element() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.insert(2, 12345).expect("successful allocation");
+
+                assert_eq!(actual, &mut 12345);
             }
 
             #[test]
             fn does_not_modify_leading_elements() {
-                todo!()
+                const INDEX: usize = 2;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.insert(INDEX, 12345).expect("successful allocation");
+
+                for index in 0..INDEX {
+                    assert_eq!(actual[index], expected[index]);
+                }
             }
 
             #[test]
             fn does_not_modify_trailing_elements() {
-                todo!()
+                const INDEX: usize = 2;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.insert(INDEX, 12345).expect("successful allocation");
+
+                for index in INDEX..expected.len() {
+                    assert_eq!(actual[index + 1], expected[index]);
+                }
             }
 
             #[test]
             fn when_empty() {
-                todo!()
+                let mut actual = Singly::<usize>::default();
+
+                assert!(actual.insert(0, 12345).is_ok());
             }
 
             #[test]
             fn can_prepend() {
-                todo!()
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                assert!(actual.insert(0, 12345).is_ok());
+                assert_eq!(actual[0], 12345);
             }
 
             #[test]
             fn can_append() {
-                todo!()
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                assert!(actual.insert(6, 12345).is_ok());
+                assert_eq!(actual[6], 12345);
             }
         }
 
