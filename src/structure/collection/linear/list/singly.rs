@@ -942,24 +942,30 @@ impl<'a, T: 'a> DoubleEndedIterator for Drain<'a, T> {
     /// assert_eq!(instance.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        if let Some(decremented) = self.remaining.checked_sub(1) {
+        self.remaining.checked_sub(1).and_then(|decremented| {
             self.remaining = decremented;
-        } else {
-            return None;
-        }
 
-        let mut next = self.next.as_deref_mut();
+            let mut next = self.next.as_deref_mut();
 
-        for _ in 0..self.remaining {
-            next = next.and_then(|current| current.next.as_deref_mut());
-        }
+            for _ in 0..self.remaining {
+                if let Some(current) = next.take() {
+                    if current.next.is_none() {
+                        break;
+                    }
 
-        next.and_then(|preceding| {
-            let mut removed = preceding.next.take()?;
-            let succeeding = removed.next.take();
-            preceding.next = succeeding;
+                    next = current.next.as_deref_mut();
+                } else {
+                    break;
+                }
+            }
 
-            Some(removed.element)
+            next.and_then(|preceding| {
+                let mut removed = preceding.next.take()?;
+                let succeeding = removed.next.take();
+                preceding.next = succeeding;
+
+                Some(removed.element)
+            })
         })
     }
 }
