@@ -1717,12 +1717,20 @@ mod test {
 
             #[test]
             fn element_count() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.iter().count(), expected.len());
             }
 
             #[test]
             fn in_order() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = expected.iter().copied().collect();
+
+                assert!(actual.iter().eq(expected.iter()));
             }
 
             mod double_ended {
@@ -1730,12 +1738,20 @@ mod test {
 
                 #[test]
                 fn element_count() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter().rev().count(), expected.len());
                 }
 
                 #[test]
                 fn in_order() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert!(actual.iter().rev().eq(expected.iter().rev()));
                 }
             }
 
@@ -1744,17 +1760,47 @@ mod test {
 
                 #[test]
                 fn hint() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter().size_hint(), (expected.len(), Some(expected.len())));
                 }
 
                 #[test]
                 fn len() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter().len(), expected.len());
                 }
 
                 #[test]
                 fn updates() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Singly<_> = expected.iter().copied().collect();
+
+                    let mut actual = actual.iter();
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 5);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 4);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 3);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 2);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 1);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 0);
                 }
             }
 
@@ -1763,12 +1809,35 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    todo!()
+                    let actual = Singly::<()>::default();
+
+                    let mut actual = actual.iter();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
                 }
 
                 #[test]
                 fn exhausted() {
-                    todo!()
+                    let actual: Singly<_> = [()].into_iter().collect();
+
+                    let mut actual = actual.iter();
+
+                    // Exhaust the elements.
+                    let _: &() = actual.next().expect("the one element");
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
                 }
             }
         }
@@ -1778,12 +1847,20 @@ mod test {
 
             #[test]
             fn element_count() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.iter_mut().count(), expected.len());
             }
 
             #[test]
             fn in_order() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                assert!(actual.iter_mut().eq(expected.iter()));
             }
 
             mod double_ended {
@@ -1791,12 +1868,20 @@ mod test {
 
                 #[test]
                 fn element_count() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter_mut().rev().count(), expected.len());
                 }
 
                 #[test]
                 fn in_order() {
-                    todo!()
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert!(actual.iter_mut().rev().eq(expected.iter_mut().rev()));
                 }
             }
 
@@ -1805,17 +1890,47 @@ mod test {
 
                 #[test]
                 fn hint() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter_mut().size_hint(), (expected.len(), Some(expected.len())));
                 }
 
                 #[test]
                 fn len() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter_mut().len(), expected.len());
                 }
 
                 #[test]
                 fn updates() {
-                    todo!()
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                    let mut actual = actual.iter_mut();
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 5);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 4);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 3);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 2);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 1);
+
+                    drop(actual.next());
+                    assert_eq!(actual.len(), 0);
                 }
             }
 
@@ -1824,12 +1939,35 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    todo!()
+                    let mut actual = Singly::<()>::default();
+
+                    let mut actual = actual.iter_mut();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
                 }
 
                 #[test]
                 fn exhausted() {
-                    todo!()
+                    let mut actual: Singly<_> = [()].into_iter().collect();
+
+                    let mut actual = actual.iter_mut();
+
+                    // Exhaust the elements.
+                    let _: &() = actual.next().expect("the one element");
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
                 }
             }
         }
