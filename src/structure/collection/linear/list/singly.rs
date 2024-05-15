@@ -1586,18 +1586,28 @@ mod test {
             use super::*;
 
             #[test]
+            fn empty() {
+                let actual: Singly<()> = core::iter::empty().collect();
+
+                assert!(actual.elements.is_none())
+            }
+
+            #[test]
             fn has_elements() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.len(), expected.len());
             }
 
             #[test]
             fn initializes_elements() {
-                todo!()
-            }
+                let expected = [0, 1, 2, 3, 4, 5];
 
-            #[test]
-            fn empty() {
-                todo!()
+                let actual: Singly<_> = expected.iter().copied().collect();
+
+                assert!(actual.eq(expected));
             }
         }
 
