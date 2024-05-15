@@ -1702,7 +1702,9 @@ mod test {
 
             #[test]
             fn number_of_elements() {
-                todo!()
+                let actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                assert_eq!(actual.count(), 6);
             }
         }
     }
