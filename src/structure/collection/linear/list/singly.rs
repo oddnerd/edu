@@ -1241,23 +1241,24 @@ mod test {
         use super::*;
 
         #[test]
-        fn zero_size_type() {
-            todo!()
+        fn empty() {
+            let instance = Singly::<usize>::default();
+
+            drop(instance);
         }
 
         #[test]
-        fn empty() {
-            todo!()
+        fn zero_size_type() {
+            let instance: Singly<_> = [(), (), (), (), (), ()].into_iter().collect();
+
+            drop(instance);
         }
 
         #[test]
         fn deallocates_nodes() {
-            todo!()
-        }
+            let instance: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
-        #[test]
-        fn prevents_call_stack_overflow() {
-            todo!()
+            drop(instance);
         }
     }
 
