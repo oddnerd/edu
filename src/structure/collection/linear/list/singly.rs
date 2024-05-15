@@ -1278,17 +1278,31 @@ mod test {
 
         #[test]
         fn has_elements() {
-            todo!()
+            let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let clone = original.clone();
+
+            assert_eq!(clone.len(), original.len());
         }
 
         #[test]
         fn is_equivalent() {
-            todo!()
+            let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let clone = original.clone();
+
+            assert_eq!(clone, original);
         }
 
         #[test]
         fn owns_elements() {
-            todo!()
+            let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let clone = original.clone();
+
+            for (clone, original) in clone.iter().zip(original.iter()) {
+                assert!(!core::ptr::addr_eq(clone, original));
+            }
         }
     }
 
