@@ -110,6 +110,30 @@ impl<T: Clone> Clone for Singly<T> {
     }
 }
 
+impl<T: PartialEq> PartialEq for Singly<T> {
+    /// Query if `other` has the same elements in the same order.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let elements = [0, 1, 2, 3, 4, 5];
+    ///
+    /// let original = Singly::from_iter(elements.iter().copied());
+    /// let other = Singly::from_iter(elements.iter().copied());
+    ///
+    /// assert_eq!(clone, original);
+    /// ```
+    fn eq(&self, other: &Self) -> bool {
+        self.iter().eq(other.iter())
+    }
+}
+
+impl<T: Eq> Eq for Singly<T> {}
+
 impl<T: core::fmt::Debug> core::fmt::Debug for Singly<T> {
     /// List the elements contained.
     ///
