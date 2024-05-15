@@ -2064,23 +2064,58 @@ mod test {
             use super::*;
 
             #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.remove(0);
+
+                assert_eq!(actual.len(), expected.len() - 1);
+            }
+
+            #[test]
             fn yields_element() {
-                todo!()
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                (0..expected.len()).for_each(|index| {
+                    assert_eq!(actual.remove(0).expect("front element"), expected[index]);
+                });
             }
 
             #[test]
             fn does_not_modify_leading_elements() {
-                todo!()
+                const INDEX: usize = 2;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.remove(INDEX);
+
+                for index in 0..INDEX {
+                    assert_eq!(actual[index], expected[index]);
+                }
             }
 
             #[test]
             fn does_not_modify_trailing_elements() {
-                todo!()
+                const INDEX: usize = 2;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.remove(INDEX);
+
+                for index in INDEX..expected.len() - 1 {
+                    assert_eq!(actual[index], expected[index + 1]);
+                }
             }
 
             #[test]
             fn none_when_index_out_of_bounds() {
-                todo!()
+                let mut actual = Singly::<()>::default();
+
+                assert!(actual.remove(0).is_none());
             }
         }
 
