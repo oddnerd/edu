@@ -698,11 +698,11 @@ mod test {
 
                     let mut actual = actual.iter();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -959,11 +959,11 @@ mod test {
 
                     let mut actual = actual.iter();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -1071,11 +1071,11 @@ mod test {
 
                     let mut actual = actual.iter_mut();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
