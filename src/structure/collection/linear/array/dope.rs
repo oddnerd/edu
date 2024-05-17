@@ -49,7 +49,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
     /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
+    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
     /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
@@ -114,13 +114,11 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
-    /// for index in 0..expected.len() {
+    /// for index in 0..=5{
     ///     use core::ops::Index;
-    ///     assert_eq!(actual.index(index), expected.index(index));
+    ///     assert_eq!(actual.index(index), &index);
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
@@ -156,13 +154,11 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = Dope::from(expected.as_mut_slice());
     ///
-    /// for index in 0..expected.len() {
+    /// for mut index in 0..=5 {
     ///     use core::ops::IndexMut;
-    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
+    ///     assert_eq!(actual.index_mut(index), &mut index);
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
@@ -219,9 +215,7 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
@@ -245,9 +239,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(Collection::count(&actual), expected.len());
     /// ```
@@ -269,11 +261,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
-    /// assert!(actual.iter().eq(expected.iter()))
+    /// for (index, element) in actual.iter().enumerate() {
+    ///     assert_eq!(element, &index);
+    /// }
     /// ```
     fn iter(
         &self,
@@ -298,11 +290,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = Dope::from(expected.as_mut_slice());
     ///
-    /// assert!(actual.iter_mut().eq(expected.iter_mut()));
+    /// for (mut index, element) in actual.iter_mut().enumerate() {
+    ///     assert_eq!(element, &mut index);
+    /// }
     /// ```
     fn iter_mut(
         &mut self,
@@ -334,9 +326,7 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(actual.as_ptr(), expected.as_ptr());
     /// ```
@@ -359,9 +349,7 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
-    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(actual.as_mut_ptr(), expected.as_mut_ptr());
     /// ```
