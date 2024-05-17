@@ -4036,6 +4036,17 @@ mod test {
 
                     assert_eq!(actual.into_iter().len(), expected.len());
                 }
+
+                #[test]
+                fn updates() {
+                    let mut actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
+                }
             }
 
             mod fused {
