@@ -612,6 +612,19 @@ mod test {
 
             let _: &() = instance.index_mut(0);
         }
+
+        #[test]
+        fn is_mutable() {
+            let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+            for index in 0..actual.count() {
+                *actual.index_mut(index) = 0;
+            }
+
+            for element in actual {
+                assert_eq!(element, 0);
+            }
+        }
     }
 
     mod iterator {
