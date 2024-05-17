@@ -502,12 +502,9 @@ impl<T> List for Singly<T> {
             next: None,
         });
 
-        let new = if let &mut Some(ref mut preceding) = next {
-            new.next = preceding.next.take();
-            preceding.next.insert(new)
-        } else {
-            next.insert(new)
-        };
+        new.next = next.take();
+
+        let new = next.insert(new);
 
         Ok(&mut new.element)
     }
@@ -2048,6 +2045,7 @@ mod test {
                 let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
                 assert!(actual.insert(0, 12345).is_ok());
+
                 assert_eq!(actual[0], 12345);
             }
 
@@ -2056,6 +2054,7 @@ mod test {
                 let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
                 assert!(actual.insert(6, 12345).is_ok());
+
                 assert_eq!(actual[6], 12345);
             }
         }
