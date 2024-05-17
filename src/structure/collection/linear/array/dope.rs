@@ -114,13 +114,11 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
-    /// for index in 0..expected.len() {
+    /// for index in 0..=5{
     ///     use core::ops::Index;
-    ///     assert_eq!(actual.index(index), expected.index(index));
+    ///     assert_eq!(actual.index(index), &index);
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
@@ -156,13 +154,11 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = Dope::from(expected.as_mut_slice());
     ///
-    /// for index in 0..expected.len() {
+    /// for mut index in 0..=5 {
     ///     use core::ops::IndexMut;
-    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
+    ///     assert_eq!(actual.index_mut(index), &mut index);
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
@@ -219,9 +215,7 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
@@ -245,9 +239,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(Collection::count(&actual), expected.len());
     /// ```
@@ -269,11 +261,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
-    /// assert!(actual.iter().eq(expected.iter()))
+    /// for (index, element) in actual.iter().enumerate() {
+    ///     assert_eq!(element, &index);
+    /// }
     /// ```
     fn iter(
         &self,
@@ -298,11 +290,11 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = Dope::from(expected.as_mut_slice());
     ///
-    /// assert!(actual.iter_mut().eq(expected.iter_mut()));
+    /// for (mut index, element) in actual.iter_mut().enumerate() {
+    ///     assert_eq!(element, &mut index);
+    /// }
     /// ```
     fn iter_mut(
         &mut self,
@@ -334,9 +326,7 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(actual.as_ptr(), expected.as_ptr());
     /// ```
@@ -359,9 +349,7 @@ impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
-    /// let mut actual = unsafe { Dope::new(ptr, expected.len()) };
+    /// let mut actual = Dope::from(expected.as_mut_slice());
     ///
     /// assert_eq!(actual.as_mut_ptr(), expected.as_mut_ptr());
     /// ```
@@ -391,7 +379,7 @@ mod test {
 
                 let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -404,7 +392,7 @@ mod test {
 
                 let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -422,6 +410,7 @@ mod test {
             #[test]
             fn correct_size() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.count, expected.len());
@@ -430,6 +419,7 @@ mod test {
             #[test]
             fn correct_pointer() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
@@ -447,7 +437,7 @@ mod test {
 
             let actual = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -476,7 +466,7 @@ mod test {
 
             let mut actual = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -492,6 +482,21 @@ mod test {
             let mut instance = Dope::from(underlying.as_mut_slice());
 
             let _: &() = instance.index_mut(0);
+        }
+
+        #[test]
+        fn is_mutable() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let mut actual = Dope::from(expected.as_mut_slice());
+
+            for index in 0..actual.count() {
+                *actual.index_mut(index) = 0;
+            }
+
+            for element in expected {
+                assert_eq!(element, 0);
+            }
         }
     }
 
@@ -529,13 +534,13 @@ mod test {
 
             let first = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let second = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -547,14 +552,14 @@ mod test {
             let mut zero = [0];
             let zero = {
                 let ptr = zero.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, zero.len()) }
             };
 
             let mut one = [1];
             let one = {
                 let ptr = one.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, one.len()) }
             };
 
@@ -567,13 +572,13 @@ mod test {
 
             let first = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let second = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -588,19 +593,19 @@ mod test {
 
             let first = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let second = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
             let third = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -616,7 +621,7 @@ mod test {
 
             let actual = {
                 let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
                 unsafe { Dope::new(ptr, expected.len()) }
             };
 
@@ -636,7 +641,7 @@ mod test {
 
                 let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -657,11 +662,10 @@ mod test {
 
                 let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
-                assert_eq!(actual.count, expected.len());
                 assert_eq!(Collection::count(&actual), expected.len());
             }
 
@@ -695,7 +699,7 @@ mod test {
 
                 let actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -719,7 +723,7 @@ mod test {
 
                     let actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -736,7 +740,7 @@ mod test {
 
                     let actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -752,7 +756,7 @@ mod test {
 
                     let actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -765,17 +769,17 @@ mod test {
 
                     let actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
                     let mut actual = actual.iter();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -834,7 +838,7 @@ mod test {
 
                 let mut actual = {
                     let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
@@ -858,7 +862,7 @@ mod test {
 
                     let mut actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -875,7 +879,7 @@ mod test {
 
                     let mut actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -891,7 +895,7 @@ mod test {
 
                     let mut actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
@@ -904,17 +908,17 @@ mod test {
 
                     let mut actual = {
                         let ptr = expected.as_mut_ptr();
-                        let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+                        let ptr = unsafe { NonNull::new_unchecked(ptr) };
                         unsafe { Dope::new(ptr, expected.len()) }
                     };
 
                     let mut actual = actual.iter_mut();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 

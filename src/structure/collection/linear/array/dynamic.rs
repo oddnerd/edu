@@ -3940,6 +3940,19 @@ mod test {
 
             let _: &mut () = instance.index_mut(0);
         }
+
+        #[test]
+        fn is_mutable() {
+            let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+            for element in actual.iter_mut() {
+                *element = 0;
+            }
+
+            for element in actual {
+                assert_eq!(element, 0);
+            }
+        }
     }
 
     mod iterator {
@@ -4022,6 +4035,17 @@ mod test {
                     let actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.into_iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let mut actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -4454,7 +4478,6 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
-                assert_eq!(actual.initialized, expected.len());
                 assert_eq!(Collection::count(&actual), expected.len());
             }
 
@@ -4551,6 +4574,18 @@ mod test {
                     let actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                    let mut actual = actual.iter();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -4649,6 +4684,18 @@ mod test {
                     let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let mut actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                    let mut actual = actual.iter_mut();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
