@@ -720,6 +720,10 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut current = self.next.as_deref()?;
 
+        if core::ptr::addr_eq(current, self.previous_back) {
+            return None;
+        }
+
         while let Some(next) = current.next.as_deref() {
             if core::ptr::addr_eq(next, self.previous_back) {
                 break;
@@ -838,6 +842,10 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut current_ref = self.next.take()?;
         let mut current_ptr = core::ptr::from_mut(current_ref);
+
+        if core::ptr::addr_eq(current_ref, self.previous_back) {
+            return None;
+        }
 
         let old_next = current_ptr;
 
