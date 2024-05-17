@@ -3940,6 +3940,19 @@ mod test {
 
             let _: &mut () = instance.index_mut(0);
         }
+
+        #[test]
+        fn is_mutable() {
+            let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+            for element in actual.iter_mut() {
+                *element = 0;
+            }
+
+            for element in actual {
+                assert_eq!(element, 0);
+            }
+        }
     }
 
     mod iterator {
