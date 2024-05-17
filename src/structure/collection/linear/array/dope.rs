@@ -481,6 +481,21 @@ mod test {
 
             let _: &() = instance.index_mut(0);
         }
+
+        #[test]
+        fn is_mutable() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let mut actual = Dope::from(expected.as_mut_slice());
+
+            for index in 0..actual.count() {
+                *actual.index_mut(index) = 0;
+            }
+
+            for element in expected {
+                assert_eq!(element, 0);
+            }
+        }
     }
 
     #[allow(clippy::clone_on_copy)]
