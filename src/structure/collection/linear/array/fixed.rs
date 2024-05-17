@@ -781,6 +781,17 @@ mod test {
 
             assert_eq!(actual, expected);
         }
+
+        #[test]
+        fn owns_elements() {
+            let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            for (clone, original) in actual.iter().zip(expected.iter()) {
+                assert!(!core::ptr::addr_eq(clone, original));
+            }
+        }
     }
 
     mod equality {
