@@ -528,7 +528,7 @@ impl<T> List for Singly<T> {
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
         let mut next = &mut self.elements;
 
-        for _ in 0..index.saturating_sub(1) {
+        for _ in 0..index {
             if let &mut Some(ref mut current) = next {
                 next = &mut current.next;
             } else {
@@ -536,11 +536,10 @@ impl<T> List for Singly<T> {
             }
         }
 
-        next.as_deref_mut().and_then(|preceding| {
-            preceding.next.take().map(|removed| {
-                preceding.next = removed.next;
-                removed.element
-            })
+        next.take().map(|removed| {
+            *next = removed.next;
+
+            removed.element
         })
     }
 
@@ -2090,6 +2089,8 @@ mod test {
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 _ = actual.remove(INDEX);
+
+                println!("{actual:?}");
 
                 for index in 0..INDEX {
                     assert_eq!(actual[index], expected[index]);
