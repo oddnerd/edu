@@ -473,7 +473,7 @@ impl<T> Linear for Singly<T> {
 }
 
 impl<T> List for Singly<T> {
-    /// Move an `element` into a new node at `index`.
+    /// Move an `element` into such that it becomes the element at `index`.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
