@@ -2086,8 +2086,6 @@ mod test {
 
                 _ = actual.remove(INDEX);
 
-                println!("{actual:?}");
-
                 for index in 0..INDEX {
                     assert_eq!(actual[index], expected[index]);
                 }
