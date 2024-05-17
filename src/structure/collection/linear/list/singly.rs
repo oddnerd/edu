@@ -296,16 +296,12 @@ impl<T> DoubleEndedIterator for Singly<T> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut removed = self.elements.take()?;
-
         let mut successor = removed.next.take();
-
         let mut predecessor = &mut self.elements;
 
         while let Some(mut current) = successor.take() {
             successor = current.next.take();
-
             predecessor = &mut predecessor.insert(removed).next;
-
             removed = current;
         }
 
