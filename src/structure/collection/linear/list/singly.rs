@@ -562,6 +562,7 @@ impl<T> List for Singly<T> {
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
         let (offset, remaining) = (|| {
+            // This may be more than the number of elements contained.
             let offset = match range.start_bound() {
                 core::ops::Bound::Included(start) => *start,
                 core::ops::Bound::Excluded(start) => {
@@ -574,6 +575,7 @@ impl<T> List for Singly<T> {
                 core::ops::Bound::Unbounded => 0,
             };
 
+            // This may be more than the number of elements after next.
             let remaining = match range.end_bound() {
                 core::ops::Bound::Included(end) => end.abs_diff(offset).saturating_add(1),
                 core::ops::Bound::Excluded(end) => end.abs_diff(offset),
