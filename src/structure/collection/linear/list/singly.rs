@@ -54,7 +54,7 @@ impl<T> Drop for Singly<T> {
     ///     instance.prepend(());
     /// }
     ///
-    /// core::mem::drop(instance);
+    /// drop(instance);
     /// ```
     fn drop(&mut self) {
         for element in self {
