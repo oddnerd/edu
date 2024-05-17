@@ -4575,6 +4575,18 @@ mod test {
 
                     assert_eq!(actual.iter().len(), expected.len());
                 }
+
+                #[test]
+                fn updates() {
+                    let actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                    let mut actual = actual.iter();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
+                }
             }
 
             mod fused {
@@ -4672,6 +4684,18 @@ mod test {
                     let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let mut actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                    let mut actual = actual.iter_mut();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
