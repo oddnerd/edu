@@ -497,16 +497,12 @@ impl<T> List for Singly<T> {
             }
         }
 
-        let mut new = Box::new(Node {
+        let new = Box::new(Node {
             element,
-            next: None,
+            next: next.take(),
         });
 
-        new.next = next.take();
-
-        let new = next.insert(new);
-
-        Ok(&mut new.element)
+        Ok(&mut next.insert(new).element)
     }
 
     /// Move the element at `index` out, if it exists.
