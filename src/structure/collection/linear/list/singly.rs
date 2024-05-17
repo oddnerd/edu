@@ -314,7 +314,7 @@ impl<T> ExactSizeIterator for Singly<T> {}
 impl<T> core::iter::FusedIterator for Singly<T> {}
 
 impl<T> Extend<T> for Singly<T> {
-    /// Append the elements in `iter` maintaining order.
+    /// Append the `elements` at the end, maintaining order.
     ///
     /// Using [`Self::append`] directly would be O(N^2) since it is required to
     /// traverse all existing elements for each insertion whereas this method
@@ -337,14 +337,14 @@ impl<T> Extend<T> for Singly<T> {
     ///
     /// assert!(instance.iter().eq([0, 1, 2, 3, 4, 5]));
     /// ```
-    fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
+    fn extend<Iter: IntoIterator<Item = T>>(&mut self, elements: Iter) {
         let mut current = &mut self.elements;
 
         while let &mut Some(ref mut next) = current {
             current = &mut next.next;
         }
 
-        for element in iter {
+        for element in elements {
             let element = Box::new(Node {
                 element,
                 next: None,
@@ -356,7 +356,7 @@ impl<T> Extend<T> for Singly<T> {
 }
 
 impl<T> FromIterator<T> for Singly<T> {
-    /// Construct an instance with elements from an iterator.
+    /// Construct an instance with `elements`.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
@@ -374,10 +374,10 @@ impl<T> FromIterator<T> for Singly<T> {
     ///
     /// assert!(actual.iter().eq(expected));
     /// ```
-    fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
+    fn from_iter<Iter: IntoIterator<Item = T>>(elements: Iter) -> Self {
         let mut instance = Singly::<T>::default();
 
-        instance.extend(iter);
+        instance.extend(elements);
 
         instance
     }
