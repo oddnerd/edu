@@ -761,10 +761,10 @@ mod test {
 
         #[test]
         fn initializes_elements() {
-            let actual = Fixed::<usize, 256>::default();
+            let actual = Fixed::<Value, 256>::default();
 
             for element in actual {
-                assert_eq!(element, Default::default());
+                assert_eq!(element, Value::default());
             }
         }
     }
