@@ -666,7 +666,6 @@ mod test {
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
-                assert_eq!(actual.count, expected.len());
                 assert_eq!(Collection::count(&actual), expected.len());
             }
 
