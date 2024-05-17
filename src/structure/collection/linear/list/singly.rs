@@ -251,7 +251,11 @@ impl<T> Iterator for Singly<T> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        self.front()
+        let removed = self.elements.take()?;
+
+        self.elements = removed.next;
+
+        Some(removed.element)
     }
 
     /// Query how many elements are contained.
@@ -295,7 +299,21 @@ impl<T> DoubleEndedIterator for Singly<T> {
     /// assert_eq!(instance.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.back()
+        let mut removed = self.elements.take()?;
+
+        let mut successor = removed.next.take();
+
+        let mut predecessor = &mut self.elements;
+
+        while let Some(mut current) = successor.take() {
+            successor = current.next.take();
+
+            predecessor = &mut predecessor.insert(removed).next;
+
+            removed = current;
+        }
+
+        Some(removed.element)
     }
 }
 
