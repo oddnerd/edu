@@ -769,6 +769,7 @@ mod test {
         }
     }
 
+    #[allow(clippy::clone_on_copy)]
     mod clone {
         use super::*;
 
@@ -776,7 +777,7 @@ mod test {
         fn is_equivalent() {
             let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-            let actual = expected;
+            let actual = expected.clone();
 
             assert_eq!(actual, expected);
         }
