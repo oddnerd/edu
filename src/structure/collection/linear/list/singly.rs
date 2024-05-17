@@ -553,7 +553,7 @@ impl<T> List for Singly<T> {
     ///
     /// Using [`Self::remove`] would be inefficient because each removal would
     /// require traversing the list to the given index which is O(N^2) time,
-    /// whereas this method traverses the list only once there being O(N).
+    /// whereas this method traverses the list only once thereby being O(N).
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
