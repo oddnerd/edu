@@ -834,38 +834,48 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// assert_eq!(iter.next(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        let mut current_ref = self.next.take()?;
-        let mut current_ptr = core::ptr::from_mut(current_ref);
+        let mut current = self.next.as_deref_mut()?;
+        let mut ptr = core::ptr::from_mut(current);
 
-        if core::ptr::addr_eq(current_ref, self.previous_back) {
+        if core::ptr::addr_eq(current, self.previous_back) {
             return None;
         }
 
-        let old_next = current_ptr;
-
-        while let Some(next) = current_ref.next.as_deref_mut() {
+        while let Some(next) = current.next.as_deref_mut() {
             if core::ptr::addr_eq(next, self.previous_back) {
                 break;
             }
 
-            current_ptr = next;
-            current_ref = next;
+            current = next;
+            ptr = core::ptr::from_mut(current);
         }
 
-        // SAFETY:
-        // `self.previous_back` ensures multiple references to the same
-        // elements will not be yielded. However, `self.next` has mutable
-        // access to all subsequent elements including the last, hence a
-        // mutable reference to the next back cannot be returned without
-        // invalidating `self.next`. This exists for pointer misdirection
-        // where we manually enforce Rust's lifetime rules to create a mutable
-        // reference to the next front node after consuming it to derive the
-        // mutable reference to the last node and its element.
-        self.next = unsafe { old_next.as_mut() };
+        self.previous_back = ptr;
 
-        self.previous_back = current_ptr;
+        let element = {
+            let element = core::ptr::from_mut(&mut current.element);
 
-        Some(&mut current_ref.element)
+            // SAFETY:
+            // This is probably undefined behaviour, but it is the best I got.
+            //
+            // Since the reference to the next node has mutable access to all
+            // subsequent nodes, the borrow checker cannot statically guarantee
+            // it will not be advanced to access nodes already yielded from the
+            // back via this method thereby creating aliasing mutable
+            // references (undefined behaviour). In effect, we are consuming
+            // the internal mutable reference to create a mutable reference to
+            // the back node. However, because we explicitly prevent advancing
+            // the internal mutable reference to nodes whose elements have
+            // already been yielded, therefore we prevent creating aliasing
+            // references. Moreover, because we have mutable access to the
+            // entirety of nodes whilst only ever yielding mutable references
+            // to contained elements, we can be sure the mutable access to the
+            // next front node will not invalidate the lifetime of references
+            // to elements at the back.
+            unsafe { &mut *element}
+        };
+
+        Some(element)
     }
 }
 
