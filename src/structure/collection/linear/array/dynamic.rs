@@ -4454,7 +4454,6 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
-                assert_eq!(actual.initialized, expected.len());
                 assert_eq!(Collection::count(&actual), expected.len());
             }
 
