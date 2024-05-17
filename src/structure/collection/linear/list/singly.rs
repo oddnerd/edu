@@ -1354,9 +1354,9 @@ mod test {
         fn is_transitive() {
             let elements = [0, 1, 2, 3, 4, 5];
 
-            let first:  Singly<_> = elements.iter().copied().collect();
+            let first: Singly<_> = elements.iter().copied().collect();
             let second: Singly<_> = elements.iter().copied().collect();
-            let third:  Singly<_> = elements.iter().copied().collect();
+            let third: Singly<_> = elements.iter().copied().collect();
 
             // `first == second && second == third` => `first == third`
             assert_eq!(first, second);
@@ -1370,7 +1370,6 @@ mod test {
 
             assert_eq!(actual, actual);
         }
-
     }
 
     mod fmt {
@@ -1774,7 +1773,10 @@ mod test {
 
                     let actual: Singly<_> = expected.iter().copied().collect();
 
-                    assert_eq!(actual.iter().size_hint(), (expected.len(), Some(expected.len())));
+                    assert_eq!(
+                        actual.iter().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
                 }
 
                 #[test]
@@ -1904,7 +1906,10 @@ mod test {
 
                     let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                    assert_eq!(actual.iter_mut().size_hint(), (expected.len(), Some(expected.len())));
+                    assert_eq!(
+                        actual.iter_mut().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
                 }
 
                 #[test]
@@ -2447,5 +2452,5 @@ mod test {
                 actual.clear();
             }
         }
-   }
+    }
 }
