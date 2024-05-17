@@ -410,6 +410,7 @@ mod test {
             #[test]
             fn correct_size() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.count, expected.len());
@@ -418,6 +419,7 @@ mod test {
             #[test]
             fn correct_pointer() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
