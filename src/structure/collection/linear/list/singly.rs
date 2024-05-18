@@ -1167,7 +1167,6 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This method takes O(N^2) time and consumes O(1) memory.
-    #[allow(clippy::redundant_else)]
     fn next_back(&mut self) -> Option<Self::Item> {
         while let Some(mut removed) = self.next.take() {
             if core::ptr::addr_eq(&*removed, self.previous_back) {
