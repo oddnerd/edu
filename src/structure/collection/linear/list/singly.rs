@@ -868,7 +868,7 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
             // to contained elements, we can be sure the mutable access to the
             // next front node will not invalidate the lifetime of references
             // to elements at the back.
-            unsafe { &mut *element}
+            unsafe { &mut *element }
         };
 
         Some(element)
@@ -1075,6 +1075,23 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let instance = underlying.withdraw(|element| element % 2 == 0));
+    ///
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), None);
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         let mut removed = self.next.take()?;
         let mut successor = removed.next.take();
