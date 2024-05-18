@@ -409,7 +409,7 @@ impl<T> Collection for Singly<T> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than usize::MAX elements");
+                unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
             next = &current.next;
@@ -676,7 +676,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than usize::MAX elements");
+                unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
             next = &current.next;
@@ -798,7 +798,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than usize::MAX elements");
+                unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
             next = current.next.as_deref();
@@ -975,7 +975,7 @@ impl<'a, T: 'a> Iterator for Drain<'a, T> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than usize::MAX elements");
+                unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
             next = current.next.as_deref();
@@ -1164,7 +1164,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             if let Some(incremented) = count.checked_add(1) {
                 count = incremented;
             } else {
-                unreachable!("more than usize::MAX elements");
+                unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
             next = &current.next;
@@ -1538,7 +1538,7 @@ mod test {
 
                 #[test]
                 fn updates() {
-                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
                     drop(actual.next());
                     assert_eq!(actual.len(), 5);
