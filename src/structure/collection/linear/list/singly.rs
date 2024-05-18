@@ -1139,6 +1139,18 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let instance = underlying.withdraw(|element| element % 2 == 0));
+    ///
+    /// assert_eq!(instance.size_hint(), (0, Some(6));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
 
