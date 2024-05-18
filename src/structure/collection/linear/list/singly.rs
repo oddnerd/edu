@@ -1179,6 +1179,24 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This method takes O(N^2) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let instance = underlying.withdraw(|element| element % 2 == 0));
+    ///
+    ///
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), None);
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         while let Some(mut removed) = self.next.take() {
             if core::ptr::addr_eq(&*removed, self.previous_back) {
