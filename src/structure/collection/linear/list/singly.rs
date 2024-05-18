@@ -602,13 +602,9 @@ impl<T> List for Singly<T> {
         &mut self,
         predicate: impl FnMut(&Self::Element) -> bool,
     ) -> impl DoubleEndedIterator<Item = Self::Element> {
-        let next = self.elements.take();
-
         Withdraw {
-            underlying: Some(self),
-            preceding: None,
-            next,
-            previous_back: None,
+            next: &mut self.elements,
+            previous_back: core::ptr::null(),
             predicate,
         }
     }
@@ -1041,17 +1037,10 @@ impl<'a, T: 'a> core::iter::FusedIterator for Drain<'a, T> {}
 // TODO: examples for withdraw
 /// By-value iterator over values which match some predicate.
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
-    /// The underlying elements being drained from.
-    underlying: Option<&'a mut Singly<T>>,
-
-    /// The node preceding those being drained, if any.
-    preceding: Option<&'a mut Node<T>>,
-
-    /// The remaining elements of the list, if any.
-    next: Option<Box<Node<T>>>,
+    next: &'a mut Option<Box<Node<T>>>,
 
     /// The previously yielded element from the back, if any.
-    previous_back: Option<*const Node<T>>,
+    previous_back: *const Node<T>,
 
     /// The predicate based upon which elements are withdrawn.
     predicate: F,
@@ -1064,14 +1053,6 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// This method takes O(N) time and consumes O(1) memory.
     fn drop(&mut self) {
         self.for_each(drop);
-
-        if let Some(preceding) = self.preceding.take() {
-            preceding.next = self.next.take();
-        } else if let Some(underlying) = self.underlying.take() {
-            underlying.elements = self.next.take();
-        } else {
-            unreachable!("logic error");
-        }
     }
 }
 
@@ -1083,39 +1064,43 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(mut current) = self.next.take() {
-            if let Some(sentinel) = self.previous_back {
-                if core::ptr::addr_eq(current.as_ref(), sentinel) {
-                    break;
-                }
-            }
+        let mut removed = self.next.take()?;
+        let mut successor = removed.next.take();
+        let mut predecessor = &mut *self.next;
 
-            if (self.predicate)(&current.element) {
-                if let Some(preceding) = self.preceding.take() {
-                    preceding.next = current.next;
-                } else if let Some(underlying) = self.underlying.take() {
-                    underlying.elements = current.next;
-                } else {
-                    unreachable!("logic error");
-                }
+        if core::ptr::addr_eq(&*removed, self.previous_back) {
+            let inserted = predecessor.insert(removed);
+            inserted.next = successor;
 
-                return Some(current.element);
-            }
-
-            self.next = current.next.take();
-
-            if let Some(preceding) = self.preceding.take() {
-                let current = preceding.next.insert(current);
-                self.preceding = Some(current);
-            } else if let Some(underlying) = self.underlying.take() {
-                let current = underlying.elements.insert(current);
-                self.preceding = Some(current);
-            } else {
-                unreachable!("logic error");
-            }
+            return None;
         }
 
-        None
+        while let Some(mut current) = successor.take() {
+            if core::ptr::addr_eq(&*current, self.previous_back) {
+                successor = Some(current);
+                break;
+            }
+
+            if (self.predicate)(&removed.element) {
+                *predecessor = Some(current);
+
+                return Some(removed.element);
+            }
+
+            successor = current.next.take();
+            predecessor = &mut predecessor.insert(removed).next;
+            removed = current;
+        }
+
+        if (self.predicate)(&removed.element) {
+            *predecessor = successor;
+
+            Some(removed.element)
+        } else {
+            let inserted = predecessor.insert(removed);
+            inserted.next = successor;
+            None
+        }
     }
 
     /// Query how many elements could be yielded.
@@ -1123,18 +1108,25 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let Some(mut current) = self.next.as_deref() else {
-            return (0, Some(0));
-        };
+        let mut count: usize = 0;
 
-        let mut remaining: usize = 1;
+        let mut next = &*self.next;
 
-        while let Some(next) = current.next.as_deref() {
-            current = next;
-            remaining += 1;
+        while let Some(current) = next.as_deref() {
+            if core::ptr::addr_eq(current, self.previous_back) {
+                break;
+            }
+
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                unreachable!("more than usize::MAX elements");
+            }
+
+            next = &current.next;
         }
 
-        (0, Some(remaining))
+        (0, Some(count))
     }
 }
 
@@ -1145,95 +1137,37 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// This method takes O(N^2) time and consumes O(1) memory.
     #[allow(clippy::redundant_else)]
     fn next_back(&mut self) -> Option<Self::Item> {
-        // TODO(oddnerd): this is the worst code I have ever written.
+        while let Some(mut removed) = self.next.take() {
+            if core::ptr::addr_eq(&*removed, self.previous_back) {
+                *self.next = Some(removed);
+                break;
+            }
 
-        while self.next.is_some() {
-            if let Some(mut first) = self.next.take() {
-                if let Some(second) = first.next.take() {
-                    if second.next.is_none() {
-                        if (self.predicate)(&second.element) {
-                            self.next = Some(first);
-                            return Some(second.element);
-                        } else if (self.predicate)(&first.element) {
-                            if let Some(underlying) = self.underlying.take() {
-                                underlying.elements = Some(second);
-                            } else if let Some(preceding) = self.preceding.take() {
-                                preceding.next = Some(second);
-                            } else {
-                                unreachable!("logic error");
-                            }
+            let mut successor = removed.next.take();
+            let mut predecessor = &mut *self.next;
 
-                            return Some(first.element);
-                        } else {
-                            first.next = Some(second);
+            while let Some(mut current) = successor.take() {
+                if core::ptr::addr_eq(&*current, self.previous_back) {
+                    successor = Some(current);
 
-                            if let Some(underlying) = self.underlying.take() {
-                                underlying.elements = Some(first);
-                            } else if let Some(preceding) = self.preceding.take() {
-                                preceding.next = Some(first);
-                            } else {
-                                unreachable!("logic error");
-                            }
-                        }
-                    } else {
-                        first.next = Some(second);
-                        self.next = Some(first);
-                        // handle with below loop
-                    }
-                } else if (self.predicate)(&first.element) {
-                    return Some(first.element);
-                } else {
-                    if let Some(underlying) = self.underlying.take() {
-                        underlying.elements = Some(first);
-                    } else if let Some(preceding) = self.preceding.take() {
-                        preceding.next = Some(first);
-                    } else {
-                        unreachable!("logic error");
-                    }
-
-                    return None;
+                    break;
                 }
+
+                successor = current.next.take();
+                predecessor = &mut predecessor.insert(removed).next;
+                removed = current;
             }
 
-            let mut current = self.next.as_deref_mut();
+            if (self.predicate)(&removed.element) {
+                *predecessor = successor;
 
-            while let Some(next) = current.take() {
-                if let Some(next_next) = next.next.as_deref_mut() {
-                    if let Some(next_next_next) = next_next.next.as_deref_mut() {
-                        if let Some(sentinel) = self.previous_back {
-                            if core::ptr::addr_eq(next_next_next, sentinel) {
-                                // current (second last) -> last -> sentinel
-                                break;
-                            }
-                        }
-                    } else {
-                        unreachable!("only two elements");
-                    }
-
-                    current = Some(next);
-                } else {
-                    unreachable!("only one element");
-                }
+                return Some(removed.element);
             }
 
-            let Some(second_last) = current else {
-                unreachable!("no next element");
-            };
+            let inserted = predecessor.insert(removed);
+            inserted.next = successor;
 
-            let Some(last) = second_last.next.as_deref_mut() else {
-                unreachable!("was actually last element");
-            };
-
-            if (self.predicate)(&last.element) {
-                let Some(popped) = second_last.next.take() else {
-                    unreachable!("was actually last element");
-                };
-
-                second_last.next = popped.next;
-                return Some(popped.element);
-            } else {
-                self.previous_back = Some(last);
-            }
+            self.previous_back = &**inserted;
         }
 
         None
