@@ -1087,16 +1087,24 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             return None;
         }
 
+        if (self.predicate)(&removed.element) {
+            *predecessor = successor;
+
+            return Some(removed.element);
+        }
+
         while let Some(mut current) = successor.take() {
             if core::ptr::addr_eq(&*current, self.previous_back) {
                 successor = Some(current);
+
                 break;
             }
 
-            if (self.predicate)(&removed.element) {
-                *predecessor = Some(current);
+            if (self.predicate)(&current.element) {
+                let inserted = predecessor.insert(removed);
+                inserted.next = current.next.take();
 
-                return Some(removed.element);
+                return Some(current.element);
             }
 
             successor = current.next.take();
@@ -1104,15 +1112,10 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             removed = current;
         }
 
-        if (self.predicate)(&removed.element) {
-            *predecessor = successor;
+        let inserted = predecessor.insert(removed);
+        inserted.next = successor;
 
-            Some(removed.element)
-        } else {
-            let inserted = predecessor.insert(removed);
-            inserted.next = successor;
-            None
-        }
+        None
     }
 
     /// Query how many elements could be yielded.
