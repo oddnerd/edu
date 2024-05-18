@@ -1034,9 +1034,9 @@ impl<'a, T: 'a> ExactSizeIterator for Drain<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for Drain<'a, T> {}
 
-// TODO: examples for withdraw
 /// By-value iterator over values which match some predicate.
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
+    /// The next element to query with the predicate, if any.
     next: &'a mut Option<Box<Node<T>>>,
 
     /// The previously yielded element from the back, if any.
@@ -1051,6 +1051,18 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// drop(instance.withdraw(|element| element % 2 == 0));
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
     fn drop(&mut self) {
         self.for_each(drop);
     }
