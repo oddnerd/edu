@@ -1013,27 +1013,23 @@ impl<'a, T: 'a> DoubleEndedIterator for Drain<'a, T> {
         self.remaining.checked_sub(1).and_then(|decremented| {
             self.remaining = decremented;
 
-            let mut next = self.next.as_deref_mut();
+            let mut removed = self.next.take()?;
+            let mut successor = removed.next.take();
+            let mut predecessor = &mut *self.next;
 
             for _ in 0..self.remaining {
-                if let Some(current) = next.take() {
-                    if current.next.is_none() {
-                        break;
-                    }
-
-                    next = current.next.as_deref_mut();
+                if let Some(mut current) = successor.take() {
+                    successor = current.next.take();
+                    predecessor = &mut predecessor.insert(removed).next;
+                    removed = current;
                 } else {
                     break;
                 }
             }
 
-            next.and_then(|preceding| {
-                let mut removed = preceding.next.take()?;
-                let succeeding = removed.next.take();
-                preceding.next = succeeding;
+            *predecessor = successor;
 
-                Some(removed.element)
-            })
+            Some(removed.element)
         })
     }
 }
