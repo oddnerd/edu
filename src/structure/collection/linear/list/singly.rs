@@ -48,7 +48,9 @@ impl<T> Drop for Singly<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::<()>::default();
+    /// let mut instance = Singly::<()>::default();
+    ///
+    /// todo!("is this really a good idea to test like this?");
     ///
     /// for _ in 0..usize::MAX {
     ///     instance.prepend(());
@@ -118,10 +120,10 @@ impl<T: PartialEq> PartialEq for Singly<T> {
     ///
     /// let elements = [0, 1, 2, 3, 4, 5];
     ///
-    /// let original = Singly::from_iter(elements.iter().copied());
-    /// let other = Singly::from_iter(elements.iter().copied());
+    /// let first = Singly::from_iter(elements.iter().copied());
+    /// let second = Singly::from_iter(elements.iter().copied());
     ///
-    /// assert_eq!(clone, original);
+    /// assert_eq!(first, second);
     /// ```
     fn eq(&self, other: &Self) -> bool {
         self.iter().eq(other.iter())
@@ -201,8 +203,8 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
     /// ```
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Singly::from_iter(expected.iter().copied());
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = Singly::from_iter(expected.iter().copied());
     ///
     /// for index in 0..expected.len() {
     ///     use core::ops::IndexMut;
@@ -236,7 +238,7 @@ impl<T> Iterator for Singly<T> {
     /// ```
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
     ///
     /// assert_eq!(instance.next(), Some(0));
     /// assert_eq!(instance.next(), Some(1));
@@ -284,7 +286,7 @@ impl<T> DoubleEndedIterator for Singly<T> {
     /// ```
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
     ///
     /// assert_eq!(instance.next_back(), Some(5));
     /// assert_eq!(instance.next_back(), Some(4));
@@ -328,14 +330,13 @@ impl<T> Extend<T> for Singly<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2]);
+    /// let mut instance = Singly::from_iter([0, 1, 2]);
     ///
     /// instance.extend([3, 4, 5]);
     ///
-    /// assert!(instance.iter().eq([0, 1, 2, 3, 4, 5]));
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, elements: Iter) {
         let mut current = &mut self.elements;
@@ -372,7 +373,7 @@ impl<T> FromIterator<T> for Singly<T> {
     /// let expected = [0, 1, 2, 3, 4, 5];
     /// let actual = Singly::from_iter(expected.iter().copied());
     ///
-    /// assert!(actual.iter().eq(expected));
+    /// assert!(actual.eq(expected));
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(elements: Iter) -> Self {
         let mut instance = Singly::<T>::default();
@@ -487,10 +488,10 @@ impl<T> List for Singly<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 4, 5]);
     ///
-    /// assert!(instance.insert(3, 3).is_ok_and(|inserted| inserted == &mut 3))
-    /// assert!(instance.iter().eq([0, 1, 2, 3, 4, 5]);
+    /// assert!(instance.insert(3, 3).is_ok_and(|inserted| inserted == &3));
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn insert(
         &mut self,
@@ -526,10 +527,10 @@ impl<T> List for Singly<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert!(instance.remove(3).is_ok_and(|inserted| inserted == 3))
-    /// assert!(instance.iter().eq([0, 1, 2, 4, 5]);
+    /// assert!(instance.remove(3).is_some_and(|inserted| inserted == 3));
+    /// assert!(instance.eq([0, 1, 2, 4, 5]));
     /// ```
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
         let mut next = &mut self.elements;
@@ -560,15 +561,14 @@ impl<T> List for Singly<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// assert!(instance.drain(1..=4).eq([1, 2, 3, 4]));
     ///
-    /// assert!(instance.iter().eq([0, 5]);
+    /// assert!(instance.eq([0, 5]));
     /// ```
     fn drain(
         &mut self,
@@ -622,11 +622,11 @@ impl<T> List for Singly<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// assert!(instance.withdraw(|element| element % 2 == 0).eq([0, 2, 4]));
     ///
-    /// assert!(instance.iter().eq([1, 3, 5]);
+    /// assert!(instance.eq([1, 3, 5]));
     /// ```
     fn withdraw(
         &mut self,
@@ -663,14 +663,15 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// use rust::structure::collection::linear::list::Singly;
     ///
     /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut instance = underlying.iter_mut();
+    /// let mut instance = underlying.iter();
     ///
-    /// assert_eq!(iter.next(), Some(&1));
-    /// assert_eq!(iter.next(), Some(&2));
-    /// assert_eq!(iter.next(), Some(&3));
-    /// assert_eq!(iter.next(), Some(&4));
-    /// assert_eq!(iter.next(), Some(&5));
-    /// assert_eq!(iter.next(), None);
+    /// assert_eq!(instance.next(), Some(&0));
+    /// assert_eq!(instance.next(), Some(&1));
+    /// assert_eq!(instance.next(), Some(&2));
+    /// assert_eq!(instance.next(), Some(&3));
+    /// assert_eq!(instance.next(), Some(&4));
+    /// assert_eq!(instance.next(), Some(&5));
+    /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.next.as_deref().and_then(|current| {
@@ -693,9 +694,10 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 4, 4, 5]).iter();
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.iter_mut();
     ///
-    /// assert_eq!(instance.iter().size_hint(), (6, Some(6)));
+    /// assert_eq!(instance.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
@@ -727,15 +729,16 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 4, 5]);
-    /// let instance = underlying.iter().rev();
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.iter().rev();
     ///
-    /// assert_eq!(iter.next(), Some(&5));
-    /// assert_eq!(iter.next(), Some(&4));
-    /// assert_eq!(iter.next(), Some(&3));
-    /// assert_eq!(iter.next(), Some(&2));
-    /// assert_eq!(iter.next(), Some(&1));
-    /// assert_eq!(iter.next(), None);
+    /// assert_eq!(instance.next(), Some(&5));
+    /// assert_eq!(instance.next(), Some(&4));
+    /// assert_eq!(instance.next(), Some(&3));
+    /// assert_eq!(instance.next(), Some(&2));
+    /// assert_eq!(instance.next(), Some(&1));
+    /// assert_eq!(instance.next(), Some(&0));
+    /// assert_eq!(instance.next(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut current = self.next.as_deref()?;
@@ -787,12 +790,13 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut instance = underlying.iter_mut();
     ///
-    /// assert_eq!(iter.next(), Some(&mut 1));
-    /// assert_eq!(iter.next(), Some(&mut 2));
-    /// assert_eq!(iter.next(), Some(&mut 3));
-    /// assert_eq!(iter.next(), Some(&mut 4));
-    /// assert_eq!(iter.next(), Some(&mut 5));
-    /// assert_eq!(iter.next(), None);
+    /// assert_eq!(instance.next(), Some(&mut 0));
+    /// assert_eq!(instance.next(), Some(&mut 1));
+    /// assert_eq!(instance.next(), Some(&mut 2));
+    /// assert_eq!(instance.next(), Some(&mut 3));
+    /// assert_eq!(instance.next(), Some(&mut 4));
+    /// assert_eq!(instance.next(), Some(&mut 5));
+    /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.next.take().and_then(|current| {
@@ -815,9 +819,10 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 4, 4, 5]).iter();
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 4, 4, 5]);
+    /// let instance = underlying.iter_mut();
     ///
-    /// assert_eq!(instance.iter_mut().size_hint(), (6, Some(6)));
+    /// assert_eq!(instance.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
@@ -852,12 +857,13 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut instance = underlying.iter_mut();
     ///
-    /// assert_eq!(iter.next(), Some(&mut 5));
-    /// assert_eq!(iter.next(), Some(&mut 4));
-    /// assert_eq!(iter.next(), Some(&mut 3));
-    /// assert_eq!(iter.next(), Some(&mut 2));
-    /// assert_eq!(iter.next(), Some(&mut 1));
-    /// assert_eq!(iter.next(), None);
+    /// assert_eq!(instance.next_back(), Some(&mut 5));
+    /// assert_eq!(instance.next_back(), Some(&mut 4));
+    /// assert_eq!(instance.next_back(), Some(&mut 3));
+    /// assert_eq!(instance.next_back(), Some(&mut 2));
+    /// assert_eq!(instance.next_back(), Some(&mut 1));
+    /// assert_eq!(instance.next_back(), Some(&mut 0));
+    /// assert_eq!(instance.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         let mut current = self.next.as_deref_mut()?;
@@ -926,14 +932,14 @@ impl<'a, T: 'a> Drop for Drain<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// core::mem::drop(instance.drain(1..=4));
     ///
-    /// assert!(instance.iter().eq([0, 5]));
+    /// assert!(instance.eq([0, 5]));
     /// ```
     fn drop(&mut self) {
         self.for_each(drop);
@@ -950,11 +956,11 @@ impl<'a, T: 'a> Iterator for Drain<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let instance = underlying.drain(1..=4);
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.drain(1..=4);
     ///
     /// assert_eq!(instance.next(), Some(1));
     /// assert_eq!(instance.next(), Some(2));
@@ -981,10 +987,10 @@ impl<'a, T: 'a> Iterator for Drain<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     /// let instance = underlying.drain(1..=4);
     ///
     /// assert_eq!(instance.size_hint(), (4, Some(4)));
@@ -1023,11 +1029,11 @@ impl<'a, T: 'a> DoubleEndedIterator for Drain<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let instance = underlying.drain(1..=4);
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.drain(1..=4);
     ///
     /// assert_eq!(instance.next_back(), Some(4));
     /// assert_eq!(instance.next_back(), Some(3));
@@ -1087,7 +1093,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// drop(instance.withdraw(|element| element % 2 == 0));
     ///
@@ -1111,14 +1117,9 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// let instance = underlying.withdraw(|element| element % 2 == 0));
-    ///
-    /// assert_eq!(instance.next(), Some(0));
-    /// assert_eq!(instance.next(), Some(2));
-    /// assert_eq!(instance.next(), Some(4));
-    /// assert_eq!(instance.next(), None);
+    /// assert!(instance.withdraw(|element| element % 2 == 0).eq([0, 2, 4]));
     ///
     /// assert!(instance.eq([1, 3, 5]));
     /// ```
@@ -1181,11 +1182,11 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// let instance = underlying.withdraw(|element| element % 2 == 0));
+    /// let instance = underlying.withdraw(|element| element % 2 == 0);
     ///
-    /// assert_eq!(instance.size_hint(), (0, Some(6));
+    /// assert_eq!(instance.size_hint(), (0, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
@@ -1221,15 +1222,9 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
-    /// let underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// let instance = underlying.withdraw(|element| element % 2 == 0));
-    ///
-    ///
-    /// assert_eq!(instance.next(), Some(4));
-    /// assert_eq!(instance.next(), Some(2));
-    /// assert_eq!(instance.next(), Some(0));
-    /// assert_eq!(instance.next(), None);
+    /// assert!(instance.withdraw(|element| element % 2 == 0).rev().eq([4, 2, 0]));
     ///
     /// assert!(instance.eq([1, 3, 5]));
     /// ```
