@@ -611,6 +611,23 @@ impl<T> List for Singly<T> {
         Drain { next, remaining }
     }
 
+    /// Remove elements matching some `predicate`.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert!(instance.withdraw(|element| element % 2 == 0).eq([0, 2, 4]));
+    ///
+    /// assert!(instance.iter().eq([1, 3, 5]);
+    /// ```
     fn withdraw(
         &mut self,
         predicate: impl FnMut(&Self::Element) -> bool,
