@@ -1151,6 +1151,9 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 let inserted = predecessor.insert(removed);
                 inserted.next = current.next.take();
 
+                // SAFETY: node will outlive the lifetime of this iterator.
+                self.next = unsafe { &mut *core::ptr::from_mut(&mut inserted.next) };
+
                 return Some(current.element);
             }
 
@@ -1161,6 +1164,9 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 
         let inserted = predecessor.insert(removed);
         inserted.next = successor;
+
+        // SAFETY: node will outlive the lifetime of this iterator.
+        self.next = unsafe { &mut *core::ptr::from_mut(&mut inserted.next) };
 
         None
     }
