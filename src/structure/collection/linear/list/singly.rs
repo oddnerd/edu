@@ -50,12 +50,11 @@ impl<T> Drop for Singly<T> {
     ///
     /// let mut instance = Singly::<()>::default();
     ///
-    /// todo!("is this really a good idea to test like this?");
-    ///
-    /// for _ in 0..usize::MAX {
+    /// for _ in 0..i16::MAX {
     ///     instance.prepend(());
     /// }
     ///
+    /// // This would overflow the call stack is not for the implementation.
     /// drop(instance);
     /// ```
     fn drop(&mut self) {
