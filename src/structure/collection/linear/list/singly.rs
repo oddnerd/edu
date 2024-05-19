@@ -1812,29 +1812,17 @@ mod test {
 
                 #[test]
                 fn updates() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-
-                    let actual: Singly<_> = expected.iter().copied().collect();
+                    let actual: Singly<_> = [0, 1, 2, 3, 4, 5].iter().copied().collect();
 
                     let mut actual = actual.iter();
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 5);
+                    let mut remaining = actual.len();
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 4);
+                    while let Some(_) = actual.next() {
+                        remaining -= 1;
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 3);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 2);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 1);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 0);
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -1951,23 +1939,13 @@ mod test {
 
                     let mut actual = actual.iter_mut();
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 5);
+                    let mut remaining = actual.len();
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 4);
+                    while let Some(_) = actual.next() {
+                        remaining -= 1;
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 3);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 2);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 1);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 0);
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
