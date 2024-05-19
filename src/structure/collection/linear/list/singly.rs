@@ -1584,7 +1584,7 @@ mod test {
 
                 #[test]
                 fn empty() {
-                    let mut actual = Singly::<()>::default().into_iter();
+                    let mut actual = Singly::<()>::default();
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -1597,7 +1597,7 @@ mod test {
 
                 #[test]
                 fn exhausted() {
-                    let mut actual = Singly::from_iter([()]).into_iter();
+                    let mut actual = Singly::from_iter([()]);
 
                     // Exhaust the elements.
                     let _: () = actual.next().expect("the one element");
@@ -1620,7 +1620,7 @@ mod test {
             fn empty() {
                 let actual: Singly<()> = core::iter::empty().collect();
 
-                assert!(actual.elements.is_none())
+                assert!(actual.elements.is_none());
             }
 
             #[test]
