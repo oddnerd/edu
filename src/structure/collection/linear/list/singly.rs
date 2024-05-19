@@ -2334,9 +2334,21 @@ mod test {
                 fn size_hint() {
                     let mut underlying = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                    let actual = underlying.withdraw(|element| element % 2 == 0);
+                    let mut actual = underlying.withdraw(|element| element % 2 == 0);
 
                     assert_eq!(actual.size_hint(), (0, Some(6)));
+
+                    _ = actual.next().expect("element with value 0");
+                    assert_eq!(actual.size_hint(), (0, Some(5)));
+
+                    _ = actual.next().expect("element with value 2");
+                    assert_eq!(actual.size_hint(), (0, Some(3)));
+
+                    _ = actual.next().expect("element with value 4");
+                    assert_eq!(actual.size_hint(), (0, Some(1)));
+
+                    _ = actual.next();
+                    assert_eq!(actual.size_hint(), (0, Some(0)));
                 }
 
                 mod double_ended {
