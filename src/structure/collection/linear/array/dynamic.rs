@@ -836,7 +836,7 @@ impl<T> Dynamic<T> {
     /// The `range` must be within bounds, even when shifted by `offset`.
     ///
     /// # Panics
-    /// If the end bound is before the start bound.
+    /// This method has the precondition the start bound is before the end.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
@@ -1066,7 +1066,7 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     /// Query the initialized element `index` positions from the start.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1103,7 +1103,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1534,10 +1534,9 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// Will panic if there exists no allocation hence the pointer would be
-    /// dangling and nothing meaningful can be derived from it. Note that a
-    /// dangling (but nevertheless entirely useable in generic code) pointer
-    /// _WILL_ be yielded for zero-size types.
+    /// This method has the precondition that an underlying allocation exist to
+    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1577,10 +1576,9 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// Will panic if there exists no allocation hence the pointer would be
-    /// dangling and nothing meaningful can be derived from it. Note that a
-    /// dangling (but nevertheless entirely useable in generic code) pointer
-    /// _WILL_ be yielded for zero-size types.
+    /// This method has the precondition that an underlying allocation exist to
+    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.

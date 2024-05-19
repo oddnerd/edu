@@ -157,7 +157,7 @@ impl<T> core::ops::Index<usize> for Singly<T> {
     /// Obtain an immutable reference to the element at position `index`.
     ///
     /// # Panics
-    /// This method has the precondition that `index` is within bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
@@ -193,7 +193,7 @@ impl<T> core::ops::IndexMut<usize> for Singly<T> {
     /// Obtain a mutable reference to the element at position `index`.
     ///
     /// # Panics
-    /// This method has the precondition that `index` is within bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
