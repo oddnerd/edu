@@ -1338,13 +1338,12 @@ mod test {
         }
 
         #[test]
-        #[allow(clippy::shadow_unrelated)]
         fn owns_elements() {
-            let original = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+            let expected = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
-            let clone = original.clone();
+            let actual = expected.clone();
 
-            for (clone, original) in clone.iter().zip(original.iter()) {
+            for (clone, original) in actual.iter().zip(expected.iter()) {
                 assert!(!core::ptr::addr_eq(clone, original));
             }
         }
