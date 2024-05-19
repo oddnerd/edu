@@ -5,9 +5,9 @@ pub mod linear;
 pub use linear::Linear;
 
 /// A data structure which stores multiple elements of a single type.
-pub trait Collection<'a> {
+pub trait Collection {
     /// The type of the elements.
-    type Element: 'a;
+    type Element;
 
     /// Query the number of elements.
     fn count(&self) -> usize;

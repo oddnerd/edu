@@ -49,7 +49,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
     /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+    /// let ptr = unsafe { NonNull::new_unchecked(ptr) };
     /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
@@ -224,7 +224,7 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
+impl<'a, T: 'a> Collection for Dope<'a, T> {
     type Element = T;
 
     /// Query how many elements are referenced to/contained.
@@ -248,7 +248,7 @@ impl<'a, T: 'a> Collection<'a> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
+impl<'a, T: 'a> Linear for Dope<'a, T> {
     /// Immutably iterate the elements in order.
     ///
     /// # Performance
@@ -269,7 +269,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         // SAFETY:
         // * Pointer is aligned.
@@ -298,7 +298,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
         // SAFETY:
@@ -309,7 +309,7 @@ impl<'a, T: 'a> Linear<'a> for Dope<'a, T> {
     }
 }
 
-impl<'a, T: 'a> Array<'a> for Dope<'a, T> {
+impl<'a, T: 'a> Array for Dope<'a, T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Safety

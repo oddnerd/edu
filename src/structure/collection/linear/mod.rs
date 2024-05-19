@@ -58,16 +58,16 @@ use super::Collection;
 /// prevents erroneous inputs.
 ///
 /// [zbi]: https://en.wikipedia.org/wiki/Zero-based_numbering
-pub trait Linear<'a>: Collection<'a> + core::ops::IndexMut<usize, Output = Self::Element> {
+pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
     fn iter_mut(
         &mut self,
-    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator;
 

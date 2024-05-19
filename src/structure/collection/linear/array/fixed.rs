@@ -208,7 +208,7 @@ impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Collection for Fixed<T, N> {
     type Element = T;
 
     /// Query how many elements are contained.
@@ -231,7 +231,7 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
+impl<T, const N: usize> Linear for Fixed<T, N> {
     /// Immutably iterate the elements in order.
     ///
     /// # Performance
@@ -251,7 +251,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = {
             // This pointer will _never_ be written to.
@@ -287,7 +287,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
         let ptr = {
@@ -306,7 +306,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Array for Fixed<T, N> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Performance

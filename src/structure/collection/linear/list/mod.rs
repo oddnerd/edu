@@ -1,6 +1,10 @@
 //! Implementations of [`List`].
 
 use super::Linear;
+use super::Collection;
+
+pub mod singly;
+pub use singly::Singly;
 
 /// A modifiable [`Linear`] [`super::Collection`].
 ///
@@ -22,13 +26,13 @@ use super::Linear;
 ///   [`withdraw`](`Self::withdraw`) given a predicate.
 /// * An index range can be moved out via [`drain`](`Self::drain`).
 /// * All elements can be removed via [`clear`](`Self::clear`).
-pub trait List<'a>:
-    Linear<'a>
+pub trait List:
+    Linear
     + IntoIterator<Item = Self::Element>
-    + Iterator<Item = Self::Element>
     + DoubleEndedIterator<Item = Self::Element>
     + ExactSizeIterator
     + core::iter::FusedIterator
+    + Extend<Self::Element>
     + FromIterator<Self::Element>
 {
     /// Insert an `element` at `index`.
