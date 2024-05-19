@@ -1879,11 +1879,11 @@ mod test {
 
             #[test]
             fn in_order() {
-                let expected = [0, 1, 2, 3, 4, 5];
+                let mut expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                assert!(actual.iter_mut().eq(expected.iter()));
+                assert!(actual.iter_mut().eq(expected.iter_mut()));
             }
 
             mod double_ended {
@@ -2275,7 +2275,7 @@ mod test {
 
                     drop(actual.drain(3..));
 
-                    assert!(actual.iter().eq([0, 1, 2].iter()));
+                    assert!(actual.eq([0, 1, 2]));
                 }
 
                 #[test]
@@ -2284,7 +2284,7 @@ mod test {
 
                     drop(actual.drain(..3));
 
-                    assert!(actual.iter().eq([3, 4, 5].iter()));
+                    assert!(actual.eq([3, 4, 5]));
                 }
 
                 #[test]
@@ -2293,7 +2293,7 @@ mod test {
 
                     drop(actual.drain(1..=4));
 
-                    assert!(actual.iter().eq([0, 5].iter()));
+                    assert!(actual.eq([0, 5]));
                 }
             }
         }
