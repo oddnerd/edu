@@ -1569,23 +1569,13 @@ mod test {
                 fn updates() {
                     let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 5);
+                    let mut remaining = actual.len();
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 4);
+                    while let Some(_) = actual.next() {
+                        remaining -= 1;
 
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 3);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 2);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 1);
-
-                    drop(actual.next());
-                    assert_eq!(actual.len(), 0);
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
