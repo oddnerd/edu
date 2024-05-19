@@ -78,7 +78,7 @@ impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     /// Query the element `index` positions from the start.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -115,7 +115,7 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -208,7 +208,7 @@ impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Collection for Fixed<T, N> {
     type Element = T;
 
     /// Query how many elements are contained.
@@ -231,7 +231,7 @@ impl<'a, T: 'a, const N: usize> Collection<'a> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
+impl<T, const N: usize> Linear for Fixed<T, N> {
     /// Immutably iterate the elements in order.
     ///
     /// # Performance
@@ -251,7 +251,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = {
             // This pointer will _never_ be written to.
@@ -287,7 +287,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
         let ptr = {
@@ -306,7 +306,7 @@ impl<'a, T: 'a, const N: usize> Linear<'a> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Array<'a> for Fixed<T, N> {
+impl<'a, T: 'a, const N: usize> Array for Fixed<T, N> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Performance
@@ -612,6 +612,19 @@ mod test {
 
             let _: &() = instance.index_mut(0);
         }
+
+        #[test]
+        fn is_mutable() {
+            let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+            for index in 0..actual.count() {
+                *actual.index_mut(index) = 0;
+            }
+
+            for element in actual {
+                assert_eq!(element, 0);
+            }
+        }
     }
 
     mod iterator {
@@ -685,11 +698,11 @@ mod test {
 
                     let mut actual = actual.iter();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -748,14 +761,15 @@ mod test {
 
         #[test]
         fn initializes_elements() {
-            let actual = Fixed::<usize, 256>::default();
+            let actual = Fixed::<Value, 256>::default();
 
             for element in actual {
-                assert_eq!(element, Default::default());
+                assert_eq!(element, Value::default());
             }
         }
     }
 
+    #[allow(clippy::clone_on_copy)]
     mod clone {
         use super::*;
 
@@ -763,9 +777,20 @@ mod test {
         fn is_equivalent() {
             let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
 
-            let actual = expected;
+            let actual = expected.clone();
 
             assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn owns_elements() {
+            let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            for (clone, original) in actual.iter().zip(expected.iter()) {
+                assert!(!core::ptr::addr_eq(clone, original));
+            }
         }
     }
 
@@ -934,11 +959,11 @@ mod test {
 
                     let mut actual = actual.iter();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -1046,11 +1071,11 @@ mod test {
 
                     let mut actual = actual.iter_mut();
 
-                    (0..expected.len()).rev().for_each(|len| {
+                    for remaining in (0..expected.len()).rev() {
                         _ = actual.next();
 
-                        assert_eq!(actual.size_hint(), (len, Some(len)));
-                    });
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 

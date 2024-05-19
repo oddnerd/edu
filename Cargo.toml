@@ -2,7 +2,7 @@
 
 [package]
 name = "rust"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
@@ -61,7 +61,7 @@ negative_feature_names  = "deny" # Prefer features which add functionally.
 redundant_feature_names = "deny" # Prevent restating they are features.
 
 # Prefer good coding practices over technically valid code.
-pedantic = "warn"
+pedantic = { level = "warn", priority = -1 }
 
 # Dependencies
 wildcard_dependencies    = "deny" # Prefer specific version over any.

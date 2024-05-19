@@ -836,7 +836,7 @@ impl<T> Dynamic<T> {
     /// The `range` must be within bounds, even when shifted by `offset`.
     ///
     /// # Panics
-    /// If the end bound is before the start bound.
+    /// This method has the precondition the start bound is before the end.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
@@ -1066,7 +1066,7 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     /// Query the initialized element `index` positions from the start.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1103,7 +1103,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// Panics if `index` is out of bounds.
+    /// This method has the precondition that the `index` is within bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1420,7 +1420,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
+impl<'a, T: 'a> Collection for Dynamic<T> {
     type Element = T;
 
     /// Query the number of initialized elements contained.
@@ -1443,7 +1443,7 @@ impl<'a, T: 'a> Collection<'a> for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
+impl<T> Linear for Dynamic<T> {
     /// Create an immutable iterator over the initialized elements.
     ///
     /// # Performance
@@ -1463,7 +1463,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = &'a Self::Element> + ExactSizeIterator + core::iter::FusedIterator
+    ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = if self.initialized > 0 {
             // The pointer will only ever be read, no written to.
@@ -1502,7 +1502,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     /// ```
     fn iter_mut(
         &mut self,
-    ) -> impl DoubleEndedIterator<Item = &'a mut Self::Element>
+    ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
            + ExactSizeIterator
            + core::iter::FusedIterator {
         let ptr = if self.initialized > 0 {
@@ -1523,7 +1523,7 @@ impl<'a, T: 'a> Linear<'a> for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Array<'a> for Dynamic<T> {
+impl<T> Array for Dynamic<T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// The pointer starts at the first initialized element.
@@ -1534,10 +1534,9 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// Will panic if there exists no allocation hence the pointer would be
-    /// dangling and nothing meaningful can be derived from it. Note that a
-    /// dangling (but nevertheless entirely useable in generic code) pointer
-    /// _WILL_ be yielded for zero-size types.
+    /// This method has the precondition that an underlying allocation exist to
+    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1577,10 +1576,9 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// Will panic if there exists no allocation hence the pointer would be
-    /// dangling and nothing meaningful can be derived from it. Note that a
-    /// dangling (but nevertheless entirely useable in generic code) pointer
-    /// _WILL_ be yielded for zero-size types.
+    /// This method has the precondition that an underlying allocation exist to
+    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -1612,7 +1610,7 @@ impl<'a, T: 'a> Array<'a> for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> List<'a> for Dynamic<T> {
+impl<T> List for Dynamic<T> {
     /// Insert an `element` at `index`.
     ///
     /// # Panics
@@ -3940,6 +3938,19 @@ mod test {
 
             let _: &mut () = instance.index_mut(0);
         }
+
+        #[test]
+        fn is_mutable() {
+            let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+            for element in actual.iter_mut() {
+                *element = 0;
+            }
+
+            for element in actual {
+                assert_eq!(element, 0);
+            }
+        }
     }
 
     mod iterator {
@@ -4022,6 +4033,17 @@ mod test {
                     let actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.into_iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let mut actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -4454,7 +4476,6 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
-                assert_eq!(actual.initialized, expected.len());
                 assert_eq!(Collection::count(&actual), expected.len());
             }
 
@@ -4551,6 +4572,18 @@ mod test {
                     let actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                    let mut actual = actual.iter();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
@@ -4649,6 +4682,18 @@ mod test {
                     let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let mut actual: Dynamic<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                    let mut actual = actual.iter_mut();
+
+                    for remaining in (0..actual.len()).rev() {
+                        _ = actual.next();
+
+                        assert_eq!(actual.len(), remaining);
+                    }
                 }
             }
 
