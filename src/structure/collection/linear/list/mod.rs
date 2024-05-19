@@ -6,6 +6,9 @@ use super::Collection;
 pub mod singly;
 pub use singly::Singly;
 
+pub mod doubly;
+pub use doubly::Doubly;
+
 /// A modifiable [`Linear`] [`super::Collection`].
 ///
 /// Unlike the base [`Linear`] trait, implementors of [`Self`] provide methods
