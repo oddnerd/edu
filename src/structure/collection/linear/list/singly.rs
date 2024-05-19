@@ -2008,7 +2008,7 @@ mod test {
             fn initializes_element() {
                 let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
-                actual.insert(2, 12345);
+                _ = actual.insert(2, 12345).expect("successful allocation");
 
                 assert_eq!(actual[2], 12345);
             }
@@ -2062,7 +2062,7 @@ mod test {
             fn can_prepend() {
                 let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
-                assert!(actual.insert(0, 12345).is_ok());
+                _ = actual.insert(0, 12345).expect("successful allocation");
 
                 assert_eq!(actual[0], 12345);
             }
@@ -2071,7 +2071,7 @@ mod test {
             fn can_append() {
                 let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
-                assert!(actual.insert(6, 12345).is_ok());
+                _ = actual.insert(6, 12345).expect("successful allocation");
 
                 assert_eq!(actual[6], 12345);
             }
@@ -2085,7 +2085,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                _ = actual.remove(0);
+                _ = actual.remove(0).expect("valid index");
 
                 assert_eq!(actual.len(), expected.len() - 1);
             }
@@ -2095,9 +2095,11 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                (0..expected.len()).for_each(|index| {
-                    assert_eq!(actual.remove(0).expect("front element"), expected[index]);
-                });
+                for element in expected {
+                    let removed = actual.remove(0).expect("front element");
+
+                    assert_eq!(removed, element);
+                }
             }
 
             #[test]
@@ -2107,7 +2109,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                _ = actual.remove(INDEX);
+                _ = actual.remove(INDEX).expect("valid index");
 
                 for index in 0..INDEX {
                     assert_eq!(actual[index], expected[index]);
@@ -2121,7 +2123,7 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
-                _ = actual.remove(INDEX);
+                _ = actual.remove(INDEX).expect("valid index");
 
                 for index in INDEX..expected.len() - 1 {
                     assert_eq!(actual[index], expected[index + 1]);
