@@ -1280,6 +1280,22 @@ impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {
 mod test {
     use super::*;
 
+    extern crate alloc;
+
+    /// Mock element for drop tests.
+    #[derive(Debug, Clone)]
+    struct Droppable {
+        /// A shared counter for the number of elements dropped.
+        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
+    }
+
+    impl Drop for Droppable {
+        /// Increment the shared counter upon drop.
+        fn drop(&mut self) {
+            _ = self.counter.replace_with(|old| old.wrapping_add(1));
+        }
+    }
+
     mod drop {
         use super::*;
 
@@ -1298,10 +1314,24 @@ mod test {
         }
 
         #[test]
-        fn deallocates_nodes() {
-            let instance: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+        fn drops_elements() {
+            const ELEMENTS: usize = 256;
 
-            drop(instance);
+            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+            let mut actual = Singly::<Droppable>::default();
+
+            for _ in 0..ELEMENTS {
+                _ = actual
+                    .prepend(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("uses capacity");
+            }
+
+            drop(actual);
+
+            assert_eq!(dropped.take(), ELEMENTS);
         }
     }
 
@@ -2260,12 +2290,25 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn removes_yielded_elements() {
-                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+                fn drops_yet_to_be_yielded_elements() {
+                    const ELEMENTS: usize = 256;
+
+                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+                    let mut actual = Singly::<Droppable>::default();
+
+                    for _ in 0..ELEMENTS {
+                        _ = actual
+                            .prepend(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
+                    }
 
                     drop(actual.drain(..));
 
                     assert_eq!(actual.len(), 0);
+                    assert_eq!(dropped.take(), ELEMENTS);
                 }
 
                 #[test]
@@ -2437,11 +2480,24 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
-                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 256;
 
-                    drop(actual.withdraw(|element| element % 2 == 0));
+                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
-                    assert!(actual.eq([1, 3, 5]));
+                    let mut actual = Singly::<Droppable>::default();
+
+                    for _ in 0..ELEMENTS {
+                        _ = actual
+                            .prepend(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
+                    }
+
+                    drop(actual.withdraw(|_element| true));
+
+                    assert_eq!(actual.len(), 0);
+                    assert_eq!(dropped.take(), ELEMENTS);
                 }
             }
         }
