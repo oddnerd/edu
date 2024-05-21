@@ -558,7 +558,7 @@ mod test {
     #[derive(Debug, Clone)]
     struct Droppable {
         /// A shared counter for the number of elements dropped.
-        counter: alloc::rc::Rc<core::cell::RefCell<usize>>
+        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
     }
 
     impl Drop for Droppable {
@@ -672,12 +672,18 @@ mod test {
                 let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
                 let actual = {
-                    let mut uninitialized: [core::mem::MaybeUninit<Droppable>; ELEMENTS] = unsafe {
-                        core::mem::MaybeUninit::uninit().assume_init()
-                    };
+                    let mut uninitialized: [core::mem::MaybeUninit<Droppable>; ELEMENTS] =
+                        unsafe { core::mem::MaybeUninit::uninit().assume_init() };
 
                     for element in &mut uninitialized[..] {
-                        unsafe { core::ptr::write(element.as_mut_ptr(), Droppable { counter: alloc::rc::Rc::clone(&dropped) }); }
+                        unsafe {
+                            core::ptr::write(
+                                element.as_mut_ptr(),
+                                Droppable {
+                                    counter: alloc::rc::Rc::clone(&dropped),
+                                },
+                            );
+                        }
                     }
 
                     unsafe { std::mem::transmute::<_, [Droppable; ELEMENTS]>(uninitialized) }

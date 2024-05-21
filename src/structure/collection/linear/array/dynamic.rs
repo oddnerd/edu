@@ -2593,7 +2593,7 @@ mod test {
     #[derive(Debug, Clone)]
     struct Droppable {
         /// A shared counter for the number of elements dropped.
-        counter: alloc::rc::Rc<core::cell::RefCell<usize>>
+        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
     }
 
     impl Drop for Droppable {
@@ -3824,10 +3824,15 @@ mod test {
 
             let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
-            let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+            let mut actual =
+                Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(Droppable { counter: alloc::rc::Rc::clone(&dropped) } ).expect("uses capacity");
+                _ = actual
+                    .append(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("uses capacity");
             }
 
             drop(actual);
@@ -3859,10 +3864,15 @@ mod test {
 
             let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
-            let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+            let mut actual =
+                Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(Droppable { counter: alloc::rc::Rc::clone(&dropped) } ).expect("uses capacity");
+                _ = actual
+                    .append(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("uses capacity");
             }
 
             _ = actual.reserve_front(256).expect("successful allocation");
@@ -5193,10 +5203,15 @@ mod test {
 
                     let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
-                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS)
+                        .expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(Droppable { counter: alloc::rc::Rc::clone(&dropped) } ).expect("uses capacity");
+                        _ = actual
+                            .append(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
                     }
 
                     drop(actual.drain(..));
@@ -5386,10 +5401,15 @@ mod test {
 
                     let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
-                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS)
+                        .expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(Droppable { counter: alloc::rc::Rc::clone(&dropped) } ).expect("uses capacity");
+                        _ = actual
+                            .append(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
                     }
 
                     drop(actual.withdraw(|_element| true));
