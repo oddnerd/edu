@@ -1,11 +1,11 @@
 //! Implementation of [`Dynamic`].
 
+extern crate alloc;
+
 use super::super::List;
 use super::Array;
 use super::Collection;
 use super::Linear;
-
-use std::alloc;
 
 use core::mem::MaybeUninit;
 use core::ptr::NonNull;
@@ -926,7 +926,7 @@ impl<T> Dynamic<T> {
             if total == 0 {
                 if new.size() > 0 {
                     // SAFETY: layout has non-zero size.
-                    unsafe { alloc::alloc(new) }.cast::<T>()
+                    unsafe { alloc::alloc::alloc(new) }.cast::<T>()
                 } else {
                     debug_assert_eq!(capacity, 0, "otherwise occupies memory");
 
@@ -950,7 +950,7 @@ impl<T> Dynamic<T> {
                     // * `new_layout` has non-zero size.
                     // * `Layout` => `new.size() <= isize::MAX`.
                     unsafe {
-                        alloc::dealloc(ptr, existing);
+                        alloc::alloc::dealloc(ptr, existing);
                     }
 
                     // empty state => will _NOT_ be read/written to.
@@ -963,7 +963,7 @@ impl<T> Dynamic<T> {
                     // * `existing_layout` is currently allocated.
                     // * `new_layout` has non-zero size.
                     // * `Layout` => `new.size() <= isize::MAX`.
-                    unsafe { alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
+                    unsafe { alloc::alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
                 }
             }
         };
