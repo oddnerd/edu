@@ -52,7 +52,7 @@ impl<T> Drop for Doubly<T> {
     /// ```
     /// use rust::structure::collection::linear::list::Doubly;
     ///
-    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// drop(instance);
     /// ```
@@ -84,7 +84,7 @@ impl<T> Default for Doubly<T> {
 }
 
 impl<T: Clone> Clone for Doubly<T> {
-    /// Clone all contained elements into a new instance of [`Singly`].
+    /// Clone all contained elements into a new instance of [`Doubly`].
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
@@ -167,7 +167,7 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
     /// use rust::structure::collection::linear::list::Doubly;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Singly::from_iter(expected.iter().copied());
+    /// let actual = Doubly::from_iter(expected.iter().copied());
     ///
     /// for index in 0..expected.len() {
     ///     use core::ops::Index;
@@ -413,7 +413,7 @@ impl<T> FromIterator<T> for Doubly<T> {
     /// use rust::structure::collection::linear::list::Doubly;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Singly::from_iter(expected.iter().copied());
+    /// let actual = Doubly::from_iter(expected.iter().copied());
     ///
     /// assert!(actual.eq(expected));
     /// ```
