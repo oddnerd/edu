@@ -119,8 +119,8 @@ impl<T: PartialEq> PartialEq for Doubly<T> {
     ///
     /// let elements = [0, 1, 2, 3, 4, 5];
     ///
-    /// let first = Singly::from_iter(elements.iter().copied());
-    /// let second = Singly::from_iter(elements.iter().copied());
+    /// let first = Doubly::from_iter(elements.iter().copied());
+    /// let second = Doubly::from_iter(elements.iter().copied());
     ///
     /// assert_eq!(first, second);
     /// ```
