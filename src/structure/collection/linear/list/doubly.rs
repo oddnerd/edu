@@ -349,6 +349,15 @@ mod test {
 
                 assert!(actual.eq(expected));
             }
+
+            #[test]
+            fn initializes_elements() {
+                let mut actual: Doubly<_> = [0, 1, 2].into_iter().collect();
+
+                actual.extend([3, 4, 5]);
+
+                assert!(actual.eq([0, 1, 2, 3, 4, 5]));
+            }
         }
     }
 }
