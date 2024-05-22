@@ -158,8 +158,34 @@ impl<T> Iterator for Doubly<T> {
 }
 
 impl<T> DoubleEndedIterator for Doubly<T> {
+    /// Obtain the last element by value via moving it out of [`Self`].
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// assert_eq!(instance.next_back(), Some(5));
+    /// assert_eq!(instance.next_back(), Some(4));
+    /// assert_eq!(instance.next_back(), Some(3));
+    /// assert_eq!(instance.next_back(), Some(2));
+    /// assert_eq!(instance.next_back(), Some(1));
+    /// assert_eq!(instance.next_back(), Some(0));
+    /// assert_eq!(instance.next_back(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.tail.map(|removed| {
+            // SAFETY: the node was allocated via `Box`.
+            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+            self.tail = removed.predecessor;
+
+            removed.element
+        })
     }
 }
 
