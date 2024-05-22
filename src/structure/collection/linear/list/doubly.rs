@@ -597,7 +597,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
 
-        let next = self.front;
+        let mut next = self.front;
 
         while let Some(current) = next {
             if let Some(incremented) = count.checked_add(1) {
@@ -610,6 +610,11 @@ impl<'a, T> Iterator for Iter<'a, T> {
                 if current == sentinel {
                     break;
                 }
+
+                // SAFETY: aligned to an initialized node we can reference.
+                let current = unsafe { current.as_ref() };
+
+                next = current.successor;
             } else {
                 unreachable!("at least one next element (current)")
             }
@@ -740,7 +745,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     fn size_hint(&self) -> (usize, Option<usize>) {
         let mut count: usize = 0;
 
-        let next = self.front;
+        let mut next = self.front;
 
         while let Some(current) = next {
             if let Some(incremented) = count.checked_add(1) {
@@ -753,6 +758,11 @@ impl<'a, T> Iterator for IterMut<'a, T> {
                 if current == sentinel {
                     break;
                 }
+
+                // SAFETY: aligned to an initialized node we can reference.
+                let current = unsafe { current.as_ref() };
+
+                next = current.successor;
             } else {
                 unreachable!("at least one next element (current)")
             }
