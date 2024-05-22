@@ -226,22 +226,20 @@ impl<T> Extend<T> for Doubly<T> {
     /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, elements: Iter) {
-        let mut previous = self.tail;
+        let mut elements = elements.into_iter();
 
-        let mut next = if let Some(mut tail) = self.tail {
+        let mut previous = if let Some(mut last) = self.tail {
             // SAFETY: aligned to an initialized node that we own.
-            let tail = unsafe { tail.as_mut() };
-
-            &mut tail.successor
+            unsafe { last.as_mut() }
         } else {
-            &mut self.tail
-        };
+            let Some(element) = elements.next() else {
+                return;
+            };
 
-        for element in elements {
             let mut node = {
                 let node = Box::new(Node {
                     element,
-                    predecessor: previous,
+                    predecessor: None,
                     successor: None,
                 });
 
@@ -249,16 +247,30 @@ impl<T> Extend<T> for Doubly<T> {
                 unsafe { NonNull::new_unchecked(Box::into_raw(node)) }
             };
 
-            _ = next.insert(node);
+            self.head = Some(node);
+            self.tail = Some(node);
 
-            previous = Some(node);
+            // SAFETY: aligned to na initialized node that we own.
+            unsafe { node.as_mut() }
+        };
 
-            next = {
-                // SAFETY: aligned to an initialized node that we own.
-                let node = unsafe { node.as_mut() };
+        for element in elements {
+            let mut node = {
+                let node = Box::new(Node {
+                    element,
+                    // SAFETY: reference cannot be null.
+                    predecessor: Some(unsafe { NonNull::new_unchecked(previous) }),
+                    successor: None,
+                });
 
-                &mut node.successor
+                // SAFETY: since allocation has not failed, this cannot be null.
+                unsafe { NonNull::new_unchecked(Box::into_raw(node)) }
             };
+
+            previous.successor = Some(node);
+
+            // SAFETY: aligned to an initialized element that we own.
+            previous = unsafe { node.as_mut() };
         }
     }
 }
