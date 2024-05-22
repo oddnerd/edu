@@ -3972,7 +3972,7 @@ mod test {
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                (isize::MAX as usize, Some(isize::MAX as usize))
+                (usize::MAX, Some(usize::MAX))
             }
         }
 
