@@ -376,6 +376,16 @@ mod test {
                     assert_eq!(actual[index], expected[index]);
                 }
             }
+
+            #[test]
+            fn empty() {
+                let mut actual = Doubly::<()>::default();
+
+                actual.extend(core::iter::empty());
+
+                assert!(actual.head.is_none());
+                assert!(actual.tail.is_none());
+            }
         }
     }
 }
