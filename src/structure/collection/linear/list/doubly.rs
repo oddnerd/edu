@@ -392,6 +392,7 @@ impl<T> Extend<T> for Doubly<T> {
             };
 
             previous.successor = Some(node);
+            self.tail = Some(node);
 
             // SAFETY: aligned to an initialized element that we own.
             previous = unsafe { node.as_mut() };
