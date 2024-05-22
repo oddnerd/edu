@@ -188,12 +188,15 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
             }
         }
 
-        next.map_or_else(|| panic!("index out of bounds"), |node| {
-            // SAFETY: aligned to an initialized node that we own.
-            let node = unsafe { node.as_ref() };
+        next.map_or_else(
+            || panic!("index out of bounds"),
+            |node| {
+                // SAFETY: aligned to an initialized node that we own.
+                let node = unsafe { node.as_ref() };
 
-            &node.element
-        })
+                &node.element
+            },
+        )
     }
 }
 
@@ -232,12 +235,15 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
             }
         }
 
-        next.map_or_else(|| panic!("index out of bounds"), |mut node| {
-            // SAFETY: aligned to an initialized node that we own.
-            let node = unsafe { node.as_mut() };
+        next.map_or_else(
+            || panic!("index out of bounds"),
+            |mut node| {
+                // SAFETY: aligned to an initialized node that we own.
+                let node = unsafe { node.as_mut() };
 
-            &mut node.element
-        })
+                &mut node.element
+            },
+        )
     }
 }
 
@@ -492,12 +498,66 @@ impl<T> Linear for Doubly<T> {
 }
 
 impl<T> List for Doubly<T> {
+    /// Move an `element` into such that it becomes the element at `index`.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 4, 5]);
+    ///
+    /// assert!(instance.insert(3, 3).is_ok_and(|inserted| inserted == &3));
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn insert(
         &mut self,
         index: usize,
         element: Self::Element,
     ) -> Result<&mut Self::Element, Self::Element> {
-        todo!()
+        let mut previous = None;
+        let mut next = &mut self.head;
+
+        for _ in 0..index {
+            if let &mut Some(ref mut current) = next {
+                previous = Some(*current);
+
+                // SAFETY: aligned to an initialized node that we own.
+                let current = unsafe { current.as_mut() };
+
+                next = &mut current.successor;
+            } else {
+                return Err(element);
+            }
+        }
+
+        let new = {
+            let allocation = Box::new(Node {
+                element,
+                predecessor: previous,
+                successor: next.take(),
+            });
+
+            let ptr = Box::into_raw(allocation);
+
+            // SAFETY: since allocation has not failed, this cannot be null.
+            unsafe { NonNull::new_unchecked(ptr) }
+        };
+
+        let inserted = next.insert(new);
+
+        Ok({
+            // SAFETY: aligned to an initialized node that we own.
+            let inserted = unsafe { inserted.as_mut() };
+
+            &mut inserted.element
+        })
     }
 
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
@@ -1617,5 +1677,4 @@ mod test {
             }
         }
     }
-
 }
