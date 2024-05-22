@@ -108,8 +108,24 @@ impl<T: Clone> Clone for Doubly<T> {
 }
 
 impl<T: PartialEq> PartialEq for Doubly<T> {
+    /// Query if `other` has the same elements in the same order.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let elements = [0, 1, 2, 3, 4, 5];
+    ///
+    /// let first = Singly::from_iter(elements.iter().copied());
+    /// let second = Singly::from_iter(elements.iter().copied());
+    ///
+    /// assert_eq!(first, second);
+    /// ```
     fn eq(&self, other: &Self) -> bool {
-        todo!()
+        self.iter().eq(other.iter())
     }
 }
 
