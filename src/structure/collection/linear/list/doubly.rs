@@ -739,6 +739,29 @@ mod test {
         }
     }
 
+    mod index {
+        use super::*;
+        use core::ops::Index;
+
+        #[test]
+        fn correct_element() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            let actual = Doubly::from_iter(expected);
+
+            for (index, value) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), value);
+            }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let instance = Doubly::<()>::default();
+
+            let _: &() = instance.index(0);
+        }
+    }
+
     mod iterator {
         use super::*;
 
