@@ -4116,7 +4116,7 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
+            fn updates_internal_state() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
