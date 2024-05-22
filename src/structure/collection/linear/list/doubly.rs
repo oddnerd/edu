@@ -107,8 +107,34 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
 impl<T> Iterator for Doubly<T> {
     type Item = T;
 
+    /// Obtain the first element by value via moving it out of [`Self`].
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), Some(1));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(3));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(5));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.head.map(|removed| {
+            // SAFETY: the node was allocated via `Box`.
+            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+            self.head = removed.successor;
+
+            removed.element
+        })
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
