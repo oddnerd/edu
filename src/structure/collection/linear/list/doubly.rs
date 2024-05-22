@@ -184,8 +184,29 @@ impl<T> Extend<T> for Doubly<T> {
 }
 
 impl<T> FromIterator<T> for Doubly<T> {
+    /// Construct an instance with `elements`.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Singly::from_iter(expected.iter().copied());
+    ///
+    /// assert!(actual.eq(expected));
+    /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(elements: Iter) -> Self {
-        todo!()
+        let mut instance = Doubly::<T>::default();
+
+        instance.extend(elements);
+
+        instance
     }
 }
 
