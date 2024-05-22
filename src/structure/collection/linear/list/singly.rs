@@ -1646,17 +1646,6 @@ mod test {
             use super::*;
 
             #[test]
-            fn when_empty() {
-                let mut actual = Singly::<usize>::default();
-
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                actual.extend(expected.iter().copied());
-
-                assert!(actual.eq(expected));
-            }
-
-            #[test]
             #[allow(clippy::shadow_unrelated)]
             fn appends_elements() {
                 let preexisting = [0, 1, 2];
@@ -1684,7 +1673,18 @@ mod test {
             }
 
             #[test]
-            fn empty() {
+            fn into_empty_instance() {
+                let mut actual = Singly::<usize>::default();
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                actual.extend(expected.iter().copied());
+
+                assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn from_empty_iterator() {
                 let mut actual = Singly::<()>::default();
 
                 actual.extend(core::iter::empty());

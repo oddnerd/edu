@@ -4275,7 +4275,18 @@ mod test {
             }
 
             #[test]
-            fn empty() {
+            fn into_empty_instance() {
+                let mut actual = Dynamic::<usize>::default();
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                actual.extend(expected.iter().copied());
+
+                assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn from_empty_iterator() {
                 let mut actual = Dynamic::<()>::default();
 
                 actual.extend(core::iter::empty());
