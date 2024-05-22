@@ -403,6 +403,27 @@ mod test {
             }
         }
 
+        mod from {
+            use super::*;
+
+            #[test]
+            fn empty() {
+                let actual: Doubly<()> = core::iter::empty().collect();
+
+                assert!(actual.head.is_none());
+                assert!(actual.tail.is_none());
+            }
+
+            #[test]
+            fn initializes_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Doubly<_> = expected.iter().copied().collect();
+
+                assert!(actual.eq(expected));
+            }
+        }
+
         mod extend {
             use super::*;
 
