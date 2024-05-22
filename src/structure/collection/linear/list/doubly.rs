@@ -280,8 +280,39 @@ impl<T> FromIterator<T> for Doubly<T> {
 impl<T> Collection for Doubly<T> {
     type Element = T;
 
+    /// Query how many elements are contained.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::Collection;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.count(), 6);
+    /// ```
     fn count(&self) -> usize {
-        todo!()
+        let mut count: usize = 0;
+
+        let mut next = self.head;
+
+        while let Some(current) = next {
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                unreachable!("more elements than supported by the address space (usize::MAX)");
+            }
+
+            // SAFETY: aligned to an initialized element that we own.
+            let current = unsafe { current.as_ref() };
+
+            next = current.successor;
+        }
+
+        count
     }
 }
 
