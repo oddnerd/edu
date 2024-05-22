@@ -352,7 +352,7 @@ mod test {
 
             #[test]
             #[allow(clippy::shadow_unrelated)]
-            fn initializes_elements() {
+            fn appends_elements() {
                 let preexisting = [0, 1, 2];
                 let mut actual: Doubly<_> = preexisting.into_iter().collect();
 

@@ -1658,7 +1658,7 @@ mod test {
 
             #[test]
             #[allow(clippy::shadow_unrelated)]
-            fn initializes_elements() {
+            fn appends_elements() {
                 let preexisting = [0, 1, 2];
                 let mut actual: Singly<_> = preexisting.into_iter().collect();
 
@@ -1679,19 +1679,6 @@ mod test {
                 actual.extend([3, 4, 5]);
 
                 for index in 0..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
-                }
-            }
-
-            #[test]
-            fn appends_after_initialized_elements() {
-                let initialized = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = initialized.iter().copied().collect();
-
-                let expected = [6, 7, 8, 9, 10];
-                actual.extend(expected.iter().copied());
-
-                for index in initialized.len()..expected.len() {
                     assert_eq!(actual[index], expected[index]);
                 }
             }
