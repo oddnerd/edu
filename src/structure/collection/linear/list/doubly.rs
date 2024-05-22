@@ -336,6 +336,24 @@ mod test {
     mod iterator {
         use super::*;
 
+        struct FaultySizeHintIter<I> {
+            data: core::iter::Copied<I>,
+        }
+
+        impl<'a, T: 'a + Copy, I> Iterator for FaultySizeHintIter<I>
+        where
+            I: Iterator<Item = &'a T>,
+        {
+            type Item = T;
+            fn next(&mut self) -> Option<Self::Item> {
+                self.data.next()
+            }
+
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                (isize::MAX as usize, Some(isize::MAX as usize))
+            }
+        }
+
         mod extend {
             use super::*;
 
@@ -385,6 +403,18 @@ mod test {
 
                 assert!(actual.head.is_none());
                 assert!(actual.tail.is_none());
+            }
+
+            #[test]
+            fn does_not_trust_size_hint() {
+                let mut actual = Doubly::<usize>::default();
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                // Ideally, this will panic if it uses the invalid size.
+                actual.extend(FaultySizeHintIter {
+                    data: expected.iter().copied(),
+                });
             }
         }
     }
