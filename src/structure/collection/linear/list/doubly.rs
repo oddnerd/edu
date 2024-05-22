@@ -560,8 +560,55 @@ impl<T> List for Doubly<T> {
         })
     }
 
+    /// Move the element at `index` out, if it exists.
+    ///
+    /// # Performance
+    /// This method takes O(N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert!(instance.remove(3).is_some_and(|inserted| inserted == 3));
+    /// assert!(instance.eq([0, 1, 2, 4, 5]));
+    /// ```
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
-        todo!()
+        let mut previous = None;
+        let mut next = &mut self.head;
+
+        for _ in 0..index {
+            if let &mut Some(ref mut current) = next {
+                previous = Some(*current);
+
+                // SAFETY: aligned to an initialized node that we own.
+                let current = unsafe { current.as_mut() };
+
+                next = &mut current.successor;
+            } else {
+                return None;
+            }
+        }
+
+        let mut removed = {
+            let ptr = next.take()?;
+
+            // SAFETY: the node was allocated via `Box`.
+            let removed = unsafe { Box::from_raw(ptr.as_ptr()) };
+
+            *removed
+        };
+
+        if let Some(mut previous) = previous {
+            // SAFETY: aligned to an initialized node that we own.
+            let previous = unsafe { previous.as_mut() };
+
+            previous.successor = removed.successor.take();
+        }
+
+        Some(removed.element)
     }
 
     fn drain(
