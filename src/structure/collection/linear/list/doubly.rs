@@ -483,6 +483,8 @@ impl<T> Linear for Doubly<T> {
            + ExactSizeIterator
            + core::iter::FusedIterator {
         IterMut {
+            front: self.head,
+            back: self.tail,
             lifetime: core::marker::PhantomData,
         }
     }
@@ -663,25 +665,142 @@ impl<T> ExactSizeIterator for Iter<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Iter<'_, T> {}
 
+/// Mutable iterator over a [`Doubly`].
 struct IterMut<'a, T> {
+    /// The next element to yield from the front, if any.
+    front: Option<NonNull<Node<T>>>,
+
+    /// The next element to yield from the back, if any.
+    back: Option<NonNull<Node<T>>>,
+
+    /// Bind lifetime to underlying owner.
     lifetime: core::marker::PhantomData<&'a mut T>,
 }
 
 impl<'a, T> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
+    /// Obtain the next element from the front, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.iter_mut();
+    ///
+    /// assert_eq!(instance.next(), Some(&mut 0));
+    /// assert_eq!(instance.next(), Some(&mut 1));
+    /// assert_eq!(instance.next(), Some(&mut 2));
+    /// assert_eq!(instance.next(), Some(&mut 3));
+    /// assert_eq!(instance.next(), Some(&mut 4));
+    /// assert_eq!(instance.next(), Some(&mut 5));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.front.map(|mut next| {
+            // SAFETY: aligned to an initialized element that we can reference.
+            let next = unsafe { next.as_mut() };
+
+            if let Some(back) = self.back {
+                if core::ptr::addr_eq(next, back.as_ptr()) {
+                    self.front = None;
+                    self.back = None;
+                } else {
+                    self.front = next.successor;
+                }
+            } else {
+                unreachable!("at least one next element (current)");
+            }
+
+            &mut next.element
+        })
     }
 
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.iter_mut();
+    ///
+    /// assert_eq!(instance.size_hint(), (6, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!()
+        let mut count: usize = 0;
+
+        let next = self.front;
+
+        while let Some(current) = next {
+            if let Some(incremented) = count.checked_add(1) {
+                count = incremented;
+            } else {
+                unreachable!("more elements than supported by the address space (usize::MAX)");
+            }
+
+            if let Some(sentinel) = self.back {
+                if current == sentinel {
+                    break;
+                }
+            } else {
+                unreachable!("at least one next element (current)")
+            }
+        }
+
+        (count, Some(count))
     }
 }
 
 impl<T> DoubleEndedIterator for IterMut<'_, T> {
+    /// Obtain the next element from the back, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.iter_mut().rev();
+    ///
+    /// assert_eq!(instance.next(), Some(&5));
+    /// assert_eq!(instance.next(), Some(&4));
+    /// assert_eq!(instance.next(), Some(&3));
+    /// assert_eq!(instance.next(), Some(&2));
+    /// assert_eq!(instance.next(), Some(&1));
+    /// assert_eq!(instance.next(), Some(&0));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.back.map(|mut next| {
+            // SAFETY: aligned to an initialized element that we can reference.
+            let next = unsafe { next.as_mut() };
+
+            if let Some(front) = self.front {
+                if core::ptr::addr_eq(next, front.as_ptr()) {
+                    self.front = None;
+                    self.back = None;
+                } else {
+                    self.back = next.predecessor;
+                }
+            } else {
+                unreachable!("at least one next element (current)");
+            }
+
+            &mut next.element
+        })
     }
 }
 
