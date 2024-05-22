@@ -496,6 +496,59 @@ impl<T> core::iter::FusedIterator for Withdraw<'_, T> {}
 mod test {
     use super::*;
 
+    mod drop {
+        use super::*;
+
+        /// Mock element for drop tests.
+        #[derive(Debug, Clone)]
+        struct Droppable {
+            /// A shared counter for the number of elements dropped.
+            counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
+        }
+
+        impl Drop for Droppable {
+            /// Increment the shared counter upon drop.
+            fn drop(&mut self) {
+                _ = self.counter.replace_with(|old| old.wrapping_add(1));
+            }
+        }
+
+        #[test]
+        fn empty() {
+            let instance = Doubly::<usize>::default();
+
+            drop(instance);
+        }
+
+        #[test]
+        fn zero_size_type() {
+            let instance: Doubly<_> = [(), (), (), (), (), ()].into_iter().collect();
+
+            drop(instance);
+        }
+
+        #[test]
+        fn deallocates_nodes() {
+            const ELEMENTS: usize = 256;
+
+            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+            let mut actual = Doubly::<Droppable>::default();
+
+            for _ in 0..ELEMENTS {
+                _ = actual
+                    .prepend(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("successful allocation");
+            }
+
+            drop(actual);
+
+            assert_eq!(dropped.take(), ELEMENTS);
+        }
+    }
+
     mod default {
         use super::*;
 
