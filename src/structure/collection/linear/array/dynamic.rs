@@ -4249,14 +4249,16 @@ mod test {
             }
 
             #[test]
+            #[allow(clippy::shadow_unrelated)]
             fn initializes_elements() {
-                let mut actual = Dynamic::default();
+                let preexisting = [0, 1, 2];
+                let mut actual: Dynamic<_> = preexisting.into_iter().collect();
 
-                let expected = [0, 1, 2, 3, 4, 5];
-                actual.extend(expected);
+                let expected = [3, 4, 5];
+                actual.extend(expected.iter().copied());
 
-                for index in 0..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
+                for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
+                    assert_eq!(actual, expected);
                 }
             }
 

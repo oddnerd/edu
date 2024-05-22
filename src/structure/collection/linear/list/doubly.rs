@@ -351,12 +351,17 @@ mod test {
             }
 
             #[test]
+            #[allow(clippy::shadow_unrelated)]
             fn initializes_elements() {
-                let mut actual: Doubly<_> = [0, 1, 2].into_iter().collect();
+                let preexisting = [0, 1, 2];
+                let mut actual: Doubly<_> = preexisting.into_iter().collect();
 
-                actual.extend([3, 4, 5]);
+                let expected = [3, 4, 5];
+                actual.extend(expected.iter().copied());
 
-                assert!(actual.eq([0, 1, 2, 3, 4, 5]));
+                for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
+                    assert_eq!(actual, expected);
+                }
             }
 
             #[test]
