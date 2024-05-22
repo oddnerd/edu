@@ -47,8 +47,21 @@ impl<T> Drop for Doubly<T> {
 }
 
 impl<T> Default for Doubly<T> {
+    /// Construct an empty instance with no elements.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let instance = Doubly::<()>::default();
+    ///
+    /// todo!("assert element count is zero")
+    /// ```
     fn default() -> Self {
-        todo!();
+        Doubly { head: None, tail: None}
     }
 }
 
