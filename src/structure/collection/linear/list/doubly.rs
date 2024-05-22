@@ -137,8 +137,23 @@ impl<T> Iterator for Doubly<T> {
         })
     }
 
+    /// Query how many elements are contained.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// assert_eq!(instance.size_hint(), (6, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!()
+        let count = self.count();
+
+        (count, Some(count))
     }
 }
 
