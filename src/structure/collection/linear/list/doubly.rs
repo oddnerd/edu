@@ -132,8 +132,22 @@ impl<T: PartialEq> PartialEq for Doubly<T> {
 impl<T: Eq> Eq for Doubly<T> {}
 
 impl<T: core::fmt::Debug> core::fmt::Debug for Doubly<T> {
+    /// List the elements contained.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Double::from_iter(expected.iter().copied());
+    ///
+    /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+    /// ```
     fn fmt(&self, output: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        todo!()
+        output.debug_list().entries(self.iter()).finish()
     }
 }
 
