@@ -606,6 +606,8 @@ impl<T> List for Doubly<T> {
             let previous = unsafe { previous.as_mut() };
 
             previous.successor = removed.successor.take();
+        } else {
+            self.head = removed.successor.take();
         }
 
         Some(removed.element)
