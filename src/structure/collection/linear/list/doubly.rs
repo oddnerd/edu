@@ -1120,4 +1120,253 @@ mod test {
             }
         }
     }
+
+    mod linear {
+        use super::*;
+
+        mod iter {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Doubly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.iter().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Doubly<_> = expected.iter().copied().collect();
+
+                assert!(actual.iter().eq(expected.iter()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert!(actual.iter().rev().eq(expected.iter().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(
+                        actual.iter().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let actual: Doubly<_> = [0, 1, 2, 3, 4, 5].iter().copied().collect();
+
+                    let mut actual = actual.iter();
+
+                    let mut remaining = actual.len();
+
+                    while let Some(_) = actual.next() {
+                        remaining -= 1;
+
+                        assert_eq!(actual.len(), remaining);
+                    }
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let actual = Doubly::<()>::default();
+
+                    let mut actual = actual.iter();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let actual: Doubly<_> = [()].into_iter().collect();
+
+                    let mut actual = actual.iter();
+
+                    // Exhaust the elements.
+                    let _: &() = actual.next().expect("the one element");
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+
+        mod iter_mut {
+            use super::*;
+
+            #[test]
+            fn element_count() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.iter_mut().count(), expected.len());
+            }
+
+            #[test]
+            fn in_order() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                assert!(actual.iter_mut().eq(expected.iter_mut()));
+            }
+
+            mod double_ended {
+                use super::*;
+
+                #[test]
+                fn element_count() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter_mut().rev().count(), expected.len());
+                }
+
+                #[test]
+                fn in_order() {
+                    let mut expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert!(actual.iter_mut().rev().eq(expected.iter_mut().rev()));
+                }
+            }
+
+            mod exact_size {
+                use super::*;
+
+                #[test]
+                fn hint() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(
+                        actual.iter_mut().size_hint(),
+                        (expected.len(), Some(expected.len()))
+                    );
+                }
+
+                #[test]
+                fn len() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                    assert_eq!(actual.iter_mut().len(), expected.len());
+                }
+
+                #[test]
+                fn updates() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                    let mut actual = actual.iter_mut();
+
+                    let mut remaining = actual.len();
+
+                    while let Some(_) = actual.next() {
+                        remaining -= 1;
+
+                        assert_eq!(actual.len(), remaining);
+                    }
+                }
+            }
+
+            mod fused {
+                use super::*;
+
+                #[test]
+                fn empty() {
+                    let mut actual = Doubly::<()>::default();
+
+                    let mut actual = actual.iter_mut();
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn exhausted() {
+                    let mut actual: Doubly<_> = [()].into_iter().collect();
+
+                    let mut actual = actual.iter_mut();
+
+                    // Exhaust the elements.
+                    let _: &() = actual.next().expect("the one element");
+
+                    // Yields `None` at least once.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+
+                    // Continues to yield `None`.
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+        }
+    }
+
 }
