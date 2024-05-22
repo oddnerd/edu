@@ -550,7 +550,7 @@ mod test {
 
             for _ in 0..ELEMENTS {
                 _ = actual
-                    .prepend(Droppable {
+                    .append(Droppable {
                         counter: alloc::rc::Rc::clone(&dropped),
                     })
                     .expect("successful allocation");
