@@ -800,6 +800,42 @@ mod test {
         }
     }
 
+    mod index_mut {
+        use super::*;
+        use core::ops::IndexMut;
+
+        #[test]
+        fn correct_element() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            let mut actual = Doubly::from_iter(expected);
+
+            for (index, value) in expected.iter().enumerate() {
+                assert_eq!(actual.index_mut(index), value);
+            }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let mut instance = Doubly::<()>::default();
+
+            let _: &() = instance.index_mut(0);
+        }
+
+        #[test]
+        fn is_mutable() {
+            let mut instance: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+            for index in 0..instance.len() {
+                *(instance.index_mut(index)) = 0;
+            }
+
+            for element in instance {
+                assert_eq!(element, 0);
+            }
+        }
+    }
+
     mod iterator {
         use super::*;
 
