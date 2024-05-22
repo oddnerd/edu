@@ -1562,7 +1562,7 @@ mod test {
 
                     let actual: Singly<_> = expected.iter().copied().collect();
 
-                    assert_eq!(actual.size_hint(), (expected.len(), Some(expected.len())));
+                    assert_eq!(actual.len(), expected.len());
                 }
 
                 #[test]
