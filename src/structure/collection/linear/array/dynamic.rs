@@ -4263,7 +4263,7 @@ mod test {
             }
 
             #[test]
-            fn does_not_modify_initialized_elements() {
+            fn does_not_modify_preexisting_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
