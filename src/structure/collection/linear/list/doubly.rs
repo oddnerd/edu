@@ -198,8 +198,46 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
 }
 
 impl<T> core::ops::IndexMut<usize> for Doubly<T> {
+    /// Obtain a mutable reference to the element at position `index`.
+    ///
+    /// # Panics
+    /// This method has the precondition that `index` is within bounds.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut actual = Doubly::from_iter(expected.iter().copied());
+    ///
+    /// for index in 0..expected.len() {
+    ///     use core::ops::IndexMut;
+    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
+    /// }
+    /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        todo!()
+        let mut next = self.head;
+
+        for _ in 0..index {
+            if let Some(mut current) = next {
+                // SAFETY: aligned to an initialized node that we own.
+                let current = unsafe { current.as_mut() };
+
+                next = current.successor;
+            } else {
+                break;
+            }
+        }
+
+        next.map_or_else(|| panic!("index out of bounds"), |mut node| {
+            // SAFETY: aligned to an initialized node that we own.
+            let node = unsafe { node.as_mut() };
+
+            &mut node.element
+        })
     }
 }
 
