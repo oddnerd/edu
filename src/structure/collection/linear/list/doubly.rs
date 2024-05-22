@@ -84,8 +84,26 @@ impl<T> Default for Doubly<T> {
 }
 
 impl<T: Clone> Clone for Doubly<T> {
+    /// Clone all contained elements into a new instance of [`Singly`].
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let original = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let clone = original.clone();
+    ///
+    /// assert_eq!(clone, original);
+    /// ```
     fn clone(&self) -> Self {
-        todo!()
+        self.iter().cloned().collect()
     }
 }
 
