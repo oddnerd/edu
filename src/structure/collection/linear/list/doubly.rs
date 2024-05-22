@@ -332,4 +332,23 @@ mod test {
             assert!(actual.tail.is_none());
         }
     }
+
+    mod iterator {
+        use super::*;
+
+        mod extend {
+            use super::*;
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Doubly::<usize>::default();
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                actual.extend(expected.iter().copied());
+
+                assert!(actual.eq(expected));
+            }
+        }
+    }
 }
