@@ -43,8 +43,21 @@ struct Node<T> {
 }
 
 impl<T> Drop for Doubly<T> {
+    /// Drop all contained elements.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// drop(instance);
+    /// ```
     fn drop(&mut self) {
-        todo!()
+        self.for_each(drop);
     }
 }
 
