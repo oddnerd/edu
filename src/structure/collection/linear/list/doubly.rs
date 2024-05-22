@@ -358,6 +358,19 @@ mod test {
 
                 assert!(actual.eq([0, 1, 2, 3, 4, 5]));
             }
+
+            #[test]
+            fn does_not_modify_initialized_elements() {
+                let expected = [0, 1, 2];
+
+                let mut actual: Doubly<_> = expected.into_iter().collect();
+
+                actual.extend([3, 4, 5]);
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
         }
     }
 }
