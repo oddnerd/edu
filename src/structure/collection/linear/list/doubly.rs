@@ -637,6 +637,61 @@ mod test {
         }
     }
 
+    mod equality {
+        use super::*;
+
+        #[test]
+        fn eq_when_same_elements() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let first: Doubly<_> = elements.iter().copied().collect();
+            let second: Doubly<_> = elements.iter().copied().collect();
+
+            assert_eq!(first, second);
+        }
+
+        #[test]
+        fn ne_when_different_elements() {
+            let first: Doubly<_> = [0].into_iter().collect();
+            let second: Doubly<_> = [1].into_iter().collect();
+
+            assert_ne!(first, second);
+        }
+
+        #[test]
+        fn is_symmetric() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let first: Doubly<_> = elements.iter().copied().collect();
+            let second: Doubly<_> = elements.iter().copied().collect();
+
+            // `first == second` <=> `second == first`
+            assert_eq!(first, second);
+            assert_eq!(second, first);
+        }
+
+        #[test]
+        fn is_transitive() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let first: Doubly<_> = elements.iter().copied().collect();
+            let second: Doubly<_> = elements.iter().copied().collect();
+            let third: Doubly<_> = elements.iter().copied().collect();
+
+            // `first == second && second == third` => `first == third`
+            assert_eq!(first, second);
+            assert_eq!(second, third);
+            assert_eq!(third, first);
+        }
+
+        #[test]
+        fn is_reflexive() {
+            let actual = Doubly::<()>::default();
+
+            assert_eq!(actual, actual);
+        }
+    }
+
     mod iterator {
         use super::*;
 
