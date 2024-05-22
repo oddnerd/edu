@@ -21,8 +21,11 @@ use super::List;
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Linked_list)
 pub struct Doubly<T> {
-    /// The node considered to be the first, if any are contained.
-    elements: Option<NonNull<Node<T>>>,
+    /// The node considered to be the first/front, if any are contained.
+    head: Option<NonNull<Node<T>>>,
+
+    /// The node considered to be the last/back, if any are contained.
+    tail: Option<NonNull<Node<T>>>,
 }
 
 /// An independently allocated element contained within some [`Doubly`].
