@@ -1,5 +1,7 @@
 //! Implementation of [`Doubly`].
 
+extern crate alloc;
+
 use core::ptr::NonNull;
 
 use super::Collection;
@@ -122,8 +124,55 @@ impl<T> ExactSizeIterator for Doubly<T> {}
 impl<T> core::iter::FusedIterator for Doubly<T> {}
 
 impl<T> Extend<T> for Doubly<T> {
+    /// Append the `elements` at the end, maintaining order.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2]);
+    ///
+    /// instance.extend([3, 4, 5]);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, elements: Iter) {
-        todo!()
+        let mut previous = self.tail;
+
+        let mut next = if let Some(mut tail) = self.tail {
+            // SAFETY: aligned to an initialized node that we own.
+            let tail = unsafe { tail.as_mut() };
+
+            &mut tail.successor
+        } else {
+            &mut self.tail
+        };
+
+        for element in elements {
+            let mut node = {
+                let node = Box::new(Node{element, predecessor: previous, successor: None});
+
+                // SAFETY: since allocation has not failed, this cannot be null.
+                unsafe { NonNull::new_unchecked(Box::into_raw(node)) }
+            };
+
+            _ = next.insert(node);
+
+            previous = Some(node);
+
+            next = {
+                // SAFETY: aligned to an initialized node that we own.
+                let node = unsafe { node.as_mut() };
+
+                &mut node.successor
+            };
+        }
     }
 }
 
