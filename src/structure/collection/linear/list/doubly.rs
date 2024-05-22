@@ -296,3 +296,27 @@ impl<T> DoubleEndedIterator for Withdraw<'_, T> {
 impl<T> ExactSizeIterator for Withdraw<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Withdraw<'_, T> {}
+
+#[cfg(test)]
+#[allow(
+    clippy::undocumented_unsafe_blocks,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::assertions_on_result_states,
+    clippy::indexing_slicing
+)]
+mod test {
+    use super::*;
+
+    mod default {
+        use super::*;
+
+        #[test]
+        fn has_no_elements() {
+            let actual = Doubly::<()>::default();
+
+            assert!(actual.head.is_none());
+            assert!(actual.tail.is_none());
+        }
+    }
+}
