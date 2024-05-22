@@ -708,4 +708,19 @@ mod test {
             }
         }
     }
+
+    mod collection {
+        use super::*;
+
+        mod count {
+            use super::*;
+
+            #[test]
+            fn number_of_elements() {
+                let actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                assert_eq!(Collection::count(&actual), 6);
+            }
+        }
+    }
 }
