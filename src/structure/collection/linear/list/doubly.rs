@@ -586,6 +586,39 @@ mod test {
         }
     }
 
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn has_elements() {
+            let expected = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            assert_eq!(actual.len(), expected.len());
+        }
+
+        #[test]
+        fn is_equivalent() {
+            let expected = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn owns_elements() {
+            let expected = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+            let actual = expected.clone();
+
+            for (clone, original) in actual.iter().zip(expected.iter()) {
+                assert!(!core::ptr::addr_eq(clone, original));
+            }
+        }
+    }
+
     mod iterator {
         use super::*;
 
