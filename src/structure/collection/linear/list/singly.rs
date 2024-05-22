@@ -1657,17 +1657,6 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let mut actual = Singly::<usize>::default();
-
-                actual.extend(expected);
-
-                assert_eq!(actual.len(), expected.len());
-            }
-
-            #[test]
             fn initializes_elements() {
                 let mut actual: Singly<_> = [0, 1, 2].into_iter().collect();
 

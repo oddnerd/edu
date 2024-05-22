@@ -4238,10 +4238,11 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
+            fn updates_internal_state() {
                 let mut actual = Dynamic::default();
 
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 actual.extend(expected);
 
                 assert_eq!(actual.initialized, expected.len());
