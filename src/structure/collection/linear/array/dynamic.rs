@@ -4147,10 +4147,12 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
 
                 // Ideally, this will panic if it uses the invalid size.
-                let _actual: Dynamic<_> = FaultySizeHintIter {
+                let actual: Dynamic<_> = FaultySizeHintIter {
                     data: expected.iter().copied(),
                 }
                 .collect();
+
+                assert_eq!(actual.initialized, expected.len());
             }
         }
 

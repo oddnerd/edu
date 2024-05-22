@@ -63,7 +63,10 @@ impl<T> Default for Doubly<T> {
     /// todo!("assert element count is zero")
     /// ```
     fn default() -> Self {
-        Doubly { head: None, tail: None}
+        Doubly {
+            head: None,
+            tail: None,
+        }
     }
 }
 
@@ -156,7 +159,11 @@ impl<T> Extend<T> for Doubly<T> {
 
         for element in elements {
             let mut node = {
-                let node = Box::new(Node{element, predecessor: previous, successor: None});
+                let node = Box::new(Node {
+                    element,
+                    predecessor: previous,
+                    successor: None,
+                });
 
                 // SAFETY: since allocation has not failed, this cannot be null.
                 unsafe { NonNull::new_unchecked(Box::into_raw(node)) }
@@ -421,6 +428,19 @@ mod test {
                 let actual: Doubly<_> = expected.iter().copied().collect();
 
                 assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn does_not_trust_size_hint() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                // Ideally, this will panic if it uses the invalid size.
+                let actual: Doubly<_> = (FaultySizeHintIter {
+                    data: expected.iter().copied(),
+                })
+                .collect();
+
+                assert_eq!(actual.len(), expected.len());
             }
         }
 

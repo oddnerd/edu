@@ -1631,6 +1631,19 @@ mod test {
 
                 assert!(actual.eq(expected));
             }
+
+            #[test]
+            fn does_not_trust_size_hint() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                // Ideally, this will panic if it uses the invalid size.
+                let actual: Singly<_> = (FaultySizeHintIter {
+                    data: expected.iter().copied(),
+                })
+                .collect();
+
+                assert_eq!(actual.len(), expected.len());
+            }
         }
 
         mod extend {
