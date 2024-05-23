@@ -473,6 +473,21 @@ impl<T> Collection for Doubly<T> {
 }
 
 impl<T> Linear for Doubly<T> {
+    /// Iterate over the elements by immutable reference.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let instance = Doubly::from_iter(expected.iter().copied());
+    ///
+    /// assert!(instance.iter().eq(expected.iter()));
+    /// ```
     fn iter(
         &self,
     ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
@@ -484,6 +499,21 @@ impl<T> Linear for Doubly<T> {
         }
     }
 
+    /// Iterate over the elements by mutable reference.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut expected = [0, 1, 2, 3, 4, 5];
+    /// let mut instance = Doubly::from_iter(expected.iter().copied());
+    ///
+    /// assert!(instance.iter_mut().eq(expected.iter_mut()));
+    /// ```
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
