@@ -958,8 +958,16 @@ impl<T> ExactSizeIterator for IterMut<'_, T> {}
 
 impl<T> core::iter::FusedIterator for IterMut<'_, T> {}
 
+/// By-value iterator over a range of indices.
 struct Drain<'a, T> {
-    lifetime: core::marker::PhantomData<&'a mut T>,
+    /// The next element to remove from the front, if any.
+    front: &'a mut Option<NonNull<Node<T>>>,
+
+    /// The next element to remove from the back, if any.
+    back: Option<&'a mut Option<NonNull<Node<T>>>>,
+
+    /// The number of elements yet to be yielded.
+    remaining: usize,
 }
 
 impl<T> Drop for Drain<'_, T> {
@@ -987,8 +995,38 @@ impl<T> Drop for Drain<'_, T> {
 impl<T> Iterator for Drain<'_, T> {
     type Item = T;
 
+    /// Obtain the next element from the front, if any exists.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Double;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.drain(1..=4);
+    ///
+    /// assert_eq!(instance.next(), Some(1));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(3));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.remaining.checked_sub(1).and_then(|decremented| {
+            self.remaining = decremented;
+
+            let removed = self.front.take()?;
+
+            // SAFETY: the node was allocated via `Box`.
+            let mut removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+            *self.front = removed.successor.take();
+
+            Some(removed.element)
+        })
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
