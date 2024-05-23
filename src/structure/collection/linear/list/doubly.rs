@@ -1029,8 +1029,38 @@ impl<T> Iterator for Drain<'_, T> {
         })
     }
 
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.drain(1..=4);
+    ///
+    /// assert_eq!(instance.size_hint(), (4, Some(4)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!()
+        let count: usize = 0;
+
+        let mut next = *self.front;
+
+        for _ in 0..self.remaining {
+            if let Some(current) = next {
+                // SAFETY: aligned to an initialized node we can reference.
+                let node = unsafe { current.as_ref() };
+
+                next = node.successor;
+            } else {
+                break;
+            }
+        }
+
+        (count, Some(count))
     }
 }
 
