@@ -963,8 +963,24 @@ struct Drain<'a, T> {
 }
 
 impl<T> Drop for Drain<'_, T> {
+    /// Drop all elements yet to be yielded..
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// drop(instance.drain(1..=4));
+    ///
+    /// assert!(instance.eq([1, 5]));
+    /// ```
     fn drop(&mut self) {
-        todo!()
+        self.for_each(drop);
     }
 }
 
