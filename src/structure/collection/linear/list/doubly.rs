@@ -1074,37 +1074,111 @@ impl<T> ExactSizeIterator for Drain<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
-struct Withdraw<'a, T> {
-    lifetime: core::marker::PhantomData<&'a mut T>,
+struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
+    /// The next from the back to query with the predicate.
+    head: &'a mut Option<NonNull<Node<T>>>,
+
+    /// The next from the back to query with the predicate.
+    tail: &'a mut Option<NonNull<Node<T>>>,
+
+    /// The predicate based upon which elements are withdrawn.
+    predicate: F,
 }
 
-impl<T> Drop for Withdraw<'_, T> {
+impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
+    /// Drop all elements yet to be yielded..
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// drop(instance.withdraw(|element| element % 2 == 0));
+    ///
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
     fn drop(&mut self) {
-        todo!()
+        self.for_each(drop)
     }
 }
 
-impl<T> Iterator for Withdraw<'_, T> {
+impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     type Item = T;
 
+    /// Obtain the next element from the front, if any exists.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         todo!()
     }
 
+    /// Query how many elements have yet to be yielded.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = underlying.withdraw(|element| element % 2 == 0);
+    ///
+    /// assert_eq!(instance.size_hint(), (0, Some(6)));
+    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         todo!()
     }
 }
 
-impl<T> DoubleEndedIterator for Withdraw<'_, T> {
+impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
+    /// Obtain the next element from the back, if any exists.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.withdraw(|element| element % 2 == 0).rev();
+    ///
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         todo!()
     }
 }
 
-impl<T> ExactSizeIterator for Withdraw<'_, T> {}
+impl<T, F: FnMut(&T) -> bool> ExactSizeIterator for Withdraw<'_, T, F> {}
 
-impl<T> core::iter::FusedIterator for Withdraw<'_, T> {}
+impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {}
 
 #[cfg(test)]
 #[allow(
