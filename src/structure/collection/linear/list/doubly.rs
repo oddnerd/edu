@@ -647,8 +647,92 @@ impl<T> List for Doubly<T> {
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
+        // TODO(oddnerd): is this really the best I can do?
+
+        let (offset, mut remaining) = (|| {
+            // This may be more than the number of elements contained.
+            let offset = match range.start_bound() {
+                core::ops::Bound::Included(start) => *start,
+                core::ops::Bound::Excluded(start) => {
+                    if let Some(incremented) = start.checked_add(1) {
+                        incremented
+                    } else {
+                        return (0, 0);
+                    }
+                }
+                core::ops::Bound::Unbounded => 0,
+            };
+
+            // This may be more than the number of elements after next.
+            let remaining = match range.end_bound() {
+                core::ops::Bound::Included(end) => end.abs_diff(offset).saturating_add(1),
+                core::ops::Bound::Excluded(end) => end.abs_diff(offset),
+                core::ops::Bound::Unbounded => usize::MAX.abs_diff(offset),
+            };
+
+            (offset, remaining)
+        })();
+
+        let mut front = &mut self.head;
+
+        for _ in 0..offset {
+            if let Some(mut current) = *front {
+                // SAFETY: aligned to an initialized node uniquely referenced.
+                let current = unsafe { current.as_mut() };
+
+                front = &mut current.successor;
+            } else {
+                break;
+            }
+        }
+
+        let back = if let Some(mut first) = *front {
+            // SAFETY: aligned to an initialized node uniquely referenced.
+            let first = unsafe { first.as_mut() };
+
+            if let Some(mut successor) = first.successor {
+                'found: {
+                    let mut count: usize = 1;
+
+                    for _ in 1..remaining {
+                        // SAFETY: aligned to an initialized node uniquely referenced.
+                        let node = unsafe { successor.as_mut() };
+
+                        if let Some(next) = node.successor {
+                            if let Some(incremented) = count.checked_add(1) {
+                                count = incremented;
+                            } else {
+                                unreachable!("more elements than supported by the address space (usize::MAX)");
+                            }
+
+                            successor = next;
+                        } else {
+                            remaining = count;
+
+                            break 'found &mut self.tail;
+                        }
+                    }
+
+                    remaining = count;
+
+                    // SAFETY: aligned to an initialized node uniquely referenced.
+                    let node = unsafe { successor.as_mut() };
+
+                    &mut node.predecessor
+                }
+            } else {
+                remaining = 1;
+                &mut self.tail
+            }
+        } else {
+            remaining = 0;
+            &mut self.tail
+        };
+
         Drain {
-            lifetime: core::marker::PhantomData,
+            front,
+            back,
+            remaining,
         }
     }
 
@@ -963,8 +1047,14 @@ impl<T> core::iter::FusedIterator for IterMut<'_, T> {}
 
 /// By-value iterator over a range of indices.
 struct Drain<'a, T> {
-    /// Bind lifetime to underlying owner.
-    lifetime: core::marker::PhantomData<&'a T>,
+    /// The next (front) element to remove, if any.
+    front: &'a mut Option<NonNull<Node<T>>>,
+
+    /// The next (back) element to remove, if any.
+    back: &'a mut Option<NonNull<Node<T>>>,
+
+    /// The maximum amount of elements yet to be yielded.
+    remaining: usize,
 }
 
 impl<T> Drop for Drain<'_, T> {
@@ -1012,13 +1102,42 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.remaining.checked_sub(1).and_then(|decremented| {
+            self.remaining = decremented;
+
+            let mut removed = self.front.take()?;
+
+            // SAFETY: aligned to an initialized node we uniquely reference.
+            let node = unsafe { removed.as_mut() };
+
+            if let Some(back) = *self.back {
+                if removed == back {
+                    *self.back = node.predecessor;
+                } else if let Some(mut successor) = node.successor {
+                    // SAFETY: different from back, so unique reference.
+                    let successor = unsafe { successor.as_mut() };
+
+                    successor.predecessor = node.predecessor.take();
+                } else {
+                    unreachable!("either last node, or some successor");
+                }
+            } else {
+                unreachable!("at least the current node remaining");
+            }
+
+            *self.front = node.successor.take();
+
+            // SAFETY: the node was allocated via `Box`.
+            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+            Some(removed.element)
+        })
     }
 
     /// Query how many elements have yet to be yielded.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// This method takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
@@ -1031,13 +1150,61 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(instance.size_hint(), (4, Some(4)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!()
+        (self.remaining, Some(self.remaining))
     }
 }
 
 impl<T> DoubleEndedIterator for Drain<'_, T> {
+    /// Obtain the next element from the back, if any exists.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = underlying.drain(1..=4).rev();
+    ///
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(3));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(1));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        todo!()
+        self.remaining.checked_sub(1).and_then(|decremented| {
+            self.remaining = decremented;
+
+            let mut removed = self.back.take()?;
+
+            // SAFETY: aligned to an initialized node we uniquely reference.
+            let node = unsafe { removed.as_mut() };
+
+            if let Some(front) = *self.front {
+                if removed == front {
+                    *self.front = node.successor;
+                } else if let Some(mut predecessor) = node.predecessor {
+                    // SAFETY: different from front, so unique reference.
+                    let predecessor = unsafe { predecessor.as_mut() };
+
+                    predecessor.successor = node.successor.take();
+                } else {
+                    unreachable!("either last node, or some predecessor");
+                }
+            } else {
+                unreachable!("at least the current node remaining");
+            }
+
+            *self.back = node.predecessor.take();
+
+            // SAFETY: the node was allocated via `Box`.
+            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+            Some(removed.element)
+        })
     }
 }
 
@@ -2284,7 +2451,14 @@ mod test {
                 fn removes_yielded_elements() {
                     let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                    drop(actual.drain(..));
+                    // drop(actual.drain(..));
+
+                    for element in actual.drain(..) {
+                        println!("ELEMENT: {element:?}");
+                    }
+
+                    assert!(actual.head.is_none());
+                    assert!(actual.tail.is_none());
 
                     assert_eq!(actual.len(), 0);
                 }
