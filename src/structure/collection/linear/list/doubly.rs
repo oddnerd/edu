@@ -657,7 +657,10 @@ impl<T> List for Doubly<T> {
         predicate: impl FnMut(&Self::Element) -> bool,
     ) -> impl DoubleEndedIterator<Item = Self::Element> {
         Withdraw {
-            lifetime: core::marker::PhantomData,
+            front: &mut self.head,
+            back: &mut self.tail,
+            exhausted: false,
+            predicate,
         }
     }
 }
@@ -960,14 +963,8 @@ impl<T> core::iter::FusedIterator for IterMut<'_, T> {}
 
 /// By-value iterator over a range of indices.
 struct Drain<'a, T> {
-    /// The next element to remove from the front, if any.
-    front: &'a mut Option<NonNull<Node<T>>>,
-
-    /// The next element to remove from the back, if any.
-    back: Option<&'a mut Option<NonNull<Node<T>>>>,
-
-    /// The number of elements yet to be yielded.
-    remaining: usize,
+    /// Bind lifetime to underlying owner.
+    lifetime: core::marker::PhantomData<&'a T>,
 }
 
 impl<T> Drop for Drain<'_, T> {
@@ -1015,18 +1012,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        self.remaining.checked_sub(1).and_then(|decremented| {
-            self.remaining = decremented;
-
-            let removed = self.front.take()?;
-
-            // SAFETY: the node was allocated via `Box`.
-            let mut removed = unsafe { Box::from_raw(removed.as_ptr()) };
-
-            *self.front = removed.successor.take();
-
-            Some(removed.element)
-        })
+        todo!()
     }
 
     /// Query how many elements have yet to be yielded.
@@ -1045,22 +1031,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(instance.size_hint(), (4, Some(4)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let count: usize = 0;
-
-        let mut next = *self.front;
-
-        for _ in 0..self.remaining {
-            if let Some(current) = next {
-                // SAFETY: aligned to an initialized node we can reference.
-                let node = unsafe { current.as_ref() };
-
-                next = node.successor;
-            } else {
-                break;
-            }
-        }
-
-        (count, Some(count))
+        todo!()
     }
 }
 
@@ -1074,12 +1045,16 @@ impl<T> ExactSizeIterator for Drain<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
+/// By-value iterator to remove elements matching some predicate.
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// The next from the back to query with the predicate.
-    head: &'a mut Option<NonNull<Node<T>>>,
+    front: &'a mut Option<NonNull<Node<T>>>,
 
     /// The next from the back to query with the predicate.
-    tail: &'a mut Option<NonNull<Node<T>>>,
+    back: &'a mut Option<NonNull<Node<T>>>,
+
+    /// If all elements have been queried.
+    exhausted: bool,
 
     /// The predicate based upon which elements are withdrawn.
     predicate: F,
@@ -1103,7 +1078,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// assert!(instance.eq([1, 3, 5]));
     /// ```
     fn drop(&mut self) {
-        self.for_each(drop)
+        self.for_each(drop);
     }
 }
 
@@ -1129,7 +1104,55 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        if self.exhausted {
+            return None;
+        }
+
+        while let Some(mut removed) = self.front.take() {
+            // SAFETY: aligned to an initialized node we uniquely reference.
+            let node = unsafe { removed.as_mut() };
+
+            if (self.predicate)(&node.element) {
+                if let Some(back) = *self.back {
+                    if removed == back {
+                        *self.back = node.predecessor;
+                    } else if let Some(mut successor) = node.successor {
+                        // SAFETY: different from back, so unique reference.
+                        let successor = unsafe { successor.as_mut() };
+
+                        successor.predecessor = node.predecessor.take();
+                    } else {
+                        unreachable!("either last node, or some successor");
+                    }
+                } else {
+                    unreachable!("at least the current node remaining");
+                }
+
+                *self.front = node.successor.take();
+
+                // SAFETY: the node was allocated via `Box`.
+                let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+                return Some(removed.element);
+            }
+
+            *self.front = Some(removed);
+            self.front = &mut node.successor;
+
+            if let Some(back) = *self.back {
+                if removed == back {
+                    self.exhausted = true;
+
+                    break;
+                }
+            } else {
+                unreachable!("at least the current node remaining");
+            }
+        }
+
+        self.exhausted = true;
+
+        None
     }
 
     /// Query how many elements have yet to be yielded.
@@ -1148,7 +1171,30 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert_eq!(instance.size_hint(), (0, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        todo!()
+        let mut count: usize = 0;
+
+        let mut next = *self.front;
+
+        while let Some(current) = next {
+            if let Some(sentinel) = *self.back {
+                if let Some(incremented) = count.checked_add(1) {
+                    count = incremented;
+                } else {
+                    unreachable!("more elements than supported by the address space (usize::MAX)");
+                }
+
+                if current == sentinel {
+                    break;
+                }
+
+                // SAFETY: aligned to an initialized node that we uniquely reference.
+                let current = unsafe { current.as_ref() };
+
+                next = current.successor;
+            }
+        }
+
+        (0, Some(count))
     }
 }
 
@@ -1172,7 +1218,55 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        todo!()
+        if self.exhausted {
+            return None;
+        }
+
+        while let Some(mut removed) = self.back.take() {
+            // SAFETY: aligned to an initialized node we uniquely reference.
+            let node = unsafe { removed.as_mut() };
+
+            if (self.predicate)(&node.element) {
+                if let Some(front) = *self.front {
+                    if removed == front {
+                        *self.front = node.successor;
+                    } else if let Some(mut predecessor) = node.predecessor {
+                        // SAFETY: different from front, so unique reference.
+                        let predecessor = unsafe { predecessor.as_mut() };
+
+                        predecessor.successor = node.successor.take();
+                    } else {
+                        unreachable!("either last node, or some predecessor");
+                    }
+                } else {
+                    unreachable!("at least the current node remaining");
+                }
+
+                *self.back = node.predecessor.take();
+
+                // SAFETY: the node was allocated via `Box`.
+                let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+                return Some(removed.element);
+            }
+
+            *self.back = Some(removed);
+            self.back = &mut node.predecessor;
+
+            if let Some(front) = *self.front {
+                if removed == front {
+                    self.exhausted = true;
+
+                    break;
+                }
+            } else {
+                unreachable!("at least the current node remaining");
+            }
+        }
+
+        self.exhausted = true;
+
+        None
     }
 }
 
@@ -2394,5 +2488,4 @@ mod test {
             }
         }
     }
-
 }
