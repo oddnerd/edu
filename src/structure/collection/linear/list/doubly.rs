@@ -692,9 +692,9 @@ impl<T> List for Doubly<T> {
 
             if let Some(mut successor) = first.successor {
                 'found: {
-                    let mut count: usize = 1;
+                    let mut count: usize = 2;
 
-                    for _ in 1..remaining {
+                    for _ in 2..remaining {
                         // SAFETY: aligned to an initialized node uniquely referenced.
                         let node = unsafe { successor.as_mut() };
 
@@ -1128,9 +1128,9 @@ impl<T> Iterator for Drain<'_, T> {
             *self.front = node.successor.take();
 
             // TODO: is this necessary?
-            if self.front.is_none() {
-                _ = self.back.take();
-            }
+            // if self.front.is_none() {
+            //     _ = self.back.take();
+            // }
 
             // SAFETY: the node was allocated via `Box`.
             let removed = unsafe { Box::from_raw(removed.as_ptr()) };
@@ -1206,9 +1206,9 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
             *self.back = node.predecessor.take();
 
             // TODO: is this necessary?
-            if self.back.is_none() {
-                _ = self.front.take();
-            }
+            // if self.back.is_none() {
+            //     _ = self.front.take();
+            // }
 
             // SAFETY: the node was allocated via `Box`.
             let removed = unsafe { Box::from_raw(removed.as_ptr()) };
@@ -2461,11 +2461,7 @@ mod test {
                 fn removes_yielded_elements() {
                     let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                    // drop(actual.drain(..));
-
-                    for element in actual.drain(..) {
-                        println!("ELEMENT: {element:?}");
-                    }
+                    drop(actual.drain(..));
 
                     assert!(actual.head.is_none());
                     assert!(actual.tail.is_none());
