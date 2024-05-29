@@ -647,8 +647,6 @@ impl<T> List for Doubly<T> {
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
-        // TODO(oddnerd): is this really the best I can do?
-
         let (offset, mut remaining) = (|| {
             // This may be more than the number of elements contained.
             let offset = match range.start_bound() {
@@ -673,60 +671,55 @@ impl<T> List for Doubly<T> {
             (offset, remaining)
         })();
 
-        let mut front = &mut self.head;
+        let front = {
+            let mut next = &mut self.head;
 
-        for _ in 0..offset {
-            if let Some(mut current) = *front {
-                // SAFETY: aligned to an initialized node uniquely referenced.
-                let current = unsafe { current.as_mut() };
+            for _ in 0..offset {
+                if let Some(mut current) = *next {
+                    // SAFETY: unique mutable reference.
+                    let current = unsafe { current.as_mut() };
 
-                front = &mut current.successor;
-            } else {
-                break;
+                    next = &mut current.successor;
+                } else {
+                    break;
+                }
             }
-        }
 
-        let back = if let Some(mut first) = *front {
-            // SAFETY: aligned to an initialized node uniquely referenced.
-            let first = unsafe { first.as_mut() };
+            next
+        };
 
-            if let Some(mut successor) = first.successor {
-                'found: {
-                    let mut count: usize = 1;
+        let back = {
+            let mut count: usize = 0;
 
-                    for _ in 1..remaining {
-                        // SAFETY: aligned to an initialized node uniquely referenced.
-                        let node = unsafe { successor.as_mut() };
+            let mut next = &mut *front;
 
-                        if let Some(incremented) = count.checked_add(1) {
-                            count = incremented;
-                        } else {
-                            unreachable!("more elements than supported by the address space (usize::MAX)");
-                        }
-
-                        if let Some(next) = node.successor {
-                            successor = next;
-                        } else {
-                            remaining = count;
-
-                            break 'found &mut self.tail;
-                        }
+            for _ in 0..remaining {
+                if let Some(mut current) = *next {
+                    if let Some(incremented) = count.checked_add(1) {
+                        count = incremented;
+                    } else {
+                        unreachable!("more elements than supported by the address space (usize::MAX)");
                     }
 
-                    remaining = count;
+                    // SAFETY: unique mutable reference.
+                    let node = unsafe { current.as_mut() };
 
-                    // SAFETY: aligned to an initialized node uniquely referenced.
-                    let node = unsafe { successor.as_mut() };
-
-                    &mut node.predecessor
+                    next = &mut node.successor;
+                } else {
+                    break;
                 }
+            }
+
+            remaining = count;
+
+            if let Some(mut successor) = *next {
+                // SAFETY: unique mutable reference.
+                let successor = unsafe { successor.as_mut() };
+
+                &mut successor.predecessor
             } else {
-                remaining = 1;
                 &mut self.tail
             }
-        } else {
-            remaining = 0;
-            &mut self.tail
         };
 
         Drain {
