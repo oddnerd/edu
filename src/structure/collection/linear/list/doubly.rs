@@ -181,7 +181,7 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
 
         for _ in 0..index {
             if let Some(current) = next {
-                // SAFETY: aligned to an initialized node that we own.
+                // SAFETY: can have multiple shared immutable references.
                 let current = unsafe { current.as_ref() };
 
                 next = current.successor;
@@ -193,7 +193,7 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
         next.map_or_else(
             || panic!("index out of bounds"),
             |node| {
-                // SAFETY: aligned to an initialized node that we own.
+                // SAFETY: can have multiple shared immutable references.
                 let node = unsafe { node.as_ref() };
 
                 &node.element
