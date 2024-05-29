@@ -641,14 +641,11 @@ impl<T> List for Doubly<T> {
     /// assert!(instance.eq([0, 1, 2, 4, 5]));
     /// ```
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
-        let mut previous = None;
         let mut next = &mut self.head;
 
         for _ in 0..index {
-            if let &mut Some(ref mut current) = next {
-                previous = Some(*current);
-
-                // SAFETY: aligned to an initialized node that we own.
+            if let Some(mut current) = *next {
+                // SAFETY: unique mutable reference.
                 let current = unsafe { current.as_mut() };
 
                 next = &mut current.successor;
@@ -657,20 +654,26 @@ impl<T> List for Doubly<T> {
             }
         }
 
-        let mut removed = {
-            let ptr = next.take()?;
+        // SAFETY:
+        // * we own the node.
+        // * there are no references to the node to invalidate.
+        // * the node was allocated via `Box` and `into_raw`.
+        let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
 
-            // SAFETY: the node was allocated via `Box`.
-            let removed = unsafe { Box::from_raw(ptr.as_ptr()) };
+        if let Some(mut successor) = removed.successor {
+            // SAFETY: unique mutable reference.
+            let successor = unsafe { successor.as_mut() };
 
-            *removed
-        };
+            successor.predecessor = removed.predecessor;
+        } else {
+            self.tail = removed.predecessor.take();
+        }
 
-        if let Some(mut previous) = previous {
-            // SAFETY: aligned to an initialized node that we own.
-            let previous = unsafe { previous.as_mut() };
+        if let Some(mut predecessor) = removed.predecessor {
+            // SAFETY: unique mutable reference.
+            let predecessor = unsafe { predecessor.as_mut() };
 
-            previous.successor = removed.successor.take();
+            predecessor.successor = removed.successor;
         } else {
             self.head = removed.successor.take();
         }
