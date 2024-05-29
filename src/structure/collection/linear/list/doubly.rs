@@ -647,8 +647,8 @@ impl<T> List for Doubly<T> {
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator {
+        // These values denote the range and do not correspond to elements.
         let (offset, remaining) = (|| {
-            // This may be more than the number of elements contained.
             let offset = match range.start_bound() {
                 core::ops::Bound::Included(start) => *start,
                 core::ops::Bound::Excluded(start) => {
@@ -661,7 +661,6 @@ impl<T> List for Doubly<T> {
                 core::ops::Bound::Unbounded => 0,
             };
 
-            // This may be more than the number of elements after next.
             let remaining = match range.end_bound() {
                 core::ops::Bound::Included(end) => end.abs_diff(offset).saturating_add(1),
                 core::ops::Bound::Excluded(end) => end.abs_diff(offset),
