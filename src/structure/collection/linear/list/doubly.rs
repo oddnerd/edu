@@ -322,7 +322,7 @@ impl<T> Iterator for Doubly<T> {
 }
 
 impl<T> DoubleEndedIterator for Doubly<T> {
-    /// Obtain the last element by value via moving it out of [`Self`].
+    /// Move the back/last element out of [`Self`], if any are contained.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
@@ -343,13 +343,23 @@ impl<T> DoubleEndedIterator for Doubly<T> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         self.tail.take().map(|removed| {
-            // SAFETY: the node was allocated via `Box`.
+            // SAFETY:
+            // * we own the node.
+            // * there are no references to the node to invalidate.
+            // * the node was allocated via `Box` and `into_raw`.
             let mut removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
+            debug_assert_eq!(removed.successor, None, "no successor to update");
+
             if let Some(predecessor) = removed.predecessor.take() {
-                _ = self.tail.insert(predecessor);
+                let predecessor = self.tail.insert(predecessor);
+
+                // SAFETY: unique mutable reference.
+                let predecessor = unsafe { predecessor.as_mut() };
+
+                predecessor.successor = None;
             } else {
-                _ = self.head.take();
+                self.head = None;
             }
 
             removed.element
