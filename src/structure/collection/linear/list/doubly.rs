@@ -1102,7 +1102,7 @@ impl<T> Drop for Drain<'_, T> {
     ///
     /// drop(instance.drain(1..=4));
     ///
-    /// assert!(instance.eq([1, 5]));
+    /// assert!(instance.eq([0, 5]));
     /// ```
     fn drop(&mut self) {
         self.for_each(drop);
