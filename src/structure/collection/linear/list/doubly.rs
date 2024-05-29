@@ -257,7 +257,7 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
 impl<T> Iterator for Doubly<T> {
     type Item = T;
 
-    /// Obtain the first element by value via moving it out of [`Self`].
+    /// Move the front/first element out of [`Self`], if any are contained.
     ///
     /// # Performance
     /// This method takes O(1) time and consumes O(1) memory.
