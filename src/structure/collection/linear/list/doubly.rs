@@ -643,6 +643,21 @@ impl<T> List for Doubly<T> {
         Some(removed.element)
     }
 
+    /// Move the elements at indexes within `range` out, if they exist.
+    ///
+    /// # Performance
+    /// This method takes O(N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert!(instance.drain(1..=4).eq([1, 2, 3, 4]));
+    /// assert!(instance.eq([0, 5]));
+    /// ```
     fn drain(
         &mut self,
         range: impl core::ops::RangeBounds<usize>,
