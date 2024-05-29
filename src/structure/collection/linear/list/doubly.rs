@@ -1118,11 +1118,6 @@ impl<T> Iterator for Drain<'_, T> {
 
             *self.front = node.successor.take();
 
-            // TODO: is this necessary?
-            // if self.front.is_none() {
-            //     _ = self.back.take();
-            // }
-
             // SAFETY: the node was allocated via `Box`.
             let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
@@ -1195,11 +1190,6 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
             }
 
             *self.back = node.predecessor.take();
-
-            // TODO: is this necessary?
-            // if self.back.is_none() {
-            //     _ = self.front.take();
-            // }
 
             // SAFETY: the node was allocated via `Box`.
             let removed = unsafe { Box::from_raw(removed.as_ptr()) };
