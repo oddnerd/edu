@@ -73,7 +73,7 @@ impl<T> Default for Doubly<T> {
     ///
     /// let instance = Doubly::<()>::default();
     ///
-    /// todo!("assert element count is zero")
+    /// assert_eq!(instance.len(), 0);
     /// ```
     fn default() -> Self {
         Doubly {
