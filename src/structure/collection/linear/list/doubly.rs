@@ -1120,7 +1120,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::list::Double;
+    /// use rust::structure::collection::linear::list::Doubly;
     ///
     /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut instance = underlying.drain(1..=4);
