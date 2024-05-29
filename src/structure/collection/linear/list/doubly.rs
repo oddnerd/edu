@@ -133,7 +133,7 @@ impl<T: PartialEq> PartialEq for Doubly<T> {
 impl<T: Eq> Eq for Doubly<T> {}
 
 impl<T: core::fmt::Debug> core::fmt::Debug for Doubly<T> {
-    /// List the elements contained.
+    /// Print to `output` a formatted list of the contained elements.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(N) memory.
