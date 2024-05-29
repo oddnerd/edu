@@ -372,7 +372,7 @@ impl<T> ExactSizeIterator for Doubly<T> {}
 impl<T> core::iter::FusedIterator for Doubly<T> {}
 
 impl<T> Extend<T> for Doubly<T> {
-    /// Append the `elements` at the end, maintaining order.
+    /// Move `elements` to the end of [`Self`], maintaining order.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
@@ -391,52 +391,9 @@ impl<T> Extend<T> for Doubly<T> {
     /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, elements: Iter) {
-        let mut elements = elements.into_iter();
-
-        let mut previous = if let Some(mut last) = self.tail {
-            // SAFETY: aligned to an initialized node that we own.
-            unsafe { last.as_mut() }
-        } else {
-            let Some(element) = elements.next() else {
-                return;
-            };
-
-            let mut node = {
-                let node = Box::new(Node {
-                    element,
-                    predecessor: None,
-                    successor: None,
-                });
-
-                // SAFETY: since allocation has not failed, this cannot be null.
-                unsafe { NonNull::new_unchecked(Box::into_raw(node)) }
-            };
-
-            self.head = Some(node);
-            self.tail = Some(node);
-
-            // SAFETY: aligned to na initialized node that we own.
-            unsafe { node.as_mut() }
-        };
-
         for element in elements {
-            let mut node = {
-                let node = Box::new(Node {
-                    element,
-                    // SAFETY: reference cannot be null.
-                    predecessor: Some(unsafe { NonNull::new_unchecked(previous) }),
-                    successor: None,
-                });
-
-                // SAFETY: since allocation has not failed, this cannot be null.
-                unsafe { NonNull::new_unchecked(Box::into_raw(node)) }
-            };
-
-            previous.successor = Some(node);
-            self.tail = Some(node);
-
-            // SAFETY: aligned to an initialized element that we own.
-            previous = unsafe { node.as_mut() };
+            // TODO: this requires O(1) append implementation.
+            assert!(self.append(element).is_ok(), "allocation failed");
         }
     }
 }
