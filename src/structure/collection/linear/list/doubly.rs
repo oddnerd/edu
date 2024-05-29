@@ -692,19 +692,19 @@ impl<T> List for Doubly<T> {
 
             if let Some(mut successor) = first.successor {
                 'found: {
-                    let mut count: usize = 2;
+                    let mut count: usize = 1;
 
-                    for _ in 2..remaining {
+                    for _ in 1..remaining {
                         // SAFETY: aligned to an initialized node uniquely referenced.
                         let node = unsafe { successor.as_mut() };
 
-                        if let Some(next) = node.successor {
-                            if let Some(incremented) = count.checked_add(1) {
-                                count = incremented;
-                            } else {
-                                unreachable!("more elements than supported by the address space (usize::MAX)");
-                            }
+                        if let Some(incremented) = count.checked_add(1) {
+                            count = incremented;
+                        } else {
+                            unreachable!("more elements than supported by the address space (usize::MAX)");
+                        }
 
+                        if let Some(next) = node.successor {
                             successor = next;
                         } else {
                             remaining = count;
