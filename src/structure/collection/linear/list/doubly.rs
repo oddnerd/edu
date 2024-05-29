@@ -278,13 +278,23 @@ impl<T> Iterator for Doubly<T> {
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.head.take().map(|removed| {
-            // SAFETY: the node was allocated via `Box`.
+            // SAFETY:
+            // * we own the node.
+            // * there are no references to the node to invalidate.
+            // * the node was allocated via `Box` and `into_raw`.
             let mut removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
+            debug_assert_eq!(removed.predecessor, None, "no predecessor to update");
+
             if let Some(successor) = removed.successor.take() {
-                _ = self.head.insert(successor);
+                let successor = self.head.insert(successor);
+
+                // SAFETY: unique mutable reference.
+                let successor = unsafe { successor.as_mut() };
+
+                successor.predecessor = None;
             } else {
-                _ = self.tail.take();
+                self.tail = None;
             }
 
             removed.element
