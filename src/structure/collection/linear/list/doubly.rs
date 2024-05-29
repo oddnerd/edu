@@ -12,8 +12,9 @@ use super::List;
 ///
 /// Each element exists within separate allocated object, referred to as a
 /// node. Each node contains a pointer to the previous node alongside a pointer
-/// to the subsequent node whereas [`Self`] maintains a pointer to the first
-/// _and_ last node as visualized below:
+/// to the subsequent node. [`Self`] maintains independent pointers to both the
+/// first and last node thereby allowing constant access to both ends as
+/// visualized below:
 ///
 /// ```text
 ///         +-------+ -> +---------+ -> +---------+ -> ... -> +------+
