@@ -85,7 +85,7 @@ impl<T> Default for Doubly<T> {
 }
 
 impl<T: Clone> Clone for Doubly<T> {
-    /// Clone all contained elements into a new instance of [`Doubly`].
+    /// Clone all contained elements into a new instance of [`Self`].
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
