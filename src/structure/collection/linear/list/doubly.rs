@@ -172,6 +172,7 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
     ///
     /// for index in 0..expected.len() {
     ///     use core::ops::Index;
+    ///
     ///     assert_eq!(actual.index(index), expected.index(index));
     /// }
     /// ```
@@ -219,6 +220,7 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
     ///
     /// for index in 0..expected.len() {
     ///     use core::ops::IndexMut;
+    ///
     ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
     /// }
     /// ```
