@@ -1088,7 +1088,7 @@ struct Drain<'a, T> {
 }
 
 impl<T> Drop for Drain<'_, T> {
-    /// Drop all elements yet to be yielded..
+    /// Drop all elements yet to be yielded.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
