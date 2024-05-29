@@ -205,6 +205,10 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
 impl<T> core::ops::IndexMut<usize> for Doubly<T> {
     /// Obtain a mutable reference to the element at position `index`.
     ///
+    /// # Safety
+    /// This method does _NOT_ prevent creating aliasing mutable references
+    /// if multiple calls are made with the same `index`.
+    ///
     /// # Panics
     /// This method has the precondition that `index` is within bounds.
     ///
@@ -229,7 +233,7 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
 
         for _ in 0..index {
             if let Some(mut current) = next {
-                // SAFETY: aligned to an initialized node that we own.
+                // SAFETY: unique mutable reference.
                 let current = unsafe { current.as_mut() };
 
                 next = current.successor;
@@ -241,7 +245,7 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
         next.map_or_else(
             || panic!("index out of bounds"),
             |mut node| {
-                // SAFETY: aligned to an initialized node that we own.
+                // SAFETY: if `index` is unique, then so is this reference.
                 let node = unsafe { node.as_mut() };
 
                 &mut node.element
