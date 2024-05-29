@@ -1042,12 +1042,12 @@ impl<T> DoubleEndedIterator for IterMut<'_, T> {
     /// let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut instance = underlying.iter_mut().rev();
     ///
-    /// assert_eq!(instance.next(), Some(&5));
-    /// assert_eq!(instance.next(), Some(&4));
-    /// assert_eq!(instance.next(), Some(&3));
-    /// assert_eq!(instance.next(), Some(&2));
-    /// assert_eq!(instance.next(), Some(&1));
-    /// assert_eq!(instance.next(), Some(&0));
+    /// assert_eq!(instance.next(), Some(&mut 5));
+    /// assert_eq!(instance.next(), Some(&mut 4));
+    /// assert_eq!(instance.next(), Some(&mut 3));
+    /// assert_eq!(instance.next(), Some(&mut 2));
+    /// assert_eq!(instance.next(), Some(&mut 1));
+    /// assert_eq!(instance.next(), Some(&mut 0));
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -1098,7 +1098,7 @@ impl<T> Drop for Drain<'_, T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Doubly;
     ///
-    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// drop(instance.drain(1..=4));
     ///
@@ -1268,7 +1268,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Doubly;
     ///
-    /// let instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// drop(instance.withdraw(|element| element % 2 == 0));
     ///
