@@ -270,11 +270,15 @@ impl<T> Iterator for Doubly<T> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        self.head.map(|removed| {
+        self.head.take().map(|removed| {
             // SAFETY: the node was allocated via `Box`.
-            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+            let mut removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
-            self.head = removed.successor;
+            if let Some(successor) = removed.successor.take() {
+                _ = self.head.insert(successor);
+            } else {
+                _ = self.tail.take();
+            }
 
             removed.element
         })
@@ -321,11 +325,15 @@ impl<T> DoubleEndedIterator for Doubly<T> {
     /// assert_eq!(instance.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.tail.map(|removed| {
+        self.tail.take().map(|removed| {
             // SAFETY: the node was allocated via `Box`.
-            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+            let mut removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
-            self.tail = removed.predecessor;
+            if let Some(predecessor) = removed.predecessor.take() {
+                _ = self.tail.insert(predecessor);
+            } else {
+                _ = self.head.take();
+            }
 
             removed.element
         })
