@@ -142,7 +142,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Doubly<T> {
     /// use rust::structure::collection::linear::list::Doubly;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Double::from_iter(expected.iter().copied());
+    /// let actual = Doubly::from_iter(expected.iter().copied());
     ///
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
