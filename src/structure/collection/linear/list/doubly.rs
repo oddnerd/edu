@@ -720,7 +720,9 @@ impl<T> List for Doubly<T> {
                     if let Some(incremented) = count.checked_add(1) {
                         count = incremented;
                     } else {
-                        unreachable!("more elements than supported by the address space (usize::MAX)");
+                        unreachable!(
+                            "more elements than supported by the address space (usize::MAX)"
+                        );
                     }
 
                     // SAFETY: unique mutable reference.
