@@ -563,32 +563,43 @@ impl<T> List for Doubly<T> {
         }));
 
         // SAFETY: Only null if allocation failed, which panics before this.
-        let mut ptr = unsafe { NonNull::new_unchecked(allocation) };
+        let mut allocation = unsafe { NonNull::new_unchecked(allocation) };
 
         // SAFETY: unique reference.
-        let new = unsafe { ptr.as_mut() };
+        let new = unsafe { allocation.as_mut() };
 
-        if let Some(mut predecessor) = next {
-            new.predecessor = Some(predecessor);
+        if let Some(mut existing) = next {
+            if index == 0 {
+                self.head = Some(allocation);
 
-            // SAFETY: unique reference.
-            let predecessor = unsafe { predecessor.as_mut() };
-
-            if let Some(mut successor) = predecessor.successor {
-                new.successor = Some(successor);
+                new.successor = Some(existing);
 
                 // SAFETY: unique reference.
-                let successor = unsafe { successor.as_mut() };
+                let successor = unsafe { existing.as_mut() };
 
-                successor.predecessor = Some(ptr);
+                successor.predecessor = Some(allocation);
             } else {
-                self.tail = Some(ptr);
-            }
+                new.predecessor = Some(existing);
 
-            predecessor.successor = Some(ptr);
+                // SAFETY: unique reference.
+                let predecessor = unsafe { existing.as_mut() };
+
+                if let Some(mut successor) = predecessor.successor {
+                    new.successor = Some(successor);
+
+                    // SAFETY: unique reference.
+                    let successor = unsafe { successor.as_mut() };
+
+                    successor.predecessor = Some(allocation);
+                } else {
+                    self.tail = Some(allocation);
+                }
+
+                predecessor.successor = Some(allocation);
+            }
         } else {
-            self.head = Some(ptr);
-            self.tail = Some(ptr);
+            self.head = Some(allocation);
+            self.tail = Some(allocation);
         }
 
         Ok(&mut new.element)
@@ -2281,11 +2292,7 @@ mod test {
 
                 _ = actual.insert(0, 12345).expect("successful allocation");
 
-                for element in actual {
-                    println!("{element:?}");
-                }
-
-                // assert_eq!(actual[0], 12345);
+                assert_eq!(actual[0], 12345);
             }
 
             #[test]
