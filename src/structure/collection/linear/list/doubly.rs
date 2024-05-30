@@ -1592,7 +1592,7 @@ mod test {
         }
 
         #[test]
-        fn deallocates_nodes() {
+        fn drops_element() {
             const ELEMENTS: usize = 256;
 
             let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
