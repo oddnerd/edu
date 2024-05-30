@@ -519,6 +519,78 @@ impl<T> Linear for Doubly<T> {
             lifetime: core::marker::PhantomData,
         }
     }
+
+    /// Query the element considered to be at the front, the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.first(), &0);
+    /// ```
+    fn first(&self) -> Option<&Self::Element> {
+        todo!()
+    }
+
+    /// Query the element considered to be at the back, the last element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.last(), &5);
+    /// ```
+    fn last(&self) -> Option<&Self::Element> {
+        todo!()
+    }
+
+    /// Obtain a reference to the element at the front, the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.first_mut(), &mut 0);
+    /// ```
+    fn first_mut(&mut self) -> Option<&mut Self::Element> {
+        todo!()
+    }
+
+    /// Obtain a reference to the element at the back, the last element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.last_mut(), &mut 5);
+    /// ```
+    fn last_mut(&mut self) -> Option<&mut Self::Element> {
+        todo!()
+    }
 }
 
 impl<T> List for Doubly<T> {
@@ -605,6 +677,46 @@ impl<T> List for Doubly<T> {
         }
 
         Ok(&mut new.element)
+    }
+
+    /// Move an `element` into a new node at the front to become the first.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([1, 2, 3, 4, 5]);
+    ///
+    /// instance.prepend(0);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
+    fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        todo!()
+    }
+
+    /// Move an `element` into a new node at the back to become the last.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4]);
+    ///
+    /// instance.append(5);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
+    fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        todo!()
     }
 
     /// Move the element at `index` out of [`Self`], if it exists.
