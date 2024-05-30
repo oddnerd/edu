@@ -454,7 +454,7 @@ impl<T> Collection for Doubly<T> {
                 unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
-            // SAFETY: aligned to an initialized element that we own.
+            // SAFETY: shared immutable reference.
             let current = unsafe { current.as_ref() };
 
             next = current.successor;
@@ -520,7 +520,7 @@ impl<T> Linear for Doubly<T> {
 }
 
 impl<T> List for Doubly<T> {
-    /// Move an `element` into such that it becomes the element at `index`.
+    /// Move an `element` into [`Self`] at position `index`.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
@@ -605,7 +605,7 @@ impl<T> List for Doubly<T> {
         Ok(&mut new.element)
     }
 
-    /// Move the element at `index` out, if it exists.
+    /// Move the element at `index` out of [`Self`], if it exists.
     ///
     /// # Performance
     /// This method takes O(N) times and consumes O(1) memory.
