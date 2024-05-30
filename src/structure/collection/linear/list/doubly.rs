@@ -181,14 +181,26 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        let mut next = self.head;
+        let forward = index <= self.count / 2;
 
-        for _ in 0..index {
+        let (mut next, offset) = if forward {
+            (self.head, index)
+        } else if let Some(offset) = self.count.abs_diff(index).checked_sub(1) {
+            (self.tail, offset)
+        } else {
+            (None, 0)
+        };
+
+        for _ in 0..offset {
             if let Some(current) = next {
                 // SAFETY: immutable references can alias.
                 let current = unsafe { current.as_ref() };
 
-                next = current.successor;
+                next = if forward {
+                    current.successor
+                } else {
+                    current.predecessor
+                };
             } else {
                 break;
             }
@@ -233,16 +245,26 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let mut next = self.head;
+        let forward = index <= self.count / 2;
 
-        for _ in 0..index {
-            if let Some(mut current) = next {
-                // SAFETY: no other references to this node exist.
-                // However, mutable references to the element may.
-                // That means this is _probably_ undefined behaviour.
-                let current = unsafe { current.as_mut() };
+        let (mut next, offset) = if forward {
+            (self.head, index)
+        } else if let Some(offset) = self.count.abs_diff(index).checked_sub(1) {
+            (self.tail, offset)
+        } else {
+            (None, 0)
+        };
 
-                next = current.successor;
+        for _ in 0..offset {
+            if let Some(current) = next {
+                // SAFETY: TODO: no other references to this node exist.
+                let current = unsafe { current.as_ref() };
+
+                next = if forward {
+                    current.successor
+                } else {
+                    current.predecessor
+                };
             } else {
                 break;
             }
