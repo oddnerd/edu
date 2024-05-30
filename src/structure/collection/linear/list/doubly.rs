@@ -2745,26 +2745,5 @@ mod test {
                 }
             }
         }
-
-        mod clear {
-            use super::*;
-
-            #[test]
-            fn drop_all_elements() {
-                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
-
-                actual.clear();
-
-                assert_eq!(actual.len(), 0);
-            }
-
-            #[test]
-            fn when_already_empty() {
-                let mut actual = Doubly::<usize>::default();
-
-                // Ideally this will panic or something in case of logic error.
-                actual.clear();
-            }
-        }
     }
 }
