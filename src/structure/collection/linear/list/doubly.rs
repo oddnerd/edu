@@ -338,7 +338,7 @@ impl<T> Iterator for Doubly<T> {
     /// Query how many elements are contained.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// This method takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
@@ -349,9 +349,7 @@ impl<T> Iterator for Doubly<T> {
     /// assert_eq!(instance.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let count = self.count();
-
-        (count, Some(count))
+        (self.count, Some(self.count))
     }
 }
 
