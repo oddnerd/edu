@@ -325,6 +325,12 @@ impl<T> Iterator for Doubly<T> {
                 self.tail = None;
             }
 
+            if let Some(decremented) = self.count.checked_sub(1) {
+                self.count = decremented;
+            } else {
+                unreachable!("at least the current node being removed");
+            }
+
             removed.element
         })
     }
@@ -388,6 +394,12 @@ impl<T> DoubleEndedIterator for Doubly<T> {
                 predecessor.successor = None;
             } else {
                 self.head = None;
+            }
+
+            if let Some(decremented) = self.count.checked_sub(1) {
+                self.count = decremented;
+            } else {
+                unreachable!("at least the current node being removed");
             }
 
             removed.element
