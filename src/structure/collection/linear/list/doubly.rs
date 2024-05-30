@@ -29,9 +29,6 @@ pub struct Doubly<T> {
 
     /// The node considered to be the last/back, if any are contained.
     tail: Option<NonNull<Node<T>>>,
-
-    /// The number of elements/nodes contained.
-    count: usize,
 }
 
 /// An independently allocated element contained within some [`Doubly`].
@@ -83,7 +80,6 @@ impl<T> Default for Doubly<T> {
         Doubly {
             head: None,
             tail: None,
-            count: 0,
         }
     }
 }
@@ -181,26 +177,14 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        let forward = index <= self.count / 2;
+        let mut next = self.head;
 
-        let (mut next, offset) = if forward {
-            (self.head, index)
-        } else if let Some(offset) = self.count.abs_diff(index).checked_sub(1) {
-            (self.tail, offset)
-        } else {
-            (None, 0)
-        };
-
-        for _ in 0..offset {
+        for _ in 0..index {
             if let Some(current) = next {
                 // SAFETY: immutable references can alias.
                 let current = unsafe { current.as_ref() };
 
-                next = if forward {
-                    current.successor
-                } else {
-                    current.predecessor
-                };
+                next = current.successor;
             } else {
                 break;
             }
@@ -245,26 +229,16 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let forward = index <= self.count / 2;
+        let mut next = self.head;
 
-        let (mut next, offset) = if forward {
-            (self.head, index)
-        } else if let Some(offset) = self.count.abs_diff(index).checked_sub(1) {
-            (self.tail, offset)
-        } else {
-            (None, 0)
-        };
+        for _ in 0..index {
+            if let Some(mut current) = next {
+                // SAFETY: no other references to this node exist.
+                // However, mutable references to the element may.
+                // That means this is _probably_ undefined behaviour.
+                let current = unsafe { current.as_mut() };
 
-        for _ in 0..offset {
-            if let Some(current) = next {
-                // SAFETY: TODO: no other references to this node exist.
-                let current = unsafe { current.as_ref() };
-
-                next = if forward {
-                    current.successor
-                } else {
-                    current.predecessor
-                };
+                next = current.successor;
             } else {
                 break;
             }
@@ -325,12 +299,6 @@ impl<T> Iterator for Doubly<T> {
                 self.tail = None;
             }
 
-            if let Some(decremented) = self.count.checked_sub(1) {
-                self.count = decremented;
-            } else {
-                unreachable!("at least the current node being removed");
-            }
-
             removed.element
         })
     }
@@ -338,7 +306,7 @@ impl<T> Iterator for Doubly<T> {
     /// Query how many elements are contained.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// This method takes O(N) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
@@ -349,7 +317,9 @@ impl<T> Iterator for Doubly<T> {
     /// assert_eq!(instance.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.count, Some(self.count))
+        let count = self.count();
+
+        (count, Some(count))
     }
 }
 
@@ -392,12 +362,6 @@ impl<T> DoubleEndedIterator for Doubly<T> {
                 predecessor.successor = None;
             } else {
                 self.head = None;
-            }
-
-            if let Some(decremented) = self.count.checked_sub(1) {
-                self.count = decremented;
-            } else {
-                unreachable!("at least the current node being removed");
             }
 
             removed.element
@@ -594,19 +558,11 @@ impl<T> List for Doubly<T> {
             }
         }
 
-        let node = Box::new(Node {
+        let allocation = Box::into_raw(Box::new(Node {
             element,
             predecessor: None,
             successor: None,
-        });
-
-        if let Some(incremented) = self.count.checked_add(1) {
-            self.count = incremented;
-        } else {
-            return Err(node.element);
-        }
-
-        let allocation = Box::into_raw(node);
+        }));
 
         // SAFETY: Only null if allocation failed, which panics before this.
         let mut allocation = unsafe { NonNull::new_unchecked(allocation) };
@@ -685,12 +641,6 @@ impl<T> List for Doubly<T> {
         // * there are no references to the node to invalidate.
         // * the node was allocated via `Box` and `into_raw`.
         let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
-
-        if let Some(decremented) = self.count.checked_sub(1) {
-            self.count = decremented;
-        } else {
-            unreachable!("at least the current element being removed");
-        }
 
         if let Some(mut successor) = removed.successor {
             // SAFETY: no other references to this node exist.
@@ -1622,7 +1572,6 @@ mod test {
 
             assert!(actual.head.is_none());
             assert!(actual.tail.is_none());
-            assert_eq!(actual.count, 0);
         }
     }
 
