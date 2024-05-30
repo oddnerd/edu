@@ -29,6 +29,9 @@ pub struct Doubly<T> {
 
     /// The node considered to be the last/back, if any are contained.
     tail: Option<NonNull<Node<T>>>,
+
+    /// The number of elements/nodes contained.
+    count: usize,
 }
 
 /// An independently allocated element contained within some [`Doubly`].
@@ -80,6 +83,7 @@ impl<T> Default for Doubly<T> {
         Doubly {
             head: None,
             tail: None,
+            count: 0,
         }
     }
 }
@@ -558,11 +562,19 @@ impl<T> List for Doubly<T> {
             }
         }
 
-        let allocation = Box::into_raw(Box::new(Node {
+        let node = Box::new(Node {
             element,
             predecessor: None,
             successor: None,
-        }));
+        });
+
+        if let Some(incremented) = self.count.checked_add(1) {
+            self.count = incremented;
+        } else {
+            return Err(node.element);
+        }
+
+        let allocation = Box::into_raw(node);
 
         // SAFETY: Only null if allocation failed, which panics before this.
         let mut allocation = unsafe { NonNull::new_unchecked(allocation) };
@@ -641,6 +653,12 @@ impl<T> List for Doubly<T> {
         // * there are no references to the node to invalidate.
         // * the node was allocated via `Box` and `into_raw`.
         let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
+
+        if let Some(decremented) = self.count.checked_sub(1) {
+            self.count = decremented;
+        } else {
+            unreachable!("at least the current element being removed");
+        }
 
         if let Some(mut successor) = removed.successor {
             // SAFETY: no other references to this node exist.
