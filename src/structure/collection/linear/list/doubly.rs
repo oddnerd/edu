@@ -233,7 +233,7 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
 
         for _ in 0..index {
             if let Some(mut current) = next {
-                // SAFETY: unique mutable reference.
+                // SAFETY: unique reference.
                 let current = unsafe { current.as_mut() };
 
                 next = current.successor;
@@ -289,7 +289,7 @@ impl<T> Iterator for Doubly<T> {
             if let Some(successor) = removed.successor.take() {
                 let successor = self.head.insert(successor);
 
-                // SAFETY: unique mutable reference.
+                // SAFETY: unique reference.
                 let successor = unsafe { successor.as_mut() };
 
                 successor.predecessor = None;
@@ -354,7 +354,7 @@ impl<T> DoubleEndedIterator for Doubly<T> {
             if let Some(predecessor) = removed.predecessor.take() {
                 let predecessor = self.tail.insert(predecessor);
 
-                // SAFETY: unique mutable reference.
+                // SAFETY: unique reference.
                 let predecessor = unsafe { predecessor.as_mut() };
 
                 predecessor.successor = None;
@@ -625,7 +625,7 @@ impl<T> List for Doubly<T> {
 
         for _ in 0..index {
             if let Some(mut current) = *next {
-                // SAFETY: unique mutable reference.
+                // SAFETY: unique reference.
                 let current = unsafe { current.as_mut() };
 
                 next = &mut current.successor;
@@ -641,7 +641,7 @@ impl<T> List for Doubly<T> {
         let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
 
         if let Some(mut successor) = removed.successor {
-            // SAFETY: unique mutable reference.
+            // SAFETY: unique reference.
             let successor = unsafe { successor.as_mut() };
 
             successor.predecessor = removed.predecessor;
@@ -650,7 +650,7 @@ impl<T> List for Doubly<T> {
         }
 
         if let Some(mut predecessor) = removed.predecessor {
-            // SAFETY: unique mutable reference.
+            // SAFETY: unique reference.
             let predecessor = unsafe { predecessor.as_mut() };
 
             predecessor.successor = removed.successor;
@@ -708,7 +708,7 @@ impl<T> List for Doubly<T> {
 
             for _ in 0..offset {
                 if let Some(mut current) = *next {
-                    // SAFETY: unique mutable reference.
+                    // SAFETY: unique reference.
                     let current = unsafe { current.as_mut() };
 
                     next = &mut current.successor;
@@ -735,7 +735,7 @@ impl<T> List for Doubly<T> {
                         );
                     }
 
-                    // SAFETY: unique mutable reference.
+                    // SAFETY: unique reference.
                     let node = unsafe { current.as_mut() };
 
                     next = &mut node.successor;
@@ -745,7 +745,7 @@ impl<T> List for Doubly<T> {
             }
 
             if let Some(mut successor) = *next {
-                // SAFETY: unique mutable reference.
+                // SAFETY: unique reference.
                 let successor = unsafe { successor.as_mut() };
 
                 (&mut successor.predecessor, count)
