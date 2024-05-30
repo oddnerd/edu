@@ -181,7 +181,7 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
 
         for _ in 0..index {
             if let Some(current) = next {
-                // SAFETY: can have multiple shared immutable references.
+                // SAFETY: immutable references can alias.
                 let current = unsafe { current.as_ref() };
 
                 next = current.successor;
@@ -193,7 +193,7 @@ impl<T> core::ops::Index<usize> for Doubly<T> {
         next.map_or_else(
             || panic!("index out of bounds"),
             |node| {
-                // SAFETY: can have multiple shared immutable references.
+                // SAFETY: immutable references can alias.
                 let node = unsafe { node.as_ref() };
 
                 &node.element
@@ -233,7 +233,9 @@ impl<T> core::ops::IndexMut<usize> for Doubly<T> {
 
         for _ in 0..index {
             if let Some(mut current) = next {
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
+                // However, mutable references to the element may.
+                // That means this is _probably_ undefined behaviour.
                 let current = unsafe { current.as_mut() };
 
                 next = current.successor;
@@ -289,7 +291,7 @@ impl<T> Iterator for Doubly<T> {
             if let Some(successor) = removed.successor.take() {
                 let successor = self.head.insert(successor);
 
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let successor = unsafe { successor.as_mut() };
 
                 successor.predecessor = None;
@@ -354,7 +356,7 @@ impl<T> DoubleEndedIterator for Doubly<T> {
             if let Some(predecessor) = removed.predecessor.take() {
                 let predecessor = self.tail.insert(predecessor);
 
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let predecessor = unsafe { predecessor.as_mut() };
 
                 predecessor.successor = None;
@@ -454,7 +456,7 @@ impl<T> Collection for Doubly<T> {
                 unreachable!("more elements than supported by the address space (usize::MAX)");
             }
 
-            // SAFETY: shared immutable reference.
+            // SAFETY: immutable references can alias.
             let current = unsafe { current.as_ref() };
 
             next = current.successor;
@@ -547,7 +549,7 @@ impl<T> List for Doubly<T> {
 
         for _ in 0..index.saturating_sub(1) {
             if let Some(mut current) = next {
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let current = unsafe { current.as_mut() };
 
                 next = current.successor;
@@ -565,7 +567,7 @@ impl<T> List for Doubly<T> {
         // SAFETY: Only null if allocation failed, which panics before this.
         let mut allocation = unsafe { NonNull::new_unchecked(allocation) };
 
-        // SAFETY: unique reference.
+        // SAFETY: no other references to this node exist.
         let new = unsafe { allocation.as_mut() };
 
         if let Some(mut existing) = next {
@@ -574,20 +576,20 @@ impl<T> List for Doubly<T> {
 
                 new.successor = Some(existing);
 
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let successor = unsafe { existing.as_mut() };
 
                 successor.predecessor = Some(allocation);
             } else {
                 new.predecessor = Some(existing);
 
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let predecessor = unsafe { existing.as_mut() };
 
                 if let Some(mut successor) = predecessor.successor {
                     new.successor = Some(successor);
 
-                    // SAFETY: unique reference.
+                    // SAFETY: no other references to this node exist.
                     let successor = unsafe { successor.as_mut() };
 
                     successor.predecessor = Some(allocation);
@@ -625,7 +627,7 @@ impl<T> List for Doubly<T> {
 
         for _ in 0..index {
             if let Some(mut current) = *next {
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let current = unsafe { current.as_mut() };
 
                 next = &mut current.successor;
@@ -641,7 +643,7 @@ impl<T> List for Doubly<T> {
         let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
 
         if let Some(mut successor) = removed.successor {
-            // SAFETY: unique reference.
+            // SAFETY: no other references to this node exist.
             let successor = unsafe { successor.as_mut() };
 
             successor.predecessor = removed.predecessor;
@@ -650,7 +652,7 @@ impl<T> List for Doubly<T> {
         }
 
         if let Some(mut predecessor) = removed.predecessor {
-            // SAFETY: unique reference.
+            // SAFETY: no other references to this node exist.
             let predecessor = unsafe { predecessor.as_mut() };
 
             predecessor.successor = removed.successor;
@@ -708,7 +710,7 @@ impl<T> List for Doubly<T> {
 
             for _ in 0..offset {
                 if let Some(mut current) = *next {
-                    // SAFETY: unique reference.
+                    // SAFETY: no other references to this node exist.
                     let current = unsafe { current.as_mut() };
 
                     next = &mut current.successor;
@@ -735,7 +737,7 @@ impl<T> List for Doubly<T> {
                         );
                     }
 
-                    // SAFETY: unique reference.
+                    // SAFETY: no other references to this node exist.
                     let node = unsafe { current.as_mut() };
 
                     next = &mut node.successor;
@@ -745,7 +747,7 @@ impl<T> List for Doubly<T> {
             }
 
             if let Some(mut successor) = *next {
-                // SAFETY: unique reference.
+                // SAFETY: no other references to this node exist.
                 let successor = unsafe { successor.as_mut() };
 
                 (&mut successor.predecessor, count)
@@ -827,7 +829,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.front.map(|next| {
-            // SAFETY: aligned to an initialized element that we can reference.
+            // SAFETY: immutable references can alias.
             let next = unsafe { next.as_ref() };
 
             if let Some(back) = self.back {
@@ -838,7 +840,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
                     self.front = next.successor;
                 }
             } else {
-                unreachable!("at least one next element (current)");
+                unreachable!("at least the current node remaining");
             }
 
             &next.element
@@ -877,12 +879,12 @@ impl<'a, T> Iterator for Iter<'a, T> {
                     break;
                 }
 
-                // SAFETY: aligned to an initialized node we can reference.
+                // SAFETY: immutable references can alias.
                 let current = unsafe { current.as_ref() };
 
                 next = current.successor;
             } else {
-                unreachable!("at least one next element (current)")
+                unreachable!("at least the current node remaining")
             }
         }
 
@@ -914,7 +916,7 @@ impl<T> DoubleEndedIterator for Iter<'_, T> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         self.back.map(|next| {
-            // SAFETY: aligned to an initialized element that we can reference.
+            // SAFETY: immutable references can alias.
             let next = unsafe { next.as_ref() };
 
             if let Some(front) = self.front {
@@ -925,7 +927,7 @@ impl<T> DoubleEndedIterator for Iter<'_, T> {
                     self.back = next.predecessor;
                 }
             } else {
-                unreachable!("at least one next element (current)");
+                unreachable!("at least the current node remaining");
             }
 
             &next.element
@@ -975,7 +977,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.front.map(|mut next| {
-            // SAFETY: aligned to an initialized element that we can reference.
+            // SAFETY: no other references to this node will be created.
             let next = unsafe { next.as_mut() };
 
             if let Some(back) = self.back {
@@ -986,7 +988,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
                     self.front = next.successor;
                 }
             } else {
-                unreachable!("at least one next element (current)");
+                unreachable!("at least the current node remaining");
             }
 
             &mut next.element
@@ -1025,12 +1027,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
                     break;
                 }
 
-                // SAFETY: aligned to an initialized node we can reference.
+                // SAFETY: no other active references to this node.
                 let current = unsafe { current.as_ref() };
 
                 next = current.successor;
             } else {
-                unreachable!("at least one next element (current)")
+                unreachable!("at least the current node remaining")
             }
         }
 
@@ -1062,7 +1064,7 @@ impl<T> DoubleEndedIterator for IterMut<'_, T> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         self.back.map(|mut next| {
-            // SAFETY: aligned to an initialized element that we can reference.
+            // SAFETY: no other references to this node will be created.
             let next = unsafe { next.as_mut() };
 
             if let Some(front) = self.front {
@@ -1073,7 +1075,7 @@ impl<T> DoubleEndedIterator for IterMut<'_, T> {
                     self.back = next.predecessor;
                 }
             } else {
-                unreachable!("at least one next element (current)");
+                unreachable!("at least the current node remaining");
             }
 
             &mut next.element
@@ -1145,30 +1147,35 @@ impl<T> Iterator for Drain<'_, T> {
         self.remaining.checked_sub(1).and_then(|decremented| {
             self.remaining = decremented;
 
-            let mut removed = self.front.take()?;
+            let mut ptr = self.front.take()?;
 
-            // SAFETY: aligned to an initialized node we uniquely reference.
-            let node = unsafe { removed.as_mut() };
+            {
+                // SAFETY: no other references to this node exist.
+                let removed = unsafe { ptr.as_mut() };
 
-            if let Some(back) = *self.back {
-                if removed == back {
-                    *self.back = node.predecessor;
-                } else if let Some(mut successor) = node.successor {
-                    // SAFETY: different from back, so unique reference.
-                    let successor = unsafe { successor.as_mut() };
+                if let Some(back) = *self.back {
+                    if ptr == back {
+                        *self.back = removed.predecessor;
+                    } else if let Some(mut successor) = removed.successor {
+                        // SAFETY: does not alias back, so unique reference.
+                        let successor = unsafe { successor.as_mut() };
 
-                    successor.predecessor = node.predecessor.take();
+                        successor.predecessor = removed.predecessor.take();
+                    } else {
+                        unreachable!("either last node, or some successor");
+                    }
                 } else {
-                    unreachable!("either last node, or some successor");
+                    unreachable!("at least the current node remaining");
                 }
-            } else {
-                unreachable!("at least the current node remaining");
+
+                *self.front = removed.successor.take();
             }
 
-            *self.front = node.successor.take();
-
-            // SAFETY: the node was allocated via `Box`.
-            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+            // SAFETY:
+            // * we own the node.
+            // * there are no references to the node to invalidate.
+            // * the node was allocated via `Box` and `into_raw`.
+            let removed = unsafe { Box::from_raw(ptr.as_ptr()) };
 
             Some(removed.element)
         })
@@ -1220,27 +1227,32 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
 
             let mut removed = self.back.take()?;
 
-            // SAFETY: aligned to an initialized node we uniquely reference.
-            let node = unsafe { removed.as_mut() };
+            {
+                // SAFETY: no other references to this node exist.
+                let node = unsafe { removed.as_mut() };
 
-            if let Some(front) = *self.front {
-                if removed == front {
-                    *self.front = node.successor;
-                } else if let Some(mut predecessor) = node.predecessor {
-                    // SAFETY: different from front, so unique reference.
-                    let predecessor = unsafe { predecessor.as_mut() };
+                if let Some(front) = *self.front {
+                    if removed == front {
+                        *self.front = node.successor;
+                    } else if let Some(mut predecessor) = node.predecessor {
+                        // SAFETY: does not alias front, so unique reference.
+                        let predecessor = unsafe { predecessor.as_mut() };
 
-                    predecessor.successor = node.successor.take();
+                        predecessor.successor = node.successor.take();
+                    } else {
+                        unreachable!("either last node, or some predecessor");
+                    }
                 } else {
-                    unreachable!("either last node, or some predecessor");
+                    unreachable!("at least the current node remaining");
                 }
-            } else {
-                unreachable!("at least the current node remaining");
+
+                *self.back = node.predecessor.take();
             }
 
-            *self.back = node.predecessor.take();
-
-            // SAFETY: the node was allocated via `Box`.
+            // SAFETY:
+            // * we own the node.
+            // * there are no references to the node to invalidate.
+            // * the node was allocated via `Box` and `into_raw`.
             let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
             Some(removed.element)
@@ -1268,7 +1280,7 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 }
 
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
-    /// Drop all elements yet to be yielded..
+    /// Drop all elements yet to be yielded.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
@@ -1316,7 +1328,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         }
 
         while let Some(mut removed) = self.front.take() {
-            // SAFETY: aligned to an initialized node we uniquely reference.
+            // SAFETY: no other references to this node exists.
             let node = unsafe { removed.as_mut() };
 
             if (self.predicate)(&node.element) {
@@ -1324,7 +1336,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     if removed == back {
                         *self.back = node.predecessor;
                     } else if let Some(mut successor) = node.successor {
-                        // SAFETY: different from back, so unique reference.
+                        // SAFETY: does not alias back, so unique reference.
                         let successor = unsafe { successor.as_mut() };
 
                         successor.predecessor = node.predecessor.take();
@@ -1337,7 +1349,10 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 
                 *self.front = node.successor.take();
 
-                // SAFETY: the node was allocated via `Box`.
+                // SAFETY:
+                // * we own the node.
+                // * TODO: there are no references to the node to invalidate.
+                // * the node was allocated via `Box` and `into_raw`.
                 let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
                 return Some(removed.element);
@@ -1394,7 +1409,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                     break;
                 }
 
-                // SAFETY: aligned to an initialized node that we uniquely reference.
+                // SAFETY: no other references to this node exist.
                 let current = unsafe { current.as_ref() };
 
                 next = current.successor;
@@ -1430,7 +1445,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
         }
 
         while let Some(mut removed) = self.back.take() {
-            // SAFETY: aligned to an initialized node we uniquely reference.
+            // SAFETY: no other references to this node exist.
             let node = unsafe { removed.as_mut() };
 
             if (self.predicate)(&node.element) {
@@ -1438,7 +1453,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                     if removed == front {
                         *self.front = node.successor;
                     } else if let Some(mut predecessor) = node.predecessor {
-                        // SAFETY: different from front, so unique reference.
+                        // SAFETY: does not alias front, so unique reference.
                         let predecessor = unsafe { predecessor.as_mut() };
 
                         predecessor.successor = node.successor.take();
@@ -1451,7 +1466,10 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 
                 *self.back = node.predecessor.take();
 
-                // SAFETY: the node was allocated via `Box`.
+                // SAFETY:
+                // * we own the node.
+                // * TODO: there are no references to the node to invalidate.
+                // * the node was allocated via `Box` and `into_raw`.
                 let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
                 return Some(removed.element);
