@@ -1622,6 +1622,7 @@ mod test {
 
             assert!(actual.head.is_none());
             assert!(actual.tail.is_none());
+            assert_eq!(actual.count, 0);
         }
     }
 
