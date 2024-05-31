@@ -394,7 +394,6 @@ impl<T> Extend<T> for Doubly<T> {
     /// ```
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, elements: Iter) {
         for element in elements {
-            // TODO: this requires O(1) append implementation.
             assert!(self.append(element).is_ok(), "allocation failed");
         }
     }
