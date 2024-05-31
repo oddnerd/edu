@@ -1021,6 +1021,7 @@ impl<T> Drop for Dynamic<T> {
 
         if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
             self.back_capacity = capacity;
+            self.initialized = 0;
         } else {
             unreachable!("allocated more than `isize::MAX` bytes");
         }
@@ -2243,8 +2244,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
         // Drop all remaining elements to withdraw.
         self.for_each(drop);
 
-        // Shift any string of trailing retained elements into position.
-        {
+        if self.trailing > 0 {
             // SAFETY: aligned within the allocated object, or one byte past.
             let trailing = unsafe { self.next_back.as_ptr().add(1) };
 
@@ -5364,11 +5364,8 @@ mod test {
 
                     #[test]
                     fn empty() {
-                        let mut underlying = Dynamic::from_iter([0]);
+                        let mut underlying = Dynamic::<usize>::default();
                         let mut actual = underlying.withdraw(|element| element % 2 == 0);
-
-                        // Exhaust the elements.
-                        _ = actual.next().expect("the one element");
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
@@ -5381,8 +5378,11 @@ mod test {
 
                     #[test]
                     fn exhausted() {
-                        let mut underlying = Dynamic::<usize>::default();
+                        let mut underlying = Dynamic::from_iter([0]);
                         let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Exhaust the elements.
+                        _ = actual.next().expect("the one element");
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
