@@ -2550,6 +2550,8 @@ mod test {
                 let mut actual = Doubly::<usize>::default();
 
                 assert!(actual.insert(0, 12345).is_ok());
+                assert_eq!(actual.head, actual.tail);
+                assert!(actual.eq([12345]));
             }
 
             #[test]
