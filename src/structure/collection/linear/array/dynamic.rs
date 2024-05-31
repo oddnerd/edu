@@ -4012,7 +4012,7 @@ mod test {
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                (isize::MAX as usize, Some(isize::MAX as usize))
+                (usize::MAX, Some(usize::MAX))
             }
         }
 
@@ -4156,7 +4156,7 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
+            fn updates_internal_state() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
@@ -4187,10 +4187,12 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
 
                 // Ideally, this will panic if it uses the invalid size.
-                let _actual: Dynamic<_> = FaultySizeHintIter {
+                let actual: Dynamic<_> = FaultySizeHintIter {
                     data: expected.iter().copied(),
                 }
                 .collect();
+
+                assert_eq!(actual.initialized, expected.len());
             }
         }
 
@@ -4278,29 +4280,32 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
+            fn updates_internal_state() {
                 let mut actual = Dynamic::default();
 
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 actual.extend(expected);
 
                 assert_eq!(actual.initialized, expected.len());
             }
 
             #[test]
-            fn initializes_elements() {
-                let mut actual = Dynamic::default();
+            #[allow(clippy::shadow_unrelated)]
+            fn appends_elements() {
+                let preexisting = [0, 1, 2];
+                let mut actual: Dynamic<_> = preexisting.into_iter().collect();
 
-                let expected = [0, 1, 2, 3, 4, 5];
-                actual.extend(expected);
+                let expected = [3, 4, 5];
+                actual.extend(expected.iter().copied());
 
-                for index in 0..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
+                for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
+                    assert_eq!(actual, expected);
                 }
             }
 
             #[test]
-            fn does_not_modify_initialized_elements() {
+            fn does_not_modify_preexisting_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
@@ -4312,20 +4317,18 @@ mod test {
             }
 
             #[test]
-            fn appends_after_initialized_elements() {
-                let initialized = [0, 1, 2, 3, 4, 5];
-                let mut actual: Dynamic<_> = initialized.iter().copied().collect();
+            fn into_empty_instance() {
+                let mut actual = Dynamic::<usize>::default();
 
-                let expected = [6, 7, 8, 9, 10];
+                let expected = [0, 1, 2, 3, 4, 5];
+
                 actual.extend(expected.iter().copied());
 
-                for index in initialized.len()..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
-                }
+                assert!(actual.eq(expected));
             }
 
             #[test]
-            fn empty() {
+            fn from_empty_iterator() {
                 let mut actual = Dynamic::<()>::default();
 
                 actual.extend(core::iter::empty());
