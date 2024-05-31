@@ -1,11 +1,11 @@
 //! Implementation of [`Dynamic`].
 
+extern crate alloc;
+
 use super::super::List;
 use super::Array;
 use super::Collection;
 use super::Linear;
-
-use std::alloc;
 
 use core::mem::MaybeUninit;
 use core::ptr::NonNull;
@@ -926,7 +926,7 @@ impl<T> Dynamic<T> {
             if total == 0 {
                 if new.size() > 0 {
                     // SAFETY: layout has non-zero size.
-                    unsafe { alloc::alloc(new) }.cast::<T>()
+                    unsafe { alloc::alloc::alloc(new) }.cast::<T>()
                 } else {
                     debug_assert_eq!(capacity, 0, "otherwise occupies memory");
 
@@ -950,7 +950,7 @@ impl<T> Dynamic<T> {
                     // * `new_layout` has non-zero size.
                     // * `Layout` => `new.size() <= isize::MAX`.
                     unsafe {
-                        alloc::dealloc(ptr, existing);
+                        alloc::alloc::dealloc(ptr, existing);
                     }
 
                     // empty state => will _NOT_ be read/written to.
@@ -963,7 +963,7 @@ impl<T> Dynamic<T> {
                     // * `existing_layout` is currently allocated.
                     // * `new_layout` has non-zero size.
                     // * `Layout` => `new.size() <= isize::MAX`.
-                    unsafe { alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
+                    unsafe { alloc::alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
                 }
             }
         };
@@ -2589,6 +2589,20 @@ impl std::error::Error for OutOfBounds {}
 mod test {
     use super::*;
 
+    /// Mock element for drop tests.
+    #[derive(Debug, Clone)]
+    struct Droppable {
+        /// A shared counter for the number of elements dropped.
+        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
+    }
+
+    impl Drop for Droppable {
+        /// Increment the shared counter upon drop.
+        fn drop(&mut self) {
+            _ = self.counter.replace_with(|old| old.wrapping_add(1));
+        }
+    }
+
     mod method {
         use super::*;
 
@@ -3806,11 +3820,24 @@ mod test {
 
         #[test]
         fn all_initialized() {
-            let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+            const ELEMENTS: usize = 256;
 
-            _ = actual.shrink(None).expect("no capacity");
+            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+            let mut actual =
+                Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+
+            for _ in 0..ELEMENTS {
+                _ = actual
+                    .append(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("uses capacity");
+            }
 
             drop(actual);
+
+            assert_eq!(dropped.take(), ELEMENTS);
         }
 
         #[test]
@@ -3833,12 +3860,27 @@ mod test {
 
         #[test]
         fn front_capacity_and_initialized_elements_and_back_capacity() {
-            let mut actual = Dynamic::<usize>::from_iter([0, 1, 2, 3, 4, 5]);
+            const ELEMENTS: usize = 256;
+
+            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+            let mut actual =
+                Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+
+            for _ in 0..ELEMENTS {
+                _ = actual
+                    .append(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("uses capacity");
+            }
 
             _ = actual.reserve_front(256).expect("successful allocation");
             _ = actual.reserve_back(256).expect("successful allocation");
 
             drop(actual);
+
+            assert_eq!(dropped.take(), ELEMENTS);
         }
     }
 
@@ -3970,7 +4012,7 @@ mod test {
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                (isize::MAX as usize, Some(isize::MAX as usize))
+                (usize::MAX, Some(usize::MAX))
             }
         }
 
@@ -4114,7 +4156,7 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
+            fn updates_internal_state() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
@@ -4145,10 +4187,12 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
 
                 // Ideally, this will panic if it uses the invalid size.
-                let _actual: Dynamic<_> = FaultySizeHintIter {
+                let actual: Dynamic<_> = FaultySizeHintIter {
                     data: expected.iter().copied(),
                 }
                 .collect();
+
+                assert_eq!(actual.initialized, expected.len());
             }
         }
 
@@ -4236,29 +4280,32 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
+            fn updates_internal_state() {
                 let mut actual = Dynamic::default();
 
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 actual.extend(expected);
 
                 assert_eq!(actual.initialized, expected.len());
             }
 
             #[test]
-            fn initializes_elements() {
-                let mut actual = Dynamic::default();
+            #[allow(clippy::shadow_unrelated)]
+            fn appends_elements() {
+                let preexisting = [0, 1, 2];
+                let mut actual: Dynamic<_> = preexisting.into_iter().collect();
 
-                let expected = [0, 1, 2, 3, 4, 5];
-                actual.extend(expected);
+                let expected = [3, 4, 5];
+                actual.extend(expected.iter().copied());
 
-                for index in 0..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
+                for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
+                    assert_eq!(actual, expected);
                 }
             }
 
             #[test]
-            fn does_not_modify_initialized_elements() {
+            fn does_not_modify_preexisting_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
@@ -4270,20 +4317,18 @@ mod test {
             }
 
             #[test]
-            fn appends_after_initialized_elements() {
-                let initialized = [0, 1, 2, 3, 4, 5];
-                let mut actual: Dynamic<_> = initialized.iter().copied().collect();
+            fn into_empty_instance() {
+                let mut actual = Dynamic::<usize>::default();
 
-                let expected = [6, 7, 8, 9, 10];
+                let expected = [0, 1, 2, 3, 4, 5];
+
                 actual.extend(expected.iter().copied());
 
-                for index in initialized.len()..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
-                }
+                assert!(actual.eq(expected));
             }
 
             #[test]
-            fn empty() {
+            fn from_empty_iterator() {
                 let mut actual = Dynamic::<()>::default();
 
                 actual.extend(core::iter::empty());
@@ -5156,13 +5201,26 @@ mod test {
                 }
 
                 #[test]
-                fn removes_yielded_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                fn drops_yet_to_be_yielded_elements() {
+                    const ELEMENTS: usize = 256;
+
+                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS)
+                        .expect("successful allocation");
+
+                    for _ in 0..ELEMENTS {
+                        _ = actual
+                            .append(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
+                    }
 
                     drop(actual.drain(..));
 
                     assert_eq!(actual.len(), 0);
-                    assert_eq!(actual.capacity(), 6);
+                    assert_eq!(dropped.take(), ELEMENTS);
                 }
 
                 #[test]
@@ -5225,46 +5283,6 @@ mod test {
                     let actual = underlying.withdraw(|element| element % 2 == 0);
 
                     assert!(actual.eq([0, 2, 4]));
-                }
-
-                #[test]
-                fn increases_front_capacity_when_withdrawing_first_element() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element != &5));
-
-                    assert_eq!(actual.capacity_front(), 5);
-                    assert_eq!(actual.capacity_back(), 0);
-                }
-
-                #[test]
-                fn increases_back_capacity_when_retained_are_combined() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element % 2 == 1));
-
-                    assert_eq!(actual.capacity_front(), 0);
-                    assert_eq!(actual.capacity_back(), 3);
-                }
-
-                #[test]
-                fn combines_retained_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element == &1));
-
-                    assert!(actual.eq([0, 2, 3, 4, 5]));
-                }
-
-                #[test]
-                fn first_retained_element_is_not_repositioned() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
-
-                    drop(actual.withdraw(|element| element % 2 == 0));
-
-                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
                 }
 
                 #[test]
@@ -5382,11 +5400,65 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
+                    const ELEMENTS: usize = 256;
+
+                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS)
+                        .expect("successful allocation");
+
+                    for _ in 0..ELEMENTS {
+                        _ = actual
+                            .append(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
+                    }
+
+                    drop(actual.withdraw(|_element| true));
+
+                    assert_eq!(actual.len(), 0);
+                    assert_eq!(dropped.take(), ELEMENTS);
+                }
+
+                #[test]
+                fn increases_front_capacity_when_withdrawing_first_element() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element != &5));
+
+                    assert_eq!(actual.capacity_front(), 5);
+                    assert_eq!(actual.capacity_back(), 0);
+                }
+
+                #[test]
+                fn increases_back_capacity_when_retained_are_combined() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 1));
+
+                    assert_eq!(actual.capacity_front(), 0);
+                    assert_eq!(actual.capacity_back(), 3);
+                }
+
+                #[test]
+                fn combines_retained_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element == &1));
+
+                    assert!(actual.eq([0, 2, 3, 4, 5]));
+                }
+
+                #[test]
+                fn first_retained_element_is_not_repositioned() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
 
                     drop(actual.withdraw(|element| element % 2 == 0));
 
-                    assert!(actual.eq([1, 3, 5]));
+                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
                 }
 
                 #[test]

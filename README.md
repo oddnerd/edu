@@ -19,3 +19,4 @@ Hand-written implementations in Rust for personal reference.
       - [Dynamic](/src/structure/collection/linear/array/dynamic.rs)
     - [List](/src/structure/collection/linear/list.rs)
       - [Singly Linked](/src/structure/collection/linear/list/singly.rs)
+      - [Doubly Linked](/src/structure/collection/linear/list/doubly.rs)

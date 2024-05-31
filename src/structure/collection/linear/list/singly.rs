@@ -1280,6 +1280,22 @@ impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {
 mod test {
     use super::*;
 
+    extern crate alloc;
+
+    /// Mock element for drop tests.
+    #[derive(Debug, Clone)]
+    struct Droppable {
+        /// A shared counter for the number of elements dropped.
+        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
+    }
+
+    impl Drop for Droppable {
+        /// Increment the shared counter upon drop.
+        fn drop(&mut self) {
+            _ = self.counter.replace_with(|old| old.wrapping_add(1));
+        }
+    }
+
     mod drop {
         use super::*;
 
@@ -1298,10 +1314,24 @@ mod test {
         }
 
         #[test]
-        fn deallocates_nodes() {
-            let instance: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+        fn drops_elements() {
+            const ELEMENTS: usize = 256;
 
-            drop(instance);
+            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+            let mut actual = Singly::<Droppable>::default();
+
+            for _ in 0..ELEMENTS {
+                _ = actual
+                    .prepend(Droppable {
+                        counter: alloc::rc::Rc::clone(&dropped),
+                    })
+                    .expect("uses capacity");
+            }
+
+            drop(actual);
+
+            assert_eq!(dropped.take(), ELEMENTS);
         }
     }
 
@@ -1497,7 +1527,7 @@ mod test {
             }
 
             fn size_hint(&self) -> (usize, Option<usize>) {
-                (isize::MAX as usize, Some(isize::MAX as usize))
+                (usize::MAX, Some(usize::MAX))
             }
         }
 
@@ -1562,7 +1592,7 @@ mod test {
 
                     let actual: Singly<_> = expected.iter().copied().collect();
 
-                    assert_eq!(actual.size_hint(), (expected.len(), Some(expected.len())));
+                    assert_eq!(actual.len(), expected.len());
                 }
 
                 #[test]
@@ -1624,21 +1654,25 @@ mod test {
             }
 
             #[test]
-            fn has_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let actual: Singly<_> = expected.iter().copied().collect();
-
-                assert_eq!(actual.len(), expected.len());
-            }
-
-            #[test]
             fn initializes_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
 
                 let actual: Singly<_> = expected.iter().copied().collect();
 
                 assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn does_not_trust_size_hint() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                // Ideally, this will panic if it uses the invalid size.
+                let actual: Singly<_> = (FaultySizeHintIter {
+                    data: expected.iter().copied(),
+                })
+                .collect();
+
+                assert_eq!(actual.len(), expected.len());
             }
         }
 
@@ -1646,38 +1680,21 @@ mod test {
             use super::*;
 
             #[test]
-            fn when_empty() {
-                let mut actual = Singly::<usize>::default();
+            #[allow(clippy::shadow_unrelated)]
+            fn appends_elements() {
+                let preexisting = [0, 1, 2];
+                let mut actual: Singly<_> = preexisting.into_iter().collect();
 
-                let expected = [0, 1, 2, 3, 4, 5];
-
+                let expected = [3, 4, 5];
                 actual.extend(expected.iter().copied());
 
-                assert!(actual.eq(expected));
+                for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
+                    assert_eq!(actual, expected);
+                }
             }
 
             #[test]
-            fn has_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let mut actual = Singly::<usize>::default();
-
-                actual.extend(expected);
-
-                assert_eq!(actual.len(), expected.len());
-            }
-
-            #[test]
-            fn initializes_elements() {
-                let mut actual: Singly<_> = [0, 1, 2].into_iter().collect();
-
-                actual.extend([3, 4, 5]);
-
-                assert!(actual.eq([0, 1, 2, 3, 4, 5]));
-            }
-
-            #[test]
-            fn does_not_modify_initialized_elements() {
+            fn does_not_modify_preexisting_elements() {
                 let expected = [0, 1, 2];
 
                 let mut actual: Singly<_> = expected.into_iter().collect();
@@ -1690,20 +1707,18 @@ mod test {
             }
 
             #[test]
-            fn appends_after_initialized_elements() {
-                let initialized = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = initialized.iter().copied().collect();
+            fn into_empty_instance() {
+                let mut actual = Singly::<usize>::default();
 
-                let expected = [6, 7, 8, 9, 10];
+                let expected = [0, 1, 2, 3, 4, 5];
+
                 actual.extend(expected.iter().copied());
 
-                for index in initialized.len()..expected.len() {
-                    assert_eq!(actual[index], expected[index]);
-                }
+                assert!(actual.eq(expected));
             }
 
             #[test]
-            fn empty() {
+            fn from_empty_iterator() {
                 let mut actual = Singly::<()>::default();
 
                 actual.extend(core::iter::empty());
@@ -2260,12 +2275,25 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn removes_yielded_elements() {
-                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+                fn drops_yet_to_be_yielded_elements() {
+                    const ELEMENTS: usize = 256;
+
+                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+
+                    let mut actual = Singly::<Droppable>::default();
+
+                    for _ in 0..ELEMENTS {
+                        _ = actual
+                            .prepend(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
+                    }
 
                     drop(actual.drain(..));
 
                     assert_eq!(actual.len(), 0);
+                    assert_eq!(dropped.take(), ELEMENTS);
                 }
 
                 #[test]
@@ -2437,33 +2465,25 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
-                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 256;
 
-                    drop(actual.withdraw(|element| element % 2 == 0));
+                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
 
-                    assert!(actual.eq([1, 3, 5]));
+                    let mut actual = Singly::<Droppable>::default();
+
+                    for _ in 0..ELEMENTS {
+                        _ = actual
+                            .prepend(Droppable {
+                                counter: alloc::rc::Rc::clone(&dropped),
+                            })
+                            .expect("uses capacity");
+                    }
+
+                    drop(actual.withdraw(|_element| true));
+
+                    assert_eq!(actual.len(), 0);
+                    assert_eq!(dropped.take(), ELEMENTS);
                 }
-            }
-        }
-
-        mod clear {
-            use super::*;
-
-            #[test]
-            fn drop_all_elements() {
-                let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
-
-                actual.clear();
-
-                assert_eq!(actual.len(), 0);
-            }
-
-            #[test]
-            fn when_already_empty() {
-                let mut actual = Singly::<usize>::default();
-
-                // Ideally this will panic or something in case of logic error.
-                actual.clear();
             }
         }
     }
