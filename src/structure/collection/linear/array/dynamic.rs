@@ -5365,11 +5365,8 @@ mod test {
 
                     #[test]
                     fn empty() {
-                        let mut underlying = Dynamic::from_iter([0]);
+                        let mut underlying = Dynamic::<usize>::default();
                         let mut actual = underlying.withdraw(|element| element % 2 == 0);
-
-                        // Exhaust the elements.
-                        _ = actual.next().expect("the one element");
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
@@ -5382,8 +5379,11 @@ mod test {
 
                     #[test]
                     fn exhausted() {
-                        let mut underlying = Dynamic::<usize>::default();
+                        let mut underlying = Dynamic::from_iter([0]);
                         let mut actual = underlying.withdraw(|element| element % 2 == 0);
+
+                        // Exhaust the elements.
+                        _ = actual.next().expect("the one element");
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
