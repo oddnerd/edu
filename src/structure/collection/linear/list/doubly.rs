@@ -1532,7 +1532,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 
                 // SAFETY:
                 // * we own the node.
-                // * TODO: there are no references to the node to invalidate.
+                // * there are no references to the node to invalidate.
                 // * the node was allocated via `Box` and `into_raw`.
                 let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
@@ -1649,7 +1649,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 
                 // SAFETY:
                 // * we own the node.
-                // * TODO: there are no references to the node to invalidate.
+                // * there are no references to the node to invalidate.
                 // * the node was allocated via `Box` and `into_raw`.
                 let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
