@@ -555,7 +555,7 @@ impl<T> Linear for Doubly<T> {
     ///
     /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert_eq!(instance.last(), Some(&5));
+    /// assert_eq!(Linear::last(&instance), Some(&5));
     /// ```
     fn last(&self) -> Option<&Self::Element> {
         self.tail.map(|last| {
