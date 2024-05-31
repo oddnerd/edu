@@ -532,7 +532,7 @@ impl<T> Linear for Doubly<T> {
     ///
     /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert_eq!(instance.first(), &0);
+    /// assert_eq!(instance.first(), Some(&0));
     /// ```
     fn first(&self) -> Option<&Self::Element> {
         self.head.map(|first| {
@@ -555,7 +555,7 @@ impl<T> Linear for Doubly<T> {
     ///
     /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert_eq!(instance.last(), &5);
+    /// assert_eq!(instance.last(), Some(&5));
     /// ```
     fn last(&self) -> Option<&Self::Element> {
         self.tail.map(|last| {
@@ -578,7 +578,7 @@ impl<T> Linear for Doubly<T> {
     ///
     /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert_eq!(instance.first_mut(), &mut 0);
+    /// assert_eq!(instance.first_mut(), Some(&mut 0));
     /// ```
     fn first_mut(&mut self) -> Option<&mut Self::Element> {
         self.head.map(|mut first| {
@@ -601,7 +601,7 @@ impl<T> Linear for Doubly<T> {
     ///
     /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert_eq!(instance.last_mut(), &mut 5);
+    /// assert_eq!(instance.last_mut(), Some(&mut 5));
     /// ```
     fn last_mut(&mut self) -> Option<&mut Self::Element> {
         self.tail.map(|mut last| {
