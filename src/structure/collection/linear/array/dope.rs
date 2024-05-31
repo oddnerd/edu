@@ -12,8 +12,13 @@ use core::ptr::NonNull;
 /// pointer and length pair leveraging compile-time type information alongside
 /// pointer arithmetic to distinguish between individual elements.
 ///
-/// This is equivalent to Rust's slice ([`[T]`]([`slice`]))  or C++'s span
+/// This is equivalent to Rust's slice ([`[T]`]([`slice`])) or C++'s span
 /// ([`std::span`][span]) and views ([`std::string_view`][string_view]).
+///
+/// Note that is is strictly a mutable variant, hence you cannot safely
+/// construct an instance from memory you only have an immutable reference to,
+/// even if you promise to not call mutable methods. The expected use case is
+/// constructing from _owned_ memory.
 ///
 /// [span]: https://en.cppreference.com/w/cpp/container/span
 /// [string_view]: https://en.cppreference.com/w/cpp/string/basic_string_view
