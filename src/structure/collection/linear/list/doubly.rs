@@ -535,7 +535,12 @@ impl<T> Linear for Doubly<T> {
     /// assert_eq!(instance.first(), &0);
     /// ```
     fn first(&self) -> Option<&Self::Element> {
-        todo!()
+        self.head.map(|first| {
+            // SAFETY: immutable references can alias.
+            let first = unsafe { first.as_ref() };
+
+            &first.element
+        })
     }
 
     /// Query the element considered to be at the back, the last element.
@@ -553,7 +558,12 @@ impl<T> Linear for Doubly<T> {
     /// assert_eq!(instance.last(), &5);
     /// ```
     fn last(&self) -> Option<&Self::Element> {
-        todo!()
+        self.tail.map(|last| {
+            // SAFETY: immutable references can alias.
+            let last = unsafe { last.as_ref() };
+
+            &last.element
+        })
     }
 
     /// Obtain a reference to the element at the front, the first element.
@@ -571,7 +581,12 @@ impl<T> Linear for Doubly<T> {
     /// assert_eq!(instance.first_mut(), &mut 0);
     /// ```
     fn first_mut(&mut self) -> Option<&mut Self::Element> {
-        todo!()
+        self.head.map(|mut first| {
+            // SAFETY: no other references to this node will be created.
+            let first = unsafe { first.as_mut() };
+
+            &mut first.element
+        })
     }
 
     /// Obtain a reference to the element at the back, the last element.
@@ -589,7 +604,12 @@ impl<T> Linear for Doubly<T> {
     /// assert_eq!(instance.last_mut(), &mut 5);
     /// ```
     fn last_mut(&mut self) -> Option<&mut Self::Element> {
-        todo!()
+        self.tail.map(|mut last| {
+            // SAFETY: no other references to this node will be created.
+            let last = unsafe { last.as_mut() };
+
+            &mut last.element
+        })
     }
 }
 
