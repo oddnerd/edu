@@ -2244,8 +2244,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
         // Drop all remaining elements to withdraw.
         self.for_each(drop);
 
-        // Shift any string of trailing retained elements into position.
-        {
+        if self.trailing > 0 {
             // SAFETY: aligned within the allocated object, or one byte past.
             let trailing = unsafe { self.next_back.as_ptr().add(1) };
 
