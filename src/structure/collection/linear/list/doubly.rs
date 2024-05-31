@@ -2344,6 +2344,142 @@ mod test {
                 }
             }
         }
+
+        mod first {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.first().expect("the first element");
+
+                assert_eq!(actual, &expected[0]);
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Doubly::<()>::default();
+
+                assert!(actual.first().is_none());
+            }
+        }
+
+        mod first_mut {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.first_mut().expect("the first element");
+
+                assert_eq!(actual, &mut expected[0]);
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.first_mut().is_none());
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                {
+                    let actual = actual.first_mut().expect("the first element");
+
+                    *actual = 12345;
+                }
+
+                assert_eq!(actual[0], 12345);
+            }
+
+            #[test]
+            fn does_not_modify_preexisting_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.first_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
+            }
+        }
+
+        mod last {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = Linear::last(&actual).expect("the last element");
+
+                assert_eq!(actual, &expected[5]);
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Doubly::<()>::default();
+
+                assert!(Linear::last(&actual).is_none());
+            }
+        }
+
+        mod last_mut {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.last_mut().expect("the first element");
+
+                assert_eq!(actual, &mut expected[5]);
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.last_mut().is_none());
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                {
+                    let actual = actual.last_mut().expect("the first element");
+
+                    *actual = 12345;
+                }
+
+                assert_eq!(actual[5], 12345);
+            }
+
+            #[test]
+            fn does_not_modify_preexisting_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.last_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
+            }
+        }
     }
 
     mod list {
@@ -2432,6 +2568,114 @@ mod test {
                 _ = actual.insert(6, 12345).expect("successful allocation");
 
                 assert_eq!(actual[6], 12345);
+            }
+        }
+
+        mod prepend {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Doubly<_> = [1, 2, 3, 4, 5].into_iter().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual[0], 0);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual, &mut 0);
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index + 1], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Doubly::<usize>::default();
+
+                assert!(actual.prepend(0).is_ok());
+                assert_eq!(actual.head, actual.tail);
+                assert!(actual.eq([0]));
+            }
+        }
+
+        mod append {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Doubly<_> = [0, 1, 2, 3, 4].into_iter().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual[5], 5);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual, &mut 5);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Doubly::<usize>::default();
+
+                assert!(actual.append(0).is_ok());
+                assert_eq!(actual.head, actual.tail);
+                assert!(actual.eq([0]));
             }
         }
 
