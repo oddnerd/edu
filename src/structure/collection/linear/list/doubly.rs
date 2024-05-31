@@ -716,7 +716,32 @@ impl<T> List for Doubly<T> {
     /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
-        todo!()
+        let allocation = Box::into_raw(Box::new(Node {
+            element,
+            predecessor: None,
+            successor: self.head.take(),
+        }));
+
+        // SAFETY: Only null if allocation failed, which panics before this.
+        let mut allocation = unsafe { NonNull::new_unchecked(allocation) };
+
+        // SAFETY: no other references to this node exist.
+        let new = unsafe { allocation.as_mut() };
+
+        self.head = Some(allocation);
+
+        if let Some(mut successor) = new.successor {
+            // SAFETY: no other references to this node exist.
+            let successor = unsafe { successor.as_mut() };
+
+            successor.predecessor = Some(allocation);
+        }
+
+        if self.tail.is_none() {
+            self.tail = Some(allocation);
+        }
+
+        Ok(&mut new.element)
     }
 
     /// Move an `element` into a new node at the back to become the last.
@@ -736,7 +761,32 @@ impl<T> List for Doubly<T> {
     /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
-        todo!()
+        let allocation = Box::into_raw(Box::new(Node {
+            element,
+            predecessor: self.tail.take(),
+            successor: None,
+        }));
+
+        // SAFETY: Only null if allocation failed, which panics before this.
+        let mut allocation = unsafe { NonNull::new_unchecked(allocation) };
+
+        // SAFETY: no other references to this node exist.
+        let new = unsafe { allocation.as_mut() };
+
+        self.tail = Some(allocation);
+
+        if let Some(mut predecessor) = new.predecessor {
+            // SAFETY: no other references to this node exist.
+            let predecessor = unsafe { predecessor.as_mut() };
+
+            predecessor.successor = Some(allocation);
+        }
+
+        if self.head.is_none() {
+            self.head = Some(allocation);
+        }
+
+        Ok(&mut new.element)
     }
 
     /// Move the element at `index` out of [`Self`], if it exists.
