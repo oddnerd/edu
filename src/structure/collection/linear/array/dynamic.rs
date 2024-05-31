@@ -1021,6 +1021,7 @@ impl<T> Drop for Dynamic<T> {
 
         if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
             self.back_capacity = capacity;
+            self.initialized = 0;
         } else {
             unreachable!("allocated more than `isize::MAX` bytes");
         }
