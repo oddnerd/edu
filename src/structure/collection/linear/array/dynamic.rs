@@ -74,11 +74,10 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// if let Ok(instance) = Dynamic::<i32>::with_capacity(256) {
-    ///     assert_eq!(Collection::count(&instance), 0);
+    ///     assert_eq!(instance.len(), 0);
     ///     assert_eq!(instance.capacity(), 256);
     ///     assert_eq!(instance.capacity_front(), 256);
     ///     assert_eq!(instance.capacity_back(), 256);
@@ -149,9 +148,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
@@ -167,9 +166,9 @@ impl<T> Dynamic<T> {
     ///
     /// // This many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_front()).for_each(|element| {
+    /// for element in 0..instance.capacity_front() {
     ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -192,9 +191,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
@@ -210,9 +209,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_back()).for_each(|element| {
+    /// for element in 0..instance.capacity_back() {
     ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -256,9 +255,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
@@ -273,9 +272,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be inserted without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_back()).for_each(|element| {
+    /// for element in 0..instance.capacity_back() {
     ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
@@ -329,9 +328,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -340,9 +339,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_front()).for_each(|element| {
+    /// for element in 0..instance.capacity_front() {
     ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
@@ -379,9 +378,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -390,9 +389,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_back()).for_each(|element| {
+    /// for element in 0..instance.capacity_back() {
     ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
@@ -430,8 +429,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -439,6 +438,7 @@ impl<T> Dynamic<T> {
     /// for element in 0..128 {
     ///     instance.prepend(element).expect("enough capacity");
     /// }
+    ///
     /// assert_eq!(instance.capacity_front(), 128);
     /// assert_eq!(instance.capacity_back(), 0);
     ///
@@ -480,8 +480,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -489,6 +489,7 @@ impl<T> Dynamic<T> {
     /// for element in 0..128 {
     ///     instance.prepend(element).expect("enough capacity");
     /// }
+    ///
     /// assert_eq!(instance.capacity_front(), 128);
     /// assert_eq!(instance.capacity_back(), 0);
     ///
@@ -547,9 +548,8 @@ impl<T> Dynamic<T> {
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
     /// // Half fill with elements.
-    /// for element in 0..128 {
-    ///     instance.append(element).expect("enough capacity");
-    /// }
+    /// instance.extend(0..128);
+    ///
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 128);
     ///
@@ -597,15 +597,13 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
     /// // Fill with elements.
-    /// for element in 0..256 {
-    ///     instance.append(element).expect("enough capacity");
-    /// }
+    /// instance.extend(0..256);
     ///
     /// // Allocate capacity at both ends.
     /// instance.reserve_front(256).expect("successful allocation");
@@ -990,7 +988,6 @@ impl<T> Drop for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
@@ -1074,7 +1071,6 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -1111,7 +1107,6 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -1147,7 +1142,6 @@ impl<T> Iterator for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
@@ -1210,7 +1204,6 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
@@ -1332,12 +1325,11 @@ impl<T> Default for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance = Dynamic::<()>::default();
     ///
-    /// assert_eq!(Collection::count(&instance), 0);
+    /// assert_eq!(instance.len(), 0);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     fn default() -> Self {
@@ -1535,8 +1527,8 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// This method has the precondition that an underlying allocation exist to
-    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// This method has the precondition that an underlying allocation exists
+    /// to point to. Note that a dangling (but nevertheless valid) pointer will
     /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
@@ -1577,8 +1569,8 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// This method has the precondition that an underlying allocation exist to
-    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// This method has the precondition that an underlying allocation exists
+    /// to point to. Note that a dangling (but nevertheless valid) pointer will
     /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
@@ -1977,8 +1969,8 @@ impl<T> Drop for Drain<'_, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
     ///
@@ -2068,8 +2060,8 @@ impl<T> Iterator for Drain<'_, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.drain(..);
@@ -2132,8 +2124,8 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.drain(..);
@@ -2226,19 +2218,24 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
     ///
-    /// assert_eq!(withdraw.next(), Some(0));      // Consumes the element with value `0`.
-    /// assert_eq!(withdraw.next_back(), Some(4)); // Consumes the element with value `4`.
+    /// // Consumes the element with value `0`.
+    /// assert_eq!(withdraw.next(), Some(0));
     ///
-    /// drop(withdraw); // Drops the element with value '2'.
+    /// // Consumes the element with value `4`.
+    /// assert_eq!(withdraw.next_back(), Some(4));
     ///
-    /// assert!(instance.eq([1, 3, 5])); // Retained elements.
+    /// // Drops the element with value '2'.
+    /// drop(withdraw);
+    ///
+    /// // Retained elements.
+    /// assert!(instance.eq([1, 3, 5]));
     /// ```
     fn drop(&mut self) {
         // Drop all remaining elements to withdraw.
@@ -2269,8 +2266,8 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
@@ -2406,8 +2403,8 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let instance = underlying.withdraw(|element| element % 2 == 0);
@@ -2427,8 +2424,8 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.withdraw(|element| element % 2 == 0);

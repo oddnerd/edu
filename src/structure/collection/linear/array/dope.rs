@@ -114,7 +114,6 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -154,7 +153,6 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];

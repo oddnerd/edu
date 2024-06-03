@@ -85,7 +85,6 @@ impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -122,7 +121,6 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
@@ -417,7 +415,6 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut iter = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
@@ -425,7 +422,7 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
     /// iter.next();      // Consumes the element with value `0`.
     /// iter.next_back(); // Consumes the element with value `5`.
     ///
-    /// core::mem::drop(iter); // Drops the elements with values `[1, 2, 3, 4]`.
+    /// core::mem::drop(iter); // Drops elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
         for offset in self.next.clone() {
@@ -457,7 +454,6 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
@@ -511,7 +507,6 @@ impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Fixed;
     ///
     /// let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
