@@ -92,6 +92,7 @@ pub trait List:
     ) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator;
 
     /// Remove all elements matching some `predicate`.
+    #[must_use]
     fn withdraw(
         &mut self,
         predicate: impl FnMut(&Self::Element) -> bool,
