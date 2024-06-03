@@ -1977,8 +1977,8 @@ impl<T> Drop for Drain<'_, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
     ///
@@ -2068,8 +2068,8 @@ impl<T> Iterator for Drain<'_, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.drain(..);
@@ -2132,8 +2132,8 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.drain(..);
