@@ -841,6 +841,7 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    #[inline]
     unsafe fn shift_range(&mut self, range: impl core::ops::RangeBounds<usize>, offset: isize) {
         let start = match range.start_bound() {
             core::ops::Bound::Unbounded => 0,
@@ -887,6 +888,7 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(N) memory.
+    #[inline]
     fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
         let capacity = self
             .capacity_back()
