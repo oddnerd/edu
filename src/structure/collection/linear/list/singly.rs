@@ -54,7 +54,7 @@ impl<T> Drop for Singly<T> {
     ///     instance.prepend(());
     /// }
     ///
-    /// // This would overflow the call stack is not for the implementation.
+    /// // This would overflow the call stack if not for the implementation.
     /// drop(instance);
     /// ```
     fn drop(&mut self) {
@@ -366,7 +366,6 @@ impl<T> FromIterator<T> for Singly<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::list::Singly;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
