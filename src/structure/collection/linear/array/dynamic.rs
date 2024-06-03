@@ -700,6 +700,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 1);
     /// assert_eq!(instance[2], 0);
     /// ```
+    #[must_use]
     pub fn remove_via_front(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
             return None;
@@ -757,6 +758,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 1);
     /// assert_eq!(instance[3], 5);
     /// ```
+    #[must_use]
     pub fn remove_via_back(&mut self, index: usize) -> Option<T> {
         if index >= self.initialized {
             return None;
