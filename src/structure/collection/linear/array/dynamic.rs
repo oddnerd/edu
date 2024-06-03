@@ -1147,7 +1147,6 @@ impl<T> Iterator for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
@@ -1210,7 +1209,6 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
