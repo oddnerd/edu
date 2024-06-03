@@ -60,11 +60,13 @@ use super::Collection;
 /// [zbi]: https://en.wikipedia.org/wiki/Zero-based_numbering
 pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element> {
     /// Iterate over the elements by immutable reference.
+    #[must_use]
     fn iter(
         &self,
     ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
 
     /// Iterate over the elements by mutable reference.
+    #[must_use]
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
@@ -72,33 +74,39 @@ pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element
            + core::iter::FusedIterator;
 
     /// Obtain an immutable reference to them `index` element, bounds checked.
+    #[must_use]
     #[allow(clippy::indexing_slicing)]
     fn at(&self, index: usize) -> Option<&Self::Element> {
         (index < self.count()).then(|| &self[index])
     }
 
     /// Obtain a mutable reference to the `index` element, bounds checked.
+    #[must_use]
     #[allow(clippy::indexing_slicing)]
     fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
         (index < self.count()).then(|| &mut self[index])
     }
 
     /// Query the element considered to be at the front, the first element.
+    #[must_use]
     fn first(&self) -> Option<&Self::Element> {
         self.at(0)
     }
 
     /// Query the element considered to be at the back, the last element.
+    #[must_use]
     fn last(&self) -> Option<&Self::Element> {
         self.at(self.count().saturating_sub(1))
     }
 
     /// Obtain a reference to the element at the front, the first element.
+    #[must_use]
     fn first_mut(&mut self) -> Option<&mut Self::Element> {
         self.at_mut(0)
     }
 
     /// Obtain a reference to the element at the back, the last element.
+    #[must_use]
     fn last_mut(&mut self) -> Option<&mut Self::Element> {
         self.at_mut(self.count().saturating_sub(1))
     }
