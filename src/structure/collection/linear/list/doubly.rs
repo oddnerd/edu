@@ -1268,7 +1268,9 @@ impl<T> ExactSizeIterator for IterMut<'_, T> {}
 
 impl<T> core::iter::FusedIterator for IterMut<'_, T> {}
 
-/// By-value iterator over a range of indices.
+/// By-value [`Iterator`] to remove elements from a [`Doubly`].
+///
+/// See [`Doubly::drain`].
 struct Drain<'a, T> {
     /// The next (front) element to remove, if any.
     front: &'a mut Option<NonNull<Node<T>>>,
@@ -1445,7 +1447,9 @@ impl<T> ExactSizeIterator for Drain<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
-/// By-value iterator to remove elements matching some predicate.
+/// By-value [`Iterator`] to remove elements from a [`Doubly`].
+///
+/// See [`Doubly::withdraw`].
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// The next from the back to query with the predicate.
     front: &'a mut Option<NonNull<Node<T>>>,

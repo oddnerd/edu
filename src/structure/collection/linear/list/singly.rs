@@ -914,7 +914,9 @@ impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
-/// By-value iterator over a range of indices.
+/// By-value [`Iterator`] to remove elements from a [`Singly`].
+///
+/// See [`Singly::drain`].
 struct Drain<'a, T> {
     /// The next element from the front to be yielded, if any.
     next: &'a mut Option<Box<Node<T>>>,
@@ -1069,7 +1071,9 @@ impl<'a, T: 'a> ExactSizeIterator for Drain<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for Drain<'a, T> {}
 
-/// By-value iterator over values which match some predicate.
+/// By-value [`Iterator`] to remove elements from a [`Singly`].
+///
+/// See [`Singly::withdraw`].
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
     /// The next element to query with the predicate, if any.
     next: &'a mut Option<Box<Node<T>>>,
