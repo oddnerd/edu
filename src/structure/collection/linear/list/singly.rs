@@ -483,7 +483,6 @@ impl<T> List for Singly<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
@@ -522,7 +521,6 @@ impl<T> List for Singly<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::list::Singly;
     ///
