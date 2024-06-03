@@ -816,6 +816,7 @@ impl<T> Dynamic<T> {
     ///
     /// [amortized]: https://en.wikipedia.org/wiki/Amortized_analysis
     /// [dynamic]: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
+    #[must_use]
     fn amortized(&self, capacity: usize) -> Option<usize> {
         let Some(retained) = self.front_capacity.checked_add(self.initialized) else {
             unreachable!("allocated more the `isize::MAX` bytes");
