@@ -74,11 +74,10 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// if let Ok(instance) = Dynamic::<i32>::with_capacity(256) {
-    ///     assert_eq!(Collection::count(&instance), 0);
+    ///     assert_eq!(instance.len(), 0);
     ///     assert_eq!(instance.capacity(), 256);
     ///     assert_eq!(instance.capacity_front(), 256);
     ///     assert_eq!(instance.capacity_back(), 256);
