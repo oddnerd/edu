@@ -2226,6 +2226,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
+    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
     ///
@@ -2269,8 +2270,8 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
@@ -2406,8 +2407,8 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let instance = underlying.withdraw(|element| element % 2 == 0);
@@ -2427,8 +2428,8 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
