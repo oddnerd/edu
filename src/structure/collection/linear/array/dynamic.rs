@@ -2228,18 +2228,22 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// ```
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
     ///
-    /// assert_eq!(withdraw.next(), Some(0));      // Consumes the element with value `0`.
-    /// assert_eq!(withdraw.next_back(), Some(4)); // Consumes the element with value `4`.
+    /// // Consumes the element with value `0`.
+    /// assert_eq!(withdraw.next(), Some(0));
     ///
-    /// drop(withdraw); // Drops the element with value '2'.
+    /// // Consumes the element with value `4`.
+    /// assert_eq!(withdraw.next_back(), Some(4));
     ///
-    /// assert!(instance.eq([1, 3, 5])); // Retained elements.
+    /// // Drops the element with value '2'.
+    /// drop(withdraw);
+    ///
+    /// // Retained elements.
+    /// assert!(instance.eq([1, 3, 5]));
     /// ```
     fn drop(&mut self) {
         // Drop all remaining elements to withdraw.
