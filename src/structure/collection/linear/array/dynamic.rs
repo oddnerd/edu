@@ -1535,8 +1535,8 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// This method has the precondition that an underlying allocation exist to
-    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// This method has the precondition that an underlying allocation exists
+    /// to point to. Note that a dangling (but nevertheless valid) pointer will
     /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
@@ -1577,8 +1577,8 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// This method has the precondition that an underlying allocation exist to
-    /// point to. Note that a dangling (but nevertheless valid) pointer will
+    /// This method has the precondition that an underlying allocation exists
+    /// to point to. Note that a dangling (but nevertheless valid) pointer will
     /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
