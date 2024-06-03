@@ -149,9 +149,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
@@ -167,9 +167,9 @@ impl<T> Dynamic<T> {
     ///
     /// // This many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_front()).for_each(|element| {
+    /// for element in 0..instance.capacity_front() {
     ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -192,9 +192,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// // Constructing with generic capacity.
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
@@ -210,9 +210,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_back()).for_each(|element| {
+    /// for element in 0..instance.capacity_back() {
     ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr)
     /// ```
     #[must_use]
@@ -256,9 +256,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
@@ -273,9 +273,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be inserted without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_back()).for_each(|element| {
+    /// for element in 0..instance.capacity_back() {
     ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
@@ -329,9 +329,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -340,9 +340,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be prepended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_front()).for_each(|element| {
+    /// for element in 0..instance.capacity_front() {
     ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
@@ -379,9 +379,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::Array;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
@@ -390,9 +390,9 @@ impl<T> Dynamic<T> {
     ///
     /// // That many elements can be appended without invalidating pointers.
     /// let ptr = instance.as_ptr();
-    /// (0..instance.capacity_back()).for_each(|element| {
+    /// for element in 0..instance.capacity_back() {
     ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// });
+    /// }
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
