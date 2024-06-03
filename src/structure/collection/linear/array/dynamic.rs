@@ -1332,12 +1332,11 @@ impl<T> Default for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let instance = Dynamic::<()>::default();
     ///
-    /// assert_eq!(Collection::count(&instance), 0);
+    /// assert_eq!(instance.len(), 0);
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     fn default() -> Self {
