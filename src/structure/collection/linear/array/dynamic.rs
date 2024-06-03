@@ -990,7 +990,6 @@ impl<T> Drop for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
@@ -1074,7 +1073,6 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let expected = [0, 1, 2, 3, 4, 5];
@@ -1111,7 +1109,6 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
