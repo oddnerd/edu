@@ -430,8 +430,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -439,6 +439,7 @@ impl<T> Dynamic<T> {
     /// for element in 0..128 {
     ///     instance.prepend(element).expect("enough capacity");
     /// }
+    ///
     /// assert_eq!(instance.capacity_front(), 128);
     /// assert_eq!(instance.capacity_back(), 0);
     ///
@@ -480,8 +481,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
     ///
@@ -489,6 +490,7 @@ impl<T> Dynamic<T> {
     /// for element in 0..128 {
     ///     instance.prepend(element).expect("enough capacity");
     /// }
+    ///
     /// assert_eq!(instance.capacity_front(), 128);
     /// assert_eq!(instance.capacity_back(), 0);
     ///
