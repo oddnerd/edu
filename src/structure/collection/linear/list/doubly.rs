@@ -1723,7 +1723,7 @@ mod test {
         }
 
         #[test]
-        fn drops_element() {
+        fn drops_elements() {
             const ELEMENTS: usize = 256;
 
             let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
