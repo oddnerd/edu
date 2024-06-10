@@ -2214,6 +2214,45 @@ mod test {
             }
         }
 
+        mod front {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.front();
+
+                assert_eq!(actual.len(), expected.len() - 1);
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.front();
+
+                assert!(actual.iter().eq(expected[1..].iter()));
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.front(), expected.first().copied());
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.front(), None);
+            }
+        }
+
         mod prepend {
             use super::*;
 
