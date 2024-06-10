@@ -573,6 +573,23 @@ impl<T> List for Singly<T> {
         Ok(&mut new.element)
     }
 
+    fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        let mut current = &mut self.elements;
+
+        while let &mut Some(ref mut next) = current {
+            current = &mut next.next;
+        }
+
+        let new = Box::new(Node {
+            element,
+            next: None,
+        });
+
+        let new = current.insert(new);
+
+        Ok(&mut new.element)
+    }
+
     /// Efficiently remove the elements within the given index `range`.
     ///
     /// Using [`Self::remove`] would be inefficient because each removal would
