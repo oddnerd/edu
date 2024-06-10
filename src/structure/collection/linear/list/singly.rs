@@ -2234,6 +2234,59 @@ mod test {
             }
         }
 
+        mod append {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4].into_iter().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual[5], 5);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual, &mut 5);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Singly::<usize>::default();
+
+                assert!(actual.append(0).is_ok());
+                assert!(actual.eq([0]));
+            }
+        }
+
         mod drain {
             use super::*;
 
