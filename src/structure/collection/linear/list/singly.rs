@@ -606,6 +606,26 @@ impl<T> List for Singly<T> {
         Ok(&mut new.element)
     }
 
+    /// Remove the element at the front, the first element, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.front(), Some(0));
+    /// assert_eq!(instance.front(), Some(1));
+    /// assert_eq!(instance.front(), Some(2));
+    /// assert_eq!(instance.front(), Some(3));
+    /// assert_eq!(instance.front(), Some(4));
+    /// assert_eq!(instance.front(), Some(5));
+    /// assert_eq!(instance.front(), None);
+    /// ```
     fn front(&mut self) -> Option<Self::Element> {
         let mut removed = self.elements.take()?;
 
