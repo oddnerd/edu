@@ -573,6 +573,22 @@ impl<T> List for Singly<T> {
         Ok(&mut new.element)
     }
 
+    /// Move an `element` into a new node at the back to become the last.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4]);
+    ///
+    /// instance.append(5);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         let mut current = &mut self.elements;
 
