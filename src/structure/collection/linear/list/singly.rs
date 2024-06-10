@@ -606,6 +606,14 @@ impl<T> List for Singly<T> {
         Ok(&mut new.element)
     }
 
+    fn front(&mut self) -> Option<Self::Element> {
+        let mut removed = self.elements.take()?;
+
+        self.elements = removed.next.take();
+
+        Some(removed.element)
+    }
+
     /// Efficiently remove the elements within the given index `range`.
     ///
     /// Using [`Self::remove`] would be inefficient because each removal would
