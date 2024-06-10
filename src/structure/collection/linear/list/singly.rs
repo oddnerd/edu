@@ -546,6 +546,17 @@ impl<T> List for Singly<T> {
         })
     }
 
+    fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        let new = Box::new(Node {
+            element,
+            next: self.elements.take(),
+        });
+
+        let new = self.elements.insert(new);
+
+        Ok(&mut new.element)
+    }
+
     /// Efficiently remove the elements within the given index `range`.
     ///
     /// Using [`Self::remove`] would be inefficient because each removal would
