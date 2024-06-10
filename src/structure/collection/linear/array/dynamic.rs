@@ -1952,7 +1952,7 @@ impl<T> List for Dynamic<T> {
     }
 }
 
-/// By-value [`Iterator`] to remove elements from a [`Dynamic`].
+/// [`Iterator`] to yield elements within an index range from [`Dynamic`].
 ///
 /// See [`Dynamic::drain`].
 struct Drain<'a, T> {
@@ -2189,7 +2189,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
     }
 }
 
-/// By-value [`Iterator`] to remove elements from a [`Dynamic`].
+/// [`Iterator`] to yield elements matching a predicate from [`Dynamic`].
 ///
 /// See [`Dynamic::withdraw`].
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {

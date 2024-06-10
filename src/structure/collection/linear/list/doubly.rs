@@ -1268,7 +1268,7 @@ impl<T> ExactSizeIterator for IterMut<'_, T> {}
 
 impl<T> core::iter::FusedIterator for IterMut<'_, T> {}
 
-/// By-value [`Iterator`] to remove elements from a [`Doubly`].
+/// [`Iterator`] to yield elements within an index range from [`Doubly`].
 ///
 /// See [`Doubly::drain`].
 struct Drain<'a, T> {
@@ -1447,7 +1447,7 @@ impl<T> ExactSizeIterator for Drain<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
-/// By-value [`Iterator`] to remove elements from a [`Doubly`].
+/// [`Iterator`] to yield elements matching a predicate from [`Doubly`].
 ///
 /// See [`Doubly::withdraw`].
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {

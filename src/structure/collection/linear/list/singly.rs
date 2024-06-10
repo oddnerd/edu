@@ -911,7 +911,7 @@ impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
-/// By-value [`Iterator`] to remove elements from a [`Singly`].
+/// [`Iterator`] to yield elements within an index range from [`Singly`].
 ///
 /// See [`Singly::drain`].
 struct Drain<'a, T> {
@@ -1068,7 +1068,7 @@ impl<'a, T: 'a> ExactSizeIterator for Drain<'a, T> {}
 
 impl<'a, T: 'a> core::iter::FusedIterator for Drain<'a, T> {}
 
-/// By-value [`Iterator`] to remove elements from a [`Singly`].
+/// [`Iterator`] to yield elements matching a predicate from [`Singly`].
 ///
 /// See [`Singly::withdraw`].
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
