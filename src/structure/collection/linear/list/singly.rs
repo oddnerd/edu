@@ -2154,6 +2154,59 @@ mod test {
             }
         }
 
+        mod prepend {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Singly<_> = [1, 2, 3, 4, 5].into_iter().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual[0], 0);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual, &mut 0);
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index + 1], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Singly::<usize>::default();
+
+                assert!(actual.prepend(0).is_ok());
+                assert!(actual.eq([0]));
+            }
+        }
+
         mod drain {
             use super::*;
 
