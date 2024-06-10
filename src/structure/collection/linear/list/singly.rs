@@ -546,6 +546,22 @@ impl<T> List for Singly<T> {
         })
     }
 
+    /// Move an `element` into a new node at the front to become the first.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([1, 2, 3, 4, 5]);
+    ///
+    /// instance.prepend(0);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         let new = Box::new(Node {
             element,
