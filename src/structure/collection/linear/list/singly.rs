@@ -2247,7 +2247,7 @@ mod test {
 
             #[test]
             fn subtracts_element() {
-                let expected = [1, 2, 3, 4, 5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 _ = actual.front();
@@ -2257,7 +2257,7 @@ mod test {
 
             #[test]
             fn does_not_modify_trailing_elements() {
-                let expected = [1, 2, 3, 4, 5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 _ = actual.front();
@@ -2267,7 +2267,7 @@ mod test {
 
             #[test]
             fn yields_element() {
-                let expected = [1, 2, 3, 4, 5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 assert_eq!(actual.front(), expected.first().copied());
@@ -2286,7 +2286,7 @@ mod test {
 
             #[test]
             fn subtracts_element() {
-                let expected = [1, 2, 3, 4, 5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 _ = actual.back();
@@ -2296,17 +2296,17 @@ mod test {
 
             #[test]
             fn does_not_modify_leading_elements() {
-                let expected = [1, 2, 3, 4, 5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 _ = actual.back();
 
-                assert!(actual.iter().eq(expected[..4].iter()));
+                assert!(actual.iter().eq(expected[..=4].iter()));
             }
 
             #[test]
             fn yields_element() {
-                let expected = [1, 2, 3, 4, 5];
+                let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
 
                 assert_eq!(actual.back(), expected.last().copied());
