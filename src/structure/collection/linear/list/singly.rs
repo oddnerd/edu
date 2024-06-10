@@ -2281,6 +2281,45 @@ mod test {
             }
         }
 
+        mod back {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.back();
+
+                assert_eq!(actual.len(), expected.len() - 1);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.back();
+
+                assert!(actual.iter().eq(expected[..4].iter()));
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.back(), expected.last().copied());
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.back(), None);
+            }
+        }
+
         mod prepend {
             use super::*;
 
