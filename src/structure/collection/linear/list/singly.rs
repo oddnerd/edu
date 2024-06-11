@@ -469,6 +469,20 @@ impl<T> Linear for Singly<T> {
             previous_back: core::ptr::null(),
         }
     }
+
+    fn at(&self, index: usize) -> Option<&Self::Element> {
+        let mut next = self.elements.as_deref();
+
+        for _ in 0..index {
+            if let Some(current) = next {
+                next = current.next.as_deref();
+            } else {
+                break;
+            }
+        }
+
+        next.map(|node| &node.element)
+    }
 }
 
 impl<T> List for Singly<T> {
