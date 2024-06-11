@@ -2108,7 +2108,7 @@ mod test {
             }
 
             #[test]
-            fn does_not_modify_preexisting_elements() {
+            fn does_not_modify_other_elements() {
                 let expected = [0, 1, 2];
 
                 let mut actual: Singly<_> = expected.into_iter().collect();
