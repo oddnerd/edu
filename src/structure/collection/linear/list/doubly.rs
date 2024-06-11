@@ -519,6 +519,96 @@ impl<T> Linear for Doubly<T> {
         }
     }
 
+    /// Obtain an immutable reference to the element at position `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at(0), Some(&0));
+    /// assert_eq!(actual.at(1), Some(&1));
+    /// assert_eq!(actual.at(2), Some(&2));
+    /// assert_eq!(actual.at(3), Some(&3));
+    /// assert_eq!(actual.at(4), Some(&4));
+    /// assert_eq!(actual.at(5), Some(&5));
+    /// assert_eq!(actual.at(6), None);
+    /// ```
+    fn at(&self, index: usize) -> Option<&Self::Element> {
+        let mut next = self.head;
+
+        for _ in 0..index {
+            if let Some(current) = next {
+                // SAFETY: immutable references can alias.
+                let current = unsafe { current.as_ref() };
+
+                next = current.successor;
+            } else {
+                break;
+            }
+        }
+
+        next.map(|node| {
+            // SAFETY: immutable references can alias.
+            let node = unsafe { node.as_ref() };
+
+            &node.element
+        })
+    }
+
+    /// Obtain a mutable reference to the element at position `index`.
+    ///
+    /// # Safety
+    /// This method does _NOT_ prevent creating aliasing mutable references
+    /// if multiple calls are made with the same `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at_mut(0), Some(&mut 0));
+    /// assert_eq!(actual.at_mut(1), Some(&mut 1));
+    /// assert_eq!(actual.at_mut(2), Some(&mut 2));
+    /// assert_eq!(actual.at_mut(3), Some(&mut 3));
+    /// assert_eq!(actual.at_mut(4), Some(&mut 4));
+    /// assert_eq!(actual.at_mut(5), Some(&mut 5));
+    /// assert_eq!(actual.at_mut(6), None);
+    /// ```
+    fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
+        let mut next = self.head;
+
+        for _ in 0..index {
+            if let Some(mut current) = next {
+                // SAFETY: no other references to this node exist.
+                // However, mutable references to the element may.
+                // That means this is _probably_ undefined behaviour.
+                let current = unsafe { current.as_mut() };
+
+                next = current.successor;
+            } else {
+                break;
+            }
+        }
+
+        next.map(|mut node| {
+            // SAFETY: if `index` is unique, then so is this reference.
+            let node = unsafe { node.as_mut() };
+
+            &mut node.element
+        })
+    }
+
     /// Query the element considered to be at the front, the first element.
     ///
     /// # Performance
