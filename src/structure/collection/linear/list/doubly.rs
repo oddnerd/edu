@@ -844,60 +844,27 @@ impl<T> List for Doubly<T> {
         Ok(&mut new.element)
     }
 
-    /// Move the element at `index` out of [`Self`], if it exists.
-    ///
-    /// # Performance
-    /// This method takes O(N) times and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::list::Doubly;
-    ///
-    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
-    ///
-    /// assert!(instance.remove(3).is_some_and(|inserted| inserted == 3));
-    /// assert!(instance.eq([0, 1, 2, 4, 5]));
-    /// ```
-    fn remove(&mut self, index: usize) -> Option<Self::Element> {
-        let mut next = &mut self.head;
-
-        for _ in 0..index {
-            if let Some(mut current) = *next {
-                // SAFETY: no other references to this node exist.
-                let current = unsafe { current.as_mut() };
-
-                next = &mut current.successor;
-            } else {
-                return None;
-            }
-        }
+    fn front(&mut self) -> Option<Self::Element> {
+        let front = self.head.take()?;
 
         // SAFETY:
         // * we own the node.
         // * there are no references to the node to invalidate.
         // * the node was allocated via `Box` and `into_raw`.
-        let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
+        let front = unsafe { Box::from_raw(front.as_ptr()) };
 
-        if let Some(mut successor) = removed.successor {
+        if let Some(mut successor) = front.successor {
+            self.head = Some(successor);
+
             // SAFETY: no other references to this node exist.
             let successor = unsafe { successor.as_mut() };
 
-            successor.predecessor = removed.predecessor;
+            successor.predecessor = None;
         } else {
-            self.tail = removed.predecessor.take();
+            self.tail = None;
         }
 
-        if let Some(mut predecessor) = removed.predecessor {
-            // SAFETY: no other references to this node exist.
-            let predecessor = unsafe { predecessor.as_mut() };
-
-            predecessor.successor = removed.successor;
-        } else {
-            self.head = removed.successor.take();
-        }
-
-        Some(removed.element)
+        Some(front.element)
     }
 
     /// Move the elements at indexes within `range` out, if they exist.
