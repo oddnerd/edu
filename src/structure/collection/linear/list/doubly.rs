@@ -2440,6 +2440,28 @@ mod test {
             }
         }
 
+        mod last {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = Linear::last(&actual).expect("the last element");
+
+                assert_eq!(actual, &expected[5]);
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Doubly::<()>::default();
+
+                assert!(Linear::last(&actual).is_none());
+            }
+        }
+
         mod first_mut {
             use super::*;
 
@@ -2481,28 +2503,6 @@ mod test {
                 let mut actual = Doubly::<()>::default();
 
                 assert!(actual.first_mut().is_none());
-            }
-        }
-
-        mod last {
-            use super::*;
-
-            #[test]
-            fn yields_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let actual: Doubly<_> = expected.iter().copied().collect();
-
-                let actual = Linear::last(&actual).expect("the last element");
-
-                assert_eq!(actual, &expected[5]);
-            }
-
-            #[test]
-            fn none_when_empty() {
-                let actual = Doubly::<()>::default();
-
-                assert!(Linear::last(&actual).is_none());
             }
         }
 
