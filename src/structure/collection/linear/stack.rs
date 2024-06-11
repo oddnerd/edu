@@ -4,6 +4,8 @@ use super::Collection;
 use super::Linear;
 
 /// A [`Linear`] [`Collection`] with last-in-first-out (LIFO) semantics.
+///
+/// See also: [Wikipedia](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
 pub trait Stack: Collection + Linear {
     /// Add a new element at the top of the stack.
     ///
