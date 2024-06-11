@@ -865,15 +865,15 @@ impl<T> List for Doubly<T> {
     /// assert_eq!(instance.front(), None);
     /// ```
     fn front(&mut self) -> Option<Self::Element> {
-        let front = self.head.take()?;
+        let removed = self.head.take()?;
 
         // SAFETY:
         // * we own the node.
         // * there are no references to the node to invalidate.
         // * the node was allocated via `Box` and `into_raw`.
-        let front = unsafe { Box::from_raw(front.as_ptr()) };
+        let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
-        if let Some(mut successor) = front.successor {
+        if let Some(mut successor) = removed.successor {
             self.head = Some(successor);
 
             // SAFETY: no other references to this node exist.
@@ -884,7 +884,7 @@ impl<T> List for Doubly<T> {
             self.tail = None;
         }
 
-        Some(front.element)
+        Some(removed.element)
     }
 
     /// Move the elements at indexes within `range` out, if they exist.
