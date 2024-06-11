@@ -538,6 +538,20 @@ impl<T> Linear for Singly<T> {
         next.map(|node| &mut node.element)
     }
 
+    /// Query the element considered to be at the front, the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.first(), Some(&0));
+    /// ```
     fn first(&self) -> Option<&Self::Element> {
         self.elements.as_deref().map(|node| &node.element)
     }
