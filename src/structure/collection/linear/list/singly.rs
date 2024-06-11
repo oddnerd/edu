@@ -814,7 +814,7 @@ impl<T> List for Singly<T> {
                 let current = next.insert(current);
                 next = &mut current.next;
             } else {
-                return Some(current.element)
+                return Some(current.element);
             }
         }
 
