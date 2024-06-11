@@ -887,6 +887,29 @@ impl<T> List for Doubly<T> {
         Some(removed.element)
     }
 
+    fn back(&mut self) -> Option<Self::Element> {
+        let removed = self.tail.take()?;
+
+        // SAFETY:
+        // * we own the node.
+        // * there are no references to the node to invalidate.
+        // * the node was allocated via `Box` and `into_raw`.
+        let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+        if let Some(mut predecessor) = removed.predecessor {
+            self.tail = Some(predecessor);
+
+            // SAFETY: no other references to this node exist.
+            let predecessor = unsafe { predecessor.as_mut() };
+
+            predecessor.successor = None;
+        } else {
+            self.head = None;
+        }
+
+        Some(removed.element)
+    }
+
     /// Move the elements at indexes within `range` out, if they exist.
     ///
     /// # Performance
