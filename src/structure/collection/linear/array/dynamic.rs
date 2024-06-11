@@ -5014,7 +5014,7 @@ mod test {
             }
 
             #[test]
-            fn yields_inserted_element() {
+            fn yields_element() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
@@ -5683,7 +5683,7 @@ mod test {
             }
 
             #[test]
-            fn yields_inserted_element() {
+            fn yields_element() {
                 let expected = [1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
@@ -5812,7 +5812,7 @@ mod test {
             }
 
             #[test]
-            fn yields_inserted_element() {
+            fn yields_element() {
                 let expected = [0, 1, 2, 3, 4];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
