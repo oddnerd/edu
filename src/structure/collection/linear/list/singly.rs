@@ -2125,6 +2125,28 @@ mod test {
                 }
             }
         }
+
+        mod at {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = expected.iter().copied().collect();
+
+                for (index, element) in expected.iter().enumerate() {
+                    assert_eq!(actual.at(index), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let actual = Singly::<()>::default();
+
+                assert!(actual.at(0).is_none());
+            }
+        }
     }
 
     mod list {
