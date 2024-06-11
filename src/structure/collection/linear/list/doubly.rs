@@ -852,9 +852,9 @@ impl<T> List for Doubly<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::list::Singly;
+    /// use rust::structure::collection::linear::list::Doubly;
     ///
-    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
     /// assert_eq!(instance.front(), Some(0));
     /// assert_eq!(instance.front(), Some(1));
