@@ -580,6 +580,20 @@ impl<T> Linear for Singly<T> {
         Some(&current.element)
     }
 
+    /// Obtain a reference to the element at the front, the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.first_mut(), Some(&mut 0));
+    /// ```
     fn first_mut(&mut self) -> Option<&mut Self::Element> {
         self.elements.as_deref_mut().map(|node| &mut node.element)
     }
