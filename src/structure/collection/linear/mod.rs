@@ -2,9 +2,11 @@
 
 pub mod array;
 pub mod list;
+pub mod stack;
 
 pub use array::Array;
 pub use list::List;
+pub use stack::Stack;
 
 use super::Collection;
 
