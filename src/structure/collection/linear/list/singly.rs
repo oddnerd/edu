@@ -556,6 +556,20 @@ impl<T> Linear for Singly<T> {
         self.elements.as_deref().map(|node| &node.element)
     }
 
+    /// Query the element considered to be at the back, the last element.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(Linear::last(&actual), Some(&5));
+    /// ```
     fn last(&self) -> Option<&Self::Element> {
         let mut next = self.elements.as_deref();
 
