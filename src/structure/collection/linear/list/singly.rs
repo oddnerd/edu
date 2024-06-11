@@ -911,6 +911,20 @@ impl<T> List for Singly<T> {
     }
 }
 
+impl<T> super::super::Stack for Singly<T> {
+    fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        self.prepend(element)
+    }
+
+    fn pop(&mut self) -> Option<Self::Element> {
+        self.front()
+    }
+
+    fn peek(&self) -> Option<&Self::Element> {
+        self.elements.as_deref().map(|node| &node.element)
+    }
+}
+
 /// Immutable iterator over a [`Singly`].
 struct Iter<'a, T> {
     /// The next element to yield, if any.
