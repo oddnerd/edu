@@ -598,6 +598,20 @@ impl<T> Linear for Singly<T> {
         self.elements.as_deref_mut().map(|node| &mut node.element)
     }
 
+    /// Obtain a reference to the element at the back, the last element.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.last_mut(), Some(&mut 5));
+    /// ```
     fn last_mut(&mut self) -> Option<&mut Self::Element> {
         let mut current = self.elements.as_deref_mut()?;
 
