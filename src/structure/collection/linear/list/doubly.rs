@@ -2465,11 +2465,9 @@ mod test {
             fn is_mutable() {
                 let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                {
-                    let actual = actual.first_mut().expect("the first element");
+                let element = actual.first_mut().expect("the first element");
 
-                    *actual = 12345;
-                }
+                *element = 12345;
 
                 assert_eq!(actual[0], 12345);
             }
@@ -2533,11 +2531,9 @@ mod test {
             fn is_mutable() {
                 let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                {
-                    let actual = actual.last_mut().expect("the first element");
+                let element = actual.last_mut().expect("the first element");
 
-                    *actual = 12345;
-                }
+                *element = 12345;
 
                 assert_eq!(actual[5], 12345);
             }
