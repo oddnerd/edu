@@ -844,6 +844,26 @@ impl<T> List for Doubly<T> {
         Ok(&mut new.element)
     }
 
+    /// Remove the element at the front, the first element, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.front(), Some(0));
+    /// assert_eq!(instance.front(), Some(1));
+    /// assert_eq!(instance.front(), Some(2));
+    /// assert_eq!(instance.front(), Some(3));
+    /// assert_eq!(instance.front(), Some(4));
+    /// assert_eq!(instance.front(), Some(5));
+    /// assert_eq!(instance.front(), None);
+    /// ```
     fn front(&mut self) -> Option<Self::Element> {
         let front = self.head.take()?;
 
@@ -2842,9 +2862,11 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                _ = actual.front();
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.front();
 
-                assert_eq!(actual.len(), expected.len() - 1);
+                    assert_eq!(actual.len(), remaining);
+                }
             }
 
             #[test]
@@ -2852,9 +2874,14 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                _ = actual.front();
+                for offset in 1..=expected.len() {
+                    _ = actual.front();
 
-                assert!(actual.iter().eq(expected[1..].iter()));
+                    assert!(actual.iter().eq(expected[offset..].iter()));
+                }
+
+                assert_eq!(actual.head, None);
+                assert_eq!(actual.tail, None);
             }
 
             #[test]
@@ -2862,7 +2889,9 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                assert_eq!(actual.front(), expected.first().copied());
+                for element in expected {
+                    assert_eq!(actual.front(), Some(element));
+                }
             }
 
             #[test]
@@ -2881,9 +2910,11 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                _ = actual.back();
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.back();
 
-                assert_eq!(actual.len(), expected.len() - 1);
+                    assert_eq!(actual.len(), remaining);
+                }
             }
 
             #[test]
@@ -2891,9 +2922,14 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                _ = actual.back();
+                for offset in (0..expected.len()).rev() {
+                    _ = actual.back();
 
-                assert!(actual.iter().eq(expected[..=4].iter()));
+                    assert!(actual.iter().eq(expected[..offset].iter()));
+                }
+
+                assert_eq!(actual.head, None);
+                assert_eq!(actual.tail, None);
             }
 
             #[test]
@@ -2901,7 +2937,9 @@ mod test {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                assert_eq!(actual.back(), expected.last().copied());
+                for element in expected.into_iter().rev() {
+                    assert_eq!(actual.back(), Some(element));
+                }
             }
 
             #[test]
