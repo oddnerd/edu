@@ -977,7 +977,7 @@ impl<T> Stack for Singly<T> {
     /// assert_eq!(instance.peek(), Some(&0));
     /// ```
     fn peek(&self) -> Option<&Self::Element> {
-        self.elements.as_deref().map(|node| &node.element)
+        self.first()
     }
 }
 
