@@ -1903,14 +1903,6 @@ mod test {
         }
 
         #[test]
-        #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut instance = Doubly::<()>::default();
-
-            let _: &() = instance.index_mut(0);
-        }
-
-        #[test]
         fn is_mutable() {
             let mut instance: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
@@ -1921,6 +1913,14 @@ mod test {
             for element in instance {
                 assert_eq!(element, 0);
             }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let mut instance = Doubly::<()>::default();
+
+            let _: &() = instance.index_mut(0);
         }
     }
 
