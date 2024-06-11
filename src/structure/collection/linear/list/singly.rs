@@ -1,9 +1,9 @@
 //! Implementation of [`Singly`].
 
+use super::super::Stack;
 use super::Collection;
 use super::Linear;
 use super::List;
-use super::super::Stack;
 
 /// Independently allocated elements connected via a single link.
 ///
@@ -3287,7 +3287,6 @@ mod test {
                 assert!(actual.push(0).is_ok());
                 assert!(actual.eq([0]));
             }
-
         }
 
         mod pop {
