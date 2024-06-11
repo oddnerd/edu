@@ -555,6 +555,20 @@ impl<T> Linear for Singly<T> {
     fn first(&self) -> Option<&Self::Element> {
         self.elements.as_deref().map(|node| &node.element)
     }
+
+    fn last(&self) -> Option<&Self::Element> {
+        let mut next = self.elements.as_deref();
+
+        while let Some(current) = next {
+            if current.next.is_some() {
+                next = current.next.as_deref();
+            } else {
+                return Some(&current.element);
+            }
+        }
+
+        None
+    }
 }
 
 impl<T> List for Singly<T> {
