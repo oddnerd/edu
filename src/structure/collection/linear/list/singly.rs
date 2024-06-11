@@ -503,6 +503,20 @@ impl<T> Linear for Singly<T> {
 
         next.map(|node| &node.element)
     }
+
+    fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
+        let mut next = self.elements.as_deref_mut();
+
+        for _ in 0..index {
+            if let Some(current) = next {
+                next = current.next.as_deref_mut();
+            } else {
+                break;
+            }
+        }
+
+        next.map(|node| &mut node.element)
+    }
 }
 
 impl<T> List for Singly<T> {
