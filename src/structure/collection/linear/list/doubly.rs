@@ -2455,13 +2455,6 @@ mod test {
             }
 
             #[test]
-            fn none_when_empty() {
-                let mut actual = Doubly::<()>::default();
-
-                assert!(actual.first_mut().is_none());
-            }
-
-            #[test]
             fn is_mutable() {
                 let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
@@ -2481,6 +2474,13 @@ mod test {
                 _ = actual.first_mut().expect("the first element");
 
                 assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.first_mut().is_none());
             }
         }
 
@@ -2521,13 +2521,6 @@ mod test {
             }
 
             #[test]
-            fn none_when_empty() {
-                let mut actual = Doubly::<()>::default();
-
-                assert!(actual.last_mut().is_none());
-            }
-
-            #[test]
             fn is_mutable() {
                 let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
@@ -2547,6 +2540,13 @@ mod test {
                 _ = actual.last_mut().expect("the first element");
 
                 assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.last_mut().is_none());
             }
         }
     }
