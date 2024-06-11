@@ -597,6 +597,16 @@ impl<T> Linear for Singly<T> {
     fn first_mut(&mut self) -> Option<&mut Self::Element> {
         self.elements.as_deref_mut().map(|node| &mut node.element)
     }
+
+    fn last_mut(&mut self) -> Option<&mut Self::Element> {
+        let mut current = self.elements.as_deref_mut()?;
+
+        while let Some(next) = current.next.as_deref_mut() {
+            current = next;
+        }
+
+        Some(&mut current.element)
+    }
 }
 
 impl<T> List for Singly<T> {
