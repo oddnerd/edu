@@ -3601,8 +3601,8 @@ mod test {
     }
 
     mod stack {
-        use super::*;
         use super::super::super::super::Stack;
+        use super::*;
 
         mod push {
             use super::*;
@@ -3731,8 +3731,8 @@ mod test {
     }
 
     mod queue {
-        use super::*;
         use super::super::super::super::Queue;
+        use super::*;
 
         mod push {
             use super::*;
