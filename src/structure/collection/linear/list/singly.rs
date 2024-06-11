@@ -3335,11 +3335,30 @@ mod test {
 
                 assert_eq!(actual.pop(), None);
             }
-
         }
 
         mod peek {
             use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.peek(), Some(&element));
+
+                    _ = actual.pop();
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Singly::<()>::default();
+
+                assert_eq!(actual.peek(), None);
+            }
         }
     }
 }
