@@ -2378,6 +2378,34 @@ mod test {
             }
         }
 
+        mod last_mut {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                assert_eq!(actual.last_mut(), Some(&mut 5));
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                let element = actual.last_mut().expect("the first element");
+
+                *element = 12345;
+
+                assert_eq!(actual.next_back(), Some(12345));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.last_mut(), None);
+            }
+        }
     }
 
     mod list {
