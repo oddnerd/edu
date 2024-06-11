@@ -634,6 +634,21 @@ impl<T> List for Singly<T> {
         Some(removed.element)
     }
 
+    fn back(&mut self) -> Option<Self::Element> {
+        let mut next = &mut self.elements;
+
+        while let Some(current) = next.take() {
+            if current.next.is_some() {
+                let current = next.insert(current);
+                next = &mut current.next;
+            } else {
+                return Some(current.element)
+            }
+        }
+
+        None
+    }
+
     /// Efficiently remove the elements within the given index `range`.
     ///
     /// Using [`Self::remove`] would be inefficient because each removal would
