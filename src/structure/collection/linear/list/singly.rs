@@ -1,6 +1,5 @@
 //! Implementation of [`Singly`].
 
-use super::super::Stack;
 use super::Collection;
 use super::Linear;
 use super::List;
@@ -912,7 +911,7 @@ impl<T> List for Singly<T> {
     }
 }
 
-impl<T> Stack for Singly<T> {
+impl<T> super::super::Stack for Singly<T> {
     /// Move an `element` on the top of the stack.
     ///
     /// # Performance
@@ -970,6 +969,75 @@ impl<T> Stack for Singly<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.peek(), Some(&0));
+    /// ```
+    fn peek(&self) -> Option<&Self::Element> {
+        self.first()
+    }
+}
+
+impl<T> super::super::Queue for Singly<T> {
+    /// Move an `element` to the end of the queue.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Queue;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::<usize>::default();
+    ///
+    /// instance.push(0).expect("successful allocation");
+    /// instance.push(1).expect("successful allocation");
+    /// instance.push(2).expect("successful allocation");
+    /// instance.push(3).expect("successful allocation");
+    /// instance.push(4).expect("successful allocation");
+    /// instance.push(5).expect("successful allocation");
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
+    fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        self.append(element)
+    }
+
+    /// Move out the element at the front of the queue.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Queue;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.pop(), Some(0));
+    /// assert_eq!(instance.pop(), Some(1));
+    /// assert_eq!(instance.pop(), Some(2));
+    /// assert_eq!(instance.pop(), Some(3));
+    /// assert_eq!(instance.pop(), Some(4));
+    /// assert_eq!(instance.pop(), Some(5));
+    /// assert_eq!(instance.pop(), None);
+    /// ```
+    fn pop(&mut self) -> Option<Self::Element> {
+        self.front()
+    }
+
+    /// Query the element at the front of the queue.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Queue;
     /// use rust::structure::collection::linear::list::Singly;
     ///
     /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
@@ -3235,6 +3303,7 @@ mod test {
 
     mod stack {
         use super::*;
+        use super::super::super::super::Stack;
 
         mod push {
             use super::*;
@@ -3277,6 +3346,135 @@ mod test {
 
                 for index in 0..expected.len() {
                     assert_eq!(actual[index + 1], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Singly::<usize>::default();
+
+                assert!(actual.push(0).is_ok());
+                assert!(actual.eq([0]));
+            }
+        }
+
+        mod pop {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.pop();
+
+                    assert_eq!(actual.len(), remaining);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for offset in 1..=expected.len() {
+                    _ = actual.pop();
+
+                    assert!(actual.iter().eq(expected[offset..].iter()));
+                }
+
+                assert!(actual.elements.is_none());
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.pop(), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.pop(), None);
+            }
+        }
+
+        mod peek {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.peek(), Some(&element));
+
+                    _ = actual.pop();
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Singly::<()>::default();
+
+                assert_eq!(actual.peek(), None);
+            }
+        }
+    }
+
+    mod queue {
+        use super::*;
+        use super::super::super::super::Queue;
+
+        mod push {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.push(0).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4].into_iter().collect();
+
+                _ = actual.push(5).expect("successful allocation");
+
+                assert_eq!(actual[5], 5);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.push(5).expect("successful allocation");
+
+                assert_eq!(actual, &mut 5);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.push(5).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
                 }
             }
 
