@@ -2628,84 +2628,6 @@ mod test {
             }
         }
 
-        mod front {
-            use super::*;
-
-            #[test]
-            fn subtracts_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = expected.iter().copied().collect();
-
-                _ = actual.front();
-
-                assert_eq!(actual.len(), expected.len() - 1);
-            }
-
-            #[test]
-            fn does_not_modify_trailing_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = expected.iter().copied().collect();
-
-                _ = actual.front();
-
-                assert!(actual.iter().eq(expected[1..].iter()));
-            }
-
-            #[test]
-            fn yields_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = expected.iter().copied().collect();
-
-                assert_eq!(actual.front(), expected.first().copied());
-            }
-
-            #[test]
-            fn none_when_empty() {
-                let mut actual = Singly::<()>::default();
-
-                assert_eq!(actual.front(), None);
-            }
-        }
-
-        mod back {
-            use super::*;
-
-            #[test]
-            fn subtracts_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = expected.iter().copied().collect();
-
-                _ = actual.back();
-
-                assert_eq!(actual.len(), expected.len() - 1);
-            }
-
-            #[test]
-            fn does_not_modify_leading_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = expected.iter().copied().collect();
-
-                _ = actual.back();
-
-                assert!(actual.iter().eq(expected[..=4].iter()));
-            }
-
-            #[test]
-            fn yields_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Singly<_> = expected.iter().copied().collect();
-
-                assert_eq!(actual.back(), expected.last().copied());
-            }
-
-            #[test]
-            fn none_when_empty() {
-                let mut actual = Singly::<()>::default();
-
-                assert_eq!(actual.back(), None);
-            }
-        }
-
         mod prepend {
             use super::*;
 
@@ -2809,6 +2731,100 @@ mod test {
 
                 assert!(actual.append(0).is_ok());
                 assert!(actual.eq([0]));
+            }
+        }
+
+        mod front {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.front();
+
+                    assert_eq!(actual.len(), remaining);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for offset in 1..=expected.len() {
+                    _ = actual.front();
+
+                    assert!(actual.iter().eq(expected[offset..].iter()));
+                }
+
+                assert!(actual.elements.is_none());
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.front(), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.front(), None);
+            }
+        }
+
+        mod back {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.back();
+
+                    assert_eq!(actual.len(), remaining);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for offset in (0..expected.len()).rev() {
+                    _ = actual.back();
+
+                    assert!(actual.iter().eq(expected[..offset].iter()));
+                }
+
+                assert!(actual.elements.is_none());
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected.into_iter().rev() {
+                    assert_eq!(actual.back(), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.back(), None);
             }
         }
 

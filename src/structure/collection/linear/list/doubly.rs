@@ -519,6 +519,96 @@ impl<T> Linear for Doubly<T> {
         }
     }
 
+    /// Obtain an immutable reference to the element at position `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at(0), Some(&0));
+    /// assert_eq!(actual.at(1), Some(&1));
+    /// assert_eq!(actual.at(2), Some(&2));
+    /// assert_eq!(actual.at(3), Some(&3));
+    /// assert_eq!(actual.at(4), Some(&4));
+    /// assert_eq!(actual.at(5), Some(&5));
+    /// assert_eq!(actual.at(6), None);
+    /// ```
+    fn at(&self, index: usize) -> Option<&Self::Element> {
+        let mut next = self.head;
+
+        for _ in 0..index {
+            if let Some(current) = next {
+                // SAFETY: immutable references can alias.
+                let current = unsafe { current.as_ref() };
+
+                next = current.successor;
+            } else {
+                break;
+            }
+        }
+
+        next.map(|node| {
+            // SAFETY: immutable references can alias.
+            let node = unsafe { node.as_ref() };
+
+            &node.element
+        })
+    }
+
+    /// Obtain a mutable reference to the element at position `index`.
+    ///
+    /// # Safety
+    /// This method does _NOT_ prevent creating aliasing mutable references
+    /// if multiple calls are made with the same `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at_mut(0), Some(&mut 0));
+    /// assert_eq!(actual.at_mut(1), Some(&mut 1));
+    /// assert_eq!(actual.at_mut(2), Some(&mut 2));
+    /// assert_eq!(actual.at_mut(3), Some(&mut 3));
+    /// assert_eq!(actual.at_mut(4), Some(&mut 4));
+    /// assert_eq!(actual.at_mut(5), Some(&mut 5));
+    /// assert_eq!(actual.at_mut(6), None);
+    /// ```
+    fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
+        let mut next = self.head;
+
+        for _ in 0..index {
+            if let Some(mut current) = next {
+                // SAFETY: no other references to this node exist.
+                // However, mutable references to the element may.
+                // That means this is _probably_ undefined behaviour.
+                let current = unsafe { current.as_mut() };
+
+                next = current.successor;
+            } else {
+                break;
+            }
+        }
+
+        next.map(|mut node| {
+            // SAFETY: if `index` is unique, then so is this reference.
+            let node = unsafe { node.as_mut() };
+
+            &mut node.element
+        })
+    }
+
     /// Query the element considered to be at the front, the first element.
     ///
     /// # Performance
@@ -698,6 +788,62 @@ impl<T> List for Doubly<T> {
         Ok(&mut new.element)
     }
 
+    /// Move the element at `index` out of [`Self`], if it exists.
+    ///
+    /// # Performance
+    /// This method takes O(N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert!(instance.remove(3).is_some_and(|inserted| inserted == 3));
+    /// assert!(instance.eq([0, 1, 2, 4, 5]));
+    /// ```
+    fn remove(&mut self, index: usize) -> Option<Self::Element> {
+        let mut next = &mut self.head;
+
+        for _ in 0..index {
+            if let Some(mut current) = *next {
+                // SAFETY: no other references to this node exist.
+                let current = unsafe { current.as_mut() };
+
+                next = &mut current.successor;
+            } else {
+                return None;
+            }
+        }
+
+        // SAFETY:
+        // * we own the node.
+        // * there are no references to the node to invalidate.
+        // * the node was allocated via `Box` and `into_raw`.
+        let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
+
+        if let Some(mut successor) = removed.successor {
+            // SAFETY: no other references to this node exist.
+            let successor = unsafe { successor.as_mut() };
+
+            successor.predecessor = removed.predecessor;
+        } else {
+            self.tail = removed.predecessor.take();
+        }
+
+        if let Some(mut predecessor) = removed.predecessor {
+            // SAFETY: no other references to this node exist.
+            let predecessor = unsafe { predecessor.as_mut() };
+
+            predecessor.successor = removed.successor;
+        } else {
+            self.head = removed.successor.take();
+        }
+
+        Some(removed.element)
+    }
+
     /// Move an `element` into a new node at the front to become the first.
     ///
     /// # Performance
@@ -788,10 +934,10 @@ impl<T> List for Doubly<T> {
         Ok(&mut new.element)
     }
 
-    /// Move the element at `index` out of [`Self`], if it exists.
+    /// Remove the element at the front, the first element, if any.
     ///
     /// # Performance
-    /// This method takes O(N) times and consumes O(1) memory.
+    /// This method takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
@@ -800,45 +946,75 @@ impl<T> List for Doubly<T> {
     ///
     /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// assert!(instance.remove(3).is_some_and(|inserted| inserted == 3));
-    /// assert!(instance.eq([0, 1, 2, 4, 5]));
+    /// assert_eq!(instance.front(), Some(0));
+    /// assert_eq!(instance.front(), Some(1));
+    /// assert_eq!(instance.front(), Some(2));
+    /// assert_eq!(instance.front(), Some(3));
+    /// assert_eq!(instance.front(), Some(4));
+    /// assert_eq!(instance.front(), Some(5));
+    /// assert_eq!(instance.front(), None);
     /// ```
-    fn remove(&mut self, index: usize) -> Option<Self::Element> {
-        let mut next = &mut self.head;
-
-        for _ in 0..index {
-            if let Some(mut current) = *next {
-                // SAFETY: no other references to this node exist.
-                let current = unsafe { current.as_mut() };
-
-                next = &mut current.successor;
-            } else {
-                return None;
-            }
-        }
+    fn front(&mut self) -> Option<Self::Element> {
+        let removed = self.head.take()?;
 
         // SAFETY:
         // * we own the node.
         // * there are no references to the node to invalidate.
         // * the node was allocated via `Box` and `into_raw`.
-        let mut removed = unsafe { Box::from_raw(next.take()?.as_ptr()) };
+        let removed = unsafe { Box::from_raw(removed.as_ptr()) };
 
         if let Some(mut successor) = removed.successor {
+            self.head = Some(successor);
+
             // SAFETY: no other references to this node exist.
             let successor = unsafe { successor.as_mut() };
 
-            successor.predecessor = removed.predecessor;
+            successor.predecessor = None;
         } else {
-            self.tail = removed.predecessor.take();
+            self.tail = None;
         }
 
+        Some(removed.element)
+    }
+
+    /// Remove the element at the back, the last element, if any.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Doubly;
+    ///
+    /// let mut instance = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.back(), Some(5));
+    /// assert_eq!(instance.back(), Some(4));
+    /// assert_eq!(instance.back(), Some(3));
+    /// assert_eq!(instance.back(), Some(2));
+    /// assert_eq!(instance.back(), Some(1));
+    /// assert_eq!(instance.back(), Some(0));
+    /// assert_eq!(instance.back(), None);
+    /// ```
+    fn back(&mut self) -> Option<Self::Element> {
+        let removed = self.tail.take()?;
+
+        // SAFETY:
+        // * we own the node.
+        // * there are no references to the node to invalidate.
+        // * the node was allocated via `Box` and `into_raw`.
+        let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
         if let Some(mut predecessor) = removed.predecessor {
+            self.tail = Some(predecessor);
+
             // SAFETY: no other references to this node exist.
             let predecessor = unsafe { predecessor.as_mut() };
 
-            predecessor.successor = removed.successor;
+            predecessor.successor = None;
         } else {
-            self.head = removed.successor.take();
+            self.head = None;
         }
 
         Some(removed.element)
@@ -2418,25 +2594,86 @@ mod test {
             }
         }
 
-        mod first {
+        mod at {
             use super::*;
 
             #[test]
-            fn yields_element() {
+            fn correct_element() {
                 let expected = [0, 1, 2, 3, 4, 5];
 
                 let actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = actual.first().expect("the first element");
+                for (index, element) in expected.iter().enumerate() {
+                    assert_eq!(actual.at(index), Some(element));
+                }
+            }
 
-                assert_eq!(actual, &expected[0]);
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let actual = Doubly::<()>::default();
+
+                assert!(actual.at(0).is_none());
+            }
+        }
+
+        mod at_mut {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for (index, element) in expected.iter_mut().enumerate() {
+                    assert_eq!(actual.at_mut(index), Some(element));
+                }
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                for index in 0..actual.len() {
+                    let element = actual.at_mut(index).expect("within bounds");
+
+                    *element = 12345;
+                }
+
+                for element in actual {
+                    assert_eq!(element, 12345);
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.at_mut(0).is_none());
+            }
+        }
+
+        mod first {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.first(), Some(&element));
+
+                    _ = actual.next();
+                }
             }
 
             #[test]
             fn none_when_empty() {
                 let actual = Doubly::<()>::default();
 
-                assert!(actual.first().is_none());
+                assert_eq!(actual.first(), None);
             }
         }
 
@@ -2444,21 +2681,23 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
+            fn correct_element() {
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                let actual: Doubly<_> = expected.iter().copied().collect();
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = Linear::last(&actual).expect("the last element");
+                for element in expected.into_iter().rev() {
+                    assert_eq!(Linear::last(&actual), Some(&element));
 
-                assert_eq!(actual, &expected[5]);
+                    _ = actual.next_back();
+                }
             }
 
             #[test]
             fn none_when_empty() {
                 let actual = Doubly::<()>::default();
 
-                assert!(Linear::last(&actual).is_none());
+                assert_eq!(Linear::last(&actual), None);
             }
         }
 
@@ -2466,25 +2705,27 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = actual.first_mut().expect("the first element");
+                for mut element in expected {
+                    assert_eq!(actual.first_mut(), Some(&mut element));
 
-                assert_eq!(actual, &mut expected[0]);
+                    _ = actual.next();
+                }
             }
 
             #[test]
             fn is_mutable() {
-                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                let mut actual: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
                 let element = actual.first_mut().expect("the first element");
 
                 *element = 12345;
 
-                assert_eq!(actual[0], 12345);
+                assert_eq!(actual.next(), Some(12345));
             }
 
             #[test]
@@ -2502,7 +2743,7 @@ mod test {
             fn none_when_empty() {
                 let mut actual = Doubly::<()>::default();
 
-                assert!(actual.first_mut().is_none());
+                assert_eq!(actual.first_mut(), None);
             }
         }
 
@@ -2510,25 +2751,27 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = actual.last_mut().expect("the first element");
+                for mut element in expected.into_iter().rev() {
+                    assert_eq!(actual.last_mut(), Some(&mut element));
 
-                assert_eq!(actual, &mut expected[5]);
+                    _ = actual.next_back();
+                }
             }
 
             #[test]
             fn is_mutable() {
-                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                let mut actual: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
                 let element = actual.last_mut().expect("the first element");
 
                 *element = 12345;
 
-                assert_eq!(actual[5], 12345);
+                assert_eq!(actual.next_back(), Some(12345));
             }
 
             #[test]
@@ -2546,7 +2789,7 @@ mod test {
             fn none_when_empty() {
                 let mut actual = Doubly::<()>::default();
 
-                assert!(actual.last_mut().is_none());
+                assert_eq!(actual.last_mut(), None);
             }
         }
     }
@@ -2808,6 +3051,102 @@ mod test {
                 assert!(actual.append(0).is_ok());
                 assert_eq!(actual.head, actual.tail);
                 assert!(actual.eq([0]));
+            }
+        }
+
+        mod front {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.front();
+
+                    assert_eq!(actual.len(), remaining);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for offset in 1..=expected.len() {
+                    _ = actual.front();
+
+                    assert!(actual.iter().eq(expected[offset..].iter()));
+                }
+
+                assert_eq!(actual.head, None);
+                assert_eq!(actual.tail, None);
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.front(), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert_eq!(actual.front(), None);
+            }
+        }
+
+        mod back {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.back();
+
+                    assert_eq!(actual.len(), remaining);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for offset in (0..expected.len()).rev() {
+                    _ = actual.back();
+
+                    assert!(actual.iter().eq(expected[..offset].iter()));
+                }
+
+                assert_eq!(actual.head, None);
+                assert_eq!(actual.tail, None);
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for element in expected.into_iter().rev() {
+                    assert_eq!(actual.back(), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert_eq!(actual.back(), None);
             }
         }
 
