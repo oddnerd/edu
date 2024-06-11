@@ -1,6 +1,6 @@
 ### Description
 
-Associated issue(s): #
+Closes #
 
 ### Checklist
 
