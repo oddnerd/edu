@@ -2253,6 +2253,23 @@ mod test {
             }
         }
 
+        mod first {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                assert_eq!(actual.first(), Some(&0));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Singly::<()>::default();
+
+                assert_eq!(actual.first(), None);
+            }
+        }
     }
 
     mod list {
