@@ -961,6 +961,20 @@ impl<T> super::super::Stack for Singly<T> {
         self.front()
     }
 
+    /// Query the element at the top of the stack.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.peek(), Some(&0));
+    /// ```
     fn peek(&self) -> Option<&Self::Element> {
         self.elements.as_deref().map(|node| &node.element)
     }
