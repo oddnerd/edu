@@ -937,6 +937,26 @@ impl<T> super::super::Stack for Singly<T> {
         self.prepend(element)
     }
 
+    /// Move out the element at the top of the stack.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.pop(), Some(0));
+    /// assert_eq!(instance.pop(), Some(1));
+    /// assert_eq!(instance.pop(), Some(2));
+    /// assert_eq!(instance.pop(), Some(3));
+    /// assert_eq!(instance.pop(), Some(4));
+    /// assert_eq!(instance.pop(), Some(5));
+    /// assert_eq!(instance.pop(), None);
+    /// ```
     fn pop(&mut self) -> Option<Self::Element> {
         self.front()
     }
