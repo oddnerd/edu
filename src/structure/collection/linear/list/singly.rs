@@ -912,6 +912,27 @@ impl<T> List for Singly<T> {
 }
 
 impl<T> super::super::Stack for Singly<T> {
+    /// Move an `element` on the top of the stack.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::<usize>::default();
+    ///
+    /// instance.push(5).expect("successful allocation");
+    /// instance.push(4).expect("successful allocation");
+    /// instance.push(3).expect("successful allocation");
+    /// instance.push(2).expect("successful allocation");
+    /// instance.push(1).expect("successful allocation");
+    /// instance.push(0).expect("successful allocation");
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.prepend(element)
     }
