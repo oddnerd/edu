@@ -676,10 +676,10 @@ impl<T> List for Singly<T> {
     /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
     /// ```
     fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
-        let mut current = &mut self.elements;
+        let mut next = &mut self.elements;
 
-        while let &mut Some(ref mut next) = current {
-            current = &mut next.next;
+        while let &mut Some(ref mut current) = next {
+            next = &mut current.next;
         }
 
         let new = Box::new(Node {
@@ -687,7 +687,7 @@ impl<T> List for Singly<T> {
             next: None,
         });
 
-        let new = current.insert(new);
+        let new = next.insert(new);
 
         Ok(&mut new.element)
     }
