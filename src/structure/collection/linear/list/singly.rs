@@ -2181,6 +2181,44 @@ mod test {
                 assert!(actual.at(0).is_none());
             }
         }
+
+        mod at_mut {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for (index, element) in expected.iter_mut().enumerate() {
+                    assert_eq!(actual.at_mut(index), Some(element));
+                }
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                for index in 0..actual.len() {
+                    let element = actual.at_mut(index).expect("within bounds");
+
+                    *element = 12345;
+                }
+
+                for element in actual {
+                    assert_eq!(element, 12345);
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let mut actual = Singly::<()>::default();
+
+                assert!(actual.at_mut(0).is_none());
+            }
+        }
+
     }
 
     mod list {
