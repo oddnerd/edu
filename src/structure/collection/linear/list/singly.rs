@@ -571,17 +571,13 @@ impl<T> Linear for Singly<T> {
     /// assert_eq!(Linear::last(&actual), Some(&5));
     /// ```
     fn last(&self) -> Option<&Self::Element> {
-        let mut next = self.elements.as_deref();
+        let mut current = self.elements.as_deref()?;
 
-        while let Some(current) = next {
-            if current.next.is_some() {
-                next = current.next.as_deref();
-            } else {
-                return Some(&current.element);
-            }
+        while let Some(next) = current.next.as_deref() {
+            current = next;
         }
 
-        None
+        Some(&current.element)
     }
 }
 
