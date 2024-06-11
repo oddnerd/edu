@@ -1954,16 +1954,71 @@ impl<T> List for Dynamic<T> {
 }
 
 impl<T> Stack for Dynamic<T> {
+    /// Move an `element` on the top of the stack.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::<usize>::default();
+    ///
+    /// instance.push(5).expect("successful allocation");
+    /// instance.push(4).expect("successful allocation");
+    /// instance.push(3).expect("successful allocation");
+    /// instance.push(2).expect("successful allocation");
+    /// instance.push(1).expect("successful allocation");
+    /// instance.push(0).expect("successful allocation");
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
     fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
-        todo!()
+        self.prepend(element)
     }
 
+    /// Move out the element at the top of the stack.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.pop(), Some(0));
+    /// assert_eq!(instance.pop(), Some(1));
+    /// assert_eq!(instance.pop(), Some(2));
+    /// assert_eq!(instance.pop(), Some(3));
+    /// assert_eq!(instance.pop(), Some(4));
+    /// assert_eq!(instance.pop(), Some(5));
+    /// assert_eq!(instance.pop(), None);
+    /// ```
     fn pop(&mut self) -> Option<Self::Element> {
-        todo!()
+        self.front()
     }
 
+    /// Query the element at the top of the stack.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.peek(), Some(&0));
+    /// ```
     fn peek(&self) -> Option<&Self::Element> {
-        todo!()
+        self.first()
     }
 }
 
