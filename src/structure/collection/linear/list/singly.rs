@@ -2413,6 +2413,17 @@ mod test {
             }
 
             #[test]
+            fn does_not_modify_other_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.first_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
+            }
+
+            #[test]
             fn none_when_empty() {
                 let mut actual = Singly::<()>::default();
 
@@ -2445,6 +2456,17 @@ mod test {
                 *element = 12345;
 
                 assert_eq!(actual.next_back(), Some(12345));
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.last_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
             }
 
             #[test]
