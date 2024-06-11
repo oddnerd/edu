@@ -537,6 +537,10 @@ impl<T> Linear for Singly<T> {
 
         next.map(|node| &mut node.element)
     }
+
+    fn first(&self) -> Option<&Self::Element> {
+        self.elements.as_deref().map(|node| &node.element)
+    }
 }
 
 impl<T> List for Singly<T> {
