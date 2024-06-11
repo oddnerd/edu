@@ -13,6 +13,8 @@ Hand-written implementations in Rust for personal reference.
 
 - [Collections](/src/structure/collection.rs)
   - [Linear](/src/structure/collection/linear.rs)
+    - [Stack](/src/structure/collection/linear/stack.rs)
+    - [Queue](/src/structure/collection/linear/queue.rs)
     - [Array](/src/structure/collection/linear/array.rs)
       - [Dope](/src/structure/collection/linear/array/dope.rs)
       - [Fixed](/src/structure/collection/linear/array/fixed.rs)
