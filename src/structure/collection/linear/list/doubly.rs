@@ -2508,21 +2508,23 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
+            fn correct_element() {
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                let actual: Doubly<_> = expected.iter().copied().collect();
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = actual.first().expect("the first element");
+                for element in expected {
+                    assert_eq!(actual.first(), Some(&element));
 
-                assert_eq!(actual, &expected[0]);
+                    _ = actual.next();
+                }
             }
 
             #[test]
             fn none_when_empty() {
                 let actual = Doubly::<()>::default();
 
-                assert!(actual.first().is_none());
+                assert_eq!(actual.first(), None);
             }
         }
 
@@ -2530,21 +2532,23 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
+            fn correct_element() {
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                let actual: Doubly<_> = expected.iter().copied().collect();
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = Linear::last(&actual).expect("the last element");
+                for element in expected.into_iter().rev() {
+                    assert_eq!(Linear::last(&actual), Some(&element));
 
-                assert_eq!(actual, &expected[5]);
+                    _ = actual.next_back();
+                }
             }
 
             #[test]
             fn none_when_empty() {
                 let actual = Doubly::<()>::default();
 
-                assert!(Linear::last(&actual).is_none());
+                assert_eq!(Linear::last(&actual), None);
             }
         }
 
@@ -2552,25 +2556,27 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = actual.first_mut().expect("the first element");
+                for mut element in expected {
+                    assert_eq!(actual.first_mut(), Some(&mut element));
 
-                assert_eq!(actual, &mut expected[0]);
+                    _ = actual.next();
+                }
             }
 
             #[test]
             fn is_mutable() {
-                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                let mut actual: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
                 let element = actual.first_mut().expect("the first element");
 
                 *element = 12345;
 
-                assert_eq!(actual[0], 12345);
+                assert_eq!(actual.next(), Some(12345));
             }
 
             #[test]
@@ -2588,7 +2594,7 @@ mod test {
             fn none_when_empty() {
                 let mut actual = Doubly::<()>::default();
 
-                assert!(actual.first_mut().is_none());
+                assert_eq!(actual.first_mut(), None);
             }
         }
 
@@ -2596,25 +2602,27 @@ mod test {
             use super::*;
 
             #[test]
-            fn yields_element() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
 
-                let actual = actual.last_mut().expect("the first element");
+                for mut element in expected.into_iter().rev() {
+                    assert_eq!(actual.last_mut(), Some(&mut element));
 
-                assert_eq!(actual, &mut expected[5]);
+                    _ = actual.next_back();
+                }
             }
 
             #[test]
             fn is_mutable() {
-                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                let mut actual: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
                 let element = actual.last_mut().expect("the first element");
 
                 *element = 12345;
 
-                assert_eq!(actual[5], 12345);
+                assert_eq!(actual.next_back(), Some(12345));
             }
 
             #[test]
@@ -2632,7 +2640,7 @@ mod test {
             fn none_when_empty() {
                 let mut actual = Doubly::<()>::default();
 
-                assert!(actual.last_mut().is_none());
+                assert_eq!(actual.last_mut(), None);
             }
         }
     }
