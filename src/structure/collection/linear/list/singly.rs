@@ -504,6 +504,26 @@ impl<T> Linear for Singly<T> {
         next.map(|node| &node.element)
     }
 
+    /// Obtain a mutable reference to the element at position `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at_mut(0), Some(&mut 0));
+    /// assert_eq!(actual.at_mut(1), Some(&mut 1));
+    /// assert_eq!(actual.at_mut(2), Some(&mut 2));
+    /// assert_eq!(actual.at_mut(3), Some(&mut 3));
+    /// assert_eq!(actual.at_mut(4), Some(&mut 4));
+    /// assert_eq!(actual.at_mut(5), Some(&mut 5));
+    /// assert_eq!(actual.at_mut(6), None);
+    /// ```
     fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
         let mut next = self.elements.as_deref_mut();
 
