@@ -2,8 +2,8 @@
 
 extern crate alloc;
 
-use super::super::Stack;
 use super::super::List;
+use super::super::Stack;
 use super::Array;
 use super::Collection;
 use super::Linear;
