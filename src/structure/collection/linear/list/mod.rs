@@ -55,7 +55,7 @@ pub trait List:
     /// Remove the element at `index`, bounds checked.
     ///
     /// The elements at `[..index]` remain unmodified, the element at `index`
-    /// is dropped, and the elements `[index + 1..]` are shifted to the left
+    /// is returned, and the elements `[index + 1..]` are shifted to the left
     /// such that they become `[index..]`.
     fn remove(&mut self, index: usize) -> Option<Self::Element>;
 

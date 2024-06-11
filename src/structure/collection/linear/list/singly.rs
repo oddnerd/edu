@@ -469,6 +469,158 @@ impl<T> Linear for Singly<T> {
             previous_back: core::ptr::null(),
         }
     }
+
+    /// Obtain an immutable reference to the element at position `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at(0), Some(&0));
+    /// assert_eq!(actual.at(1), Some(&1));
+    /// assert_eq!(actual.at(2), Some(&2));
+    /// assert_eq!(actual.at(3), Some(&3));
+    /// assert_eq!(actual.at(4), Some(&4));
+    /// assert_eq!(actual.at(5), Some(&5));
+    /// assert_eq!(actual.at(6), None);
+    /// ```
+    fn at(&self, index: usize) -> Option<&Self::Element> {
+        let mut next = self.elements.as_deref();
+
+        for _ in 0..index {
+            if let Some(current) = next {
+                next = current.next.as_deref();
+            } else {
+                break;
+            }
+        }
+
+        next.map(|node| &node.element)
+    }
+
+    /// Obtain a mutable reference to the element at position `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at_mut(0), Some(&mut 0));
+    /// assert_eq!(actual.at_mut(1), Some(&mut 1));
+    /// assert_eq!(actual.at_mut(2), Some(&mut 2));
+    /// assert_eq!(actual.at_mut(3), Some(&mut 3));
+    /// assert_eq!(actual.at_mut(4), Some(&mut 4));
+    /// assert_eq!(actual.at_mut(5), Some(&mut 5));
+    /// assert_eq!(actual.at_mut(6), None);
+    /// ```
+    fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
+        let mut next = self.elements.as_deref_mut();
+
+        for _ in 0..index {
+            if let Some(current) = next {
+                next = current.next.as_deref_mut();
+            } else {
+                break;
+            }
+        }
+
+        next.map(|node| &mut node.element)
+    }
+
+    /// Query the element considered to be at the front, the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.first(), Some(&0));
+    /// ```
+    fn first(&self) -> Option<&Self::Element> {
+        self.elements.as_deref().map(|node| &node.element)
+    }
+
+    /// Query the element considered to be at the back, the last element.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(Linear::last(&actual), Some(&5));
+    /// ```
+    fn last(&self) -> Option<&Self::Element> {
+        let mut current = self.elements.as_deref()?;
+
+        while let Some(next) = current.next.as_deref() {
+            current = next;
+        }
+
+        Some(&current.element)
+    }
+
+    /// Obtain a reference to the element at the front, the first element.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.first_mut(), Some(&mut 0));
+    /// ```
+    fn first_mut(&mut self) -> Option<&mut Self::Element> {
+        self.elements.as_deref_mut().map(|node| &mut node.element)
+    }
+
+    /// Obtain a reference to the element at the back, the last element.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.last_mut(), Some(&mut 5));
+    /// ```
+    fn last_mut(&mut self) -> Option<&mut Self::Element> {
+        let mut current = self.elements.as_deref_mut()?;
+
+        while let Some(next) = current.next.as_deref_mut() {
+            current = next;
+        }
+
+        Some(&mut current.element)
+    }
 }
 
 impl<T> List for Singly<T> {
@@ -544,6 +696,129 @@ impl<T> List for Singly<T> {
 
             removed.element
         })
+    }
+
+    /// Move an `element` into a new node at the front to become the first.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([1, 2, 3, 4, 5]);
+    ///
+    /// instance.prepend(0);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
+    fn prepend(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        let new = Box::new(Node {
+            element,
+            next: self.elements.take(),
+        });
+
+        let new = self.elements.insert(new);
+
+        Ok(&mut new.element)
+    }
+
+    /// Move an `element` into a new node at the back to become the last.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4]);
+    ///
+    /// instance.append(5);
+    ///
+    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// ```
+    fn append(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
+        let mut next = &mut self.elements;
+
+        while let &mut Some(ref mut current) = next {
+            next = &mut current.next;
+        }
+
+        let new = Box::new(Node {
+            element,
+            next: None,
+        });
+
+        let new = next.insert(new);
+
+        Ok(&mut new.element)
+    }
+
+    /// Remove the element at the front, the first element, if any.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.front(), Some(0));
+    /// assert_eq!(instance.front(), Some(1));
+    /// assert_eq!(instance.front(), Some(2));
+    /// assert_eq!(instance.front(), Some(3));
+    /// assert_eq!(instance.front(), Some(4));
+    /// assert_eq!(instance.front(), Some(5));
+    /// assert_eq!(instance.front(), None);
+    /// ```
+    fn front(&mut self) -> Option<Self::Element> {
+        let mut removed = self.elements.take()?;
+
+        self.elements = removed.next.take();
+
+        Some(removed.element)
+    }
+
+    /// Remove the element at the back, the last element, if any.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(instance.back(), Some(5));
+    /// assert_eq!(instance.back(), Some(4));
+    /// assert_eq!(instance.back(), Some(3));
+    /// assert_eq!(instance.back(), Some(2));
+    /// assert_eq!(instance.back(), Some(1));
+    /// assert_eq!(instance.back(), Some(0));
+    /// assert_eq!(instance.back(), None);
+    /// ```
+    fn back(&mut self) -> Option<Self::Element> {
+        let mut next = &mut self.elements;
+
+        while let Some(current) = next.take() {
+            if current.next.is_some() {
+                let current = next.insert(current);
+                next = &mut current.next;
+            } else {
+                return Some(current.element);
+            }
+        }
+
+        None
     }
 
     /// Efficiently remove the elements within the given index `range`.
@@ -2002,6 +2277,183 @@ mod test {
                 }
             }
         }
+
+        mod at {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = expected.iter().copied().collect();
+
+                for (index, element) in expected.iter().enumerate() {
+                    assert_eq!(actual.at(index), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let actual = Singly::<()>::default();
+
+                assert!(actual.at(0).is_none());
+            }
+        }
+
+        mod at_mut {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for (index, element) in expected.iter_mut().enumerate() {
+                    assert_eq!(actual.at_mut(index), Some(element));
+                }
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                for index in 0..actual.len() {
+                    let element = actual.at_mut(index).expect("within bounds");
+
+                    *element = 12345;
+                }
+
+                for element in actual {
+                    assert_eq!(element, 12345);
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let mut actual = Singly::<()>::default();
+
+                assert!(actual.at_mut(0).is_none());
+            }
+        }
+
+        mod first {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.first(), Some(&element));
+
+                    _ = actual.next();
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Singly::<()>::default();
+
+                assert_eq!(actual.first(), None);
+            }
+        }
+
+        mod last {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected.into_iter().rev() {
+                    assert_eq!(Linear::last(&actual), Some(&element));
+
+                    _ = actual.next_back();
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Singly::<()>::default();
+
+                assert_eq!(Linear::last(&actual), None);
+            }
+        }
+
+        mod first_mut {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for mut element in expected {
+                    assert_eq!(actual.first_mut(), Some(&mut element));
+
+                    _ = actual.next();
+                }
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                let element = actual.first_mut().expect("the first element");
+
+                *element = 12345;
+
+                assert_eq!(actual.next(), Some(12345));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.first_mut(), None);
+            }
+        }
+
+        mod last_mut {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for mut element in expected.into_iter().rev() {
+                    assert_eq!(actual.last_mut(), Some(&mut element));
+
+                    _ = actual.next_back();
+                }
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                let element = actual.last_mut().expect("the first element");
+
+                *element = 12345;
+
+                assert_eq!(actual.next_back(), Some(12345));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.last_mut(), None);
+            }
+        }
     }
 
     mod list {
@@ -2151,6 +2603,190 @@ mod test {
                 let mut actual = Singly::<()>::default();
 
                 assert!(actual.remove(0).is_none());
+            }
+        }
+
+        mod front {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.front();
+
+                assert_eq!(actual.len(), expected.len() - 1);
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.front();
+
+                assert!(actual.iter().eq(expected[1..].iter()));
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.front(), expected.first().copied());
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.front(), None);
+            }
+        }
+
+        mod back {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.back();
+
+                assert_eq!(actual.len(), expected.len() - 1);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.back();
+
+                assert!(actual.iter().eq(expected[..=4].iter()));
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                assert_eq!(actual.back(), expected.last().copied());
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.back(), None);
+            }
+        }
+
+        mod prepend {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Singly<_> = [1, 2, 3, 4, 5].into_iter().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual[0], 0);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.prepend(0).expect("successful allocation");
+
+                assert_eq!(actual, &mut 0);
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.prepend(0).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index + 1], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Singly::<usize>::default();
+
+                assert!(actual.prepend(0).is_ok());
+                assert!(actual.eq([0]));
+            }
+        }
+
+        mod append {
+            use super::*;
+
+            #[test]
+            fn adds_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual.len(), expected.len() + 1);
+            }
+
+            #[test]
+            fn initializes_element() {
+                let mut actual: Singly<_> = [0, 1, 2, 3, 4].into_iter().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual[5], 5);
+            }
+
+            #[test]
+            fn yields_inserted_element() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.append(5).expect("successful allocation");
+
+                assert_eq!(actual, &mut 5);
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.append(5).expect("successful allocation");
+
+                for index in 0..expected.len() {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn when_empty() {
+                let mut actual = Singly::<usize>::default();
+
+                assert!(actual.append(0).is_ok());
+                assert!(actual.eq([0]));
             }
         }
 
