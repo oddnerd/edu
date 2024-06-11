@@ -2288,6 +2288,24 @@ mod test {
                 assert_eq!(actual.first(), None);
             }
         }
+
+        mod last {
+            use super::*;
+
+            #[test]
+            fn correct_element() {
+                let actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+
+                assert_eq!(Linear::last(&actual), Some(&5));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let actual = Singly::<()>::default();
+
+                assert_eq!(Linear::last(&actual), None);
+            }
+        }
     }
 
     mod list {
