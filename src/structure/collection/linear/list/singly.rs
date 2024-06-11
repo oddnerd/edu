@@ -3,6 +3,7 @@
 use super::Collection;
 use super::Linear;
 use super::List;
+use super::super::Stack;
 
 /// Independently allocated elements connected via a single link.
 ///
@@ -911,7 +912,7 @@ impl<T> List for Singly<T> {
     }
 }
 
-impl<T> super::super::Stack for Singly<T> {
+impl<T> Stack for Singly<T> {
     /// Move an `element` on the top of the stack.
     ///
     /// # Performance
@@ -3229,6 +3230,22 @@ mod test {
                     assert_eq!(dropped.take(), ELEMENTS);
                 }
             }
+        }
+    }
+
+    mod stack {
+        use super::*;
+
+        mod push {
+            use super::*;
+        }
+
+        mod pop {
+            use super::*;
+        }
+
+        mod peek {
+            use super::*;
         }
     }
 }
