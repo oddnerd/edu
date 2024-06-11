@@ -470,6 +470,26 @@ impl<T> Linear for Singly<T> {
         }
     }
 
+    /// Obtain an immutable reference to the element at position `index`.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::list::Singly;
+    ///
+    /// let actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(actual.at(0), Some(&0));
+    /// assert_eq!(actual.at(1), Some(&1));
+    /// assert_eq!(actual.at(2), Some(&2));
+    /// assert_eq!(actual.at(3), Some(&3));
+    /// assert_eq!(actual.at(4), Some(&4));
+    /// assert_eq!(actual.at(5), Some(&5));
+    /// assert_eq!(actual.at(6), None);
+    /// ```
     fn at(&self, index: usize) -> Option<&Self::Element> {
         let mut next = self.elements.as_deref();
 
