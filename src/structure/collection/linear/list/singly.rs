@@ -3292,6 +3292,50 @@ mod test {
 
         mod pop {
             use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for remaining in (0..expected.len()).rev() {
+                    _ = actual.pop();
+
+                    assert_eq!(actual.len(), remaining);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for offset in 1..=expected.len() {
+                    _ = actual.pop();
+
+                    assert!(actual.iter().eq(expected[offset..].iter()));
+                }
+
+                assert!(actual.elements.is_none());
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.pop(), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Singly::<()>::default();
+
+                assert_eq!(actual.pop(), None);
+            }
+
         }
 
         mod peek {
