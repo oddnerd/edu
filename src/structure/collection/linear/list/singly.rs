@@ -2342,9 +2342,15 @@ mod test {
 
             #[test]
             fn correct_element() {
-                let actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                let expected = [0, 1, 2, 3, 4, 5];
 
-                assert_eq!(actual.first(), Some(&0));
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    assert_eq!(actual.first(), Some(&element));
+
+                    _ = actual.next();
+                }
             }
 
             #[test]
@@ -2360,9 +2366,15 @@ mod test {
 
             #[test]
             fn correct_element() {
-                let actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                let expected = [0, 1, 2, 3, 4, 5];
 
-                assert_eq!(Linear::last(&actual), Some(&5));
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for element in expected.into_iter().rev() {
+                    assert_eq!(Linear::last(&actual), Some(&element));
+
+                    _ = actual.next_back();
+                }
             }
 
             #[test]
@@ -2378,9 +2390,15 @@ mod test {
 
             #[test]
             fn correct_element() {
-                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                let expected = [0, 1, 2, 3, 4, 5];
 
-                assert_eq!(actual.first_mut(), Some(&mut 0));
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for mut element in expected {
+                    assert_eq!(actual.first_mut(), Some(&mut element));
+
+                    _ = actual.next();
+                }
             }
 
             #[test]
@@ -2407,9 +2425,15 @@ mod test {
 
             #[test]
             fn correct_element() {
-                let mut actual: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
+                let expected = [0, 1, 2, 3, 4, 5];
 
-                assert_eq!(actual.last_mut(), Some(&mut 5));
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                for mut element in expected.into_iter().rev() {
+                    assert_eq!(actual.last_mut(), Some(&mut element));
+
+                    _ = actual.next_back();
+                }
             }
 
             #[test]
