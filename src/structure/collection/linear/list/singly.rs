@@ -1765,14 +1765,6 @@ mod test {
         }
 
         #[test]
-        #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut instance = Singly::<()>::default();
-
-            let _: &() = instance.index_mut(0);
-        }
-
-        #[test]
         fn is_mutable() {
             let mut instance: Singly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
@@ -1783,6 +1775,14 @@ mod test {
             for element in instance {
                 assert_eq!(element, 0);
             }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let mut instance = Singly::<()>::default();
+
+            let _: &() = instance.index_mut(0);
         }
     }
 
@@ -2413,6 +2413,17 @@ mod test {
             }
 
             #[test]
+            fn does_not_modify_other_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.first_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
+            }
+
+            #[test]
             fn none_when_empty() {
                 let mut actual = Singly::<()>::default();
 
@@ -2445,6 +2456,17 @@ mod test {
                 *element = 12345;
 
                 assert_eq!(actual.next_back(), Some(12345));
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                _ = actual.last_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
             }
 
             #[test]

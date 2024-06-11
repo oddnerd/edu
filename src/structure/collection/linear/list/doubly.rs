@@ -1903,14 +1903,6 @@ mod test {
         }
 
         #[test]
-        #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut instance = Doubly::<()>::default();
-
-            let _: &() = instance.index_mut(0);
-        }
-
-        #[test]
         fn is_mutable() {
             let mut instance: Doubly<_> = [0, 1, 2, 3, 4, 5].into_iter().collect();
 
@@ -1921,6 +1913,14 @@ mod test {
             for element in instance {
                 assert_eq!(element, 0);
             }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let mut instance = Doubly::<()>::default();
+
+            let _: &() = instance.index_mut(0);
         }
     }
 
@@ -2440,52 +2440,6 @@ mod test {
             }
         }
 
-        mod first_mut {
-            use super::*;
-
-            #[test]
-            fn yields_element() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
-
-                let mut actual: Doubly<_> = expected.iter().copied().collect();
-
-                let actual = actual.first_mut().expect("the first element");
-
-                assert_eq!(actual, &mut expected[0]);
-            }
-
-            #[test]
-            fn none_when_empty() {
-                let mut actual = Doubly::<()>::default();
-
-                assert!(actual.first_mut().is_none());
-            }
-
-            #[test]
-            fn is_mutable() {
-                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
-
-                {
-                    let actual = actual.first_mut().expect("the first element");
-
-                    *actual = 12345;
-                }
-
-                assert_eq!(actual[0], 12345);
-            }
-
-            #[test]
-            fn does_not_modify_preexisting_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let mut actual: Doubly<_> = expected.iter().copied().collect();
-
-                _ = actual.first_mut().expect("the first element");
-
-                assert!(actual.eq(expected));
-            }
-        }
-
         mod last {
             use super::*;
 
@@ -2508,6 +2462,50 @@ mod test {
             }
         }
 
+        mod first_mut {
+            use super::*;
+
+            #[test]
+            fn yields_element() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.first_mut().expect("the first element");
+
+                assert_eq!(actual, &mut expected[0]);
+            }
+
+            #[test]
+            fn is_mutable() {
+                let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                let element = actual.first_mut().expect("the first element");
+
+                *element = 12345;
+
+                assert_eq!(actual[0], 12345);
+            }
+
+            #[test]
+            fn does_not_modify_other_elements() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.first_mut().expect("the first element");
+
+                assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.first_mut().is_none());
+            }
+        }
+
         mod last_mut {
             use super::*;
 
@@ -2523,27 +2521,18 @@ mod test {
             }
 
             #[test]
-            fn none_when_empty() {
-                let mut actual = Doubly::<()>::default();
-
-                assert!(actual.last_mut().is_none());
-            }
-
-            #[test]
             fn is_mutable() {
                 let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
-                {
-                    let actual = actual.last_mut().expect("the first element");
+                let element = actual.last_mut().expect("the first element");
 
-                    *actual = 12345;
-                }
+                *element = 12345;
 
                 assert_eq!(actual[5], 12345);
             }
 
             #[test]
-            fn does_not_modify_preexisting_elements() {
+            fn does_not_modify_other_elements() {
                 let expected = [0, 1, 2, 3, 4, 5];
 
                 let mut actual: Doubly<_> = expected.iter().copied().collect();
@@ -2551,6 +2540,13 @@ mod test {
                 _ = actual.last_mut().expect("the first element");
 
                 assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn none_when_empty() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.last_mut().is_none());
             }
         }
     }
@@ -2643,6 +2639,67 @@ mod test {
                 _ = actual.insert(6, 12345).expect("successful allocation");
 
                 assert_eq!(actual[6], 12345);
+            }
+        }
+
+        mod remove {
+            use super::*;
+
+            #[test]
+            fn subtracts_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.remove(0).expect("valid index");
+
+                assert_eq!(actual.len(), expected.len() - 1);
+            }
+
+            #[test]
+            fn yields_element() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                for element in expected {
+                    let removed = actual.remove(0).expect("front element");
+
+                    assert_eq!(removed, element);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_leading_elements() {
+                const INDEX: usize = 2;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.remove(INDEX).expect("valid index");
+
+                for index in 0..INDEX {
+                    assert_eq!(actual[index], expected[index]);
+                }
+            }
+
+            #[test]
+            fn does_not_modify_trailing_elements() {
+                const INDEX: usize = 2;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                _ = actual.remove(INDEX).expect("valid index");
+
+                for index in INDEX..expected.len() - 1 {
+                    assert_eq!(actual[index], expected[index + 1]);
+                }
+            }
+
+            #[test]
+            fn none_when_index_out_of_bounds() {
+                let mut actual = Doubly::<()>::default();
+
+                assert!(actual.remove(0).is_none());
             }
         }
 
@@ -2751,67 +2808,6 @@ mod test {
                 assert!(actual.append(0).is_ok());
                 assert_eq!(actual.head, actual.tail);
                 assert!(actual.eq([0]));
-            }
-        }
-
-        mod remove {
-            use super::*;
-
-            #[test]
-            fn subtracts_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Doubly<_> = expected.iter().copied().collect();
-
-                _ = actual.remove(0).expect("valid index");
-
-                assert_eq!(actual.len(), expected.len() - 1);
-            }
-
-            #[test]
-            fn yields_element() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Doubly<_> = expected.iter().copied().collect();
-
-                for element in expected {
-                    let removed = actual.remove(0).expect("front element");
-
-                    assert_eq!(removed, element);
-                }
-            }
-
-            #[test]
-            fn does_not_modify_leading_elements() {
-                const INDEX: usize = 2;
-
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Doubly<_> = expected.iter().copied().collect();
-
-                _ = actual.remove(INDEX).expect("valid index");
-
-                for index in 0..INDEX {
-                    assert_eq!(actual[index], expected[index]);
-                }
-            }
-
-            #[test]
-            fn does_not_modify_trailing_elements() {
-                const INDEX: usize = 2;
-
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual: Doubly<_> = expected.iter().copied().collect();
-
-                _ = actual.remove(INDEX).expect("valid index");
-
-                for index in INDEX..expected.len() - 1 {
-                    assert_eq!(actual[index], expected[index + 1]);
-                }
-            }
-
-            #[test]
-            fn none_when_index_out_of_bounds() {
-                let mut actual = Doubly::<()>::default();
-
-                assert!(actual.remove(0).is_none());
             }
         }
 
