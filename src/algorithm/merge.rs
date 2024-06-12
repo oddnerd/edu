@@ -139,9 +139,7 @@ pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
 /// inplace(&mut slice, 3);
 /// assert_eq!(slice, [0,1,2,3,4,5]);
 /// ```
-pub fn inplace<T>(slice: &mut [T], mut middle: usize)
-where
-    T: Ord,
+pub fn in_place<T: Ord>(slice: &mut [T], mut middle: usize)
 {
     let mut left = 0;
     let mut right = middle;
@@ -291,35 +289,35 @@ mod test {
         #[test]
         fn first_empty() {
             let mut slice = [0];
-            inplace(&mut slice, 0);
+            in_place(&mut slice, 0);
             assert_eq!(slice, [0]);
         }
 
         #[test]
         fn second_empty() {
             let mut slice = [0];
-            inplace(&mut slice, 1);
+            in_place(&mut slice, 1);
             assert_eq!(slice, [0]);
         }
 
         #[test]
         fn first_greater() {
             let mut slice = [1, 0];
-            inplace(&mut slice, 1);
+            in_place(&mut slice, 1);
             assert_eq!(slice, [0, 1]);
         }
 
         #[test]
         fn second_greater() {
             let mut slice = [0, 1];
-            inplace(&mut slice, 1);
+            in_place(&mut slice, 1);
             assert_eq!(slice, [0, 1]);
         }
 
         #[test]
         fn back_and_forth() {
             let mut slice = [0, 3, 1, 2];
-            inplace(&mut slice, 2);
+            in_place(&mut slice, 2);
             assert_eq!(slice, [0, 1, 2, 3]);
         }
     }
