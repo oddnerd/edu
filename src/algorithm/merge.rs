@@ -106,18 +106,24 @@ pub fn recursive<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T])
             Err(index) | Ok(index) => index,
         };
 
-        output[middle + intersect] = first[middle].clone();
+        let (left, right) = {
+            let (left, right) = output.split_at_mut(middle + intersect);
+
+            right[0] = first[middle].clone();
+
+            (left, &mut right[1..])
+        };
 
         recursive(
             &first[..middle],
             &second[..intersect],
-            &mut output[..middle + intersect],
+            left,
         );
 
         recursive(
             &first[middle + 1..],
             &second[intersect..],
-            &mut output[middle + intersect + 1..],
+            right,
         );
     }
 }
