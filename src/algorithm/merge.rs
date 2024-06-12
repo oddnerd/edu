@@ -2,8 +2,6 @@
 
 /// An [`Iterator`] to traverse two other sorted [`Iterator`] in sorted order.
 ///
-/// <div class="warning">The underlying [`Iterator`]s MUST return items in sorted order</div>
-///
 /// # Examples:
 /// ```
 /// use rust::algorithm::merge::MergeIter;
