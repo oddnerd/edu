@@ -134,19 +134,22 @@ mod mergeiter_tests {
     }
 }
 
-/// Merge two slices into one output slice.
+/// Merge two slices into one output slice, via a recursive implementation.
 ///
-/// Peek each underlying [`Iterator`] and compare, returning the smaller
-/// without consuming the other, thereby allowing it to be quired again next.
+/// # Performance
+/// This method takes O(N) time and consumes O(N) memory.
 ///
-/// # Examples:
+/// # Examples
 /// ```
 /// use rust::algorithm::merge::recursive;
-/// let first = [0,2,4];
-/// let second = [1,3,5];
+///
+/// let first  = [0, 2, 4];
+/// let second = [1, 3, 5];
 /// let mut output = [0; 6];
+///
 /// recursive(&first, &second, &mut output);
-/// assert_eq!(output, [0,1,2,3,4,5]);
+///
+/// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
 where
