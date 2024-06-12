@@ -145,6 +145,8 @@ pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
 ///
 /// assert_eq!(slice, [0, 1, 2, 3, 4, 5]);
 /// ```
+#[allow(clippy::indexing_slicing)]
+#[allow(clippy::arithmetic_side_effects)]
 pub fn in_place<T: Ord>(slice: &mut [T], mut middle: usize)
 {
     let mut left = 0;
