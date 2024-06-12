@@ -4,32 +4,32 @@
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::merge::MergeIter;
+/// use rust::algorithm::merge::Iter;
 ///
 /// let first = [0,2,4];
 /// let second = [1,3,5];
 ///
-/// let instance = MergeIter::new([0, 2, 4].into_iter(), [1, 3, 5].into_iter());
+/// let instance = Iter::new([0, 2, 4].into_iter(), [1, 3, 5].into_iter());
 ///
 /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
 /// ```
 #[derive(Debug)]
-pub struct MergeIter<T: Ord, Iter: Iterator<Item = T>> {
-    first: core::iter::Peekable<Iter>,
-    second: core::iter::Peekable<Iter>,
+pub struct Iter<T: Ord, I: Iterator<Item = T>> {
+    first: core::iter::Peekable<I>,
+    second: core::iter::Peekable<I>,
 }
 
-impl<T: Ord, Iter: Iterator<Item = T>> MergeIter<T, Iter> {
+impl<T: Ord, I: Iterator<Item = T>> Iter<T, I> {
     /// Construct a [`MergeIter`] from two other [`Iterator`].
-    pub fn new(first: Iter, second: Iter) -> Self {
-        MergeIter {
+    pub fn new(first: I, second: I) -> Self {
+        Iter {
             first: first.peekable(),
             second: second.peekable(),
         }
     }
 }
 
-impl<T: Ord, Iter: Iterator<Item = T>> Iterator for MergeIter<T, Iter> {
+impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -57,7 +57,7 @@ mod mergeiter_tests {
     fn first_empty() {
         let first = [];
         let second = [0];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
 
         assert_eq!(result.len(), 1);
         assert_eq!(*result[0], 0);
@@ -67,7 +67,7 @@ mod mergeiter_tests {
     fn second_empty() {
         let first = [0];
         let second = [];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
 
         assert_eq!(result.len(), 1);
         assert_eq!(*result[0], 0);
@@ -77,7 +77,7 @@ mod mergeiter_tests {
     fn first_greater() {
         let first = [1];
         let second = [0];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
 
         assert_eq!(result.len(), 2);
         assert_eq!(*result[0], 0);
@@ -88,7 +88,7 @@ mod mergeiter_tests {
     fn second_greater() {
         let first = [0];
         let second = [1];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
 
         assert_eq!(result.len(), 2);
         assert_eq!(*result[0], 0);
@@ -99,7 +99,7 @@ mod mergeiter_tests {
     fn back_and_forth() {
         let first = [1, 2];
         let second = [0, 3];
-        let result: Vec<&i32> = MergeIter::new(first.iter(), second.iter()).collect();
+        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
 
         assert_eq!(result.len(), 4);
         assert_eq!(*result[0], 0);

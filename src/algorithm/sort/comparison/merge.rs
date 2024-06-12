@@ -40,7 +40,7 @@ where
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
-        crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter())
+        crate::algorithm::merge::Iter::new(left_auxiliary.iter(), right_auxiliary.iter())
             .zip(slice)
             .for_each(|(new, old)| {
                 *old = new.clone();
@@ -129,7 +129,7 @@ where
         let (left, right) = from.split_at_mut(middle);
 
         // merging those two sorted subslices sorts them together
-        let merged = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
+        let merged = crate::algorithm::merge::Iter::new(left.iter(), right.iter());
 
         // put the result into output `slice`
         merged.zip(into.iter_mut()).for_each(|(new, old)| {
@@ -273,7 +273,7 @@ where
         inplace(left);
         inplace(right);
 
-        crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut())
+        crate::algorithm::merge::Iter::new(left.iter_mut(), right.iter_mut())
             .zip(into.iter_mut())
             .for_each(|(smallest, output)| {
                 core::mem::swap(smallest, output);
