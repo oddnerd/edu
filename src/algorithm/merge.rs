@@ -1,38 +1,28 @@
 //! Combine (merge) sorted collections whilst preserving order.
 
-/// An [`Iterator`] to traverse two other sorted [`Iterator`] in sorted order.
+/// Iteratively merge two other sorted [`Iterator`].
 ///
 /// # Examples
 /// ```
 /// use rust::algorithm::merge::Iter;
 ///
-/// let instance = Iter::new([0, 2, 4].into_iter(), [1, 3, 5].into_iter());
+/// let instance = Iter {
+///     first: [0, 2, 4].into_iter().peekable(),
+///     second: [1, 3, 5].into_iter().peekable(),
+/// };
 ///
 /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
 /// ```
 #[derive(Debug)]
-pub struct Iter<T: Ord, I: Iterator<Item = T>> {
-    /// The first [`Iterator`] to merge.
-    first: core::iter::Peekable<I>,
+pub struct Iterative<T: Ord, First: Iterator<Item = T>, Second: Iterator<Item = T>> {
+    /// The first sorted input.
+    first: core::iter::Peekable<First>,
 
-    /// The second [`Iterator`] to merge.
-    second: core::iter::Peekable<I>,
+    /// The second sorted input.
+    second: core::iter::Peekable<Second>,
 }
 
-impl<T: Ord, I: Iterator<Item = T>> Iter<T, I> {
-    /// Construct an [`Iter`] from two other [`Iterator`].
-    ///
-    /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
-    pub fn new(first: I, second: I) -> Self {
-        Iter {
-            first: first.peekable(),
-            second: second.peekable(),
-        }
-    }
-}
-
-impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
+impl<T: Ord, First: Iterator<Item = T>, Second: Iterator<Item = T>> Iterator for Iterative<T, First, Second> {
     type Item = T;
 
     /// Obtain the next item in sorted order.
@@ -44,10 +34,10 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
     /// ```
     /// use rust::algorithm::merge::Iter;
     ///
-    /// let mut instance = Iter::new(
-    ///     [0, 2, 4].into_iter(),
-    ///     [1, 3, 5].into_iter()
-    /// );
+    /// let instance = Iter {
+    ///     first: [0, 2, 4].into_iter().peekable(),
+    ///     second: [1, 3, 5].into_iter().peekable(),
+    /// };
     ///
     /// assert_eq!(instance.next(), Some(0));
     /// assert_eq!(instance.next(), Some(1));
@@ -177,62 +167,72 @@ pub fn in_place<T: Ord>(slice: &mut [T], middle: usize) {
 mod test {
     use super::*;
 
-    mod iter {
+    mod iterative {
         use super::*;
 
         #[test]
         fn first_empty() {
-            let first = [];
-            let second = [0];
-            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+            let input = [0, 1, 2, 3, 4, 5];
 
-            assert_eq!(result.len(), 1);
-            assert_eq!(*result[0], 0);
+            let actual = Iterative {
+                first: core::iter::empty().peekable(),
+                second: input.iter().copied().peekable(),
+            };
+
+            assert!(actual.eq(input));
         }
+
 
         #[test]
         fn second_empty() {
-            let first = [0];
-            let second = [];
-            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+            let input = [0, 1, 2, 3, 4, 5];
 
-            assert_eq!(result.len(), 1);
-            assert_eq!(*result[0], 0);
+            let actual = Iterative {
+                first: input.iter().copied().peekable(),
+                second: core::iter::empty().peekable(),
+            };
+
+            assert!(actual.eq(input));
+        }
+
+        #[test]
+        fn both_empty() {
+            let actual = Iterative {
+                first: core::iter::empty::<()>().peekable(),
+                second: core::iter::empty::<()>().peekable(),
+            };
+
+            assert_eq!(actual.count(), 0);
         }
 
         #[test]
         fn first_greater() {
-            let first = [1];
-            let second = [0];
-            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+            let actual = Iterative {
+                first: [1].into_iter().peekable(),
+                second: [0].into_iter().peekable(),
+            };
 
-            assert_eq!(result.len(), 2);
-            assert_eq!(*result[0], 0);
-            assert_eq!(*result[1], 1);
+            assert!(actual.eq([0, 1]));
         }
 
         #[test]
         fn second_greater() {
-            let first = [0];
-            let second = [1];
-            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+            let actual = Iterative {
+                first: [0].into_iter().peekable(),
+                second: [1].into_iter().peekable(),
+            };
 
-            assert_eq!(result.len(), 2);
-            assert_eq!(*result[0], 0);
-            assert_eq!(*result[1], 1);
+            assert!(actual.eq([0, 1]));
         }
 
         #[test]
         fn back_and_forth() {
-            let first = [1, 2];
-            let second = [0, 3];
-            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+            let actual = Iterative {
+                first: [1, 2].into_iter().peekable(),
+                second: [0, 3].into_iter().peekable(),
+            };
 
-            assert_eq!(result.len(), 4);
-            assert_eq!(*result[0], 0);
-            assert_eq!(*result[1], 1);
-            assert_eq!(*result[2], 2);
-            assert_eq!(*result[3], 3);
+            assert!(actual.eq([0, 1, 2, 3]));
         }
     }
 
