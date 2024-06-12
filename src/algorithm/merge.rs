@@ -2,13 +2,16 @@
 
 /// An [`Iterator`] to traverse two other sorted [`Iterator`] in sorted order.
 ///
-/// # Examples:
+/// # Examples
 /// ```
 /// use rust::algorithm::merge::MergeIter;
+///
 /// let first = [0,2,4];
 /// let second = [1,3,5];
-/// let output: Vec<_> = MergeIter::new(first.iter(), second.iter()).cloned().collect();
-/// assert_eq!(output, [0,1,2,3,4,5]);
+///
+/// let instance = MergeIter::new([0, 2, 4].into_iter(), [1, 3, 5].into_iter());
+///
+/// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
 /// ```
 #[derive(Debug)]
 pub struct MergeIter<T: Ord, Iter: Iterator<Item = T>> {
