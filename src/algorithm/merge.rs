@@ -15,7 +15,10 @@
 /// ```
 #[derive(Debug)]
 pub struct Iter<T: Ord, I: Iterator<Item = T>> {
+    /// The first [`Iterator`] to merge.
     first: core::iter::Peekable<I>,
+
+    /// The second [`Iterator`] to merge.
     second: core::iter::Peekable<I>,
 }
 
