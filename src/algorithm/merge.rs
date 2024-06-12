@@ -74,66 +74,6 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
     }
 }
 
-#[cfg(test)]
-mod mergeiter_tests {
-    use super::*;
-
-    #[test]
-    fn first_empty() {
-        let first = [];
-        let second = [0];
-        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 1);
-        assert_eq!(*result[0], 0);
-    }
-
-    #[test]
-    fn second_empty() {
-        let first = [0];
-        let second = [];
-        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 1);
-        assert_eq!(*result[0], 0);
-    }
-
-    #[test]
-    fn first_greater() {
-        let first = [1];
-        let second = [0];
-        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 2);
-        assert_eq!(*result[0], 0);
-        assert_eq!(*result[1], 1);
-    }
-
-    #[test]
-    fn second_greater() {
-        let first = [0];
-        let second = [1];
-        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 2);
-        assert_eq!(*result[0], 0);
-        assert_eq!(*result[1], 1);
-    }
-
-    #[test]
-    fn back_and_forth() {
-        let first = [1, 2];
-        let second = [0, 3];
-        let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
-
-        assert_eq!(result.len(), 4);
-        assert_eq!(*result[0], 0);
-        assert_eq!(*result[1], 1);
-        assert_eq!(*result[2], 2);
-        assert_eq!(*result[3], 3);
-    }
-}
-
 /// Merge two slices into one output slice, via a recursive implementation.
 ///
 /// # Performance
@@ -181,71 +121,6 @@ where
     }
 }
 
-#[cfg(test)]
-mod recursive_tests {
-    use super::*;
-
-    #[test]
-    fn first_empty() {
-        let first = [];
-        let second = [0];
-        let mut output = vec![0; 1];
-        recursive(&first, &second, &mut output);
-
-        assert_eq!(output.len(), 1);
-        assert_eq!(output[0], 0);
-    }
-
-    #[test]
-    fn second_empty() {
-        let first = [0];
-        let second = [];
-        let mut output = vec![0; 1];
-        recursive(&first, &second, &mut output);
-
-        assert_eq!(output.len(), 1);
-        assert_eq!(output[0], 0);
-    }
-
-    #[test]
-    fn first_greater() {
-        let first = [1];
-        let second = [0];
-        let mut output = vec![0; 2];
-        recursive(&first, &second, &mut output);
-
-        assert_eq!(output.len(), 2);
-        assert_eq!(output[0], 0);
-        assert_eq!(output[1], 1);
-    }
-
-    #[test]
-    fn second_greater() {
-        let first = [0];
-        let second = [1];
-        let mut output = vec![0; 2];
-        recursive(&first, &second, &mut output);
-
-        assert_eq!(output.len(), 2);
-        assert_eq!(output[0], 0);
-        assert_eq!(output[1], 1);
-    }
-
-    #[test]
-    fn back_and_forth() {
-        let first = [1, 2];
-        let second = [0, 3];
-        let mut output = vec![0; 4];
-        recursive(&first, &second, &mut output);
-
-        assert_eq!(output.len(), 4);
-        assert_eq!(output[0], 0);
-        assert_eq!(output[1], 1);
-        assert_eq!(output[2], 2);
-        assert_eq!(output[3], 3);
-    }
-}
-
 /// Merge two halves of a slice in-place.
 ///
 /// Naive implementation, n<sup>2</sup> time complexity.
@@ -276,42 +151,170 @@ where
     }
 }
 
+
 #[cfg(test)]
-mod inplace_tests {
+mod test {
     use super::*;
 
-    #[test]
-    fn first_empty() {
-        let mut slice = [0];
-        inplace(&mut slice, 0);
-        assert_eq!(slice, [0]);
+    mod iter {
+        use super::*;
+
+        #[test]
+        fn first_empty() {
+            let first = [];
+            let second = [0];
+            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+
+            assert_eq!(result.len(), 1);
+            assert_eq!(*result[0], 0);
+        }
+
+        #[test]
+        fn second_empty() {
+            let first = [0];
+            let second = [];
+            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+
+            assert_eq!(result.len(), 1);
+            assert_eq!(*result[0], 0);
+        }
+
+        #[test]
+        fn first_greater() {
+            let first = [1];
+            let second = [0];
+            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+
+            assert_eq!(result.len(), 2);
+            assert_eq!(*result[0], 0);
+            assert_eq!(*result[1], 1);
+        }
+
+        #[test]
+        fn second_greater() {
+            let first = [0];
+            let second = [1];
+            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+
+            assert_eq!(result.len(), 2);
+            assert_eq!(*result[0], 0);
+            assert_eq!(*result[1], 1);
+        }
+
+        #[test]
+        fn back_and_forth() {
+            let first = [1, 2];
+            let second = [0, 3];
+            let result: Vec<&i32> = Iter::new(first.iter(), second.iter()).collect();
+
+            assert_eq!(result.len(), 4);
+            assert_eq!(*result[0], 0);
+            assert_eq!(*result[1], 1);
+            assert_eq!(*result[2], 2);
+            assert_eq!(*result[3], 3);
+        }
     }
 
-    #[test]
-    fn second_empty() {
-        let mut slice = [0];
-        inplace(&mut slice, 1);
-        assert_eq!(slice, [0]);
+    mod recursive {
+        use super::*;
+
+        #[test]
+        fn first_empty() {
+            let first = [];
+            let second = [0];
+            let mut output = vec![0; 1];
+            recursive(&first, &second, &mut output);
+
+            assert_eq!(output.len(), 1);
+            assert_eq!(output[0], 0);
+        }
+
+        #[test]
+        fn second_empty() {
+            let first = [0];
+            let second = [];
+            let mut output = vec![0; 1];
+            recursive(&first, &second, &mut output);
+
+            assert_eq!(output.len(), 1);
+            assert_eq!(output[0], 0);
+        }
+
+        #[test]
+        fn first_greater() {
+            let first = [1];
+            let second = [0];
+            let mut output = vec![0; 2];
+            recursive(&first, &second, &mut output);
+
+            assert_eq!(output.len(), 2);
+            assert_eq!(output[0], 0);
+            assert_eq!(output[1], 1);
+        }
+
+        #[test]
+        fn second_greater() {
+            let first = [0];
+            let second = [1];
+            let mut output = vec![0; 2];
+            recursive(&first, &second, &mut output);
+
+            assert_eq!(output.len(), 2);
+            assert_eq!(output[0], 0);
+            assert_eq!(output[1], 1);
+        }
+
+        #[test]
+        fn back_and_forth() {
+            let first = [1, 2];
+            let second = [0, 3];
+            let mut output = vec![0; 4];
+            recursive(&first, &second, &mut output);
+
+            assert_eq!(output.len(), 4);
+            assert_eq!(output[0], 0);
+            assert_eq!(output[1], 1);
+            assert_eq!(output[2], 2);
+            assert_eq!(output[3], 3);
+        }
     }
 
-    #[test]
-    fn first_greater() {
-        let mut slice = [1, 0];
-        inplace(&mut slice, 1);
-        assert_eq!(slice, [0, 1]);
-    }
+    mod inplace {
+        use super::*;
 
-    #[test]
-    fn second_greater() {
-        let mut slice = [0, 1];
-        inplace(&mut slice, 1);
-        assert_eq!(slice, [0, 1]);
-    }
+        #[test]
+        fn first_empty() {
+            let mut slice = [0];
+            inplace(&mut slice, 0);
+            assert_eq!(slice, [0]);
+        }
 
-    #[test]
-    fn back_and_forth() {
-        let mut slice = [0, 3, 1, 2];
-        inplace(&mut slice, 2);
-        assert_eq!(slice, [0, 1, 2, 3]);
+        #[test]
+        fn second_empty() {
+            let mut slice = [0];
+            inplace(&mut slice, 1);
+            assert_eq!(slice, [0]);
+        }
+
+        #[test]
+        fn first_greater() {
+            let mut slice = [1, 0];
+            inplace(&mut slice, 1);
+            assert_eq!(slice, [0, 1]);
+        }
+
+        #[test]
+        fn second_greater() {
+            let mut slice = [0, 1];
+            inplace(&mut slice, 1);
+            assert_eq!(slice, [0, 1]);
+        }
+
+        #[test]
+        fn back_and_forth() {
+            let mut slice = [0, 3, 1, 2];
+            inplace(&mut slice, 2);
+            assert_eq!(slice, [0, 1, 2, 3]);
+        }
     }
 }
