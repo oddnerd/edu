@@ -83,7 +83,9 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
 ///
 /// # Performance
 /// Synchronous: This method takes O(N * log N) time and consumes O(N) memory.
-/// Asynchronous: This method takes O(log^2 N) time and consumes O(N) memory.
+///
+/// Asynchronous: This method takes O(log<sup>2</sup> N) time and consumes
+/// O(N) memory.
 ///
 /// # Examples
 /// ```
