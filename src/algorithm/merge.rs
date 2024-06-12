@@ -74,34 +74,40 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
     }
 }
 
-/// Merge two slices into one output slice, via a recursive implementation.
+/// Merge two slices into one output slice.
+///
+/// For the convenience of implementation to not depend on a particular
+/// executor, this method executes synchronously within the singly calling
+/// thread. However, the implementation is of a parallel algorithm that could
+/// be trivially modified to execute asynchronously.
 ///
 /// # Performance
-/// This method takes O(N) time and consumes O(N) memory.
+/// Synchronous: This method takes O(N * log N) time and consumes O(N) memory.
+/// Asynchronous: This method takes O(log^2 N) time and consumes O(N) memory.
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::merge::recursive;
+/// use rust::algorithm::merge::parallel;
 ///
 /// let first  = [0, 2, 4];
 /// let second = [1, 3, 5];
 /// let mut output = [0; 6];
 ///
-/// recursive(&first, &second, &mut output);
+/// parallel(&first, &second, &mut output);
 ///
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-pub fn recursive<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T])
-{
+pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
     if first.len() < second.len() {
-        return recursive(second, first, output);
+        return parallel(second, first, output);
     }
 
     if !first.is_empty() {
         let middle = first.len() / 2;
 
+        // NOTE: binary search is O(log N).
         let intersect = match second.binary_search(&first[middle]) {
             Err(index) | Ok(index) => index,
         };
@@ -114,17 +120,9 @@ pub fn recursive<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T])
         let output_right = &mut output_right[1..];
         let first_right = &first_right[1..];
 
-        recursive(
-            first_left,
-            second_left,
-            output_left,
-        );
-
-        recursive(
-            first_right,
-            second_right,
-            output_right,
-        );
+        // The following calls could be executed concurrently.
+        parallel(first_left, second_left, output_left);
+        parallel(first_right, second_right, output_right);
     }
 }
 
@@ -157,7 +155,6 @@ where
         }
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -222,7 +219,7 @@ mod test {
         }
     }
 
-    mod recursive {
+    mod parallel {
         use super::*;
 
         #[test]
@@ -230,7 +227,7 @@ mod test {
             let first = [];
             let second = [0];
             let mut output = vec![0; 1];
-            recursive(&first, &second, &mut output);
+            parallel(&first, &second, &mut output);
 
             assert_eq!(output.len(), 1);
             assert_eq!(output[0], 0);
@@ -241,7 +238,7 @@ mod test {
             let first = [0];
             let second = [];
             let mut output = vec![0; 1];
-            recursive(&first, &second, &mut output);
+            parallel(&first, &second, &mut output);
 
             assert_eq!(output.len(), 1);
             assert_eq!(output[0], 0);
@@ -252,7 +249,7 @@ mod test {
             let first = [1];
             let second = [0];
             let mut output = vec![0; 2];
-            recursive(&first, &second, &mut output);
+            parallel(&first, &second, &mut output);
 
             assert_eq!(output.len(), 2);
             assert_eq!(output[0], 0);
@@ -264,7 +261,7 @@ mod test {
             let first = [0];
             let second = [1];
             let mut output = vec![0; 2];
-            recursive(&first, &second, &mut output);
+            parallel(&first, &second, &mut output);
 
             assert_eq!(output.len(), 2);
             assert_eq!(output[0], 0);
@@ -276,7 +273,7 @@ mod test {
             let first = [1, 2];
             let second = [0, 3];
             let mut output = vec![0; 4];
-            recursive(&first, &second, &mut output);
+            parallel(&first, &second, &mut output);
 
             assert_eq!(output.len(), 4);
             assert_eq!(output[0], 0);
