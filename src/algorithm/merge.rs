@@ -293,7 +293,7 @@ mod test {
         }
     }
 
-    mod inplace {
+    mod in_place {
         use super::*;
 
         #[test]
