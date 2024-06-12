@@ -130,16 +130,20 @@ pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
     parallel(first_right, second_right, output_right);
 }
 
-/// Merge two halves of a slice in-place.
+/// Merge independently sorted `[..middle]` and `[middle..]` together in-place.
 ///
-/// Naive implementation, n<sup>2</sup> time complexity.
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::merge::inplace;
-/// let mut slice = [0,2,4,1,3,5];
-/// inplace(&mut slice, 3);
-/// assert_eq!(slice, [0,1,2,3,4,5]);
+/// use rust::algorithm::merge::in_place;
+///
+/// let mut slice = [0, 2, 4, 1, 3, 5];
+///
+/// in_place(&mut slice, 3);
+///
+/// assert_eq!(slice, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn in_place<T: Ord>(slice: &mut [T], mut middle: usize)
 {
