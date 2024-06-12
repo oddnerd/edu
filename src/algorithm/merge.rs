@@ -6,9 +6,6 @@
 /// ```
 /// use rust::algorithm::merge::Iter;
 ///
-/// let first = [0,2,4];
-/// let second = [1,3,5];
-///
 /// let instance = Iter::new([0, 2, 4].into_iter(), [1, 3, 5].into_iter());
 ///
 /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
