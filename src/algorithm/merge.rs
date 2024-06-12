@@ -58,18 +58,17 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
     /// assert_eq!(instance.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(left) = self.first.peek() {
-            if let Some(right) = self.second.peek() {
-                if left <= right {
+        match (self.first.peek(), self.second.peek()) {
+            (Some(first), Some(second)) => {
+                if first <= second {
                     self.first.next()
                 } else {
                     self.second.next()
                 }
-            } else {
-                self.first.next()
             }
-        } else {
-            self.second.next()
+            (Some(_), None) => self.first.next(),
+            (None, Some(_)) => self.second.next(),
+            (None, None) => None,
         }
     }
 }
