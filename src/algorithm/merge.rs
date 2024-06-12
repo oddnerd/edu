@@ -75,6 +75,9 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
 
 /// Merge two slices into one output slice.
 ///
+/// This algorithm is _NOT_ stable meaning the order of equal elements
+/// is _NOT_ guaranteed.
+///
 /// For the convenience of implementation to not depend on a particular
 /// executor, this method executes synchronously within the singly calling
 /// thread. However, the implementation is of a parallel algorithm that could
