@@ -93,9 +93,7 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
-where
-    T: Ord + Clone,
+pub fn recursive<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T])
 {
     if first.len() < second.len() {
         return recursive(second, first, output);
