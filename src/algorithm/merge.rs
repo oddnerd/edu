@@ -92,6 +92,7 @@ impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
 #[allow(clippy::indexing_slicing)]
+#[allow(clippy::arithmetic_side_effects)]
 pub fn recursive<T>(first: &[T], second: &[T], output: &mut [T])
 where
     T: Ord + Clone,
