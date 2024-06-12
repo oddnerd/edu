@@ -147,19 +147,19 @@ pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-pub fn in_place<T: Ord>(slice: &mut [T], mut middle: usize)
-{
-    let mut left = 0;
-    let mut right = middle;
+#[allow(clippy::range_plus_one)]
+pub fn in_place<T: Ord>(slice: &mut [T], middle: usize) {
+    let mut left = 0..middle;
+    let mut right = middle..slice.len();
 
-    while (left < middle) && (right < slice.len()) {
-        if slice[left] < slice[right] {
-            left += 1;
+    while !left.is_empty() && !right.is_empty() {
+        if slice[left.start] < slice[right.start] {
+            _ = left.next();
         } else {
-            slice[left..=right].rotate_right(1);
-            left += 1;
-            middle += 1;
-            right += 1;
+            slice[left.start..=right.start].rotate_right(1);
+
+            left = (left.start + 1)..(left.end + 1);
+            _ = right.next();
         }
     }
 }
