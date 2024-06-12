@@ -24,6 +24,9 @@ pub struct Iter<T: Ord, I: Iterator<Item = T>> {
 
 impl<T: Ord, I: Iterator<Item = T>> Iter<T, I> {
     /// Construct an [`Iter`] from two other [`Iterator`].
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
     pub fn new(first: I, second: I) -> Self {
         Iter {
             first: first.peekable(),
