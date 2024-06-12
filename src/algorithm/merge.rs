@@ -101,9 +101,9 @@ where
 
     if !first.is_empty() {
         let middle = first.len() / 2;
+
         let intersect = match second.binary_search(&first[middle]) {
-            Ok(index) => index,
-            Err(index) => index,
+            Err(index) | Ok(index) => index,
         };
 
         output[middle + intersect] = first[middle].clone();
