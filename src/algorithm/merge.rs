@@ -38,6 +38,28 @@ impl<T: Ord, I: Iterator<Item = T>> Iter<T, I> {
 impl<T: Ord, I: Iterator<Item = T>> Iterator for Iter<T, I> {
     type Item = T;
 
+    /// Obtain the next item in sorted order.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::algorithm::merge::Iter;
+    ///
+    /// let mut instance = Iter::new(
+    ///     [0, 2, 4].into_iter(),
+    ///     [1, 3, 5].into_iter()
+    /// );
+    ///
+    /// assert_eq!(instance.next(), Some(0));
+    /// assert_eq!(instance.next(), Some(1));
+    /// assert_eq!(instance.next(), Some(2));
+    /// assert_eq!(instance.next(), Some(3));
+    /// assert_eq!(instance.next(), Some(4));
+    /// assert_eq!(instance.next(), Some(5));
+    /// assert_eq!(instance.next(), None);
+    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(left) = self.first.peek() {
             if let Some(right) = self.second.peek() {
