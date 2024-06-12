@@ -23,7 +23,7 @@ pub struct Iter<T: Ord, I: Iterator<Item = T>> {
 }
 
 impl<T: Ord, I: Iterator<Item = T>> Iter<T, I> {
-    /// Construct a [`MergeIter`] from two other [`Iterator`].
+    /// Construct an [`Iter`] from two other [`Iterator`].
     pub fn new(first: I, second: I) -> Self {
         Iter {
             first: first.peekable(),
