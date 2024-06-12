@@ -1,69 +1,62 @@
 //! Combine (merge) sorted collections whilst preserving order.
 
-/// Iteratively merge two other sorted [`Iterator`].
+/// Merge two sorted slices into one `output` slice.
+///
+/// # Panics
+/// This method has the precondition that `output` has the _exact_ same length
+/// as the sum of the input lengths.
+///
+/// # Performance
+/// This method takes O(N) time and consumes O(1) memory.
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::merge::Iter;
+/// use rust::algorithm::merge::iterative;
 ///
-/// let instance = Iter {
-///     first: [0, 2, 4].into_iter().peekable(),
-///     second: [1, 3, 5].into_iter().peekable(),
-/// };
+/// let mut first  = [0, 2, 4];
+/// let mut second = [1, 3, 5];
+/// let mut output = [0; 6];
 ///
-/// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+/// iterative(&mut first, &mut second, &mut output);
+///
+/// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[derive(Debug)]
-pub struct Iterative<T: Ord, First: Iterator<Item = T>, Second: Iterator<Item = T>> {
-    /// The first sorted input.
-    first: core::iter::Peekable<First>,
+#[allow(clippy::indexing_slicing)]
+pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
+    let Some(elements) = usize::checked_add(first.len(), second.len()) else {
+        panic!("output slice cannot be big enough to store inputs");
+    };
 
-    /// The second sorted input.
-    second: core::iter::Peekable<Second>,
-}
+    assert_eq!(output.len(), elements, "output length must be sum of input lengths");
 
-impl<T: Ord, First: Iterator<Item = T>, Second: Iterator<Item = T>> Iterator for Iterative<T, First, Second> {
-    type Item = T;
+    let mut first = first.iter_mut().peekable();
+    let mut second = second.iter_mut().peekable();
 
-    /// Obtain the next item in sorted order.
-    ///
-    /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::algorithm::merge::Iter;
-    ///
-    /// let instance = Iter {
-    ///     first: [0, 2, 4].into_iter().peekable(),
-    ///     second: [1, 3, 5].into_iter().peekable(),
-    /// };
-    ///
-    /// assert_eq!(instance.next(), Some(0));
-    /// assert_eq!(instance.next(), Some(1));
-    /// assert_eq!(instance.next(), Some(2));
-    /// assert_eq!(instance.next(), Some(3));
-    /// assert_eq!(instance.next(), Some(4));
-    /// assert_eq!(instance.next(), Some(5));
-    /// assert_eq!(instance.next(), None);
-    /// ```
-    fn next(&mut self) -> Option<Self::Item> {
-        match (self.first.peek(), self.second.peek()) {
-            (Some(first), Some(second)) => {
-                if first <= second {
-                    self.first.next()
+    for element in output {
+        match (first.peek_mut(), second.peek_mut()) {
+            (Some(left), Some(right)) => {
+                if left <= right {
+                    core::mem::swap(element, *left);
+                    _ = first.next();
                 } else {
-                    self.second.next()
+                    core::mem::swap(element, *right);
+                    _ = second.next();
                 }
-            }
-            (Some(_), None) => self.first.next(),
-            (None, Some(_)) => self.second.next(),
-            (None, None) => None,
-        }
+            },
+            (Some(left), None) => {
+                core::mem::swap(element, *left);
+                _ = first.next();
+            },
+            (None, Some(right)) => {
+                core::mem::swap(element, *right);
+                _ = second.next();
+            },
+            (None, None) => unreachable!("more output elements than input"),
+        };
     }
 }
 
-/// Merge two slices into one output slice.
+/// Merge two sorted slices into one `output` slice.
 ///
 /// This algorithm is _NOT_ stable meaning the order of equal elements
 /// is _NOT_ guaranteed.
@@ -172,67 +165,110 @@ mod test {
 
         #[test]
         fn first_empty() {
-            let input = [0, 1, 2, 3, 4, 5];
+            let mut first = [];
+            let mut second = [0, 1, 2, 3, 4, 5];
+            let mut output = [0; 6];
 
-            let actual = Iterative {
-                first: core::iter::empty().peekable(),
-                second: input.iter().copied().peekable(),
-            };
+            iterative(&mut first, &mut second, &mut output);
 
-            assert!(actual.eq(input));
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
-
 
         #[test]
         fn second_empty() {
-            let input = [0, 1, 2, 3, 4, 5];
+            let mut first = [0, 1, 2, 3, 4, 5];
+            let mut second = [];
+            let mut output = [0; 6];
 
-            let actual = Iterative {
-                first: input.iter().copied().peekable(),
-                second: core::iter::empty().peekable(),
-            };
+            iterative(&mut first, &mut second, &mut output);
 
-            assert!(actual.eq(input));
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
         fn both_empty() {
-            let actual = Iterative {
-                first: core::iter::empty::<()>().peekable(),
-                second: core::iter::empty::<()>().peekable(),
-            };
+            let mut first = [];
+            let mut second = [];
+            let mut output = [0; 0];
 
-            assert_eq!(actual.count(), 0);
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, []);
+        }
+
+        #[test]
+        fn first_longer() {
+            let mut first = [0, 1, 3, 5];
+            let mut second = [2, 4];
+            let mut output = [0; 6];
+
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn second_longer() {
+            let mut first = [2, 4];
+            let mut second = [0, 1, 3, 5];
+            let mut output = [0; 6];
+
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
         fn first_greater() {
-            let actual = Iterative {
-                first: [1].into_iter().peekable(),
-                second: [0].into_iter().peekable(),
-            };
+            let mut first = [1];
+            let mut second = [0];
+            let mut output = [0; 2];
 
-            assert!(actual.eq([0, 1]));
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
         }
 
         #[test]
         fn second_greater() {
-            let actual = Iterative {
-                first: [0].into_iter().peekable(),
-                second: [1].into_iter().peekable(),
-            };
+            let mut first = [0];
+            let mut second = [1];
+            let mut output = [0; 2];
 
-            assert!(actual.eq([0, 1]));
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
         }
 
         #[test]
         fn back_and_forth() {
-            let actual = Iterative {
-                first: [1, 2].into_iter().peekable(),
-                second: [0, 3].into_iter().peekable(),
-            };
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [0; 6];
 
-            assert!(actual.eq([0, 1, 2, 3]));
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        #[should_panic(expected = "output length must be sum of input lengths")]
+        fn output_cannot_be_smaller() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [];
+
+            iterative(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[should_panic(expected = "output length must be sum of input lengths")]
+        fn output_cannot_be_larger() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [0; 256];
+
+            iterative(&mut first, &mut second, &mut output);
         }
     }
 
