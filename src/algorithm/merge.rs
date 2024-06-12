@@ -104,26 +104,28 @@ pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
         return parallel(second, first, output);
     }
 
-    if !first.is_empty() {
-        let middle = first.len() / 2;
-
-        // NOTE: binary search is O(log N).
-        let intersect = match second.binary_search(&first[middle]) {
-            Err(index) | Ok(index) => index,
-        };
-
-        let (first_left, first_right) = first.split_at(middle);
-        let (second_left, second_right) = second.split_at(intersect);
-        let (output_left, output_right) = output.split_at_mut(middle + intersect);
-
-        output_right[0] = first_right[0].clone();
-        let output_right = &mut output_right[1..];
-        let first_right = &first_right[1..];
-
-        // The following calls could be executed concurrently.
-        parallel(first_left, second_left, output_left);
-        parallel(first_right, second_right, output_right);
+    if first.is_empty() {
+        return;
     }
+
+    let middle = first.len() / 2;
+
+    // NOTE: binary search is O(log N).
+    let intersect = match second.binary_search(&first[middle]) {
+        Err(index) | Ok(index) => index,
+    };
+
+    let (first_left, first_right) = first.split_at(middle);
+    let (second_left, second_right) = second.split_at(intersect);
+    let (output_left, output_right) = output.split_at_mut(middle + intersect);
+
+    output_right[0] = first_right[0].clone();
+    let output_right = &mut output_right[1..];
+    let first_right = &first_right[1..];
+
+    // The following calls could be executed concurrently.
+    parallel(first_left, second_left, output_left);
+    parallel(first_right, second_right, output_right);
 }
 
 /// Merge two halves of a slice in-place.
