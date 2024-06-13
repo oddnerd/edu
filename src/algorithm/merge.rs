@@ -27,7 +27,11 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
         panic!("output slice cannot be big enough to store inputs");
     };
 
-    assert_eq!(output.len(), elements, "output length must be sum of input lengths");
+    assert_eq!(
+        output.len(),
+        elements,
+        "output length must be sum of input lengths"
+    );
 
     let mut first = first.iter_mut().peekable();
     let mut second = second.iter_mut().peekable();
@@ -42,15 +46,15 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
                     core::mem::swap(element, *right);
                     _ = second.next();
                 }
-            },
+            }
             (Some(left), None) => {
                 core::mem::swap(element, *left);
                 _ = first.next();
-            },
+            }
             (None, Some(right)) => {
                 core::mem::swap(element, *right);
                 _ = second.next();
-            },
+            }
             (None, None) => unreachable!("more output elements than input"),
         };
     }
@@ -90,12 +94,16 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
+pub fn parallel<T: Ord + Clone>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
         panic!("output slice cannot be big enough to store inputs");
     };
 
-    assert_eq!(output.len(), elements, "output length must be sum of input lengths");
+    assert_eq!(
+        output.len(),
+        elements,
+        "output length must be sum of input lengths"
+    );
 
     if first.len() < second.len() {
         return parallel(second, first, output);
@@ -112,13 +120,13 @@ pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
         Err(index) | Ok(index) => index,
     };
 
-    let (first_left, first_right) = first.split_at(middle);
-    let (second_left, second_right) = second.split_at(intersect);
+    let (first_left, first_right) = first.split_at_mut(middle);
+    let (second_left, second_right) = second.split_at_mut(intersect);
     let (output_left, output_right) = output.split_at_mut(middle + intersect);
 
-    output_right[0] = first_right[0].clone();
+    core::mem::swap(&mut output_right[0], &mut first_right[0]);
     let output_right = &mut output_right[1..];
-    let first_right = &first_right[1..];
+    let first_right = &mut first_right[1..];
 
     // The following calls could be executed concurrently.
     parallel(first_left, second_left, output_left);
