@@ -91,9 +91,7 @@ mod top_down {
     }
 }
 
-/// Sort a slice via bottom-up merge sort.
-///
-/// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
+/// Sort a `slice` via bottom-up merge sort.
 ///
 /// Iteratively merge chunks of 2<sup>n</sup> elements. Start by merging
 /// single elements into chunks of two elements, then merge those into chunks
