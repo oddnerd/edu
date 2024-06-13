@@ -178,3 +178,9 @@ mutex_integer                 = "deny" # Prefer atomics over mutex.
 or_fun_call                   = "deny" # Prefer short-circuiting.
 trait_duplication_in_bounds   = "deny" # Prevent duplicating traits.
 useless_let_if_seq            = "deny" # Prefer inline if/else assignment.
+
+[lints.rustdoc]
+# https://doc.rust-lang.org/rustdoc/lints.html
+
+unescaped_backticks      = "deny" # Detect unmatched backticks.
+missing_crate_level_docs = "warn" # Crate level documentation must exist.
