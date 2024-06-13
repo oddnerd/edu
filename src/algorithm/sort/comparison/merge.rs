@@ -16,10 +16,13 @@ use super::super::super::merge;
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::merge::top_down;
-/// let mut slice = [3,1,5];
-/// let mut auxiliary = slice.to_vec();
-/// top_down(&mut slice, &mut auxiliary);
-/// assert_eq!(slice, [1,3,5]);
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+/// let mut auxiliary = elements.clone();
+///
+/// top_down(&mut elements, &mut auxiliary);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
