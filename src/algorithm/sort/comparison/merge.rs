@@ -2,13 +2,13 @@
 
 use super::super::super::merge;
 
-/// Sort a slice via top-down merge sort.
+/// Sort a `slice` via top-down merge sort.
 ///
-/// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
-///
-/// Recursively divide `slice` (and corresponding `auxiliary`) into two subsets
-/// until themsleves sorted. Merge the sorted sublists by iteratively
-/// cloneing the smallest element from `auxiliary` into `slice`.
+/// Recursively divide `slice` into two sub-slices until each contains only
+/// a single element and is therefore in sorted order. Then merge both
+/// independently sorted sub-slices together thereby sorting them into one
+/// larger sorted slice which can be passed up the call stack to be merged
+/// with another.
 ///
 /// # Examples
 /// ```
