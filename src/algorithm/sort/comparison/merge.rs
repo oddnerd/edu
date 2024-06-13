@@ -253,8 +253,8 @@ fn inplace_into<T: Ord>(from: &mut [T], into: &mut [T]) {
     if from.len() > 1 {
         let middle = from.len() / 2;
         let (left, right) = from.split_at_mut(middle);
-        inplace(left);
-        inplace(right);
+        in_place(left);
+        in_place(right);
 
         {
             let mut first = left.iter_mut().peekable();
@@ -314,7 +314,7 @@ fn inplace_into<T: Ord>(from: &mut [T], into: &mut [T]) {
 /// inplace(&mut slice);
 /// assert_eq!(slice, [1,2,3]);
 /// ```
-pub fn inplace<T: Ord>(slice: &mut [T]) {
+pub fn in_place<T: Ord>(slice: &mut [T]) {
     if slice.len() > 1 {
         let mut middle = (slice.len() + 1) / 2;
 
@@ -349,47 +349,47 @@ pub fn inplace<T: Ord>(slice: &mut [T]) {
 
 #[cfg(test)]
 mod inplace {
-    use super::inplace;
+    use super::in_place;
 
     #[test]
     fn empty() {
         let mut slice: [usize; 0] = [];
-        inplace(&mut slice);
+        in_place(&mut slice);
         assert_eq!(slice, []);
     }
 
     #[test]
     fn single() {
         let mut slice = [0];
-        inplace(&mut slice);
+        in_place(&mut slice);
         assert_eq!(slice, [0]);
     }
 
     #[test]
     fn sorted() {
         let mut slice = [0, 1];
-        inplace(&mut slice);
+        in_place(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
     #[test]
     fn must_swap() {
         let mut slice = [1, 0];
-        inplace(&mut slice);
+        in_place(&mut slice);
         assert_eq!(slice, [0, 1]);
     }
 
     #[test]
     fn odd_length() {
         let mut slice = [3, 2, 1];
-        inplace(&mut slice);
+        in_place(&mut slice);
         assert_eq!(slice, [1, 2, 3]);
     }
 
     #[test]
     fn multiple_swaps() {
         let mut slice = [2, 0, 3, 1];
-        inplace(&mut slice);
+        in_place(&mut slice);
         assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
