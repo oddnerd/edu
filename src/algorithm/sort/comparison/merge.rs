@@ -99,9 +99,10 @@ mod top_down {
 
 /// Sort `elements` via bottom-up merge sort.
 ///
-/// Iteratively merge chunks of 2<sup>n</sup> elements. Start by merging
-/// single elements into chunks of two elements, then merge those into chunks
-/// of four elements, then merge all those chunks, so on and so forth.
+/// Consider the input to be adjacent subsections each containing only a single
+/// element, therefore each being independently sorted. For each pair of
+/// chunks, merge them together into a combined sorted subsection. Repeat
+/// until there exists only one sorted section containing all elements.
 ///
 /// # Panics
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
