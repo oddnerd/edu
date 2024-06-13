@@ -18,7 +18,7 @@ use super::super::super::merge;
 /// top_down(&mut slice, &mut auxiliary);
 /// assert_eq!(slice, [1,3,5]);
 /// ```
-pub fn top_down<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) {
+pub fn top_down<T: Ord>(slice: &mut [T], auxiliary: &mut [T]) {
     assert!(slice == auxiliary);
     if slice.len() > 1 {
         let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
@@ -102,11 +102,11 @@ mod top_down {
 /// bottom_up(&mut slice, &mut auxiliary);
 /// assert_eq!(slice, [1,3,5]);
 /// ```
-pub fn bottom_up<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) {
+pub fn bottom_up<T: Ord>(slice: &mut [T], auxiliary: &mut [T]) {
     assert!(slice == auxiliary);
 
     // merge `from[..middle]` and `from[middle..]` into `into`
-    fn merge<T: Ord + Clone>(into: &mut [T], from: &mut [T]) {
+    fn merge<T: Ord>(into: &mut [T], from: &mut [T]) {
         let middle = (from.len() + 1) / 2;
         let (left, right) = from.split_at_mut(middle);
 
@@ -130,10 +130,10 @@ pub fn bottom_up<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) {
 
             // clone the result into `auxiliary` for next merge iteration
             slice
-                .iter()
+                .iter_mut()
                 .zip(auxiliary.iter_mut())
                 .for_each(|(new, old)| {
-                    *old = new.clone();
+                    core::mem::swap(old, new);
                 });
         }
 
