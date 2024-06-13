@@ -10,6 +10,9 @@ use super::super::super::merge;
 /// larger sorted slice which can be passed up the call stack to be merged
 /// with another.
 ///
+/// # Panics
+/// This method has the precondition that `auxiliary` is a clone of `elements`.
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::merge::top_down;
