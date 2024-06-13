@@ -296,17 +296,16 @@ where
     }
 }
 
-/// Sort a slice using in-place merge sort.
+/// Sort a `slice` using in-place merge sort.
 ///
-/// <div class="warning">Does not preserve order of equivalent elements.</div>
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
 ///
-/// Sort the left half into the right half so the right half is sorted and the
-/// left half is unsorted. Continuously sort the right half of the unsorted
-/// fraction into the left half of the unsorted fraction so the left half of
-/// the fraction is sorted and the right half of the fraction is unsorted, then
-/// merge the now sorted left fraction into the previously sorted right half
-/// using the unsorted right fraction so the left fraction now contains all the
-/// unsorted elements.
+/// Sort the left half of the slice into the right half so the right half is
+/// sorted and the left half is unsorted. Thenceforth sort the right half of
+/// the unsorted fraction into the left half, merge the sorted fraction into
+/// the original sorted right half thereby combining the sorted elements on the
+/// right and unsorted on the left, repeating until all elements are sorted.
 ///
 /// # Examples
 /// ```
