@@ -121,48 +121,43 @@ mod top_down {
 pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
 
-    // merge `from[..middle]` and `from[middle..]` into `into`
-    fn merge<T: Ord>(into: &mut [T], from: &mut [T]) {
-        let middle = (from.len() + 1) / 2;
-        let (left, right) = from.split_at_mut(middle);
+    let Some(bound) = elements.len().checked_ilog2() else {
+        debug_assert_eq!(elements.len(), 0, "only condition ilog2 is none");
+        return;
+    };
 
-        // merging those two sorted subslices sorts them together
-        merge::iterative(left, right, into);
-    }
+    let Some(bound) = bound.checked_add(1) else {
+        unreachable!("bound is at most the number of bits in usize");
+    };
 
-    // interpret each slice as chunks (subslices) of size `length`.
-    let mut length = 2;
+    for length in (1..=bound).map_while(|exponent| usize::checked_pow(2, exponent)) {
+        let elements = elements.chunks_mut(length);
+        let auxiliary = auxiliary.chunks_mut(length);
 
-    // if the length of `slice` is not exactly some 2^n, the full loop
-    // would exit leaving one final merge necessary so might as well
-    // exit when length implies theres only two sorted subslices left.
-    while length <= (elements.len() + 1) / 2 {
-        let chunks = elements.chunks_mut(length).zip(auxiliary.chunks_mut(length));
+        for (input, output) in elements.zip(auxiliary) {
+            let (left, right) = input.split_at_mut(length / 2);
 
-        for (slice, auxiliary) in chunks {
-            // we assume from previous iteration each chunk is split
-            // at the middle into sorted subslices.
-            merge(slice, auxiliary);
+            merge::iterative(left, right, output);
 
-            // clone the result into `auxiliary` for next merge iteration
-            slice
-                .iter_mut()
-                .zip(auxiliary.iter_mut())
-                .for_each(|(new, old)| {
-                    core::mem::swap(old, new);
-                });
+            input.swap_with_slice(output);
         }
-
-        // next iteration can merge two subslices of the current length.
-        length *= 2;
     }
-
-    merge(elements, auxiliary);
 }
 
 #[cfg(test)]
 mod bottom_up {
     use super::bottom_up;
+
+    #[test]
+    fn temporary_test_please_delete_me_or_something() {
+        // let mut elements = [0, 5, 2, 3, 1, 4];
+        let mut elements = [5, 0, 3, 2, 4, 1];
+        let mut auxiliary = elements.clone();
+
+        bottom_up(&mut elements, &mut auxiliary);
+
+        assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+    }
 
     #[test]
     fn empty() {
