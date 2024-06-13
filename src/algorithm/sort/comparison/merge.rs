@@ -18,10 +18,7 @@ use super::super::super::merge;
 /// top_down(&mut slice, &mut auxiliary);
 /// assert_eq!(slice, [1,3,5]);
 /// ```
-pub fn top_down<T>(slice: &mut [T], auxiliary: &mut [T])
-where
-    T: Ord + Clone,
-{
+pub fn top_down<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) {
     assert!(slice == auxiliary);
     if slice.len() > 1 {
         let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
@@ -105,10 +102,7 @@ mod top_down {
 /// bottom_up(&mut slice, &mut auxiliary);
 /// assert_eq!(slice, [1,3,5]);
 /// ```
-pub fn bottom_up<T>(slice: &mut [T], auxiliary: &mut [T])
-where
-    T: Ord + Clone,
-{
+pub fn bottom_up<T: Ord + Clone>(slice: &mut [T], auxiliary: &mut [T]) {
     assert!(slice == auxiliary);
 
     // merge `from[..middle]` and `from[middle..]` into `into`
@@ -208,16 +202,14 @@ mod bottom_up {
 /// `slice` is divided as [left..left_end..output..right..right_end]
 /// where the inputs are [left..left_end] and [right..right_end]
 /// which are merged into [output..right_end].
-fn inplace_merge<T>(
+fn inplace_merge<T: Ord>(
     slice: &mut [T],
     left: usize,
     left_end: usize,
     right: usize,
     right_end: usize,
     output: usize,
-) where
-    T: Ord + core::fmt::Debug,
-{
+) {
     match (slice[..left_end].get(left), slice[..right_end].get(right)) {
         (Some(first), Some(second)) => {
             if first < second {
@@ -246,10 +238,7 @@ fn inplace_merge<T>(
 /// overwirrten elements from `into` over to `from` such that `into` will
 /// contain the sorted entries of `from` whereas `from` will hold unordered
 /// entried of `into`.
-fn inplace_into<T>(from: &mut [T], into: &mut [T])
-where
-    T: Ord + core::fmt::Debug,
-{
+fn inplace_into<T: Ord>(from: &mut [T], into: &mut [T]) {
     if from.len() > 1 {
         let middle = from.len() / 2;
         let (left, right) = from.split_at_mut(middle);
@@ -314,10 +303,7 @@ where
 /// inplace(&mut slice);
 /// assert_eq!(slice, [1,2,3]);
 /// ```
-pub fn inplace<T>(slice: &mut [T])
-where
-    T: Ord + core::fmt::Debug,
-{
+pub fn inplace<T: Ord>(slice: &mut [T]) {
     if slice.len() > 1 {
         let mut middle = (slice.len() + 1) / 2;
 
