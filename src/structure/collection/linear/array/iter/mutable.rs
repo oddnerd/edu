@@ -202,7 +202,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
                     unsafe { IterMut::new(ptr, expected.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert_eq!(actual.count(), expected.len());
             }
@@ -216,7 +217,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
                     unsafe { IterMut::new(ptr, expected.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert!(actual.eq(expected.iter().rev()));
             }
@@ -269,7 +271,6 @@ mod test {
                     assert_eq!(actual.size_hint(), (len, Some(len)));
                 });
             }
-
         }
 
         mod fused {
