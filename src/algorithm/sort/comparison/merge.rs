@@ -97,7 +97,7 @@ mod top_down {
     }
 }
 
-/// Sort a `slice` via bottom-up merge sort.
+/// Sort `elements` via bottom-up merge sort.
 ///
 /// Iteratively merge chunks of 2<sup>n</sup> elements. Start by merging
 /// single elements into chunks of two elements, then merge those into chunks
@@ -111,8 +111,8 @@ mod top_down {
 /// bottom_up(&mut slice, &mut auxiliary);
 /// assert_eq!(slice, [1,3,5]);
 /// ```
-pub fn bottom_up<T: Ord>(slice: &mut [T], auxiliary: &mut [T]) {
-    assert!(slice == auxiliary);
+pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
+    assert!(elements == auxiliary);
 
     // merge `from[..middle]` and `from[middle..]` into `into`
     fn merge<T: Ord>(into: &mut [T], from: &mut [T]) {
@@ -129,8 +129,8 @@ pub fn bottom_up<T: Ord>(slice: &mut [T], auxiliary: &mut [T]) {
     // if the length of `slice` is not exactly some 2^n, the full loop
     // would exit leaving one final merge necessary so might as well
     // exit when length implies theres only two sorted subslices left.
-    while length <= (slice.len() + 1) / 2 {
-        let chunks = slice.chunks_mut(length).zip(auxiliary.chunks_mut(length));
+    while length <= (elements.len() + 1) / 2 {
+        let chunks = elements.chunks_mut(length).zip(auxiliary.chunks_mut(length));
 
         for (slice, auxiliary) in chunks {
             // we assume from previous iteration each chunk is split
@@ -150,7 +150,7 @@ pub fn bottom_up<T: Ord>(slice: &mut [T], auxiliary: &mut [T]) {
         length *= 2;
     }
 
-    merge(slice, auxiliary);
+    merge(elements, auxiliary);
 }
 
 #[cfg(test)]
