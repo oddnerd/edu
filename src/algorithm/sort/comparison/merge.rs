@@ -8,6 +8,8 @@
 //! | average | n log n    |
 //! | best    | n log n    |
 
+use super::super::super::merge;
+
 /// Sort a slice via top-down merge sort.
 ///
 /// <div class="warning">`auxiliary` MUST be a duplicate of `slice`</div>
@@ -40,11 +42,7 @@ where
         top_down(left_auxiliary, left_slice);
         top_down(right_auxiliary, right_slice);
 
-        crate::algorithm::merge::MergeIter::new(left_auxiliary.iter(), right_auxiliary.iter())
-            .zip(slice)
-            .for_each(|(new, old)| {
-                *old = new.clone();
-            });
+        merge::iterative(left_auxiliary, right_auxiliary, slice);
     }
 }
 
@@ -129,12 +127,7 @@ where
         let (left, right) = from.split_at_mut(middle);
 
         // merging those two sorted subslices sorts them together
-        let merged = crate::algorithm::merge::MergeIter::new(left.iter(), right.iter());
-
-        // put the result into output `slice`
-        merged.zip(into.iter_mut()).for_each(|(new, old)| {
-            *old = new.clone();
-        });
+        merge::iterative(left, right, into);
     }
 
     // interpret each slice as chunks (subslices) of size `length`.
@@ -273,11 +266,41 @@ where
         inplace(left);
         inplace(right);
 
-        crate::algorithm::merge::MergeIter::new(left.iter_mut(), right.iter_mut())
-            .zip(into.iter_mut())
-            .for_each(|(smallest, output)| {
-                core::mem::swap(smallest, output);
-            });
+        {
+            let mut first = left.iter_mut().peekable();
+            let mut second = right.iter_mut().peekable();
+
+            for element in into {
+                match (first.peek_mut(), second.peek_mut()) {
+                    (Some(left), Some(right)) => {
+                        if left <= right {
+                            core::mem::swap(element, *left);
+                            _ = first.next();
+                        } else {
+                            core::mem::swap(element, *right);
+                            _ = second.next();
+                        }
+                    }
+                    (Some(left), None) => {
+                        core::mem::swap(element, *left);
+                        _ = first.next();
+                    }
+                    (None, Some(right)) => {
+                        core::mem::swap(element, *right);
+                        _ = second.next();
+                    }
+                    (None, None) => unreachable!("more output elements than input"),
+                };
+            }
+        }
+
+        // merge::iterative(left, right, into);
+
+        // crate::algorithm::merge::Iterative::new(left.iter_mut(), right.iter_mut())
+        //     .zip(into.iter_mut())
+        //     .for_each(|(smallest, output)| {
+        //         core::mem::swap(smallest, output);
+        //     });
     } else if let (Some(mut from), Some(mut into)) = (from.first(), into.first()) {
         core::mem::swap(&mut from, &mut into);
     }
