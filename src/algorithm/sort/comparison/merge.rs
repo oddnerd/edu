@@ -19,7 +19,7 @@ use super::super::super::merge;
 /// assert_eq!(slice, [1,3,5]);
 /// ```
 pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
-    assert!(elements == auxiliary);
+    debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
 
     if elements.len() <= 1 {
         return;
