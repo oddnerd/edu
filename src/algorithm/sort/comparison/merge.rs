@@ -1,12 +1,4 @@
 //! Implementations of [Merge Sort](https://en.wikipedia.org/wiki/Merge_sort).
-//!
-//! # Performance
-//!
-//! | Case    | Complexity |
-//! | ------- | ---------- |
-//! | worst   | n log n    |
-//! | average | n log n    |
-//! | best    | n log n    |
 
 use super::super::super::merge;
 
