@@ -18,24 +18,21 @@ use super::super::super::merge;
 /// top_down(&mut slice, &mut auxiliary);
 /// assert_eq!(slice, [1,3,5]);
 /// ```
-pub fn top_down<T: Ord>(slice: &mut [T], auxiliary: &mut [T]) {
-    assert!(slice == auxiliary);
+pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
+    assert!(elements == auxiliary);
 
-    if slice.len() <= 1 {
+    if elements.len() <= 1 {
         return;
     }
 
+    let (left_input, right_input) = elements.split_at_mut(elements.len() / 2);
     let (left_auxiliary, right_auxiliary) = auxiliary.split_at_mut(auxiliary.len() / 2);
 
-    let (left_slice, right_slice) = slice.split_at_mut(slice.len() / 2);
+    // Alternating input/auxiliary ensures top-level caller merges into output.
+    top_down(left_auxiliary, left_input);
+    top_down(right_auxiliary, right_input);
 
-    // Alternating `slice`/`auxiliary` prevents unnecessary clone for
-    // top-level caller by ensuring `auxiliary` becomes the sorted
-    // left/right subslices thenceforth merged into the output (`slice`).
-    top_down(left_auxiliary, left_slice);
-    top_down(right_auxiliary, right_slice);
-
-    merge::iterative(left_auxiliary, right_auxiliary, slice);
+    merge::iterative(left_auxiliary, right_auxiliary, elements);
 }
 
 #[cfg(test)]
