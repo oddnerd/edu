@@ -266,7 +266,35 @@ where
         inplace(left);
         inplace(right);
 
-        merge::iterative(left, right, into);
+        {
+            let mut first = left.iter_mut().peekable();
+            let mut second = right.iter_mut().peekable();
+
+            for element in into {
+                match (first.peek_mut(), second.peek_mut()) {
+                    (Some(left), Some(right)) => {
+                        if left <= right {
+                            core::mem::swap(element, *left);
+                            _ = first.next();
+                        } else {
+                            core::mem::swap(element, *right);
+                            _ = second.next();
+                        }
+                    }
+                    (Some(left), None) => {
+                        core::mem::swap(element, *left);
+                        _ = first.next();
+                    }
+                    (None, Some(right)) => {
+                        core::mem::swap(element, *right);
+                        _ = second.next();
+                    }
+                    (None, None) => unreachable!("more output elements than input"),
+                };
+            }
+        }
+
+        // merge::iterative(left, right, into);
 
         // crate::algorithm::merge::Iterative::new(left.iter_mut(), right.iter_mut())
         //     .zip(into.iter_mut())
