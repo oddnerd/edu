@@ -13,6 +13,9 @@ use super::super::super::merge;
 /// # Panics
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
 ///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(log N) memory.
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::merge::top_down;
