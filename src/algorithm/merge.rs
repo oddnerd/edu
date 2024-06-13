@@ -399,37 +399,74 @@ mod test {
 
         #[test]
         fn first_empty() {
-            let mut slice = [0];
-            in_place(&mut slice, 0);
-            assert_eq!(slice, [0]);
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            in_place(&mut elements, 0);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
         fn second_empty() {
-            let mut slice = [0];
-            in_place(&mut slice, 1);
-            assert_eq!(slice, [0]);
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            in_place(&mut elements, 6);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn both_empty() {
+            let mut elements = [0; 0];
+
+            in_place(&mut elements, 0);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn first_longer() {
+            let mut elements = [0, 1, 3, 5, 2, 4];
+
+            in_place(&mut elements, 4);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn second_longer() {
+            let mut elements = [2, 4, 0, 1, 3, 5];
+
+            in_place(&mut elements, 2);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
         fn first_greater() {
-            let mut slice = [1, 0];
-            in_place(&mut slice, 1);
-            assert_eq!(slice, [0, 1]);
+            let mut elements = [1, 0];
+
+            in_place(&mut elements, 1);
+
+            assert_eq!(elements, [0, 1]);
         }
 
         #[test]
         fn second_greater() {
-            let mut slice = [0, 1];
-            in_place(&mut slice, 1);
-            assert_eq!(slice, [0, 1]);
+            let mut elements = [0, 1];
+
+            in_place(&mut elements, 1);
+
+            assert_eq!(elements, [0, 1]);
         }
 
         #[test]
         fn back_and_forth() {
-            let mut slice = [0, 3, 1, 2];
-            in_place(&mut slice, 2);
-            assert_eq!(slice, [0, 1, 2, 3]);
+            let mut elements = [0, 2, 4, 1, 3, 5];
+
+            in_place(&mut elements, 3);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
     }
 }
