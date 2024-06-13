@@ -110,10 +110,13 @@ mod top_down {
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::merge::bottom_up;
-/// let mut slice = [3,1,5];
-/// let mut auxiliary = slice.to_vec();
-/// bottom_up(&mut slice, &mut auxiliary);
-/// assert_eq!(slice, [1,3,5]);
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+/// let mut auxiliary = elements.clone();
+///
+/// bottom_up(&mut elements, &mut auxiliary);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
