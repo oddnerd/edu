@@ -2,12 +2,12 @@
 
 use super::super::super::merge;
 
-/// Sort a `slice` via top-down merge sort.
+/// Sort `elements` via top-down merge sort.
 ///
-/// Recursively divide `slice` into two sub-slices until each contains only
+/// Recursively divide `elements` into two halves until each contains only
 /// a single element and is therefore in sorted order. Then merge both
-/// independently sorted sub-slices together thereby sorting them into one
-/// larger sorted slice which can be passed up the call stack to be merged
+/// independently sorted halves together thereby sorting them into one
+/// larger sorted section which can be passed up the call stack to be merged
 /// with another.
 ///
 /// # Panics
