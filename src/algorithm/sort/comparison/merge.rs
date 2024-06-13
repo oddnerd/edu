@@ -103,6 +103,9 @@ mod top_down {
 /// single elements into chunks of two elements, then merge those into chunks
 /// of four elements, then merge all those chunks, so on and so forth.
 ///
+/// # Panics
+/// This method has the precondition that `auxiliary` is a clone of `elements`.
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::merge::bottom_up;
@@ -112,7 +115,7 @@ mod top_down {
 /// assert_eq!(slice, [1,3,5]);
 /// ```
 pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
-    assert!(elements == auxiliary);
+    debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
 
     // merge `from[..middle]` and `from[middle..]` into `into`
     fn merge<T: Ord>(into: &mut [T], from: &mut [T]) {
