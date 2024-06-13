@@ -66,6 +66,10 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// thread. However, the implementation is of a parallel algorithm that could
 /// be trivially modified to execute asynchronously.
 ///
+/// # Panics
+/// This method has the precondition that `output` has the _exact_ same length
+/// as the sum of the input lengths.
+///
 /// # Performance
 /// Synchronous: This method takes O(N * log N) time and consumes O(N) memory.
 ///
@@ -87,6 +91,12 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
 pub fn parallel<T: Ord + Clone>(first: &[T], second: &[T], output: &mut [T]) {
+    let Some(elements) = usize::checked_add(first.len(), second.len()) else {
+        panic!("output slice cannot be big enough to store inputs");
+    };
+
+    assert_eq!(output.len(), elements, "output length must be sum of input lengths");
+
     if first.len() < second.len() {
         return parallel(second, first, output);
     }
@@ -277,62 +287,110 @@ mod test {
 
         #[test]
         fn first_empty() {
-            let first = [];
-            let second = [0];
-            let mut output = vec![0; 1];
-            parallel(&first, &second, &mut output);
+            let mut first = [];
+            let mut second = [0, 1, 2, 3, 4, 5];
+            let mut output = [0; 6];
 
-            assert_eq!(output.len(), 1);
-            assert_eq!(output[0], 0);
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
         fn second_empty() {
-            let first = [0];
-            let second = [];
-            let mut output = vec![0; 1];
-            parallel(&first, &second, &mut output);
+            let mut first = [0, 1, 2, 3, 4, 5];
+            let mut second = [];
+            let mut output = [0; 6];
 
-            assert_eq!(output.len(), 1);
-            assert_eq!(output[0], 0);
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn both_empty() {
+            let mut first = [];
+            let mut second = [];
+            let mut output = [0; 0];
+
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, []);
+        }
+
+        #[test]
+        fn first_longer() {
+            let mut first = [0, 1, 3, 5];
+            let mut second = [2, 4];
+            let mut output = [0; 6];
+
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn second_longer() {
+            let mut first = [2, 4];
+            let mut second = [0, 1, 3, 5];
+            let mut output = [0; 6];
+
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
         fn first_greater() {
-            let first = [1];
-            let second = [0];
-            let mut output = vec![0; 2];
-            parallel(&first, &second, &mut output);
+            let mut first = [1];
+            let mut second = [0];
+            let mut output = [0; 2];
 
-            assert_eq!(output.len(), 2);
-            assert_eq!(output[0], 0);
-            assert_eq!(output[1], 1);
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
         }
 
         #[test]
         fn second_greater() {
-            let first = [0];
-            let second = [1];
-            let mut output = vec![0; 2];
-            parallel(&first, &second, &mut output);
+            let mut first = [0];
+            let mut second = [1];
+            let mut output = [0; 2];
 
-            assert_eq!(output.len(), 2);
-            assert_eq!(output[0], 0);
-            assert_eq!(output[1], 1);
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
         }
 
         #[test]
         fn back_and_forth() {
-            let first = [1, 2];
-            let second = [0, 3];
-            let mut output = vec![0; 4];
-            parallel(&first, &second, &mut output);
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [0; 6];
 
-            assert_eq!(output.len(), 4);
-            assert_eq!(output[0], 0);
-            assert_eq!(output[1], 1);
-            assert_eq!(output[2], 2);
-            assert_eq!(output[3], 3);
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        #[should_panic(expected = "output length must be sum of input lengths")]
+        fn output_cannot_be_smaller() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [];
+
+            parallel(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[should_panic(expected = "output length must be sum of input lengths")]
+        fn output_cannot_be_larger() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [0; 256];
+
+            parallel(&mut first, &mut second, &mut output);
         }
     }
 
