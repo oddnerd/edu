@@ -84,11 +84,11 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// ```
 /// use rust::algorithm::merge::parallel;
 ///
-/// let first  = [0, 2, 4];
-/// let second = [1, 3, 5];
+/// let mut first  = [0, 2, 4];
+/// let mut second = [1, 3, 5];
 /// let mut output = [0; 6];
 ///
-/// parallel(&first, &second, &mut output);
+/// parallel(&mut first, &mut second, &mut output);
 ///
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
