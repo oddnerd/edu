@@ -107,6 +107,9 @@ mod top_down {
 /// # Panics
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
 ///
+/// # Performance
+/// This method takes (N * log N) time and consumes O(1) memory.
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::merge::bottom_up;
