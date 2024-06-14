@@ -266,7 +266,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     }
 
     /// TODO
-    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], mut range: core::ops::Range<usize>, mut output: usize) {
+    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
         if range.len() > 1 {
             let middle = range.start + (range.len() / 2);
 
