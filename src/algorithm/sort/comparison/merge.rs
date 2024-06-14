@@ -232,73 +232,73 @@ mod bottom_up {
 pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
 
     /// TODO
-    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], mut i: usize, m: usize, mut j: usize, n: usize, mut w: usize) {
-        while i < m && j < n {
-            if elements[i] < elements[j] {
-                elements.swap(w, i);
-                i += 1;
+    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], mut left_start: usize, left_end: usize, mut right_start: usize, right_end: usize, mut output: usize) {
+        while left_start < left_end && right_start < right_end {
+            if elements[left_start] < elements[right_start] {
+                elements.swap(output, left_start);
+                left_start += 1;
             } else {
-                elements.swap(w, j);
-                j += 1;
+                elements.swap(output, right_start);
+                right_start += 1;
             }
 
-            w += 1;
+            output += 1;
         }
 
-        while i < m {
-            elements.swap(w, i);
-            i += 1;
-            w += 1;
+        while left_start < left_end {
+            elements.swap(output, left_start);
+            left_start += 1;
+            output += 1;
         }
 
 
-        while j < n {
-            elements.swap(w, j);
-            j += 1;
-            w += 1;
+        while right_start < right_end {
+            elements.swap(output, right_start);
+            right_start += 1;
+            output += 1;
         }
     }
 
     /// TODO
-    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], mut l: usize, u: usize, mut w: usize) {
-        if u - l > 1 {
-            let m = l + (u - l) / 2;
+    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], mut start: usize, end: usize, mut output: usize) {
+        if end - start > 1 {
+            let middle = start + (end - start) / 2;
 
-            imsort(elements, l, m);
-            imsort(elements, m, u);
+            imsort(elements, start, middle);
+            imsort(elements, middle, end);
 
-            merge(elements, l, m, m, u, w);
+            merge(elements, start, middle, middle, end, output);
         } else {
-            while l < u {
-                elements.swap(l, w);
-                l += 1;
-                w += 1;
+            while start < end {
+                elements.swap(start, output);
+                start += 1;
+                output += 1;
             }
         }
     }
 
     /// TODO:
-    fn imsort<T: Ord + core::fmt::Debug>(elements: &mut [T], l: usize, u: usize) {
-        if u - l > 1 {
-            let mut m = l + (u - l) / 2;
-            let mut w = l + u - m;
+    fn imsort<T: Ord + core::fmt::Debug>(elements: &mut [T], start: usize, end: usize) {
+        if end - start > 1 {
+            let mut middle = start + (end - start) / 2;
+            let mut output = start + end - middle;
 
-            wsort(elements, l, m, w);
+            wsort(elements, start, middle, output);
 
-            while w - l > 2 {
-                let n = w;
-                w = l + (n - l + 1) / 2;
+            while output - start > 2 {
+                let n = output;
+                output = start + (n - start + 1) / 2;
 
-                wsort(elements, w, n, l);
+                wsort(elements, output, n, start);
 
-                merge(elements, l, l + n - w, n, u, w);
+                merge(elements, start, start + n - output, n, end, output);
             }
 
-            let mut n = w;
-            while n > l {
+            let mut n = output;
+            while n > start {
 
                 let mut m = n;
-                while m < u && elements[m] < elements[m - 1] {
+                while m < end && elements[m] < elements[m - 1] {
                     elements.swap(m, m - 1);
 
                     m += 1;
