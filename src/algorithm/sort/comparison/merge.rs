@@ -245,7 +245,13 @@ mod bottom_up {
 ///
 /// # Examples
 /// ```
-/// todo!()
+/// use rust::algorithm::sort::comparison::merge::in_place;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// in_place(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
@@ -298,7 +304,7 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
         return;
     }
 
-    // Sort left half into right half.
+    // Sort left half ([..middle]) into right half ().
     let middle = elements.len() / 2;
     let mut output = elements.len() - middle;
     sort_into(elements, 0..middle, output);
