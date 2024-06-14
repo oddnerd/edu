@@ -4,9 +4,16 @@ Hand-written implementations in Rust for personal reference.
 
 ## Algorithms
 
+- [Merge](/src/algorithm/merge.rs)
+  - [Iterative](/src/algorithm/merge.rs#:~:text=iterative)
+  - [Parallel](/src/algorithm/merge.rs#:~:text=parallel)
+  - [In-Place](/src/algorithm/merge.rs#:~:text=in_place)
 - [Sorting](/src/algorithm/sort.rs)
   - [Comparison](/src/algorithm/sort/comparison.rs)
     - [Merge](/src/algorithm/sort/comparison/merge.rs)
+      - [Top Down](/src/algorithm/sort/comparison/merge.rs#:~:text=top_down)
+      - [Bottom Up](/src/algorithm/sort/comparison/merge.rs#:~:text=bottom_up)
+      - [In-Place](/src/algorithm/sort/comparison/merge.rs#:~:text=in_place)
     - [Heap](/src/algorithm/sort/comparison/heap.rs)
 
 ## Data Structures

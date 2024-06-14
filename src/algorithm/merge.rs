@@ -151,15 +151,15 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
 #[allow(clippy::range_plus_one)]
-pub fn in_place<T: Ord>(slice: &mut [T], middle: usize) {
+pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
     let mut left = 0..middle;
-    let mut right = middle..slice.len();
+    let mut right = middle..elements.len();
 
     while !left.is_empty() && !right.is_empty() {
-        if slice[left.start] < slice[right.start] {
+        if elements[left.start] < elements[right.start] {
             _ = left.next();
         } else {
-            slice[left.start..=right.start].rotate_right(1);
+            elements[left.start..=right.start].rotate_right(1);
 
             left = (left.start + 1)..(left.end + 1);
             _ = right.next();
