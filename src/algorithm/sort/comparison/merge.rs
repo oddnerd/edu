@@ -44,59 +44,6 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     merge::iterative(left_auxiliary, right_auxiliary, elements);
 }
 
-#[cfg(test)]
-mod top_down {
-    use super::top_down;
-
-    #[test]
-    fn empty() {
-        let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.clone();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, []);
-    }
-
-    #[test]
-    fn single() {
-        let mut slice = [0];
-        let mut auxiliary = slice.clone();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0]);
-    }
-
-    #[test]
-    fn sorted() {
-        let mut slice = [0, 1];
-        let mut auxiliary = slice.clone();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0, 1]);
-    }
-
-    #[test]
-    fn must_swap() {
-        let mut slice = [1, 0];
-        let mut auxiliary = slice.clone();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0, 1]);
-    }
-
-    #[test]
-    fn odd_length() {
-        let mut slice = [3, 2, 1];
-        let mut auxiliary = slice.clone();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2, 3]);
-    }
-
-    #[test]
-    fn multiple_swaps() {
-        let mut slice = [2, 0, 3, 1];
-        let mut auxiliary = slice.clone();
-        top_down(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0, 1, 2, 3]);
-    }
-}
-
 /// Sort `elements` via bottom-up merge sort.
 ///
 /// Consider the input to be adjacent subsections each containing only a single
@@ -144,70 +91,6 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 
             input.swap_with_slice(output);
         }
-    }
-}
-
-#[cfg(test)]
-mod bottom_up {
-    use super::bottom_up;
-
-    #[test]
-    fn temporary_test_please_delete_me_or_something() {
-        // let mut elements = [0, 5, 2, 3, 1, 4];
-        let mut elements = [5, 0, 3, 2, 4, 1];
-        let mut auxiliary = elements.clone();
-
-        bottom_up(&mut elements, &mut auxiliary);
-
-        assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-    }
-
-    #[test]
-    fn empty() {
-        let mut slice: [usize; 0] = [];
-        let mut auxiliary = slice.clone();
-        bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, []);
-    }
-
-    #[test]
-    fn single() {
-        let mut slice = [0];
-        let mut auxiliary = slice.clone();
-        bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0]);
-    }
-
-    #[test]
-    fn sorted() {
-        let mut slice = [0, 1];
-        let mut auxiliary = slice.clone();
-        bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0, 1]);
-    }
-
-    #[test]
-    fn must_swap() {
-        let mut slice = [1, 0];
-        let mut auxiliary = slice.clone();
-        bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0, 1]);
-    }
-
-    #[test]
-    fn odd_length() {
-        let mut slice = [3, 2, 1];
-        let mut auxiliary = slice.clone();
-        bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [1, 2, 3]);
-    }
-
-    #[test]
-    fn multiple_swaps() {
-        let mut slice = [2, 0, 3, 1];
-        let mut auxiliary = slice.clone();
-        bottom_up(&mut slice, &mut auxiliary);
-        assert_eq!(slice, [0, 1, 2, 3]);
     }
 }
 
@@ -309,27 +192,27 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     let mut output = elements.len() - middle;
     sort_into(elements, 0..middle, output);
 
-    // sort the right half of the unsorted section into the left half then
+    // Sort the right half of the unsorted section into the left half then
     // merge with the already sorted section via swapping with the unsorted.
     while output > 2 {
-        // unsorted: [..split]
-        // sorted: [split..]
+        // Unsorted: [..split]
+        // Sorted: [split..]
         let split = output;
 
-        // unsorted: [..output]
-        // to be sorted [output..split]
-        // already sorted: [split..]
+        // Unsorted: [..output]
+        // To be sorted [output..split]
+        // Already sorted: [split..]
         output = (split + 1) / 2;
 
-        // sort [output..split] into [..output]
+        // Sort [output..split] into [..output]
         sort_into(elements, output..split, 0);
 
-        // unsorted: [..output]
-        // sorted: [output..]
+        // Unsorted: [..output]
+        // Sorted: [output..]
         merge(elements, 0..(split - output), split..elements.len(), output);
     }
 
-    // sort the remaining elements in [..output] via insertion sort.
+    // Sort the remaining elements in [..output] via insertion sort.
     for remaining in (0..output).rev() {
         for current in remaining..(elements.len() - 1) {
             if elements[current] > elements[current + 1] {
@@ -342,57 +225,235 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
 }
 
 #[cfg(test)]
-mod inplace {
-    use super::in_place;
+#[allow(
+    clippy::undocumented_unsafe_blocks,
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::assertions_on_result_states,
+    clippy::indexing_slicing
+)]
+mod test {
+    use super::*;
 
-    #[test]
-    fn temporary_test_please_delete_me_or_something() {
-        let mut elements = [5, 0, 3, 2, 4, 1];
+    mod top_down {
+        use super::*;
 
-        in_place(&mut elements);
+        #[test]
+        fn empty() {
+            let mut elements = [usize::default(); 0];
+            let mut auxiliary = elements;
 
-        assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+            top_down(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+            let mut auxiliary = elements;
+
+            top_down(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = elements;
+
+            top_down(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+            let mut auxiliary = elements;
+
+            top_down(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+            let mut auxiliary = elements;
+
+            top_down(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+            let mut auxiliary = elements;
+
+            top_down(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_is_different_size() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            top_down(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_has_different_elements() {
+            let mut elements = [0, 1, 2, 3, 4,];
+            let mut auxiliary = [5, 6, 7, 8, 9];
+
+            top_down(&mut elements, &mut auxiliary);
+        }
     }
 
-    #[test]
-    fn empty() {
-        let mut slice: [usize; 0] = [];
-        in_place(&mut slice);
-        assert_eq!(slice, []);
+    mod bottom_up {
+        use super::*;
+
+        #[test]
+        fn empty() {
+            let mut elements = [usize::default(); 0];
+            let mut auxiliary = elements;
+
+            bottom_up(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+            let mut auxiliary = elements;
+
+            bottom_up(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = elements;
+
+            bottom_up(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+            let mut auxiliary = elements;
+
+            bottom_up(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+            let mut auxiliary = elements;
+
+            bottom_up(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+            let mut auxiliary = elements;
+
+            bottom_up(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_is_different_size() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            bottom_up(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_has_different_elements() {
+            let mut elements = [0, 1, 2, 3, 4,];
+            let mut auxiliary = [5, 6, 7, 8, 9];
+
+            bottom_up(&mut elements, &mut auxiliary);
+        }
     }
 
-    #[test]
-    fn single() {
-        let mut slice = [0];
-        in_place(&mut slice);
-        assert_eq!(slice, [0]);
-    }
+    mod in_place {
+        use super::*;
 
-    #[test]
-    fn sorted() {
-        let mut slice = [0, 1];
-        in_place(&mut slice);
-        assert_eq!(slice, [0, 1]);
-    }
+        #[test]
+        fn empty() {
+            let mut elements = [usize::default(); 0];
 
-    #[test]
-    fn must_swap() {
-        let mut slice = [1, 0];
-        in_place(&mut slice);
-        assert_eq!(slice, [0, 1]);
-    }
+            in_place(&mut elements);
 
-    #[test]
-    fn odd_length() {
-        let mut slice = [3, 2, 1];
-        in_place(&mut slice);
-        assert_eq!(slice, [1, 2, 3]);
-    }
+            assert_eq!(elements, []);
+        }
 
-    #[test]
-    fn multiple_swaps() {
-        let mut slice = [2, 0, 3, 1];
-        in_place(&mut slice);
-        assert_eq!(slice, [0, 1, 2, 3]);
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+
+            in_place(&mut elements);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            in_place(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+
+            in_place(&mut elements);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+
+            in_place(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+
+            in_place(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
     }
 }
