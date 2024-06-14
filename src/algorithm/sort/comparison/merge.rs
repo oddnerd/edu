@@ -228,9 +228,7 @@ mod bottom_up {
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-#[allow(clippy::many_single_char_names)]
 pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
-
     /// TODO
     fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], left: core::ops::Range<usize>, right: core::ops::Range<usize>, mut output: usize) {
         let mut left = left.peekable();
@@ -266,11 +264,11 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     }
 
     /// TODO
-    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
+    fn sort_into<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
         if range.len() > 1 {
-            let middle = range.start + (range.len() / 2);
+            let middle = range.len() / 2;
+            let (left, right) = elements[range.clone()].split_at_mut(middle);
 
-            let (left, right) = elements.split_at_mut(middle);
             in_place(left);
             in_place(right);
 
@@ -284,13 +282,13 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         let middle = elements.len() / 2;
         let mut output = elements.len() - middle;
 
-        wsort(elements, 0..middle, output);
+        sort_into(elements, 0..middle, output);
 
         while output > 2 {
             let middle = output;
             output = (middle + 1) / 2;
 
-            wsort(elements, output..middle, 0);
+            sort_into(elements, output..middle, 0);
 
             merge(elements, 0..(middle - output), middle..elements.len(), output);
         }
