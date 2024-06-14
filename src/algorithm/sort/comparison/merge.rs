@@ -232,25 +232,34 @@ mod bottom_up {
 pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
 
     /// TODO
-    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], mut left_start: usize, left_end: usize, mut right_start: usize, right_end: usize, mut output: usize) {
-        while left_start < left_end && right_start < right_end {
-            if elements[left_start] < elements[right_start] {
-                elements.swap(output, left_start);
-                left_start += 1;
+    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], left_start: usize, left_end: usize, right_start: usize, right_end: usize, mut output: usize) {
+        let mut left = (left_start..left_end).peekable();
+        let mut right = (right_start..right_end).peekable();
+
+        while let (Some(first), Some(second)) = (left.peek(), right.peek()) {
+            if elements[*first] < elements[*second] {
+                let Some(left) = left.next() else {
+                    unreachable!("peek was some");
+                };
+
+                elements.swap(output, left);
             } else {
-                elements.swap(output, right_start);
-                right_start += 1;
+                let Some(right) = right.next() else {
+                    unreachable!("peek was some");
+                };
+
+                elements.swap(output, right);
             }
 
             output += 1;
         }
 
-        for index in left_start..left_end {
+        for index in left {
             elements.swap(output, index);
             output += 1;
         }
 
-        for index in right_start..right_end {
+        for index in right {
             elements.swap(output, index);
             output += 1;
         }
