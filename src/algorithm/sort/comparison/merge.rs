@@ -229,35 +229,38 @@ mod bottom_up {
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
 pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
-    /// TODO
-    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], left: core::ops::Range<usize>, right: core::ops::Range<usize>, mut output: usize) {
-        let mut left = left.peekable();
-        let mut right = right.peekable();
+    /// Merge two sub-slices into a potentially overlapping sub-slice.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], first: core::ops::Range<usize>, second: core::ops::Range<usize>, mut output: usize) {
+        let mut first = first.peekable();
+        let mut second = second.peekable();
 
-        while let (Some(first), Some(second)) = (left.peek(), right.peek()) {
-            if elements[*first] < elements[*second] {
-                let Some(left) = left.next() else {
+        while let (Some(first_index), Some(second_index)) = (first.peek(), second.peek()) {
+            if elements[*first_index] < elements[*second_index] {
+                let Some(index) = first.next() else {
                     unreachable!("peek was some");
                 };
 
-                elements.swap(output, left);
+                elements.swap(output, index);
             } else {
-                let Some(right) = right.next() else {
+                let Some(index) = second.next() else {
                     unreachable!("peek was some");
                 };
 
-                elements.swap(output, right);
+                elements.swap(output, index);
             }
 
             output += 1;
         }
 
-        for index in left {
+        for index in first {
             elements.swap(output, index);
             output += 1;
         }
 
-        for index in right {
+        for index in second {
             elements.swap(output, index);
             output += 1;
         }
