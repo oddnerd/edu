@@ -232,9 +232,9 @@ mod bottom_up {
 pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
 
     /// TODO
-    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], left_start: usize, left_end: usize, right_start: usize, right_end: usize, mut output: usize) {
-        let mut left = (left_start..left_end).peekable();
-        let mut right = (right_start..right_end).peekable();
+    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], left: core::ops::Range<usize>, right: core::ops::Range<usize>, mut output: usize) {
+        let mut left = left.peekable();
+        let mut right = right.peekable();
 
         while let (Some(first), Some(second)) = (left.peek(), right.peek()) {
             if elements[*first] < elements[*second] {
@@ -273,7 +273,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
             imsort(elements, start, middle);
             imsort(elements, middle, end);
 
-            merge(elements, start, middle, middle, end, output);
+            merge(elements, start..middle, middle..end, output);
         } else {
             while start < end {
                 elements.swap(start, output);
@@ -297,7 +297,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
 
                 wsort(elements, output, n, start);
 
-                merge(elements, start, start + n - output, n, end, output);
+                merge(elements, start..(start + n - output), n..end, output);
             }
 
             let mut n = output;
