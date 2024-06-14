@@ -275,9 +275,8 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
 
             merge(elements, start..middle, middle..end, output);
         } else {
-            while start < end {
-                elements.swap(start, output);
-                start += 1;
+            for index in start..end {
+                elements.swap(output, index);
                 output += 1;
             }
         }
