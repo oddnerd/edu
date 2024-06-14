@@ -228,12 +228,12 @@ mod bottom_up {
 /// ```
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
+pub fn in_place<T: Ord>(elements: &mut [T]) {
     /// Merge two sub-slices into a potentially overlapping sub-slice.
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
-    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], first: core::ops::Range<usize>, second: core::ops::Range<usize>, output: usize) {
+    fn merge<T: Ord>(elements: &mut [T], first: core::ops::Range<usize>, second: core::ops::Range<usize>, output: usize) {
         let mut first = first.peekable();
         let mut second = second.peekable();
 
@@ -259,7 +259,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     }
 
     /// Sort a `range` of `elements` into the same slice, starting at `output`.
-    fn sort_into<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
+    fn sort_into<T: Ord>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
         if range.len() > 1 {
             let middle = range.len() / 2;
             let (left, right) = elements[range.clone()].split_at_mut(middle);
@@ -277,31 +277,40 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         return;
     }
 
+    // Sort left half into right half.
     let middle = elements.len() / 2;
     let mut output = elements.len() - middle;
-
     sort_into(elements, 0..middle, output);
 
+    // sort the right half of the unsorted section into the left half then
+    // merge with the already sorted section via swapping with the unsorted.
     while output > 2 {
-        let middle = output;
-        output = (middle + 1) / 2;
+        // unsorted: [..split]
+        // sorted: [split..]
+        let split = output;
 
-        sort_into(elements, output..middle, 0);
+        // unsorted: [..output]
+        // to be sorted [output..split]
+        // already sorted: [split..]
+        output = (split + 1) / 2;
 
-        merge(elements, 0..(middle - output), middle..elements.len(), output);
+        // sort [output..split] into [..output]
+        sort_into(elements, output..split, 0);
+
+        // unsorted: [..output]
+        // sorted: [output..]
+        merge(elements, 0..(split - output), split..elements.len(), output);
     }
 
-    let mut n = output;
-    while n > 0 {
-
-        let mut m = n;
-        while m < elements.len() && elements[m] < elements[m - 1] {
-            elements.swap(m, m - 1);
-
-            m += 1;
+    // sort the remaining elements in [..output] via insertion sort.
+    for remaining in (0..output).rev() {
+        for current in remaining..(elements.len() - 1) {
+            if elements[current] > elements[current + 1] {
+                elements.swap(current, current + 1);
+            } else {
+                break;
+            }
         }
-
-        n -= 1;
     }
 }
 
