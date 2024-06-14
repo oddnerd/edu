@@ -245,16 +245,13 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
             output += 1;
         }
 
-        while left_start < left_end {
-            elements.swap(output, left_start);
-            left_start += 1;
+        for index in left_start..left_end {
+            elements.swap(output, index);
             output += 1;
         }
 
-
-        while right_start < right_end {
-            elements.swap(output, right_start);
-            right_start += 1;
+        for index in right_start..right_end {
+            elements.swap(output, index);
             output += 1;
         }
     }
