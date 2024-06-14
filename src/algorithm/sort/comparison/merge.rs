@@ -285,7 +285,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     /// TODO:
     fn imsort<T: Ord + core::fmt::Debug>(elements: &mut [T], start: usize, end: usize) {
         if end - start > 1 {
-            let mut middle = start + (end - start) / 2;
+            let middle = start + (end - start) / 2;
             let mut output = start + end - middle;
 
             wsort(elements, start..middle, output);
