@@ -271,8 +271,8 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
             let middle = range.start + (range.len() / 2);
 
             let (left, right) = elements.split_at_mut(middle);
-            sort(left);
-            sort(right);
+            in_place(left);
+            in_place(right);
 
             merge(elements, range.start..middle, middle..range.end, output);
         } else {
@@ -280,39 +280,34 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         }
     }
 
-    /// TODO
-    fn sort<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
-        if elements.len() > 1 {
-            let middle = elements.len() / 2;
-            let mut output = elements.len() - middle;
+    if elements.len() > 1 {
+        let middle = elements.len() / 2;
+        let mut output = elements.len() - middle;
 
-            wsort(elements, 0..middle, output);
+        wsort(elements, 0..middle, output);
 
-            while output > 2 {
-                let n = output;
-                output = (n + 1) / 2;
+        while output > 2 {
+            let n = output;
+            output = (n + 1) / 2;
 
-                wsort(elements, output..n, 0);
+            wsort(elements, output..n, 0);
 
-                merge(elements, 0..(n - output), n..elements.len(), output);
+            merge(elements, 0..(n - output), n..elements.len(), output);
+        }
+
+        let mut n = output;
+        while n > 0 {
+
+            let mut m = n;
+            while m < elements.len() && elements[m] < elements[m - 1] {
+                elements.swap(m, m - 1);
+
+                m += 1;
             }
 
-            let mut n = output;
-            while n > 0 {
-
-                let mut m = n;
-                while m < elements.len() && elements[m] < elements[m - 1] {
-                    elements.swap(m, m - 1);
-
-                    m += 1;
-                }
-
-                n -= 1;
-            }
+            n -= 1;
         }
     }
-
-    sort(elements);
 }
 
 #[cfg(test)]
