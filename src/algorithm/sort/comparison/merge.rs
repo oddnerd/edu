@@ -270,8 +270,9 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         if range.len() > 1 {
             let middle = range.start + (range.len() / 2);
 
-            imsort(elements, range.start..middle);
-            imsort(elements, middle..range.end);
+            let (left, right) = elements.split_at_mut(middle);
+            sort(left);
+            sort(right);
 
             merge(elements, range.start..middle, middle..range.end, output);
         } else {
@@ -279,28 +280,28 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         }
     }
 
-    /// TODO:
-    fn imsort<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>) {
-        if range.len() > 1 {
-            let middle = range.start + (range.len() / 2);
-            let mut output = range.start + range.end - middle;
+    /// TODO
+    fn sort<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
+        if elements.len() > 1 {
+            let middle = elements.len() / 2;
+            let mut output = elements.len() - middle;
 
-            wsort(elements, range.start..middle, output);
+            wsort(elements, 0..middle, output);
 
-            while output - range.start > 2 {
+            while output > 2 {
                 let n = output;
-                output = range.start + (n - range.start + 1) / 2;
+                output = (n + 1) / 2;
 
-                wsort(elements, output..n, range.start);
+                wsort(elements, output..n, 0);
 
-                merge(elements, range.start..(range.start + n - output), n..range.end, output);
+                merge(elements, 0..(n - output), n..elements.len(), output);
             }
 
             let mut n = output;
-            while n > range.start {
+            while n > 0 {
 
                 let mut m = n;
-                while m < range.end && elements[m] < elements[m - 1] {
+                while m < elements.len() && elements[m] < elements[m - 1] {
                     elements.swap(m, m - 1);
 
                     m += 1;
@@ -311,7 +312,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         }
     }
 
-    imsort(elements, 0..elements.len());
+    sort(elements);
 }
 
 #[cfg(test)]
