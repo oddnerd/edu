@@ -211,95 +211,7 @@ mod bottom_up {
     }
 }
 
-/// Merge two lists into a partially overlapping output.
-///
-/// `slice` is divided as [left..left_end..output..right..right_end]
-/// where the inputs are [left..left_end] and [right..right_end]
-/// which are merged into [output..right_end].
-fn inplace_merge<T: Ord>(
-    slice: &mut [T],
-    left: usize,
-    left_end: usize,
-    right: usize,
-    right_end: usize,
-    output: usize,
-) {
-    match (slice[..left_end].get(left), slice[..right_end].get(right)) {
-        (Some(first), Some(second)) => {
-            if first < second {
-                slice.swap(output, left);
-                inplace_merge(slice, left + 1, left_end, right, right_end, output + 1);
-            } else {
-                slice.swap(output, right);
-                inplace_merge(slice, left, left_end, right + 1, right_end, output + 1);
-            }
-        }
-        (Some(_), None) => {
-            slice.swap(output, left);
-            inplace_merge(slice, left + 1, left_end, right, right_end, output + 1)
-        }
-        (None, Some(_)) => {
-            slice.swap(output, right);
-            inplace_merge(slice, left, left_end, right + 1, right_end, output + 1);
-        }
-        (None, None) => {}
-    }
-}
-
-/// Merge sort some slice in-place of another.
-///
-/// Sort the elements of `from` into the buffer `into` whilst swapping
-/// overwirrten elements from `into` over to `from` such that `into` will
-/// contain the sorted entries of `from` whereas `from` will hold unordered
-/// entried of `into`.
-fn inplace_into<T: Ord>(from: &mut [T], into: &mut [T]) {
-    if from.len() > 1 {
-        let middle = from.len() / 2;
-        let (left, right) = from.split_at_mut(middle);
-        in_place(left);
-        in_place(right);
-
-        {
-            let mut first = left.iter_mut().peekable();
-            let mut second = right.iter_mut().peekable();
-
-            for element in into {
-                match (first.peek_mut(), second.peek_mut()) {
-                    (Some(left), Some(right)) => {
-                        if left <= right {
-                            core::mem::swap(element, *left);
-                            _ = first.next();
-                        } else {
-                            core::mem::swap(element, *right);
-                            _ = second.next();
-                        }
-                    }
-                    (Some(left), None) => {
-                        core::mem::swap(element, *left);
-                        _ = first.next();
-                    }
-                    (None, Some(right)) => {
-                        core::mem::swap(element, *right);
-                        _ = second.next();
-                    }
-                    (None, None) => unreachable!("more output elements than input"),
-                };
-            }
-        }
-
-        // merge::iterative(left, right, into);
-
-        // crate::algorithm::merge::Iterative::new(left.iter_mut(), right.iter_mut())
-        //     .zip(into.iter_mut())
-        //     .for_each(|(smallest, output)| {
-        //         core::mem::swap(smallest, output);
-        //     });
-    } else if let (Some(mut from), Some(mut into)) = (from.first(), into.first()) {
-        core::mem::swap(&mut from, &mut into);
-    }
-}
-
-/// Sort a `slice` using in-place merge sort.
+/// Sort `elements` using in-place merge sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -312,47 +224,106 @@ fn inplace_into<T: Ord>(from: &mut [T], into: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::merge::inplace;
-/// let mut slice = [3,2,1];
-/// inplace(&mut slice);
-/// assert_eq!(slice, [1,2,3]);
+/// todo!()
 /// ```
-pub fn in_place<T: Ord>(slice: &mut [T]) {
-    if slice.len() > 1 {
-        let mut middle = (slice.len() + 1) / 2;
+#[allow(clippy::indexing_slicing)]
+#[allow(clippy::arithmetic_side_effects)]
+#[allow(clippy::many_single_char_names)]
+pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
 
-        // sort left half into right half
-        let (left, right) = slice.split_at_mut(middle);
-        inplace_into(left, right);
+    /// TODO
+    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], mut i: usize, m: usize, mut j: usize, n: usize, mut w: usize) {
+        while i < m && j < n {
+            if elements[i] < elements[j] {
+                elements.swap(w, i);
+                i += 1;
+            } else {
+                elements.swap(w, j);
+                j += 1;
+            }
 
-        while slice[..middle].len() > 1 {
-            let sorted = middle;
-            middle = (sorted + 1) / 2;
-
-            // sort right fraction into left fraction
-            let (left, right) = slice.split_at_mut(middle);
-            inplace_into(&mut right[..middle], left);
-
-            // merge sorted left fraction into original sorted right half using
-            // space of unsorted elements in-between thereby causing
-            // `slice[..middle]` to become the unsorted elements.
-            inplace_merge(slice, 0, middle, sorted, slice.len(), middle);
+            w += 1;
         }
 
-        // first is the only unsorted element, swap it back until sorted
-        for index in 1..slice.len() {
-            if slice[index] < slice[index - 1] {
-                slice.swap(index, index - 1);
-            } else {
-                break;
+        while i < m {
+            elements.swap(w, i);
+            i += 1;
+            w += 1;
+        }
+
+
+        while j < n {
+            elements.swap(w, j);
+            j += 1;
+            w += 1;
+        }
+    }
+
+    /// TODO
+    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], mut l: usize, u: usize, mut w: usize) {
+        if u - l > 1 {
+            let m = l + (u - l) / 2;
+
+            imsort(elements, l, m);
+            imsort(elements, m, u);
+
+            merge(elements, l, m, m, u, w);
+        } else {
+            while l < u {
+                elements.swap(l, w);
+                l += 1;
+                w += 1;
             }
         }
     }
+
+    /// TODO:
+    fn imsort<T: Ord + core::fmt::Debug>(elements: &mut [T], l: usize, u: usize) {
+        if u - l > 1 {
+            let mut m = l + (u - l) / 2;
+            let mut w = l + u - m;
+
+            wsort(elements, l, m, w);
+
+            while w - l > 2 {
+                let n = w;
+                w = l + (n - l + 1) / 2;
+
+                wsort(elements, w, n, l);
+
+                merge(elements, l, l + n - w, n, u, w);
+            }
+
+            let mut n = w;
+            while n > l {
+
+                let mut m = n;
+                while m < u && elements[m] < elements[m - 1] {
+                    elements.swap(m, m - 1);
+
+                    m += 1;
+                }
+
+                n -= 1;
+            }
+        }
+    }
+
+    imsort(elements, 0, elements.len());
 }
 
 #[cfg(test)]
 mod inplace {
     use super::in_place;
+
+    #[test]
+    fn temporary_test_please_delete_me_or_something() {
+        let mut elements = [5, 0, 3, 2, 4, 1];
+
+        in_place(&mut elements);
+
+        assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+    }
 
     #[test]
     fn empty() {
