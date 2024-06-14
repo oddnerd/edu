@@ -266,16 +266,16 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     }
 
     /// TODO
-    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], mut start: usize, end: usize, mut output: usize) {
-        if end - start > 1 {
-            let middle = start + (end - start) / 2;
+    fn wsort<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>, mut output: usize) {
+        if range.len() > 1 {
+            let middle = range.start + (range.len() / 2);
 
-            imsort(elements, start, middle);
-            imsort(elements, middle, end);
+            imsort(elements, range.start, middle);
+            imsort(elements, middle, range.end);
 
-            merge(elements, start..middle, middle..end, output);
+            merge(elements, range.start..middle, middle..range.end, output);
         } else {
-            for index in start..end {
+            for index in range {
                 elements.swap(output, index);
                 output += 1;
             }
@@ -288,13 +288,13 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
             let mut middle = start + (end - start) / 2;
             let mut output = start + end - middle;
 
-            wsort(elements, start, middle, output);
+            wsort(elements, start..middle, output);
 
             while output - start > 2 {
                 let n = output;
                 output = start + (n - start + 1) / 2;
 
-                wsort(elements, output, n, start);
+                wsort(elements, output..n, start);
 
                 merge(elements, start..(start + n - output), n..end, output);
             }
