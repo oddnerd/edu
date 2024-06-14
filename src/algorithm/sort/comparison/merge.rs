@@ -258,7 +258,7 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         }
     }
 
-    /// TODO
+    /// Sort a `range` of `elements` into the same slice, starting at `output`.
     fn sort_into<T: Ord + core::fmt::Debug>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
         if range.len() > 1 {
             let middle = range.len() / 2;
@@ -273,33 +273,35 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         }
     }
 
-    if elements.len() > 1 {
-        let middle = elements.len() / 2;
-        let mut output = elements.len() - middle;
+    if elements.len() <= 1 {
+        return;
+    }
 
-        sort_into(elements, 0..middle, output);
+    let middle = elements.len() / 2;
+    let mut output = elements.len() - middle;
 
-        while output > 2 {
-            let middle = output;
-            output = (middle + 1) / 2;
+    sort_into(elements, 0..middle, output);
 
-            sort_into(elements, output..middle, 0);
+    while output > 2 {
+        let middle = output;
+        output = (middle + 1) / 2;
 
-            merge(elements, 0..(middle - output), middle..elements.len(), output);
+        sort_into(elements, output..middle, 0);
+
+        merge(elements, 0..(middle - output), middle..elements.len(), output);
+    }
+
+    let mut n = output;
+    while n > 0 {
+
+        let mut m = n;
+        while m < elements.len() && elements[m] < elements[m - 1] {
+            elements.swap(m, m - 1);
+
+            m += 1;
         }
 
-        let mut n = output;
-        while n > 0 {
-
-            let mut m = n;
-            while m < elements.len() && elements[m] < elements[m - 1] {
-                elements.swap(m, m - 1);
-
-                m += 1;
-            }
-
-            n -= 1;
-        }
+        n -= 1;
     }
 }
 
