@@ -233,36 +233,28 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
-    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], first: core::ops::Range<usize>, second: core::ops::Range<usize>, mut output: usize) {
+    fn merge<T: Ord + core::fmt::Debug>(elements: &mut [T], first: core::ops::Range<usize>, second: core::ops::Range<usize>, output: usize) {
         let mut first = first.peekable();
         let mut second = second.peekable();
 
-        while let (Some(first_index), Some(second_index)) = (first.peek(), second.peek()) {
-            if elements[*first_index] < elements[*second_index] {
-                let Some(index) = first.next() else {
-                    unreachable!("peek was some");
-                };
+        for output_index in output..elements.len() {
+            let input_index = match (first.peek(), second.peek()) {
+                (Some(first_index), Some(second_index)) =>
+                    if elements[*first_index] < elements[*second_index] {
+                        first.next()
+                    } else {
+                        second.next()
+                    },
+                (Some(_), None) => first.next(),
+                (None, Some(_)) => second.next(),
+                (None, None) => None,
+            };
 
-                elements.swap(output, index);
+            if let Some(input_index) = input_index {
+                elements.swap(output_index, input_index);
             } else {
-                let Some(index) = second.next() else {
-                    unreachable!("peek was some");
-                };
-
-                elements.swap(output, index);
+                unreachable!("caller logic error");
             }
-
-            output += 1;
-        }
-
-        for index in first {
-            elements.swap(output, index);
-            output += 1;
-        }
-
-        for index in second {
-            elements.swap(output, index);
-            output += 1;
         }
     }
 
