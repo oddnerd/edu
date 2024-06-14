@@ -287,12 +287,12 @@ pub fn in_place<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
         wsort(elements, 0..middle, output);
 
         while output > 2 {
-            let n = output;
-            output = (n + 1) / 2;
+            let middle = output;
+            output = (middle + 1) / 2;
 
-            wsort(elements, output..n, 0);
+            wsort(elements, output..middle, 0);
 
-            merge(elements, 0..(n - output), n..elements.len(), output);
+            merge(elements, 0..(middle - output), middle..elements.len(), output);
         }
 
         let mut n = output;
