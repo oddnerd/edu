@@ -222,6 +222,27 @@ mod bottom_up {
 /// the original sorted right half thereby combining the sorted elements on the
 /// right and unsorted on the left, repeating until all elements are sorted.
 ///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(1) memory.
+///
+/// # Citation
+/// This algorithm is from the following citation:
+///
+/// ```bibtex
+/// @article{10.5555/642136.642138,
+///     author     = {Jyrki Katajainen and Tomi Pasanen and Jukka Teuhola},
+///     title      = {Practical in-place mergesort},
+///     journal    = {Nordic Journal of Computing},
+///     issue_date = {Spring 1996},
+///     publisher  = {Publishing Association Nordic Journal of Computing},
+///     volume     = {3},
+///     number     = {1},
+///     pages      = {27–40},
+///     issn       = {1236-6064},
+///     date       = {1996-03-01},
+/// }
+/// ```
+///
 /// # Examples
 /// ```
 /// todo!()
