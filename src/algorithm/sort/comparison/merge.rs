@@ -143,18 +143,24 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
-    fn merge<T: Ord>(elements: &mut [T], first: core::ops::Range<usize>, second: core::ops::Range<usize>, output: usize) {
+    fn merge<T: Ord>(
+        elements: &mut [T],
+        first: core::ops::Range<usize>,
+        second: core::ops::Range<usize>,
+        output: usize,
+    ) {
         let mut first = first.peekable();
         let mut second = second.peekable();
 
         for output_index in output..elements.len() {
             let input_index = match (first.peek(), second.peek()) {
-                (Some(first_index), Some(second_index)) =>
+                (Some(first_index), Some(second_index)) => {
                     if elements[*first_index] < elements[*second_index] {
                         first.next()
                     } else {
                         second.next()
-                    },
+                    }
+                }
                 (Some(_), None) => first.next(),
                 (None, Some(_)) => second.next(),
                 (None, None) => None,
@@ -310,7 +316,7 @@ mod test {
         #[test]
         #[should_panic(expected = "auxiliary must be clone of elements")]
         fn panics_if_auxiliary_has_different_elements() {
-            let mut elements = [0, 1, 2, 3, 4,];
+            let mut elements = [0, 1, 2, 3, 4];
             let mut auxiliary = [5, 6, 7, 8, 9];
 
             top_down(&mut elements, &mut auxiliary);
@@ -392,7 +398,7 @@ mod test {
         #[test]
         #[should_panic(expected = "auxiliary must be clone of elements")]
         fn panics_if_auxiliary_has_different_elements() {
-            let mut elements = [0, 1, 2, 3, 4,];
+            let mut elements = [0, 1, 2, 3, 4];
             let mut auxiliary = [5, 6, 7, 8, 9];
 
             bottom_up(&mut elements, &mut auxiliary);
