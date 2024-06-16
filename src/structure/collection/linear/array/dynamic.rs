@@ -326,6 +326,9 @@ impl<T> Dynamic<T> {
     /// # Errors
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::List;
@@ -375,6 +378,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Errors
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
     ///
     /// # Examples
     /// ```
