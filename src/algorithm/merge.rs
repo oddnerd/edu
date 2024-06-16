@@ -66,7 +66,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// is _NOT_ guaranteed.
 ///
 /// For the convenience of implementation to not depend on a particular
-/// executor, this method executes synchronously within the singly calling
+/// executor, this method executes synchronously within the single calling
 /// thread. However, the implementation is of a parallel algorithm that could
 /// be trivially modified to execute asynchronously.
 ///
@@ -75,10 +75,9 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// as the sum of the input lengths.
 ///
 /// # Performance
-/// Synchronous: This method takes O(N * log N) time and consumes O(N) memory.
+/// This method takes O(N * log N) time and consumes O(log N) memory.
 ///
-/// Asynchronous: This method takes O(log<sup>2</sup> N) time and consumes
-/// O(N) memory.
+/// If ran asynchronously, this method takes O(log<sup>2</sup> N) time instead.
 ///
 /// # Examples
 /// ```
