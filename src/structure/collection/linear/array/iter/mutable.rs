@@ -254,6 +254,7 @@ mod test {
 
                 assert_eq!(actual.len(), expected.len());
             }
+
             #[test]
             fn updates() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
