@@ -1,4 +1,4 @@
-//! Combine (merge) sorted collections whilst preserving order.
+//! Implementations of [Merge](https://en.wikipedia.org/wiki/Merge_algorithm).
 
 /// Merge two sorted slices into one `output` slice.
 ///
