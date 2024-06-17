@@ -52,38 +52,49 @@ mod sift_down {
         }
     }
 
-    pub(super) fn bottom_up<T>(slice: &mut [T], index: usize)
-    where
-        T: Ord,
-    {
-        fn leaf_search<T>(slice: &mut [T], mut index: usize) -> usize
-        where
-            T: Ord,
-        {
-            while right_child(index) < slice.len() {
-                if slice[right_child(index)] > slice[left_child(index)] {
-                    index = right_child(index);
-                } else {
-                    index = left_child(index);
-                }
-            }
+    /// Sift the root of a binary `max_heap` down to the correct position.
+    ///
+    /// Traverse the heap down to the leaves (this is presumably where the
+    /// current root value came from), and then traverse upward a node is found
+    /// which is greater than the value being sifted down.
+    ///
+    /// This uses fewer comparison than [`top_down`], but will likely have
+    /// worse performance for cheap comparisons.
+    ///
+    /// # Performance
+    /// This method takes O(log N) time and consumes O(1) memory.
+    pub(super) fn bottom_up<T: Ord>(max_heap: &mut [T]) {
+        /// The absolute root of `max_heap` is this index.
+        const ROOT: usize = 0;
 
-            if left_child(index) < slice.len() {
-                index = left_child(index);
-            }
-
-            index
+        if max_heap.is_empty() {
+            return;
         }
 
-        if !slice.is_empty() {
-            let mut leaf = leaf_search(slice, index);
-            while slice[index] > slice[leaf] {
-                leaf = parent(leaf);
+        let mut current = ROOT;
+
+        // Traverse down to leaf where the smallest possible value goes.
+        while right_child(current) < max_heap.len() {
+            if max_heap[right_child(current)] > max_heap[left_child(current)] {
+                current = right_child(current);
+            } else {
+                current = left_child(current);
             }
-            while leaf > index {
-                slice.swap(index, leaf);
-                leaf = parent(leaf);
-            }
+        }
+
+        if left_child(current) < max_heap.len() {
+            current = left_child(current);
+        }
+
+        // Traverse upwards from that leaf to find where root should go.
+        while max_heap[ROOT] > max_heap[current] {
+            current = parent(current);
+        }
+
+        // Swap root into that position and propagate upwards.
+        while current > ROOT {
+            max_heap.swap(ROOT, current);
+            current = parent(current);
         }
     }
 }
@@ -161,7 +172,7 @@ where
 
         // push the new root into the shrunk max-heap excluding sorted element.
         // sift_down(&mut max_heap[..end]);
-        sift_down::bottom_up(&mut slice[..end], 0);
+        sift_down::bottom_up(&mut slice[..end]);
     }
 }
 
