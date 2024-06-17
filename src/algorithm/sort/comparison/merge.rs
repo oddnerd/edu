@@ -193,7 +193,7 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
         return;
     }
 
-    // Sort left half ([..middle]) into right half ().
+    // Sort left half `..middle` into right half `middle..`.
     let middle = elements.len() / 2;
     let mut output = elements.len() - middle;
     sort_into(elements, 0..middle, output);
