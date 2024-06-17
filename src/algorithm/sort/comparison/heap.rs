@@ -1,8 +1,5 @@
 //! Implementations of [Heap Sort](https://en.wikipedia.org/wiki/Heapsort).
 
-#![allow(clippy::arithmetic_side_effects)]
-#![allow(clippy::indexing_slicing)]
-
 /// Sort `elements` via bottom-up heap sort.
 ///
 /// Starting from lone elements which are themselves max-heap ordered,
@@ -24,6 +21,7 @@
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
+#[allow(clippy::indexing_slicing)]
 pub fn bottom_up<T: Ord>(elements: &mut [T]) {
     // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
     construct_heap::bottom_up(elements);
@@ -59,6 +57,8 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
+#[allow(clippy::arithmetic_side_effects)]
+#[allow(clippy::indexing_slicing)]
 pub fn inline<T: Ord>(elements: &mut [T]) {
     // This is the parent of the last element, hence it is the greatest index
     // of a node in the heap which has children. Since leaf elements within
@@ -107,6 +107,7 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
+#[allow(clippy::indexing_slicing)]
 pub fn top_down<T: Ord>(elements: &mut [T]) {
     // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
     construct_heap::top_down(elements);
@@ -125,6 +126,7 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
+#[allow(clippy::arithmetic_side_effects)]
 fn left_child(index: usize) -> usize {
     2 * index + 1
 }
@@ -134,6 +136,7 @@ fn left_child(index: usize) -> usize {
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
+#[allow(clippy::arithmetic_side_effects)]
 fn right_child(index: usize) -> usize {
     2 * index + 2
 }
@@ -143,6 +146,7 @@ fn right_child(index: usize) -> usize {
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
+#[allow(clippy::arithmetic_side_effects)]
 fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
@@ -153,6 +157,8 @@ fn parent(index: usize) -> usize {
 ///
 /// # Performance
 /// This method takes O(log N) time and consumes O(1) memory.
+#[allow(clippy::arithmetic_side_effects)]
+#[allow(clippy::indexing_slicing)]
 fn sift_up<T: Ord>(max_heap: &mut [T]) {
     if max_heap.len() <= 1 {
         return;
@@ -183,6 +189,7 @@ mod sift_down {
     ///
     /// # Performance
     /// This method takes O(log N) time and consumes O(1) memory.
+    #[allow(clippy::indexing_slicing)]
     pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
         let mut root = 0;
 
@@ -215,6 +222,7 @@ mod sift_down {
     ///
     /// # Performance
     /// This method takes O(log N) time and consumes O(1) memory.
+    #[allow(clippy::indexing_slicing)]
     pub(super) fn bottom_up<T: Ord>(max_heap: &mut [T]) {
         /// The absolute root of `max_heap` is this index.
         const ROOT: usize = 0;
@@ -261,6 +269,8 @@ mod construct_heap {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
+    #[allow(clippy::arithmetic_side_effects)]
+    #[allow(clippy::indexing_slicing)]
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
         if elements.len() <= 1 {
             return;
@@ -278,6 +288,7 @@ mod construct_heap {
     ///
     /// # Performance
     /// This method takes O(N * log N) time and consumes O(1) memory.
+    #[allow(clippy::indexing_slicing)]
     pub(super) fn top_down<T: Ord>(elements: &mut [T]) {
         for leaf in 1..=elements.len() {
             // The ancestors of `leaf` are already heap ordered, so sift up.
