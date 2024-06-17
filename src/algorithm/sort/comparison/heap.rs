@@ -137,30 +137,30 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Index of the left child of the node at `index` in a binary heap.
+/// Index of the left child of the node at `root` in a binary heap.
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-fn left_child(index: usize) -> Option<usize> {
+fn left_child(root: usize) -> Option<usize> {
     index.checked_mul(2).and_then(|index| index.checked_add(1))
 }
 
-/// Index of the right child of the node at `index` in a binary heap.
+/// Index of the right child of the node at `root` in a binary heap.
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-fn right_child(index: usize) -> Option<usize> {
+fn right_child(root: usize) -> Option<usize> {
     index.checked_mul(2).and_then(|index| index.checked_add(2))
 }
 
-/// Index of the parent of the node at `index` in a binary heap.
+/// Index of the parent of the node at `root` in a binary heap.
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-fn parent(index: usize) -> Option<usize> {
+fn parent(root: usize) -> Option<usize> {
     index.checked_sub(1).map(|index| index / 2)
 }
 
