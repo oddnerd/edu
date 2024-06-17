@@ -40,7 +40,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 /// The implementation of [`bottom_up`] first creates a max-heap, and then
 /// separately uses that structure to obtain elements in sorted order thereby
 /// having two independent execution paths which ultimately invoke
-/// [`sift_down`]. In contrast, this implementation combines both steps with
+/// `sift_down`. In contrast, this implementation combines both steps with
 /// one shared execution path which would likely result in different runtime
 /// characteristics given branch prediction and potential inline expansion.
 ///
