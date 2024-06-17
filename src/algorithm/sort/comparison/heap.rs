@@ -18,6 +18,7 @@ fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
 
+/// Move a misplaced node down a heap into the correct level.
 mod sift_down {
     use super::*;
 
