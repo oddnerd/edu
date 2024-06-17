@@ -142,9 +142,8 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-#[allow(clippy::arithmetic_side_effects)]
-fn left_child(index: usize) -> usize {
-    2 * index + 1
+fn left_child(index: usize) -> Option<usize> {
+    index.checked_mul(2).and_then(|index| index.checked_add(1))
 }
 
 /// Index of the right child of the node at `index` in a binary heap.
@@ -152,9 +151,8 @@ fn left_child(index: usize) -> usize {
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-#[allow(clippy::arithmetic_side_effects)]
-fn right_child(index: usize) -> usize {
-    2 * index + 2
+fn right_child(index: usize) -> Option<usize> {
+    index.checked_mul(2).and_then(|index| index.checked_add(2))
 }
 
 /// Index of the parent of the node at `index` in a binary heap.
@@ -162,9 +160,8 @@ fn right_child(index: usize) -> usize {
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-#[allow(clippy::arithmetic_side_effects)]
-fn parent(index: usize) -> usize {
-    (index - 1) / 2
+fn parent(index: usize) -> Option<usize> {
+    index.checked_sub(1).map(|index| index / 2)
 }
 
 /// Sift the last leaf of a `max_heap` up to the correct position.
@@ -184,7 +181,9 @@ fn sift_up<T: Ord>(max_heap: &mut [T]) {
             unreachable!("index only decreases, cannot be out of bounds");
         };
 
-        let parent_index = parent(current_index);
+        let Some(parent_index) = parent(current_index) else {
+            unreachable!("the current index is non-zero");
+        };
 
         let Some(parent_element) = max_heap.get(parent_index) else {
             unreachable!("parent is between zero and current, thus in bounds");
@@ -215,19 +214,25 @@ mod sift_down {
     pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
         let mut root_index = 0;
 
-        while let Some(left) = max_heap.get(left_child(root_index)) {
-            let child_index = if max_heap
-                .get(right_child(root_index))
-                .is_some_and(|right| left < right)
-            {
-                right_child(root_index)
-            } else {
-                left_child(root_index)
+        loop {
+            let (Some(left_child), Some(right_child)) = (left_child(root_index), right_child(root_index)) else {
+                unreachable!("loop prevents a root without children big enough to overflow");
             };
 
-            let (Some(root_element), Some(child_element)) =
-                (max_heap.get(root_index), max_heap.get(child_index))
-            else {
+            let child_index = match (max_heap.get(left_child), max_heap.get(right_child)) {
+                (Some(left), Some(right)) => {
+                    if left < right {
+                        right_child
+                    } else {
+                        left_child
+                    }
+                },
+                (Some(_), None) => left_child,
+                (None, Some(_)) => unreachable!("left has smaller index"),
+                (None, None) => break,
+            };
+
+            let (Some(root_element), Some(child_element)) = (max_heap.get(root_index), max_heap.get(child_index)) else {
                 unreachable!("in the loop => child exists => root exists");
             };
 
@@ -256,8 +261,9 @@ mod sift_down {
 
         // Traverse down to leaf where the smallest possible value goes.
         loop {
-            let left_child = left_child(current);
-            let right_child = right_child(current);
+            let (Some(left_child), Some(right_child)) = (left_child(current), right_child(current)) else {
+                unreachable!("loop prevents a root without children big enough to overflow");
+            };
 
             current = match (max_heap.get(left_child), max_heap.get(right_child)) {
                 (Some(left), Some(right)) => {
@@ -284,7 +290,11 @@ mod sift_down {
             };
 
             if root > element {
-                current = parent(current);
+                let Some(parent) = parent(current) else {
+                    unreachable!("loop exits before `root == 0`");
+                };
+
+                current = parent;
             } else {
                 break;
             }
@@ -293,7 +303,12 @@ mod sift_down {
         // Swap root into that position and propagate upwards.
         while current > 0 {
             max_heap.swap(0, current);
-            current = parent(current);
+
+            let Some(parent) = parent(current) else {
+                unreachable!("loop exits upon `root == 0`");
+            };
+
+            current = parent;
         }
     }
 }
