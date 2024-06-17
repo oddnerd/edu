@@ -99,6 +99,7 @@ mod sift_down {
     }
 }
 
+/// Construct a binary max-heap.
 mod max_heapify {
     use super::*;
 
