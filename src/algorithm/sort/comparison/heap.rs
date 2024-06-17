@@ -3,6 +3,123 @@
 #![allow(clippy::arithmetic_side_effects)]
 #![allow(clippy::indexing_slicing)]
 
+/// Sort `elements` via bottom-up heap sort.
+///
+/// Starting from lone elements which are themselves max-heap ordered,
+/// iteratively join these subtrees by sifting down the element corresponding
+/// to their parent until all elements are ordered. The max element (the root)
+/// can then be swapped with the leaf with the highest index thereby placing it
+/// in sorted order, sifting down the leaf to maintain ordering of the heap.
+///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::bottom_up;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// bottom_up(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
+pub fn bottom_up<T: Ord>(elements: &mut [T]) {
+    // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
+    max_heapify::bottom_up(elements);
+
+    for end in (0..elements.len()).rev() {
+        // Place the greatest element not yet sorted into sorted order.
+        elements.swap(0, end);
+
+        // Sift down the leaf into the max-heap (excluding sorted elements).
+        sift_down::bottom_up(&mut elements[..end]);
+    }
+}
+
+/// Sort `elements` via bottom-up heap sort with inline sift-down optimization.
+///
+/// The implementation of [`bottom_up`] first creates a max-heap, and then
+/// separately uses that structure to obtain elements in sorted order thereby
+/// having two independent execution paths which ultimately invoke
+/// [`sift_down`]. In contrast, this implementation combines both steps with
+/// one shared execution path which would likely result in different runtime
+/// characteristics given branch prediction and potential inline expansion.
+///
+/// /// # Performance
+/// This method takes O(N * log N) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::inline;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// inline(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
+pub fn inline<T: Ord>(elements: &mut [T]) {
+    // This is the parent of the last element, hence it is the greatest index
+    // of a node in the heap which has children. Since leaf elements within
+    // `heap..` have a parent within `..=heap`, they will be heap-ordered by
+    // the call to [`sift_down`] on their parent.
+    let mut heap = elements.len() / 2;
+
+    // Elements within `left_unsorted..` are sorted.
+    let mut left_unsorted = elements.len();
+
+    while left_unsorted > 1 {
+        if heap > 0 {
+            // The heap has yet to be constructed, and this call to
+            // [`sift_down`] will add a subtree to the max-heap.
+            heap -= 1;
+        } else {
+            // The heap has been constructed, hence `elements[0]` is the max
+            // element which can therefore be swapped into sorted order, and
+            // this call to [`sift_down`] will reorder the leaf into the heap.
+            left_unsorted -= 1;
+            elements.swap(left_unsorted, 0);
+        }
+
+        sift_down::top_down(&mut elements[heap..left_unsorted]);
+    }
+}
+
+/// Sort `elements` via top-down heap sort.
+///
+/// Create one max-heap containing the first element, add the next element as a
+/// leaf to that heap sifting it up as necessary, repeating until all elements
+/// are ordered. The max element (the root) can then be swapped with the leaf
+/// with the highest index thereby placing it in sorted order, sifting down the
+/// leaf to maintain ordering of the heap.
+///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::heap::top_down;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// top_down(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
+pub fn top_down<T: Ord>(elements: &mut [T]) {
+    // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
+    max_heapify::top_down(elements);
+
+    for end in (0..elements.len()).rev() {
+        // Place the greatest element not yet sorted into sorted order.
+        elements.swap(0, end);
+
+        // Sift down the leaf into the max-heap (excluding sorted elements).
+        sift_down::top_down(&mut elements[..end]);
+    }
+}
+
 /// Index of the left child of the node at `index` in a binary heap.
 fn left_child(index: usize) -> usize {
     2 * index + 1
@@ -16,6 +133,29 @@ fn right_child(index: usize) -> usize {
 /// Index of the parent of the node at `index` in a binary heap.
 fn parent(index: usize) -> usize {
     (index - 1) / 2
+}
+
+/// Sift the last leaf of a `max_heap` up to the correct position.
+///
+/// Swap the leaf with its parent until the parent is greater.
+///
+/// # Performance
+/// This method takes O(log N) time and consumes O(1) memory.
+fn sift_up<T: Ord>(max_heap: &mut [T]) {
+    if max_heap.len() <= 1 {
+        return;
+    }
+
+    let mut current = max_heap.len() - 1;
+
+    while current > 0 {
+        if max_heap[parent(current)] < max_heap[current] {
+            max_heap.swap(current, parent(current));
+            current = parent(current);
+        } else {
+            return;
+        }
+    }
 }
 
 /// Move a misplaced node down a heap into the correct level.
@@ -134,146 +274,6 @@ mod max_heapify {
     }
 }
 
-/// Sort `elements` via bottom-up heap sort.
-///
-/// Starting from lone elements which are themselves max-heap ordered,
-/// iteratively join these subtrees by sifting down the element corresponding
-/// to their parent until all elements are ordered. The max element (the root)
-/// can then be swapped with the leaf with the highest index thereby placing it
-/// in sorted order, sifting down the leaf to maintain ordering of the heap.
-///
-/// # Performance
-/// This method takes O(N * log N) time and consumes O(1) memory.
-///
-/// # Examples
-/// ```
-/// use rust::algorithm::sort::comparison::heap::bottom_up;
-///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
-///
-/// bottom_up(&mut elements);
-///
-/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-/// ```
-pub fn bottom_up<T: Ord>(elements: &mut [T]) {
-    // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
-    max_heapify::bottom_up(elements);
-
-    for end in (0..elements.len()).rev() {
-        // Place the greatest element not yet sorted into sorted order.
-        elements.swap(0, end);
-
-        // Sift down the leaf into the max-heap (excluding sorted elements).
-        sift_down::bottom_up(&mut elements[..end]);
-    }
-}
-
-/// Sort `elements` via bottom-up heap sort with inline sift-down optimization.
-///
-/// The implementation of [`bottom_up`] first creates a max-heap, and then
-/// separately uses that structure to obtain elements in sorted order thereby
-/// having two independent execution paths which ultimately invoke
-/// [`sift_down`]. In contrast, this implementation combines both steps with
-/// one shared execution path which would likely result in different runtime
-/// characteristics given branch prediction and potential inline expansion.
-///
-/// /// # Performance
-/// This method takes O(N * log N) time and consumes O(1) memory.
-///
-/// # Examples
-/// ```
-/// use rust::algorithm::sort::comparison::heap::bottom_up_inline;
-///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
-///
-/// bottom_up_inline(&mut elements);
-///
-/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-/// ```
-pub fn bottom_up_inline<T: Ord>(elements: &mut [T]) {
-    // This is the parent of the last element, hence it is the greatest index
-    // of a node in the heap which has children. Since leaf elements within
-    // `heap..` have a parent within `..=heap`, they will be heap-ordered by
-    // the call to [`sift_down`] on their parent.
-    let mut heap = elements.len() / 2;
-
-    // Elements within `left_unsorted..` are sorted.
-    let mut left_unsorted = elements.len();
-
-    while left_unsorted > 1 {
-        if heap > 0 {
-            // The heap has yet to be constructed, and this call to
-            // [`sift_down`] will add a subtree to the max-heap.
-            heap -= 1;
-        } else {
-            // The heap has been constructed, hence `elements[0]` is the max
-            // element which can therefore be swapped into sorted order, and
-            // this call to [`sift_down`] will reorder the leaf into the heap.
-            left_unsorted -= 1;
-            elements.swap(left_unsorted, 0);
-        }
-
-        sift_down::top_down(&mut elements[heap..left_unsorted]);
-    }
-}
-
-/// Sift the last leaf of a `max_heap` up to the correct position.
-///
-/// Swap the leaf with its parent until the parent is greater.
-///
-/// # Performance
-/// This method takes O(log N) time and consumes O(1) memory.
-fn sift_up<T: Ord>(max_heap: &mut [T]) {
-    if max_heap.len() <= 1 {
-        return;
-    }
-
-    let mut current = max_heap.len() - 1;
-
-    while current > 0 {
-        if max_heap[parent(current)] < max_heap[current] {
-            max_heap.swap(current, parent(current));
-            current = parent(current);
-        } else {
-            return;
-        }
-    }
-}
-
-/// Sort `elements` via top-down heap sort.
-///
-/// Create one max-heap containing the first element, add the next element as a
-/// leaf to that heap sifting it up as necessary, repeating until all elements
-/// are ordered. The max element (the root) can then be swapped with the leaf
-/// with the highest index thereby placing it in sorted order, sifting down the
-/// leaf to maintain ordering of the heap.
-///
-/// # Performance
-/// This method takes O(N * log N) time and consumes O(1) memory.
-///
-/// # Examples
-/// ```
-/// use rust::algorithm::sort::comparison::heap::top_down;
-///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
-///
-/// top_down(&mut elements);
-///
-/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-/// ```
-pub fn top_down<T: Ord>(elements: &mut [T]) {
-    // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
-    max_heapify::top_down(elements);
-
-    for end in (0..elements.len()).rev() {
-        // Place the greatest element not yet sorted into sorted order.
-        elements.swap(0, end);
-
-        // Sift down the leaf into the max-heap (excluding sorted elements).
-        sift_down::top_down(&mut elements[..end]);
-    }
-}
-
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
@@ -350,7 +350,7 @@ mod test {
         fn empty() {
             let mut elements = [usize::default(); 0];
 
-            bottom_up_inline(&mut elements);
+            inline(&mut elements);
 
             assert_eq!(elements, []);
         }
@@ -359,7 +359,7 @@ mod test {
         fn single_element() {
             let mut elements = [0];
 
-            bottom_up_inline(&mut elements);
+            inline(&mut elements);
 
             assert_eq!(elements, [0]);
         }
@@ -368,7 +368,7 @@ mod test {
         fn already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
-            bottom_up_inline(&mut elements);
+            inline(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
@@ -377,7 +377,7 @@ mod test {
         fn must_swap() {
             let mut elements = [1, 0];
 
-            bottom_up_inline(&mut elements);
+            inline(&mut elements);
 
             assert_eq!(elements, [0, 1]);
         }
@@ -386,7 +386,7 @@ mod test {
         fn odd_length() {
             let mut elements = [2, 1, 0];
 
-            bottom_up_inline(&mut elements);
+            inline(&mut elements);
 
             assert_eq!(elements, [0, 1, 2]);
         }
@@ -395,7 +395,7 @@ mod test {
         fn multiple_swaps() {
             let mut elements = [2, 0, 3, 1];
 
-            bottom_up_inline(&mut elements);
+            inline(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
