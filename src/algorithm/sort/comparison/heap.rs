@@ -105,44 +105,36 @@ mod max_heapify {
     use super::sift_down;
     use super::sift_up;
 
-    /// Arrange elements of a slice into max-heap order in O(n log n) time.
+    /// Arrange `element` into max-heap (children less than parent) order.
     ///
-    /// Interpret `slice` as a binary tree where, for each node at index i, the
-    /// left child is at index (2*i+1) and the right child is at index (2*i+2).
-    /// Reorder the nodes such that all children are less than their parent.
-    pub(super) fn bottom_up<T>(slice: &mut [T])
-    where
-        T: Ord,
-    {
-        if slice.len() > 1 {
+    /// # Performance
+    /// This method takes O(N log N) time and consumes O(1) memory.
+    pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
+        if elements.len() > 1 {
             // `last` is the parent of the last element hence it is the greatest
             // index of a node in the heap which has children. Since elements
             // within `slice[first..]` are leaves to some subtree rooted by an
             // index in `slice[..=first]`, therefore they can be skipped because
             // [`sift_down`] orders them when the index of their parent is reached.
-            let last = parent(slice.len() - 1);
+            let last = parent(elements.len() - 1);
 
             // By going in reverse, since children of `node` will either be leaves
             // or subtrees already heap ordered, therefore sift it down until the
             // tree rooted at `node` is itself heap ordered.
             for node in (0..=last).rev() {
-                sift_down::top_down(&mut slice[node..]);
+                sift_down::top_down(&mut elements[node..]);
             }
         }
     }
 
-    /// Arrange elements of a slice into max-heap order in O(n) time.
+    /// Arrange `element` into max-heap (children less than parent) order.
     ///
-    /// Interpret `slice` as a binary tree where, for each node at index i, the
-    /// left child is at index (2*i+1) and the right child is at index (2*i+2).
-    /// Reorder the nodes such that all children are less than their parent.
-    pub(super) fn top_down<T>(slice: &mut [T])
-    where
-        T: Ord,
-    {
-        for leaf in 1..=slice.len() {
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
+    pub(super) fn top_down<T: Ord>(elements: &mut [T]) {
+        for leaf in 1..=elements.len() {
             // push leaf into the max-heap
-            sift_up(&mut slice[..leaf]);
+            sift_up(&mut elements[..leaf]);
         }
     }
 }
