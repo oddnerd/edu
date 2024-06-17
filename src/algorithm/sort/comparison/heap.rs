@@ -143,7 +143,7 @@ mod max_heapify {
 /// in sorted order, sifting down the leaf to maintain ordering of the heap.
 ///
 /// # Performance
-/// This method takes O(N log N) time and consumes O(1) memory.
+/// This method takes O(N * log N) time and consumes O(1) memory.
 ///
 /// # Examples
 /// ```
@@ -215,50 +215,52 @@ mod bottom_up {
     }
 }
 
-/// Sort a slice via bottom-up heap sort with inline sift-down optimization.
+/// Sort `elements` via bottom-up heap sort with inline sift-down optimization.
 ///
-/// [`bottom_up`] separates creating the max-heap and using it to iterate the
-/// elements in sorted order. In contrast, this implementation combines the two
-/// steps into one loop with a conditional. With branch prediction and inline
-/// expansion of 'sifting down', this implementation would likely have different
-/// runtime characteristics.
+/// The implementation of [`bottom_up`] first creates a max-heap, and then
+/// separately uses that structure to obtain elements in sorted order thereby
+/// having two independent execution paths which ultimately invoke
+/// [`sift_down`]. In contrast, this implementation combines both steps with
+/// one shared execution path which would likely result in different runtime
+/// characteristics given branch prediction and potential inline expansion.
+///
+/// /// # Performance
+/// This method takes O(N * log N) time and consumes O(1) memory.
 ///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::heap::bottom_up_inline;
-/// let mut slice = [3, 2, 1];
-/// bottom_up_inline(&mut slice);
-/// assert_eq!(slice, [1, 2, 3]);
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// bottom_up_inline(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn bottom_up_inline<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    // start at the parent of the last element which is the greatest
-    // index of a node in the heap which has children. Since elements
-    // within `slice[heap..]` are leaves to some subtree rooted by an
-    // index in `slice[..=heap]`, therefore they can be skipped because
-    // [`sift_down`] orders them when the index of their parent is reached.
-    let mut heap = slice.len() / 2;
+pub fn bottom_up_inline<T: Ord>(elements: &mut [T]) {
+    // This is the parent of the last element, hence it is the greatest index
+    // of a node in the heap which has children. Since leaf elements within
+    // `heap..` have a parent within `..=heap`, they will be heap-ordered by
+    // the call to [`sift_down`] on their parent.
+    let mut heap = elements.len() / 2;
 
-    // slice[left_unsorted..] is sorted.
-    let mut left_unsorted = slice.len();
+    // Elements within `left_unsorted..` are sorted.
+    let mut left_unsorted = elements.len();
 
     while left_unsorted > 1 {
-        // if the heap has yet to be constructed.
         if heap > 0 {
+            // The heap has yet to be constructed, and this call to
+            // [`sift_down`] will add a subtree to the max-heap.
             heap -= 1;
-        }
-        // max-heap implies the root node is the greatest in the collection,
-        // pop it from the max-heap by swapping it with the last element.
-        else {
+        } else {
+            // The heap has been constructed, hence `elements[0]` is the max
+            // element which can therefore be swapped into sorted order, and
+            // this call to [`sift_down`] will reorder the leaf into the heap.
             left_unsorted -= 1;
-            slice.swap(left_unsorted, 0);
+            elements.swap(left_unsorted, 0);
         }
 
-        // `slice[heap]` is either the next element to heapify, or the leaf
-        // swapped for the maximum element of the constructed max-heap.
-        sift_down::top_down(&mut slice[heap..left_unsorted]);
+        sift_down::top_down(&mut elements[heap..left_unsorted]);
     }
 }
 
