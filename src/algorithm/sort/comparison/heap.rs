@@ -300,7 +300,6 @@ mod sift_down {
 
 /// Construct a binary max-heap (also known as heapify).
 mod construct_heap {
-    use super::parent;
     use super::sift_down;
     use super::sift_up;
 
@@ -308,18 +307,17 @@ mod construct_heap {
     ///
     /// # Performance
     /// This method takes O(N) time and consumes O(1) memory.
-    #[allow(clippy::arithmetic_side_effects)]
-    #[allow(clippy::indexing_slicing)]
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
-        if elements.len() <= 1 {
-            return;
-        }
-
-        let last_parent = parent(elements.len() - 1) + 1;
+        // All leaves will be ordered when their parent is sifted down.
+        let last_parent = elements.len() / 2;
 
         for parent in (0..=last_parent).rev() {
+            let Some(heap) = elements.get_mut(parent..) else {
+                unreachable!("obviously in bounds");
+            };
+
             // The children of `node` are already heap ordered, so sift down.
-            sift_down::top_down(&mut elements[parent..]);
+            sift_down::top_down(heap);
         }
     }
 
