@@ -142,6 +142,9 @@ mod max_heapify {
 /// can then be swapped with the leaf with the highest index thereby placing it
 /// in sorted order, sifting down the leaf to maintain ordering of the heap.
 ///
+/// # Performance
+/// This method takes O(N log N) time and consumes O(1) memory.
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::heap::bottom_up;
