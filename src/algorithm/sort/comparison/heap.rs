@@ -156,15 +156,14 @@ mod max_heapify {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn bottom_up<T: Ord>(elements: &mut [T]) {
+    // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
     max_heapify::bottom_up(elements);
 
     for end in (0..elements.len()).rev() {
-        // max-heap implies the root node is the greatest in the collection,
-        // pop it from the max-heap by swapping it with the last element.
+        // Place the greatest element not yet sorted into sorted order.
         elements.swap(0, end);
 
-        // push the new root into the shrunk max-heap excluding sorted element.
-        // sift_down(&mut max_heap[..end]);
+        // Sift down the leaf into the max-heap (excluding sorted elements).
         sift_down::bottom_up(&mut elements[..end]);
     }
 }
