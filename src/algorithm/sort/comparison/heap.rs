@@ -60,32 +60,42 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::arithmetic_side_effects)]
-#[allow(clippy::indexing_slicing)]
 pub fn inline<T: Ord>(elements: &mut [T]) {
-    // This is the parent of the last element, hence it is the greatest index
-    // of a node in the heap which has children. Since leaf elements within
-    // `heap..` have a parent within `..=heap`, they will be heap-ordered by
-    // the call to [`sift_down`] on their parent.
-    let mut heap = elements.len() / 2;
+    // This is the current root of the heap. It starts at the last parent
+    // since the leaves will be heap-ordered by sifting down their parent.
+    let mut root = elements.len() / 2;
 
-    // Elements within `left_unsorted..` are sorted.
-    let mut left_unsorted = elements.len();
+    // This is how many elements remain in the heap and have yet to be moved
+    // into sorted order. This implies `remaining_unsorted..` are sorted.
+    let mut remaining_unsorted = elements.len();
 
-    while left_unsorted > 1 {
-        if heap > 0 {
-            // The heap has yet to be constructed, and this call to
-            // [`sift_down`] will add a subtree to the max-heap.
-            heap -= 1;
+    while remaining_unsorted > 1 {
+        if root > 0 {
+            // The heap has yet to be constructed, and this iteration will
+            // sift down the new root at index `heap` into the existing heap.
+            if let Some(decremented) = root.checked_sub(1) {
+                root = decremented;
+            } else {
+                unreachable!("this branch is not executed when the variable becomes zero");
+            }
         } else {
+            if let Some(decremented) = remaining_unsorted.checked_sub(1) {
+                remaining_unsorted = decremented;
+            } else {
+                unreachable!("the loop exits when the variable becomes zero");
+            }
+
             // The heap has been constructed, hence `elements[0]` is the max
             // element which can therefore be swapped into sorted order, and
-            // this call to [`sift_down`] will reorder the leaf into the heap.
-            left_unsorted -= 1;
-            elements.swap(left_unsorted, 0);
+            // this iteration will sift down the leaf swapped with the root.
+            elements.swap(remaining_unsorted, 0);
         }
 
-        sift_down::top_down(&mut elements[heap..left_unsorted]);
+        let Some(heap) = elements.get_mut(root..remaining_unsorted) else {
+            unreachable!("both bounds are less than the number of elements");
+        };
+
+        sift_down::top_down(heap);
     }
 }
 
