@@ -134,13 +134,13 @@ mod max_heapify {
     }
 }
 
-/// Sort a slice via bottom-up heap sort.
+/// Sort `elements` via bottom-up heap sort.
 ///
-/// Create bottom order heaps with one parent and two leaves. Iteratively join
-/// these heaps by 'sifting down' the element corresponding to their parent in
-/// the slice until all elements are within one max-heap.Ordered elements are
-/// then popped from the heap by swapping it with a leaf then 'sift down' to
-/// preserve order.
+/// Starting from lone elements which are themselves max-heap ordered,
+/// iteratively join these subtrees by sifting down the element corresponding
+/// to their parent until all elements are ordered. The max element (the root)
+/// can then be swapped with the leaf with the highest index thereby placing it
+/// in sorted order, sifting down the leaf to maintain ordering of the heap.
 ///
 /// # Examples
 /// ```
@@ -149,20 +149,17 @@ mod max_heapify {
 /// bottom_up(&mut slice);
 /// assert_eq!(slice, [1, 2, 3]);
 /// ```
-pub fn bottom_up<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    max_heapify::bottom_up(slice);
+pub fn bottom_up<T: Ord>(elements: &mut [T]) {
+    max_heapify::bottom_up(elements);
 
-    for end in (0..slice.len()).rev() {
+    for end in (0..elements.len()).rev() {
         // max-heap implies the root node is the greatest in the collection,
         // pop it from the max-heap by swapping it with the last element.
-        slice.swap(0, end);
+        elements.swap(0, end);
 
         // push the new root into the shrunk max-heap excluding sorted element.
         // sift_down(&mut max_heap[..end]);
-        sift_down::bottom_up(&mut slice[..end]);
+        sift_down::bottom_up(&mut elements[..end]);
     }
 }
 
