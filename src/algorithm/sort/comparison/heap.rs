@@ -121,16 +121,25 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 }
 
 /// Index of the left child of the node at `index` in a binary heap.
+///
+/// # Performance
+/// This method takes O(1) time and consumes O(1) memory.
 fn left_child(index: usize) -> usize {
     2 * index + 1
 }
 
 /// Index of the right child of the node at `index` in a binary heap.
+///
+/// # Performance
+/// This method takes O(1) time and consumes O(1) memory.
 fn right_child(index: usize) -> usize {
     2 * index + 2
 }
 
 /// Index of the parent of the node at `index` in a binary heap.
+///
+/// # Performance
+/// This method takes O(1) time and consumes O(1) memory.
 fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
