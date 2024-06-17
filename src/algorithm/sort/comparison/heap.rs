@@ -334,32 +334,37 @@ fn sift_up<T: Ord>(max_heap: &mut [T]) {
     }
 }
 
-/// Sort a slice via top-down heap sort.
+/// Sort `elements` via top-down heap sort.
 ///
-/// Create one max-heap at the start of the slice and then push each successive
-/// element into it by 'sifting up'. Ordered elements are then popped from the
-/// heap by swapping it with a leaf then 'sifting down' to preserve the heap.
+/// Create one max-heap containing the first element, add the next element as a
+/// leaf to that heap sifting it up as necessary, repeating until all elements
+/// are ordered. The max element (the root) can then be swapped with the leaf
+/// with the highest index thereby placing it in sorted order, sifting down the
+/// leaf to maintain ordering of the heap.
+///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(1) memory.
 ///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::heap::top_down;
-/// let mut slice = [3, 2, 1];
-/// top_down(&mut slice);
-/// assert_eq!(slice, [1, 2, 3]);
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// top_down(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn top_down<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    max_heapify::top_down(slice);
+pub fn top_down<T: Ord>(elements: &mut [T]) {
+    // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
+    max_heapify::top_down(elements);
 
-    for end in (0..slice.len()).rev() {
-        // max-heap implies the root node is the greatest in the collection,
-        // pop it from the max-heap by swapping it with the last element.
-        slice.swap(0, end);
+    for end in (0..elements.len()).rev() {
+        // Place the greatest element not yet sorted into sorted order.
+        elements.swap(0, end);
 
-        // push the new root into the shrunk max-heap excluding sorted element.
-        sift_down::top_down(&mut slice[..end]);
+        // Sift down the leaf into the max-heap (excluding sorted elements).
+        sift_down::top_down(&mut elements[..end]);
     }
 }
 
