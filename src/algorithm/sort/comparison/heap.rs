@@ -1,5 +1,8 @@
 //! Implementations of [Heap Sort](https://en.wikipedia.org/wiki/Heapsort).
 
+#![allow(clippy::arithmetic_side_effects)]
+#![allow(clippy::indexing_slicing)]
+
 /// Index of the left child of the node at `index` in a binary heap.
 fn left_child(index: usize) -> usize {
     2 * index + 1
