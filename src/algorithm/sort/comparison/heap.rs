@@ -313,7 +313,7 @@ mod construct_heap {
 
         for parent in (0..=last_parent).rev() {
             let Some(heap) = elements.get_mut(parent..) else {
-                unreachable!("obviously in bounds");
+                unreachable!("loop condition ensures in bounds");
             };
 
             // The children of `node` are already heap ordered, so sift down.
@@ -325,11 +325,14 @@ mod construct_heap {
     ///
     /// # Performance
     /// This method takes O(N * log N) time and consumes O(1) memory.
-    #[allow(clippy::indexing_slicing)]
     pub(super) fn top_down<T: Ord>(elements: &mut [T]) {
         for leaf in 1..=elements.len() {
+            let Some(heap) = elements.get_mut(..leaf) else {
+                unreachable!("loop condition ensures in bounds");
+            };
+
             // The ancestors of `leaf` are already heap ordered, so sift up.
-            sift_up(&mut elements[..leaf]);
+            sift_up(heap);
         }
     }
 }
