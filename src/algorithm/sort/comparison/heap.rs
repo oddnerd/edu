@@ -110,20 +110,22 @@ mod max_heapify {
     /// # Performance
     /// This method takes O(N log N) time and consumes O(1) memory.
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
-        if elements.len() > 1 {
-            // `last` is the parent of the last element hence it is the greatest
-            // index of a node in the heap which has children. Since elements
-            // within `slice[first..]` are leaves to some subtree rooted by an
-            // index in `slice[..=first]`, therefore they can be skipped because
-            // [`sift_down`] orders them when the index of their parent is reached.
-            let last = parent(elements.len() - 1);
+        if elements.len() <= 1 {
+            return;
+        }
 
-            // By going in reverse, since children of `node` will either be leaves
-            // or subtrees already heap ordered, therefore sift it down until the
-            // tree rooted at `node` is itself heap ordered.
-            for node in (0..=last).rev() {
-                sift_down::top_down(&mut elements[node..]);
-            }
+        // `last` is the parent of the last element hence it is the greatest
+        // index of a node in the heap which has children. Since elements
+        // within `slice[first..]` are leaves to some subtree rooted by an
+        // index in `slice[..=first]`, therefore they can be skipped because
+        // [`sift_down`] orders them when the index of their parent is reached.
+        let last = parent(elements.len() - 1);
+
+        // By going in reverse, since children of `node` will either be leaves
+        // or subtrees already heap ordered, therefore sift it down until the
+        // tree rooted at `node` is itself heap ordered.
+        for node in (0..=last).rev() {
+            sift_down::top_down(&mut elements[node..]);
         }
     }
 
