@@ -30,23 +30,24 @@ mod sift_down {
     /// less than that root, thereby repairing a max-heap with invalid root.
     ///
     /// # Performance
-    /// This method takes O(log N) time and consumes O(log N) memory.
+    /// This method takes O(log N) time and consumes O(1) memory.
     pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
-        let root = 0;
+        let mut root = 0;
 
-        if let Some(left) = max_heap.get(left_child(root)) {
-            let child = if max_heap
-                .get(right_child(root))
-                .is_some_and(|right| left < right)
+        while left_child(root) < max_heap.len() {
+            let greatest_child = if right_child(root) < max_heap.len()
+                && max_heap[left_child(root)] < max_heap[right_child(root)]
             {
                 right_child(root)
             } else {
                 left_child(root)
             };
 
-            if max_heap[child] > max_heap[root] {
-                max_heap.swap(root, child);
-                top_down(&mut max_heap[child..]);
+            if max_heap[root] < max_heap[greatest_child] {
+                max_heap.swap(root, greatest_child);
+                root = greatest_child;
+            } else {
+                return;
             }
         }
     }
