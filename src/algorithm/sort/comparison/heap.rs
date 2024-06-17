@@ -215,7 +215,9 @@ mod sift_down {
         let mut root_index = 0;
 
         loop {
-            let (Some(left_child), Some(right_child)) = (left_child(root_index), right_child(root_index)) else {
+            let (Some(left_child), Some(right_child)) =
+                (left_child(root_index), right_child(root_index))
+            else {
                 unreachable!("loop prevents a root without children big enough to overflow");
             };
 
@@ -226,13 +228,15 @@ mod sift_down {
                     } else {
                         left_child
                     }
-                },
+                }
                 (Some(_), None) => left_child,
                 (None, Some(_)) => unreachable!("left has smaller index"),
                 (None, None) => break,
             };
 
-            let (Some(root_element), Some(child_element)) = (max_heap.get(root_index), max_heap.get(child_index)) else {
+            let (Some(root_element), Some(child_element)) =
+                (max_heap.get(root_index), max_heap.get(child_index))
+            else {
                 unreachable!("in the loop => child exists => root exists");
             };
 
@@ -261,7 +265,8 @@ mod sift_down {
 
         // Traverse down to leaf where the smallest possible value goes.
         loop {
-            let (Some(left_child), Some(right_child)) = (left_child(current), right_child(current)) else {
+            let (Some(left_child), Some(right_child)) = (left_child(current), right_child(current))
+            else {
                 unreachable!("loop prevents a root without children big enough to overflow");
             };
 
