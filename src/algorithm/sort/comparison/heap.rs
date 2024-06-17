@@ -212,24 +212,30 @@ mod sift_down {
     ///
     /// # Performance
     /// This method takes O(log N) time and consumes O(1) memory.
-    #[allow(clippy::indexing_slicing)]
     pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
-        let mut root = 0;
+        let mut root_index = 0;
 
-        while left_child(root) < max_heap.len() {
-            let greatest_child = if right_child(root) < max_heap.len()
-                && max_heap[left_child(root)] < max_heap[right_child(root)]
+        while let Some(left) = max_heap.get(left_child(root_index)) {
+            let child_index = if max_heap
+                .get(right_child(root_index))
+                .is_some_and(|right| left < right)
             {
-                right_child(root)
+                right_child(root_index)
             } else {
-                left_child(root)
+                left_child(root_index)
             };
 
-            if max_heap[root] < max_heap[greatest_child] {
-                max_heap.swap(root, greatest_child);
-                root = greatest_child;
+            let (Some(root_element), Some(child_element)) =
+                (max_heap.get(root_index), max_heap.get(child_index))
+            else {
+                unreachable!("in the loop => child exists => root exists");
+            };
+
+            if root_element < child_element {
+                max_heap.swap(root_index, child_index);
+                root_index = child_index;
             } else {
-                return;
+                break;
             }
         }
     }
