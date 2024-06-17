@@ -251,38 +251,48 @@ mod sift_down {
     ///
     /// # Performance
     /// This method takes O(log N) time and consumes O(1) memory.
-    #[allow(clippy::indexing_slicing)]
     pub(super) fn bottom_up<T: Ord>(max_heap: &mut [T]) {
-        /// The absolute root of `max_heap` is this index.
-        const ROOT: usize = 0;
-
-        if max_heap.is_empty() {
-            return;
-        }
-
-        let mut current = ROOT;
+        let mut current = 0;
 
         // Traverse down to leaf where the smallest possible value goes.
-        while right_child(current) < max_heap.len() {
-            if max_heap[right_child(current)] > max_heap[left_child(current)] {
-                current = right_child(current);
-            } else {
-                current = left_child(current);
+        loop {
+            let left_child = left_child(current);
+            let right_child = right_child(current);
+
+            current = match (max_heap.get(left_child), max_heap.get(right_child)) {
+                (Some(left), Some(right)) => {
+                    if right > left {
+                        right_child
+                    } else {
+                        left_child
+                    }
+                }
+                (Some(_), None) => left_child,
+                (None, Some(_)) => unreachable!("left has smaller index"),
+                (None, None) => break,
             }
         }
 
-        if left_child(current) < max_heap.len() {
-            current = left_child(current);
-        }
-
         // Traverse upwards from that leaf to find where root should go.
-        while max_heap[ROOT] > max_heap[current] {
-            current = parent(current);
+        loop {
+            let Some(root) = max_heap.first() else {
+                return;
+            };
+
+            let Some(element) = max_heap.get(current) else {
+                unreachable!("above loop will ensure within bounds");
+            };
+
+            if root > element {
+                current = parent(current);
+            } else {
+                break;
+            }
         }
 
         // Swap root into that position and propagate upwards.
-        while current > ROOT {
-            max_heap.swap(ROOT, current);
+        while current > 0 {
+            max_heap.swap(0, current);
             current = parent(current);
         }
     }
