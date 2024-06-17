@@ -26,7 +26,7 @@
 /// ```
 pub fn bottom_up<T: Ord>(elements: &mut [T]) {
     // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
-    max_heapify::bottom_up(elements);
+    construct_heap::bottom_up(elements);
 
     for end in (0..elements.len()).rev() {
         // Place the greatest element not yet sorted into sorted order.
@@ -109,7 +109,7 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 /// ```
 pub fn top_down<T: Ord>(elements: &mut [T]) {
     // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
-    max_heapify::top_down(elements);
+    construct_heap::top_down(elements);
 
     for end in (0..elements.len()).rev() {
         // Place the greatest element not yet sorted into sorted order.
@@ -124,6 +124,7 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
+#[inline]
 fn left_child(index: usize) -> usize {
     2 * index + 1
 }
@@ -132,6 +133,7 @@ fn left_child(index: usize) -> usize {
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
+#[inline]
 fn right_child(index: usize) -> usize {
     2 * index + 2
 }
@@ -140,6 +142,7 @@ fn right_child(index: usize) -> usize {
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
+#[inline]
 fn parent(index: usize) -> usize {
     (index - 1) / 2
 }
@@ -248,8 +251,8 @@ mod sift_down {
     }
 }
 
-/// Construct a binary max-heap.
-mod max_heapify {
+/// Construct a binary max-heap (also known as heapify).
+mod construct_heap {
     use super::parent;
     use super::sift_down;
     use super::sift_up;
