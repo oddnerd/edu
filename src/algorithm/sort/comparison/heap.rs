@@ -148,9 +148,12 @@ mod max_heapify {
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::heap::bottom_up;
-/// let mut slice = [1, 3, 2];
-/// bottom_up(&mut slice);
-/// assert_eq!(slice, [1, 2, 3]);
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// bottom_up(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn bottom_up<T: Ord>(elements: &mut [T]) {
     max_heapify::bottom_up(elements);
