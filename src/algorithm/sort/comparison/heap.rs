@@ -30,7 +30,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
         elements.swap(0, sorted);
 
         let Some(heap) = elements.get_mut(..sorted) else {
-            unreachable!("the last leaf is less than the length");
+            unreachable!("loop ensures within bounds");
         };
 
         // Sift down the leaf into the max-heap (excluding sorted elements).
@@ -120,17 +120,20 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
 pub fn top_down<T: Ord>(elements: &mut [T]) {
     // Order `elements` in max-heap order, hence `elements[0]` is the greatest.
     construct_heap::top_down(elements);
 
-    for end in (0..elements.len()).rev() {
+    for sorted in (0..elements.len()).rev() {
         // Place the greatest element not yet sorted into sorted order.
-        elements.swap(0, end);
+        elements.swap(0, sorted);
+
+        let Some(heap) = elements.get_mut(..sorted) else {
+            unreachable!("loop ensures within bounds");
+        };
 
         // Sift down the leaf into the max-heap (excluding sorted elements).
-        sift_down::top_down(&mut elements[..end]);
+        sift_down::top_down(heap);
     }
 }
 
