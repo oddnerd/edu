@@ -20,7 +20,9 @@ fn parent(index: usize) -> usize {
 
 /// Move a misplaced node down a heap into the correct level.
 mod sift_down {
-    use super::*;
+    use super::parent;
+    use super::left_child;
+    use super::right_child;
 
     /// Reorder root (first element) of a binary max-heap ordered slice.
     ///
