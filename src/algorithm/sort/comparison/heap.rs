@@ -108,13 +108,13 @@ mod max_heapify {
     /// Arrange `element` into max-heap (children less than parent) order.
     ///
     /// # Performance
-    /// This method takes O(N log N) time and consumes O(1) memory.
+    /// This method takes O(N) time and consumes O(1) memory.
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
         if elements.len() <= 1 {
             return;
         }
 
-        let last_parent = parent(elements.len() - 1);
+        let last_parent = parent(elements.len() - 1) + 1;
 
         for parent in (0..=last_parent).rev() {
             // The children of `node` are already heap ordered, so sift down.
@@ -125,7 +125,7 @@ mod max_heapify {
     /// Arrange `element` into max-heap (children less than parent) order.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// This method takes O(N * log N) time and consumes O(1) memory.
     pub(super) fn top_down<T: Ord>(elements: &mut [T]) {
         for leaf in 1..=elements.len() {
             // The ancestors of `leaf` are already heap ordered, so sift up.
