@@ -101,7 +101,9 @@ mod sift_down {
 
 /// Construct a binary max-heap.
 mod max_heapify {
-    use super::*;
+    use super::parent;
+    use super::sift_down;
+    use super::sift_up;
 
     /// Arrange elements of a slice into max-heap order in O(n log n) time.
     ///
