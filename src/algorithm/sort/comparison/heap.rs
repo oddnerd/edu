@@ -173,21 +173,28 @@ fn parent(index: usize) -> usize {
 ///
 /// # Performance
 /// This method takes O(log N) time and consumes O(1) memory.
-#[allow(clippy::arithmetic_side_effects)]
-#[allow(clippy::indexing_slicing)]
 fn sift_up<T: Ord>(max_heap: &mut [T]) {
-    if max_heap.len() <= 1 {
+    let Some(mut current_index) = max_heap.len().checked_sub(1) else {
+        debug_assert_eq!(max_heap.len(), 0, "only condition its none");
         return;
-    }
+    };
 
-    let mut current = max_heap.len() - 1;
+    while current_index > 0 {
+        let Some(current_element) = max_heap.get(current_index) else {
+            unreachable!("index only decreases, cannot be out of bounds");
+        };
 
-    while current > 0 {
-        if max_heap[parent(current)] < max_heap[current] {
-            max_heap.swap(current, parent(current));
-            current = parent(current);
+        let parent_index = parent(current_index);
+
+        let Some(parent_element) = max_heap.get(parent_index) else {
+            unreachable!("parent is between zero and current, thus in bounds");
+        };
+
+        if parent_element < current_element {
+            max_heap.swap(current_index, parent_index);
+            current_index = parent_index;
         } else {
-            return;
+            break;
         }
     }
 }
