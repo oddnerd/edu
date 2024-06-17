@@ -143,7 +143,7 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
 fn left_child(root: usize) -> Option<usize> {
-    index.checked_mul(2).and_then(|index| index.checked_add(1))
+    root.checked_mul(2).and_then(|index| index.checked_add(1))
 }
 
 /// Index of the right child of the node at `root` in a binary heap.
@@ -152,16 +152,16 @@ fn left_child(root: usize) -> Option<usize> {
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
 fn right_child(root: usize) -> Option<usize> {
-    index.checked_mul(2).and_then(|index| index.checked_add(2))
+    root.checked_mul(2).and_then(|index| index.checked_add(2))
 }
 
-/// Index of the parent of the node at `root` in a binary heap.
+/// Index of the parent of the node at `child` in a binary heap.
 ///
 /// # Performance
 /// This method takes O(1) time and consumes O(1) memory.
 #[inline]
-fn parent(root: usize) -> Option<usize> {
-    index.checked_sub(1).map(|index| index / 2)
+fn parent(child: usize) -> Option<usize> {
+    child.checked_sub(1).map(|index| index / 2)
 }
 
 /// Sift the last leaf of a `max_heap` up to the correct position.
