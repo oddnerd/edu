@@ -20,22 +20,22 @@ fn parent(index: usize) -> usize {
 
 /// Move a misplaced node down a heap into the correct level.
 mod sift_down {
-    use super::parent;
     use super::left_child;
+    use super::parent;
     use super::right_child;
 
-    /// Reorder root (first element) of a binary max-heap ordered slice.
+    /// Sift the root of a binary `max_heap` down to the correct position.
     ///
-    /// Swap the first element (current root) with the greatest root of either
-    /// the left or right child max-heap until the subtree rooted by the first
-    /// element is itself a valid max-heap.
-    pub(super) fn top_down<T>(slice: &mut [T])
-    where
-        T: Ord,
-    {
+    /// Swap the current root with the greatest child until both children are
+    /// less than that root, thereby repairing a max-heap with invalid root.
+    ///
+    /// # Performance
+    /// This method takes O(log N) time and consumes O(log N) memory.
+    pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
         let root = 0;
-        if let Some(left) = slice.get(left_child(root)) {
-            let child = if slice
+
+        if let Some(left) = max_heap.get(left_child(root)) {
+            let child = if max_heap
                 .get(right_child(root))
                 .is_some_and(|right| left < right)
             {
@@ -44,9 +44,9 @@ mod sift_down {
                 left_child(root)
             };
 
-            if slice[child] > slice[root] {
-                slice.swap(root, child);
-                top_down(&mut slice[child..])
+            if max_heap[child] > max_heap[root] {
+                max_heap.swap(root, child);
+                top_down(&mut max_heap[child..]);
             }
         }
     }
