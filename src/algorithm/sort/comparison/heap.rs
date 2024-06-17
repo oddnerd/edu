@@ -311,23 +311,25 @@ mod bottom_up_inline {
     }
 }
 
-/// Reorder last leaf of a binary max-heap ordered slice.
+/// Sift the last leaf of a `max_heap` up to the correct position.
 ///
-/// Swap the last element (final leaf) with its parent until it is ordered
-/// within the max-heap.
-fn sift_up<T>(slice: &mut [T])
-where
-    T: Ord,
-{
-    if slice.len() > 1 {
-        let current_index = slice.len() - 1;
-        let parent_index = parent(current_index);
+/// Swap the leaf with its parent until the parent is greater.
+///
+/// # Performance
+/// This method takes O(log N) time and consumes O(1) memory.
+fn sift_up<T: Ord>(max_heap: &mut [T]) {
+    if max_heap.len() <= 1 {
+        return;
+    }
 
-        if let (Some(current), Some(parent)) = (slice.get(current_index), slice.get(parent_index)) {
-            if parent < current {
-                slice.swap(current_index, parent_index);
-                sift_up(&mut slice[..=parent_index]);
-            }
+    let mut current = max_heap.len() - 1;
+
+    while current > 0 {
+        if max_heap[parent(current)] < max_heap[current] {
+            max_heap.swap(current, parent(current));
+            current = parent(current);
+        } else {
+            return;
         }
     }
 }
