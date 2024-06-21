@@ -89,6 +89,10 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
     }
 }
 
+pub fn binary<T: Ord>(elements: &mut [T]) {
+    todo!()
+}
+
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
