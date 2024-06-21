@@ -230,6 +230,26 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using natural merge sort.
+///
+/// Unlike traditional [`top_down`] merge sort, this algorithm takes advantage
+/// of natural runs of sorted elements. In effect, this variation first splits
+/// `elements` into naturally sorted sub-slices and then merges them thereby
+/// splitting the original input optimally to prevent unnecessary recursion.
+///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(log N) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::merge::natural;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// natural(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn natural<T: Ord>(elements: &mut [T]) {
     todo!()
 }
