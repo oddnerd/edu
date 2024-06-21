@@ -1,5 +1,25 @@
 //! Implementations of [Insertion Sort](https://en.wikipedia.org/wiki/Insertion_sort).
 
+/// Sort `elements` using iterative insertion sort.
+///
+/// Starting from the first element of the slice which in isolation is a sorted
+/// subsection, iteratively move the element to the right of the sorted
+/// section to the left into sorted position within the sorted section
+/// until all elements have been moved into the sorted section.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::insertion::iterative;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// iterative(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn iterative<T: Ord>(elements: &mut [T]) {
     for sorted_length in 2..=elements.len() {
         // The sub-slice is sorted, except for the last element.
