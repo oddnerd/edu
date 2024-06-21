@@ -111,7 +111,7 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn binary<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
+pub fn binary<T: Ord>(elements: &mut [T]) {
     for next in 1..elements.len() {
         let (sorted, unsorted) = elements.split_at(next);
 
