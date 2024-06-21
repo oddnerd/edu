@@ -44,14 +44,34 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using recursive insertion sort.
+///
+/// Recursively sort all but the last element, then move the last element
+/// to the left into sorted position within the sorted section.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::insertion::recursive;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// recursive(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn recursive<T: Ord>(elements: &mut [T]) {
     let Some((_last, remaining)) = elements.split_last_mut() else {
-        debug_assert_eq!(elements.len(), 0, "only condition is none");
+        debug_assert_eq!(elements.len(), 0, "only condition it is none");
         return;
     };
 
+    // Sort everything except the last element.
     recursive(remaining);
 
+    // Move the last element down the list until sorted.
     for unsorted_index in (1..elements.len()).rev() {
         let Some(before_index) = unsorted_index.checked_sub(1) else {
             unreachable!("loop stops at index 1, so never zero");
