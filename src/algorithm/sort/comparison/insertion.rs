@@ -89,8 +89,29 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
     }
 }
 
-pub fn binary<T: Ord>(elements: &mut [T]) {
-    todo!()
+pub fn binary<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
+    for next in 1..elements.len() {
+        let (sorted, unsorted) = elements.split_at(next);
+
+        // The next element to be sorted.
+        let Some(unsorted) = unsorted.first() else {
+            unreachable!("loop ensures there will be at least one element");
+        };
+
+        // The index within the sorted section to place that element.
+        let sorted = match sorted.binary_search(unsorted) {
+            Ok(index) | Err(index) => index
+        };
+
+        // The elements between that index and the element being sorted.
+        let Some(to_rotate) = elements.get_mut(sorted..=next) else {
+            unreachable!("both indexes in bound hence the range is in bound");
+        };
+
+        // Place that element into position by shifting elements in between.
+        to_rotate.rotate_right(1);
+    }
+
 }
 
 #[cfg(test)]
