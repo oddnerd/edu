@@ -106,7 +106,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// right and unsorted on the left, repeating until all elements are sorted.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(1) memory.
+/// This method takes O(N * log N) time and consumes O(log N) memory.
 ///
 /// # Citation
 /// This algorithm is from the following citation:
