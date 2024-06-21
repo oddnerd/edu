@@ -2,10 +2,12 @@
 
 pub fn iterative<T: Ord>(elements: &mut [T]) {
     for i in 1..elements.len() {
-        let mut j = i;
-        while j > 0 && elements[j - 1] > elements[j] {
+        for j in (1..=i).rev() {
+            if !(elements[j - 1] > elements[j]) {
+                break;
+            }
+
             elements.swap(j, j - 1);
-            j -= 1;
         }
     }
 }
