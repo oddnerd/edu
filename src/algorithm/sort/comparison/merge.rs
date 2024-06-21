@@ -237,6 +237,9 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
 /// `elements` into naturally sorted sub-slices and then merges them thereby
 /// splitting the original input optimally to prevent unnecessary recursion.
 ///
+/// # Panics
+/// This method has the precondition that `auxiliary` is a clone of `elements`.
+///
 /// # Performance
 /// This method takes O(N * log N) time and consumes O(log N) memory.
 ///
@@ -245,12 +248,13 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
 /// use rust::algorithm::sort::comparison::merge::natural;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
+/// let mut auxiliary = elements.clone();
 ///
-/// natural(&mut elements);
+/// natural(&mut elements, &mut auxiliary);
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn natural<T: Ord>(elements: &mut [T]) {
+pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     todo!()
 }
 
