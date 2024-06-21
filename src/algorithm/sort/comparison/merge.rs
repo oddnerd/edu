@@ -44,6 +44,64 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     merge::iterative(left_auxiliary, right_auxiliary, elements);
 }
 
+/// Sort `elements` using natural merge sort.
+///
+/// Unlike traditional [`top_down`] merge sort, this algorithm takes advantage
+/// of natural runs of sorted elements. In effect, this variation first splits
+/// `elements` into naturally sorted sub-slices and then merges them thereby
+/// splitting the original input optimally to prevent unnecessary recursion.
+///
+/// # Panics
+/// This method has the precondition that `auxiliary` is a clone of `elements`.
+///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(log N) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::merge::natural;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+/// let mut auxiliary = elements.clone();
+///
+/// natural(&mut elements, &mut auxiliary);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
+pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
+    debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
+
+    if elements.len() <= 1 {
+        return;
+    }
+
+    let mut length: usize = 1;
+
+    for pair in elements.windows(2) {
+        let (Some(before), Some(after)) = (pair.first(), pair.last()) else {
+            unreachable!("windows yields exactly two elements");
+        };
+
+        if before > after {
+            break;
+        }
+
+        if let Some(incremented) = length.checked_add(1) {
+            length = incremented;
+        } else {
+            unreachable!("slice cannot be longer than `usize::MAX`");
+        }
+    }
+
+    let (_sorted_input, unsorted_input) = elements.split_at_mut(length);
+    let (sorted_auxiliary, unsorted_auxiliary) = auxiliary.split_at_mut(length);
+
+    // Alternating input/auxiliary ensures top-level caller merges into output.
+    natural(unsorted_auxiliary, unsorted_input);
+
+    merge::iterative(sorted_auxiliary, unsorted_auxiliary, elements);
+}
+
 /// Sort `elements` via bottom-up merge sort.
 ///
 /// Consider the input to be adjacent subsections each containing only a single
@@ -106,7 +164,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// right and unsorted on the left, repeating until all elements are sorted.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(1) memory.
+/// This method takes O(N * log N) time and consumes O(log N) memory.
 ///
 /// # Citation
 /// This algorithm is from the following citation:
@@ -320,6 +378,88 @@ mod test {
             let mut auxiliary = [5, 6, 7, 8, 9];
 
             top_down(&mut elements, &mut auxiliary);
+        }
+    }
+
+    mod natural {
+        use super::*;
+
+        #[test]
+        fn empty() {
+            let mut elements = [usize::default(); 0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_is_different_size() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            natural(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_has_different_elements() {
+            let mut elements = [0, 1, 2, 3, 4];
+            let mut auxiliary = [5, 6, 7, 8, 9];
+
+            natural(&mut elements, &mut auxiliary);
         }
     }
 

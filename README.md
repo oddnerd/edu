@@ -13,6 +13,7 @@ Hand-written implementations in Rust for personal reference.
     - [Merge](/src/algorithm/sort/comparison/merge.rs)
       - [Top Down](/src/algorithm/sort/comparison/merge.rs#:~:text=top_down)
       - [Bottom Up](/src/algorithm/sort/comparison/merge.rs#:~:text=bottom_up)
+      - [Natural](/src/algorithm/sort/comparison/merge.rs#:~:text=natural)
       - [In-Place](/src/algorithm/sort/comparison/merge.rs#:~:text=in_place)
     - [Heap](/src/algorithm/sort/comparison/heap.rs)
       - [Top Down](/src/algorithm/sort/comparison/heap.rs#:~:text=top_down)
