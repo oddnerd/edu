@@ -89,6 +89,28 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using recursive insertion sort.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// Similar to [`iterative`] except binary search is used to locate the index
+/// within the already sorted section the next unsorted element should go,
+/// thereby making fewer comparisons.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::insertion::binary;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// binary(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn binary<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     for next in 1..elements.len() {
         let (sorted, unsorted) = elements.split_at(next);
