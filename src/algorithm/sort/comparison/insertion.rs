@@ -45,7 +45,28 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn recursive<T: Ord>(elements: &mut [T]) {
-    todo!()
+    let Some((_last, remaining)) = elements.split_last_mut() else {
+        debug_assert_eq!(elements.len(), 0, "only condition is none");
+        return;
+    };
+
+    recursive(remaining);
+
+    for unsorted_index in (1..elements.len()).rev() {
+        let Some(before_index) = unsorted_index.checked_sub(1) else {
+            unreachable!("loop stops at index 1, so never zero");
+        };
+
+        let (Some(current_element), Some(before_element)) = (elements.get(unsorted_index), elements.get(before_index)) else {
+            unreachable!("loops ensure both indexes are in bounds");
+        };
+
+        if current_element < before_element {
+            elements.swap(unsorted_index, before_index);
+        } else {
+            break;
+        }
+    }
 }
 
 #[cfg(test)]
