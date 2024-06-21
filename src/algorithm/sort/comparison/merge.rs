@@ -44,6 +44,34 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     merge::iterative(left_auxiliary, right_auxiliary, elements);
 }
 
+/// Sort `elements` using natural merge sort.
+///
+/// Unlike traditional [`top_down`] merge sort, this algorithm takes advantage
+/// of natural runs of sorted elements. In effect, this variation first splits
+/// `elements` into naturally sorted sub-slices and then merges them thereby
+/// splitting the original input optimally to prevent unnecessary recursion.
+///
+/// # Panics
+/// This method has the precondition that `auxiliary` is a clone of `elements`.
+///
+/// # Performance
+/// This method takes O(N * log N) time and consumes O(log N) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::merge::natural;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+/// let mut auxiliary = elements.clone();
+///
+/// natural(&mut elements, &mut auxiliary);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
+pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
+    todo!()
+}
+
 /// Sort `elements` via bottom-up merge sort.
 ///
 /// Consider the input to be adjacent subsections each containing only a single
@@ -228,34 +256,6 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
             }
         }
     }
-}
-
-/// Sort `elements` using natural merge sort.
-///
-/// Unlike traditional [`top_down`] merge sort, this algorithm takes advantage
-/// of natural runs of sorted elements. In effect, this variation first splits
-/// `elements` into naturally sorted sub-slices and then merges them thereby
-/// splitting the original input optimally to prevent unnecessary recursion.
-///
-/// # Panics
-/// This method has the precondition that `auxiliary` is a clone of `elements`.
-///
-/// # Performance
-/// This method takes O(N * log N) time and consumes O(log N) memory.
-///
-/// # Examples
-/// ```
-/// use rust::algorithm::sort::comparison::merge::natural;
-///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
-/// let mut auxiliary = elements.clone();
-///
-/// natural(&mut elements, &mut auxiliary);
-///
-/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-/// ```
-pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
-    todo!()
 }
 
 #[cfg(test)]
