@@ -7,16 +7,16 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 
         // Move the last element down the list until sorted.
         for unsorted_index in (1..sorted.len()).rev() {
-            let Some(previous_index) = unsorted_index.checked_sub(1) else {
+            let Some(before_index) = unsorted_index.checked_sub(1) else {
                 unreachable!("loop stops at index 1, so never zero");
             };
 
-            let (Some(current_element), Some(previous_element)) = (sorted.get(unsorted_index), sorted.get(previous_index)) else {
+            let (Some(current_element), Some(before_element)) = (sorted.get(unsorted_index), sorted.get(before_index)) else {
                 unreachable!("loops ensure both indexes are in bounds");
             };
 
-            if current_element < previous_element {
-                sorted.swap(unsorted_index, previous_index);
+            if current_element < before_element {
+                sorted.swap(unsorted_index, before_index);
             } else {
                 break;
             }
