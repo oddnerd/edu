@@ -2,3 +2,4 @@
 
 pub mod heap;
 pub mod merge;
+pub mod insertion;
