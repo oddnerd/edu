@@ -230,6 +230,10 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     }
 }
 
+pub fn natural<T: Ord>(elements: &mut [T]) {
+    todo!()
+}
+
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
