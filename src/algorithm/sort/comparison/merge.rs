@@ -351,6 +351,88 @@ mod test {
         }
     }
 
+    mod natural {
+        use super::*;
+
+        #[test]
+        fn empty() {
+            let mut elements = [usize::default(); 0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+            let mut auxiliary = elements;
+
+            natural(&mut elements, &mut auxiliary);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_is_different_size() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+            natural(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        #[should_panic(expected = "auxiliary must be clone of elements")]
+        fn panics_if_auxiliary_has_different_elements() {
+            let mut elements = [0, 1, 2, 3, 4];
+            let mut auxiliary = [5, 6, 7, 8, 9];
+
+            natural(&mut elements, &mut auxiliary);
+        }
+    }
+
     mod bottom_up {
         use super::*;
 
