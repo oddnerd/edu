@@ -1,12 +1,22 @@
 //! Implementations of [Insertion Sort](https://en.wikipedia.org/wiki/Insertion_sort).
 
 pub fn iterative<T: Ord>(elements: &mut [T]) {
-    for sorted in 1..=elements.len() {
-        let (sorted, _) = elements.split_at_mut(sorted);
+    for sorted_length in 1..=elements.len() {
+        // The sub-slice is sorted, except for the last element.
+        let (sorted, _) = elements.split_at_mut(sorted_length);
 
-        for index in (1..sorted.len()).rev() {
-            if sorted[index] < sorted[index - 1] {
-                sorted.swap(index, index - 1);
+        // Move the last element down the list until sorted.
+        for unsorted_index in (1..sorted.len()).rev() {
+            let Some(previous_index) = unsorted_index.checked_sub(1) else {
+                unreachable!("loop stops at index 1, so never zero");
+            };
+
+            let (Some(current_element), Some(previous_element)) = (sorted.get(unsorted_index), sorted.get(previous_index)) else {
+                unreachable!("loops ensure both indexes are in bounds");
+            };
+
+            if current_element < previous_element {
+                sorted.swap(unsorted_index, previous_index);
             } else {
                 break;
             }
