@@ -1,7 +1,7 @@
 //! Implementations of [Insertion Sort](https://en.wikipedia.org/wiki/Insertion_sort).
 
 pub fn iterative<T: Ord>(elements: &mut [T]) {
-    for sorted_length in 1..=elements.len() {
+    for sorted_length in 2..=elements.len() {
         // The sub-slice is sorted, except for the last element.
         let (sorted, _) = elements.split_at_mut(sorted_length);
 
