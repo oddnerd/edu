@@ -1,14 +1,12 @@
 //! Implementations of [Insertion Sort](https://en.wikipedia.org/wiki/Insertion_sort).
 
 pub fn iterative<T: Ord>(elements: &mut [T]) {
-    let mut i = 1;
-    while i < elements.len() {
+    for i in 1..elements.len() {
         let mut j = i;
         while j > 0 && elements[j - 1] > elements[j] {
             elements.swap(j, j - 1);
             j -= 1;
         }
-        i += 1;
     }
 }
 
