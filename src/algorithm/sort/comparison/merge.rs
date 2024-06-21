@@ -69,7 +69,37 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
-    todo!()
+    debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
+
+    if elements.len() <= 1 {
+        return;
+    }
+
+    let mut length: usize = 1;
+
+    for pair in elements.windows(2) {
+        let (Some(before), Some(after)) = (pair.first(), pair.last()) else {
+            unreachable!("windows yields exactly two elements");
+        };
+
+        if before > after {
+            break;
+        }
+
+        if let Some(incremented) = length.checked_add(1) {
+            length = incremented;
+        } else {
+            unreachable!("slice cannot be longer than `usize::MAX`");
+        }
+    }
+
+    let (_sorted_input, unsorted_input) = elements.split_at_mut(length);
+    let (sorted_auxiliary, unsorted_auxiliary) = auxiliary.split_at_mut(length);
+
+    // Alternating input/auxiliary ensures top-level caller merges into output.
+    natural(unsorted_auxiliary, unsorted_input);
+
+    merge::iterative(sorted_auxiliary, unsorted_auxiliary, elements);
 }
 
 /// Sort `elements` via bottom-up merge sort.
