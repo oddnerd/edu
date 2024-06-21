@@ -1,13 +1,15 @@
 //! Implementations of [Insertion Sort](https://en.wikipedia.org/wiki/Insertion_sort).
 
 pub fn iterative<T: Ord>(elements: &mut [T]) {
-    for i in 1..elements.len() {
-        for j in (1..=i).rev() {
-            if !(elements[j - 1] > elements[j]) {
+    for sorted in 1..=elements.len() {
+        let (sorted, _) = elements.split_at_mut(sorted);
+
+        for index in (1..sorted.len()).rev() {
+            if sorted[index] < sorted[index - 1] {
+                sorted.swap(index, index - 1);
+            } else {
                 break;
             }
-
-            elements.swap(j, j - 1);
         }
     }
 }
