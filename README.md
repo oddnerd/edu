@@ -19,6 +19,12 @@ Hand-written implementations in Rust for personal reference.
       - [Top Down](/src/algorithm/sort/comparison/heap.rs#:~:text=top_down)
       - [Bottom Up](/src/algorithm/sort/comparison/heap.rs#:~:text=bottom_up)
       - [Inline](/src/algorithm/sort/comparison/heap.rs#:~:text=inline)
+    - [Insertion](/src/algorithm/sort/comparison/insertion.rs)
+      - [Iterative](/src/algorithm/sort/comparison/insertion.rs#:~:text=iterative)
+      - [Recursive](/src/algorithm/sort/comparison/insertion.rs#:~:text=recursive)
+      - [Binary Search](/src/algorithm/sort/comparison/insertion.rs#:~:text=binary)
+      - [Gnome](/src/algorithm/sort/comparison/insertion.rs#:~:text=gnome)
+      - [Shell](/src/algorithm/sort/comparison/insertion.rs#:~:text=shell)
 
 ## Data Structures
 
