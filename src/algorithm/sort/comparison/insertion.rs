@@ -200,14 +200,19 @@ pub fn shell<T: Ord + Clone>(elements: &mut [T]) {
 
             let tmp = elements[i].clone();
 
-            let mut j = i;
-            while (j >= gap) && (elements[j - gap] > tmp) {
+
+            let mut output = i;
+            for j in (gap..=i).rev().step_by(gap) {
+                if !(elements[j - gap] > tmp) {
+                    break;
+                }
+
                 elements[j] = elements[j - gap].clone();
 
-                j -= gap;
+                output -= gap;
             }
 
-            elements[j] = tmp;
+            elements[output] = tmp;
         }
     }
 }
