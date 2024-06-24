@@ -41,9 +41,10 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` using optimized bubble sort.
 ///
-/// Fundamentally the same as the [`naive`] implementation, but does not
-/// iterate through already sorted elements as well as exiting early when
-/// an iteration proves the remaining elements are already sorted.
+/// Fundamentally the same as the [`naive`] implementation, but takes advantage
+/// of the fact that if no swap occur past some index, then the elements
+/// after that index were proven to be sorted by that iteration hence they do
+/// not need to be compared against in future iteration.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -59,31 +60,29 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn optimized<T: Ord>(elements: &mut [T]) {
-    for sorted_position in (0..elements.len()).rev() {
-        let mut sorted = true;
+    let mut remaining = elements.len();
 
-        // `elements[sorted_position..]` are already sorted.
-        for current_index in 0..sorted_position {
-            let Some(next_index) = current_index.checked_add(1) else {
-                unreachable!("inner loop prevents ensures within bounds");
+    while remaining > 1 {
+        let mut last_swap = 0;
+
+        for current_index in 1..remaining {
+            let Some(previous_index) = current_index.checked_sub(1) else {
+                unreachable!("inner loop ensures current_index >= 1");
             };
 
-            let (Some(current_element), Some(next_element)) =
-            (elements.get(current_index), elements.get(next_index))
-            else {
-                unreachable!("loops ensure both indexes are within bounds");
+            let (Some(current_element), Some(previous_element)) = (elements.get(current_index), elements.get(previous_index)) else {
+                unreachable!("outer loop ensures both indexes are in bounds");
             };
 
-            if current_element > next_element {
-                elements.swap(current_index, next_index);
-                sorted = false;
+            if previous_element > current_element {
+                elements.swap(previous_index, current_index);
+
+                last_swap = current_index;
             }
         }
 
-        // If no elements were swapped, then the remaining are already sorted.
-        if sorted {
-            break;
-        }
+        // No swaps occurred past this point => those elements are sorted.
+        remaining = last_swap;
     }
 }
 
