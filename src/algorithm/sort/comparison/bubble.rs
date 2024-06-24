@@ -15,7 +15,22 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
 pub fn optimized<T: Ord>(elements: &mut [T]) {
-    todo!()
+    let mut swapped;
+
+    for i in 0..elements.len() {
+        swapped = false;
+
+        for j in 0..(elements.len() - i - 1) {
+            if elements[j] > elements[j + 1] {
+                elements.swap(j, j + 1);
+                swapped = true;
+            }
+        }
+
+        if !swapped {
+            break;
+        }
+    }
 }
 
 #[cfg(test)]
