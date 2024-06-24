@@ -31,7 +31,9 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop stops at index 1, so never zero");
             };
 
-            let (Some(current_element), Some(before_element)) = (sorted.get(unsorted_index), sorted.get(before_index)) else {
+            let (Some(current_element), Some(before_element)) =
+                (sorted.get(unsorted_index), sorted.get(before_index))
+            else {
                 unreachable!("loops ensure both indexes are in bounds");
             };
 
@@ -77,7 +79,9 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
             unreachable!("loop stops at index 1, so never zero");
         };
 
-        let (Some(current_element), Some(before_element)) = (elements.get(unsorted_index), elements.get(before_index)) else {
+        let (Some(current_element), Some(before_element)) =
+            (elements.get(unsorted_index), elements.get(before_index))
+        else {
             unreachable!("loops ensure both indexes are in bounds");
         };
 
@@ -122,7 +126,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 
         // The index within the sorted section to place that element.
         let sorted = match sorted.binary_search(unsorted) {
-            Ok(index) | Err(index) => index
+            Ok(index) | Err(index) => index,
         };
 
         // The elements between that index and the element being sorted.
@@ -133,7 +137,6 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
         // Place that element into position by shifting elements in between.
         to_rotate.rotate_right(1);
     }
-
 }
 
 /// Sort `elements` using gnome variation of insertion sort.
@@ -179,7 +182,6 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
         }
     }
 }
-
 
 #[cfg(test)]
 #[allow(
