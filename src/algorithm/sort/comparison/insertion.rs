@@ -186,9 +186,14 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 #[allow(clippy::arithmetic_side_effects)]
 #[allow(clippy::indexing_slicing)]
 pub fn shell<T: Ord + Clone>(elements: &mut [T]) {
-    let mut gap = elements.len() / 2;
+    let Some(end) = elements.len().checked_ilog2() else {
+        debug_assert_eq!(elements.len(), 0, "only condition it is none");
+        return;
+    };
 
-    loop {
+    for gap in (0..end).rev() {
+        let gap = usize::pow(2, gap);
+
         for i in gap..elements.len() {
 
             let tmp = elements[i].clone();
@@ -202,13 +207,6 @@ pub fn shell<T: Ord + Clone>(elements: &mut [T]) {
 
             elements[j] = tmp;
         }
-
-
-        if gap <= 1 {
-            break;
-        }
-
-        gap /= 2;
     }
 }
 
