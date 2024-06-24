@@ -20,8 +20,12 @@
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn naive<T: Ord>(elements: &mut [T]) {
-    for sorted_position in (0..elements.len()).rev() {
-        for current_index in 0..sorted_position {
+    for _sorted in 0..elements.len() {
+        let Some(second_last) = elements.len().checked_sub(1) else {
+            unreachable!("outer loop would not iterate if length is zero");
+        };
+
+        for current_index in 0..second_last {
             let Some(next_index) = current_index.checked_add(1) else {
                 unreachable!("loops ensure `current index <= usize::MAX - 1`");
             };
@@ -40,10 +44,10 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn optimized<T: Ord>(elements: &mut [T]) {
-    for sorted in (0..elements.len()).rev() {
+    for sorted_position in (0..elements.len()).rev() {
         let mut swapped = false;
 
-        for current_index in 0..sorted {
+        for current_index in 0..sorted_position {
             let Some(next_index) = current_index.checked_add(1) else {
                 unreachable!("inner loop prevents ensures within bounds");
             };
