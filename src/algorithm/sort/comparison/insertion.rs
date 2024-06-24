@@ -136,6 +136,27 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 
 }
 
+/// Sort `elements` using gnome variation of insertion sort.
+///
+/// Similar to [`iterative`] except the index is manually manipulated instead
+/// of utilizing for loops.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Gnome_sort).
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::insertion::gnome;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// gnome(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn gnome<T: Ord>(elements: &mut [T]) {
     let mut index: usize = 0;
 
