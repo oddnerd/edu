@@ -137,7 +137,16 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn gnome<T: Ord>(elements: &mut [T]) {
-    todo!()
+    let mut index: usize = 0;
+
+    while index < elements.len() {
+        if index == 0 || elements[index] >= elements[index - 1] {
+            index += 1;
+        } else {
+            elements.swap(index, index - 1);
+            index -= 1;
+        }
+    }
 }
 
 #[cfg(test)]
@@ -320,6 +329,64 @@ mod test {
             let mut elements = [2, 0, 3, 1];
 
             binary(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+    }
+
+    mod gnome {
+        use super::*;
+
+        #[test]
+        fn empty() {
+            let mut elements = [usize::default(); 0];
+
+            gnome(&mut elements);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+
+            gnome(&mut elements);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            gnome(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+
+            gnome(&mut elements);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+
+            gnome(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+
+            gnome(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
