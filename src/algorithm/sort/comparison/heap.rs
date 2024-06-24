@@ -47,7 +47,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 /// one shared execution path which would likely result in different runtime
 /// characteristics given branch prediction and potential inline expansion.
 ///
-/// /// # Performance
+/// # Performance
 /// This method takes O(N * log N) time and consumes O(1) memory.
 ///
 /// # Examples
