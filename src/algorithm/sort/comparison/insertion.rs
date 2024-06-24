@@ -136,6 +136,10 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 
 }
 
+pub fn gnome<T: Ord>(elements: &mut [T]) {
+    todo!()
+}
+
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
