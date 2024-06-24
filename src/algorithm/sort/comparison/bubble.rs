@@ -40,10 +40,10 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn optimized<T: Ord>(elements: &mut [T]) {
-    for sorted in 0..elements.len() {
+    for sorted in (0..elements.len()).rev() {
         let mut swapped = false;
 
-        for current_index in 0..(elements.len() - sorted - 1) {
+        for current_index in 0..sorted {
             let Some(next_index) = current_index.checked_add(1) else {
                 unreachable!("inner loop prevents ensures within bounds");
             };
