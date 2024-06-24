@@ -20,8 +20,8 @@
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn naive<T: Ord>(elements: &mut [T]) {
-    for sorted in (0..elements.len()).rev() {
-        for current_index in 0..sorted {
+    for sorted_position in (0..elements.len()).rev() {
+        for current_index in 0..sorted_position {
             let Some(next_index) = current_index.checked_add(1) else {
                 unreachable!("loops ensure `current index <= usize::MAX - 1`");
             };
