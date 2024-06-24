@@ -203,7 +203,7 @@ pub fn shell<T: Ord + Clone>(elements: &mut [T]) {
 
             let mut output = i;
             for j in (gap..=i).rev().step_by(gap) {
-                if !(elements[j - gap] > tmp) {
+                if elements[j - gap] <= tmp {
                     break;
                 }
 
