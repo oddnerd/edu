@@ -81,7 +81,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
             }
         }
 
-        // No swaps occurred past this point => those elements are sorted.
+        // No swaps occurred past this index => those elements are sorted.
         remaining = last_swap;
     }
 }
