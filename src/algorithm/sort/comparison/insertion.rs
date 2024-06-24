@@ -183,6 +183,42 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using shell variation of insertion sort.
+///
+/// This variation sorts elements separated by some gap such that starting from
+/// some index, every element at an index offset by a multiple of gap is in
+/// sorted order. This results in the entire list being gap many interleaved
+/// sorted sublists. The benefit of this variation is out-of-order elements are
+/// only compared to and swapped with elements within the gap sublist thereby
+/// moving large distances across the overall list without interacting with
+/// absolutely every element before it. The gap is decreased to move elements
+/// smaller distances for each iteration thereby moving it closer to overall
+/// sorted order until a gap of one is reached which is the same as the
+/// [`iterative`] solution, but by that iteration elements will only need
+/// to be swapped with those directly adjacent.
+///
+/// The exact runtime performance of this variation depends greatly on the
+/// specific gaps used. This implementation uses Hibbard's proposal which is
+/// known to be suboptimal compared to Pratt's, but is still better than
+/// Shell's original and does not excessively clutter the core algorithm with
+/// constructing a complex gap sequence.
+///
+/// # Performance
+/// This method takes O(N<sup>3/2</sup>) time and consumes O(1) memory.
+///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Shellsort).
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::insertion::shell;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// shell(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 #[allow(clippy::indexing_slicing)]
 pub fn shell<T: Ord>(elements: &mut [T]) {
     let Some(log) = elements.len().checked_ilog2() else {
