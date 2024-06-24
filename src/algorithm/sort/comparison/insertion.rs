@@ -219,7 +219,6 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
 pub fn shell<T: Ord>(elements: &mut [T]) {
     let Some(log) = elements.len().checked_ilog2() else {
         debug_assert_eq!(elements.len(), 0, "only condition it is none");
@@ -236,17 +235,22 @@ pub fn shell<T: Ord>(elements: &mut [T]) {
         };
 
         for end in gap..elements.len() {
-            for current in (gap..=end).rev().step_by(gap) {
-                let Some(previous) = current.checked_sub(gap) else {
+            for current_index in (gap..=end).rev().step_by(gap) {
+                let Some(previous_index) = current_index.checked_sub(gap) else {
                     unreachable!("inner loop ensures j >= gap => j >= 1");
                 };
 
-                // loops ensure indexes are within bounds.
-                if elements[current] >= elements[previous] {
+                let (Some(current_element), Some(previous_element)) =
+                    (elements.get(current_index), elements.get(previous_index))
+                else {
+                    unreachable!("loops ensure indexes are within bounds");
+                };
+
+                if current_element >= previous_element {
                     break;
                 }
 
-                elements.swap(current, previous);
+                elements.swap(current_index, previous_index);
             }
         }
     }
