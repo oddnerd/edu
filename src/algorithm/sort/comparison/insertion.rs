@@ -192,7 +192,9 @@ pub fn shell<T: Ord + Clone>(elements: &mut [T]) {
     };
 
     for gap in (0..end).rev() {
-        let gap = usize::pow(2, gap);
+        let Some(gap) = usize::checked_pow(2, gap) else {
+            unreachable!("length of elements fits in usize so this will too");
+        };
 
         for i in gap..elements.len() {
 
