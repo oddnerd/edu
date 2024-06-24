@@ -1,12 +1,20 @@
 //! Implementations of [Bubble Sort](https://en.wikipedia.org/wiki/Bubble_sort).
 
-#[allow(clippy::indexing_slicing)]
-#[allow(clippy::arithmetic_side_effects)]
 pub fn naive<T: Ord>(elements: &mut [T]) {
-    for i in (0..elements.len()).rev() {
-        for j in 1..=i {
-            if elements[j - 1] > elements[j] {
-                elements.swap(j, j - 1);
+    for sorted in (0..elements.len()).rev() {
+        for current_index in 1..=sorted {
+            let Some(previous_index) = current_index.checked_sub(1) else {
+                unreachable!("inner loop ensures `current_index >= 1`");
+            };
+
+            let (Some(current_element), Some(previous_element)) =
+                (elements.get(current_index), elements.get(previous_index))
+            else {
+                unreachable!("loops ensure both indexes are within bounds");
+            };
+
+            if previous_element > current_element {
+                elements.swap(current_index, previous_index);
             }
         }
     }
