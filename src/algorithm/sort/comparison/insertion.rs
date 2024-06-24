@@ -183,26 +183,29 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
     }
 }
 
-#[allow(clippy::arithmetic_side_effects)]
 #[allow(clippy::indexing_slicing)]
 pub fn shell<T: Ord>(elements: &mut [T]) {
-    let Some(end) = elements.len().checked_ilog2() else {
+    let Some(log) = elements.len().checked_ilog2() else {
         debug_assert_eq!(elements.len(), 0, "only condition it is none");
         return;
     };
 
-    for gap in (0..end).rev() {
-        let Some(gap) = usize::checked_pow(2, gap) else {
+    for exponent in (0..log).rev() {
+        let Some(gap) = usize::checked_pow(2, exponent) else {
             unreachable!("length of elements fits in usize so this will too");
         };
 
-        for i in gap..elements.len() {
-            for j in (gap..=i).rev().step_by(gap) {
-                if elements[j - gap] <= elements[j] {
+        for end in gap..elements.len() {
+            for current in (gap..=end).rev().step_by(gap) {
+                let Some(previous) = current.checked_sub(gap) else {
+                    unreachable!("inner loop ensures j >= gap");
+                };
+
+                if elements[current] >= elements[previous] {
                     break;
                 }
 
-                elements.swap(j, j - gap);
+                elements.swap(current, previous);
             }
         }
     }
