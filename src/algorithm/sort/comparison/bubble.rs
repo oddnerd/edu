@@ -11,6 +11,11 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
         }
     }
 }
+
+#[allow(clippy::indexing_slicing)]
+#[allow(clippy::arithmetic_side_effects)]
+pub fn optimized<T: Ord>(elements: &mut [T]) {
+    todo!()
 }
 
 #[cfg(test)]
