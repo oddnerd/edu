@@ -43,6 +43,25 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using optimized bubble sort.
+///
+/// Fundamentally the same as the [`naive`] implementation, but does not
+/// iterate through already sorted elements as well as exiting early when
+/// an iteration proves the remaining elements are already sorted.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::bubble::optimized;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// optimized(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn optimized<T: Ord>(elements: &mut [T]) {
     for sorted_position in (0..elements.len()).rev() {
         let mut sorted = true;
