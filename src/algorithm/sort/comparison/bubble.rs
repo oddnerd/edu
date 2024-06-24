@@ -45,8 +45,9 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 
 pub fn optimized<T: Ord>(elements: &mut [T]) {
     for sorted_position in (0..elements.len()).rev() {
-        let mut swapped = false;
+        let mut sorted = true;
 
+        // `elements[sorted_position..]` are already sorted.
         for current_index in 0..sorted_position {
             let Some(next_index) = current_index.checked_add(1) else {
                 unreachable!("inner loop prevents ensures within bounds");
@@ -60,11 +61,12 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
             if current_element > next_element {
                 elements.swap(current_index, next_index);
-                swapped = true;
+                sorted = false;
             }
         }
 
-        if !swapped {
+        // If no elements were swapped, then the remaining are already sorted.
+        if sorted {
             break;
         }
     }
