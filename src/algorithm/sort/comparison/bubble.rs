@@ -1,7 +1,16 @@
 //! Implementations of [Bubble Sort](https://en.wikipedia.org/wiki/Bubble_sort).
 
+#[allow(clippy::indexing_slicing)]
+#[allow(clippy::arithmetic_side_effects)]
 pub fn naive<T: Ord>(elements: &mut [T]) {
-    todo!()
+    for i in (0..elements.len()).rev() {
+        for j in 1..=i {
+            if elements[j - 1] > elements[j] {
+                elements.swap(j, j - 1);
+            }
+        }
+    }
+}
 }
 
 #[cfg(test)]
