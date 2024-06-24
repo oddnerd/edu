@@ -163,7 +163,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 #[allow(clippy::arithmetic_side_effects)]
 #[allow(clippy::indexing_slicing)]
 pub fn gnome<T: Ord>(elements: &mut [T]) {
-    let mut index: usize = 0;
+    let mut index: usize = 1;
 
     while index < elements.len() {
         // Short-circuiting ensures indexing only occurs when index > 0.
