@@ -183,8 +183,33 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
     }
 }
 
-pub fn shell<T: Ord>(elements: &mut [T]) {
-    todo!()
+#[allow(clippy::arithmetic_side_effects)]
+#[allow(clippy::indexing_slicing)]
+pub fn shell<T: Ord + Clone>(elements: &mut [T]) {
+    let mut gap = elements.len() / 2;
+
+    loop {
+        for i in gap..elements.len() {
+
+            let tmp = elements[i].clone();
+
+            let mut j = i;
+            while (j >= gap) && (elements[j - gap] > tmp) {
+                elements[j] = elements[j - gap].clone();
+
+                j -= gap;
+            }
+
+            elements[j] = tmp;
+        }
+
+
+        if gap <= 1 {
+            break;
+        }
+
+        gap /= 2;
+    }
 }
 
 #[cfg(test)]
