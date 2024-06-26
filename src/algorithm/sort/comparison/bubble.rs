@@ -88,13 +88,14 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` using cocktail shaker bubble sort.
 ///
-/// Traditional implementations move larger elements to the end of the list
-/// faster than they move smaller elements to the beginning of the list because
-/// larger elements can be swapped forward per each iteration of the inner loop
-/// whereas elements can only be swapped backwards via iterations of the outer
-/// loop. This implementation merely repeats the inner loop in the opposite
-/// direction thereby allowing elements to quickly move to either end per each
-/// iteration of the outer loop.
+/// The [`optimized`] solution moves larger elements to the end of the list
+/// faster than it can move smaller elements to the front because larger
+/// elements are successively swapped per each iteration of the inner loop
+/// whereas smaller elements can only move down per each iteration of the outer
+/// loop. In contrast, this implementation merely repeats the inner loop in the
+/// opposite direction thereby efficiently moving the largest element to the
+/// end of the list and the smallest to the beginning for each iteration of the
+/// outer loop.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -110,13 +111,11 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn cocktail<T: Ord>(elements: &mut [T]) {
-    let mut sorted = false;
+    let mut remaining = 1..elements.len();
 
-    while !sorted {
-        // Assume sorted unless the following loop has to swap elements.
-        sorted = true;
-
-        for current_index in 1..elements.len() {
+    while !remaining.is_empty() {
+        let mut last_swap = 0;
+        for current_index in remaining.clone() {
             let Some(previous_index) = current_index.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
@@ -128,19 +127,13 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
             if previous_element > current_element {
                 elements.swap(previous_index, current_index);
 
-                sorted = false;
+                last_swap = current_index;
             }
         }
+        remaining = remaining.start..last_swap;
 
-        // If the previous loop proved sorted, so will the following loop.
-        if sorted {
-            break;
-        }
-
-        // Assume sorted unless the following loop has to swap elements.
-        sorted = true;
-
-        for current_index in (1..elements.len()).rev() {
+        last_swap = elements.len();
+        for current_index in remaining.clone().rev() {
             let Some(previous_index) = current_index.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
@@ -152,9 +145,10 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
             if previous_element > current_element {
                 elements.swap(previous_index, current_index);
 
-                sorted = false;
+                last_swap = current_index;
             }
         }
+        remaining = last_swap..remaining.end;
     }
 }
 
