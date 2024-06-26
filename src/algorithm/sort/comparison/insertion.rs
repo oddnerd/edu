@@ -272,7 +272,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             iterative(&mut elements);
 
@@ -330,7 +330,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             recursive(&mut elements);
 
@@ -388,7 +388,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             binary(&mut elements);
 
@@ -446,7 +446,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             gnome(&mut elements);
 
@@ -504,7 +504,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             shell(&mut elements);
 
