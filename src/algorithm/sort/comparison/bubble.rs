@@ -158,23 +158,19 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
 pub fn odd_even<T: Ord>(elements: &mut [T]) {
     let mut sorted = false;
 
-    if elements.is_empty() {
-        return;
-    }
-
     while !sorted {
         sorted = true;
 
-        for current in (1..elements.len() - 1).step_by(2) {
-            if elements[current] > elements[current + 1] {
-                elements.swap(current, current + 1);
+        for current in (2..elements.len()).step_by(2) {
+            if elements[current - 1] > elements[current] {
+                elements.swap(current - 1, current);
                 sorted = false;
             }
         }
 
-        for current in (0..elements.len() - 1).step_by(2) {
-            if elements[current] > elements[current + 1] {
-                elements.swap(current, current + 1);
+        for current in (1..elements.len()).step_by(2) {
+            if elements[current - 1] > elements[current] {
+                elements.swap(current - 1, current);
                 sorted = false;
             }
         }
