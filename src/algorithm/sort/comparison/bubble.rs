@@ -237,8 +237,8 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 /// Fundamentally the same as [`naive`], except instead of comparing directly
 /// adjacent elements, this variation compares elements separated by some
 /// decreasing gap thereby allowing elements to move large distances with only
-/// a single swap. This effectively does to bubble sort what the [`shell`]
-/// variation does to insertion sort.
+/// a single swap. This effectively does to bubble sort what the
+/// [`super::insertion::shell`] variation does to insertion sort.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
