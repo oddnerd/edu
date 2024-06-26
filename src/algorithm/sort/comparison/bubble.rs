@@ -228,6 +228,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 
 pub fn comb<T: Ord>(elements: &mut [T]) {
     let mut gap = elements.len();
+
     let mut sorted = false;
 
     while !sorted {
@@ -239,8 +240,17 @@ pub fn comb<T: Ord>(elements: &mut [T]) {
         }
 
         for current_index in gap..elements.len() {
-            if elements[current_index - gap] > elements[current_index] {
-                elements.swap(current_index - gap, current_index);
+            let Some(gap_index) = current_index.checked_sub(gap) else {
+                unreachable!("loop ensures `current_index >= gap`");
+            };
+
+            let (Some(current_element), Some(gap_element)) = (elements.get(current_index), elements.get(gap_index)) else {
+                unreachable!("loop ensures both indexes are within bounds");
+            };
+
+            if gap_element > current_element {
+                elements.swap(gap_index, current_index);
+
                 sorted = false;
             }
         }
