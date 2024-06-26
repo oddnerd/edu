@@ -100,6 +100,9 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
 ///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Cocktail_shaker_sort).
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::comparison::bubble::cocktail;
