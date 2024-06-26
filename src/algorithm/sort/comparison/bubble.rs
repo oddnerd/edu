@@ -226,6 +226,10 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
     }
 }
 
+pub fn comb<T: Ord>(elements: &mut [T]) {
+    todo!()
+}
+
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
@@ -411,7 +415,7 @@ mod test {
         }
     }
 
-    mod odd_even {
+    mod parallel {
         use super::*;
 
         #[test]
