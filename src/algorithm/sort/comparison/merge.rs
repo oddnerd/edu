@@ -304,7 +304,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
             let mut auxiliary = elements;
 
             top_down(&mut elements, &mut auxiliary);
@@ -386,7 +386,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
             let mut auxiliary = elements;
 
             natural(&mut elements, &mut auxiliary);
@@ -468,7 +468,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
             let mut auxiliary = elements;
 
             bottom_up(&mut elements, &mut auxiliary);
@@ -550,7 +550,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             in_place(&mut elements);
 

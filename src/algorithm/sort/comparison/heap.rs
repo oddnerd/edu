@@ -373,7 +373,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             bottom_up(&mut elements);
 
@@ -431,7 +431,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             inline(&mut elements);
 
@@ -489,7 +489,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             top_down(&mut elements);
 

@@ -305,7 +305,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             naive(&mut elements);
 
@@ -363,7 +363,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             optimized(&mut elements);
 
@@ -421,7 +421,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             bidirectional(&mut elements);
 
@@ -479,7 +479,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             parallel(&mut elements);
 
@@ -537,7 +537,7 @@ mod test {
 
         #[test]
         fn empty() {
-            let mut elements = [usize::default(); 0];
+            let mut elements: [usize; 0] = [];
 
             comb(&mut elements);
 
