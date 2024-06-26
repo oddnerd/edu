@@ -227,33 +227,24 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn comb<T: Ord>(elements: &mut [T]) {
-//     gap := input.size // Initialize gap size
-//     shrink := 1.3 // Set the gap shrink factor
-//     sorted := false
-//
-//     loop while sorted = false
-//         // Update the gap value for a next comb
-//         gap := floor(gap / shrink)
-//         if gap ≤ 1 then
-//             gap := 1
-//             sorted := true // If there are no swaps this pass, we are done
-//         else if gap = 9 or gap = 10 then
-//             gap := 11      // The "rule of 11"
-//         end if
-//
-//         // A single "comb" over the input list
-//         i := 0
-//         loop while i + gap < input.size // See Shell sort for a similar idea
-//             if input[i] > input[i+gap] then
-//                 swap(input[i], input[i+gap])
-//                 sorted := false
-//                 // If this assignment never happens within the loop,
-//                 // then there have been no swaps and the list is sorted.
-//              end if
-//
-//              i := i + 1
-//          end loop
-//      end loop
+    let mut gap = elements.len();
+    let mut sorted = false;
+
+    while !sorted {
+        gap /= 2;
+
+        if gap <= 1 {
+            gap = 1;
+            sorted = true;
+        }
+
+        for current_index in gap..elements.len() {
+            if elements[current_index - gap] > elements[current_index] {
+                elements.swap(current_index - gap, current_index);
+                sorted = false;
+            }
+        }
+    }
 }
 
 #[cfg(test)]
