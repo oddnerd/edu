@@ -226,6 +226,30 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using parallel (odd-even) bubble sort.
+///
+/// Fundamentally the same as [`naive`], except instead of comparing directly
+/// adjacent elements, this variation compares elements separated by some
+/// decreasing gap thereby allowing elements to move large distances with only
+/// a single swap. This effectively does to bubble sort what the [`shell`]
+/// variation does to insertion sort.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Comb_sort).
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::bubble::comb;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// comb(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn comb<T: Ord>(elements: &mut [T]) {
     let mut gap = elements.len();
 
