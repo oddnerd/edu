@@ -70,7 +70,9 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
                 unreachable!("inner loop ensures current_index >= 1");
             };
 
-            let (Some(current_element), Some(previous_element)) = (elements.get(current_index), elements.get(previous_index)) else {
+            let (Some(current_element), Some(previous_element)) =
+                (elements.get(current_index), elements.get(previous_index))
+            else {
                 unreachable!("outer loop ensures both indexes are in bounds");
             };
 
@@ -123,7 +125,9 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop ensures `current_index >= 1`");
             };
 
-            let (Some(current_element), Some(previous_element)) = (elements.get(current_index), elements.get(previous_index)) else {
+            let (Some(current_element), Some(previous_element)) =
+                (elements.get(current_index), elements.get(previous_index))
+            else {
                 unreachable!("loop ensures both indexes are within bounds");
             };
 
@@ -141,7 +145,9 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop ensures `current_index >= 1`");
             };
 
-            let (Some(current_element), Some(previous_element)) = (elements.get(current_index), elements.get(previous_index)) else {
+            let (Some(current_element), Some(previous_element)) =
+                (elements.get(current_index), elements.get(previous_index))
+            else {
                 unreachable!("loop ensures both indexes are within bounds");
             };
 
@@ -268,7 +274,9 @@ pub fn comb<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop ensures `current_index >= gap`");
             };
 
-            let (Some(current_element), Some(gap_element)) = (elements.get(current_index), elements.get(gap_index)) else {
+            let (Some(current_element), Some(gap_element)) =
+                (elements.get(current_index), elements.get(gap_index))
+            else {
                 unreachable!("loop ensures both indexes are within bounds");
             };
 
