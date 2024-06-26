@@ -87,7 +87,30 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn cocktail<T: Ord>(elements: &mut [T]) {
-    todo!()
+    let mut swapped = true;
+
+    while swapped {
+        swapped = false;
+
+        for i in 1..elements.len() {
+            if elements[i - 1] > elements[i] {
+                elements.swap(i - 1, i);
+                swapped = true;
+            }
+        }
+        if !swapped {
+            break;
+        }
+
+        swapped = false;
+
+        for i in (1..elements.len()).rev() {
+            if elements[i - 1] > elements[i] {
+                elements.swap(i - 1, i);
+                swapped = true;
+            }
+        }
+    }
 }
 
 #[cfg(test)]
