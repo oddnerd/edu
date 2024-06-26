@@ -681,7 +681,12 @@ mod test {
                         }
                     }
 
-                    unsafe { std::mem::transmute::<[core::mem::MaybeUninit<Droppable>; 256], [Droppable; 256]>(uninitialized) }
+                    unsafe {
+                        std::mem::transmute::<
+                            [core::mem::MaybeUninit<Droppable>; 256],
+                            [Droppable; 256],
+                        >(uninitialized)
+                    }
                 };
 
                 drop(actual.into_iter());
