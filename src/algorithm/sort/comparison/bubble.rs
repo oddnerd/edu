@@ -86,7 +86,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using cocktail shaker bubble sort.
+/// Sort `elements` using bidirectional (cocktail shaker) bubble sort.
 ///
 /// The [`optimized`] solution moves larger elements to the end of the list
 /// faster than it can move smaller elements to the front because larger
@@ -105,15 +105,15 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::cocktail;
+/// use rust::algorithm::sort::comparison::bubble::bidirectional;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
-/// cocktail(&mut elements);
+/// bidirectional(&mut elements);
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn cocktail<T: Ord>(elements: &mut [T]) {
+pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     let mut remaining = 1..elements.len();
 
     while !remaining.is_empty() {
@@ -227,7 +227,33 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn comb<T: Ord>(elements: &mut [T]) {
-    todo!()
+//     gap := input.size // Initialize gap size
+//     shrink := 1.3 // Set the gap shrink factor
+//     sorted := false
+//
+//     loop while sorted = false
+//         // Update the gap value for a next comb
+//         gap := floor(gap / shrink)
+//         if gap ≤ 1 then
+//             gap := 1
+//             sorted := true // If there are no swaps this pass, we are done
+//         else if gap = 9 or gap = 10 then
+//             gap := 11      // The "rule of 11"
+//         end if
+//
+//         // A single "comb" over the input list
+//         i := 0
+//         loop while i + gap < input.size // See Shell sort for a similar idea
+//             if input[i] > input[i+gap] then
+//                 swap(input[i], input[i+gap])
+//                 sorted := false
+//                 // If this assignment never happens within the loop,
+//                 // then there have been no swaps and the list is sorted.
+//              end if
+//
+//              i := i + 1
+//          end loop
+//      end loop
 }
 
 #[cfg(test)]
@@ -357,14 +383,14 @@ mod test {
         }
     }
 
-    mod cocktail {
+    mod bidirectional {
         use super::*;
 
         #[test]
         fn empty() {
             let mut elements = [usize::default(); 0];
 
-            cocktail(&mut elements);
+            bidirectional(&mut elements);
 
             assert_eq!(elements, []);
         }
@@ -373,7 +399,7 @@ mod test {
         fn single_element() {
             let mut elements = [0];
 
-            cocktail(&mut elements);
+            bidirectional(&mut elements);
 
             assert_eq!(elements, [0]);
         }
@@ -382,7 +408,7 @@ mod test {
         fn already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
-            cocktail(&mut elements);
+            bidirectional(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
@@ -391,7 +417,7 @@ mod test {
         fn must_swap() {
             let mut elements = [1, 0];
 
-            cocktail(&mut elements);
+            bidirectional(&mut elements);
 
             assert_eq!(elements, [0, 1]);
         }
@@ -400,7 +426,7 @@ mod test {
         fn odd_length() {
             let mut elements = [2, 1, 0];
 
-            cocktail(&mut elements);
+            bidirectional(&mut elements);
 
             assert_eq!(elements, [0, 1, 2]);
         }
@@ -409,7 +435,7 @@ mod test {
         fn multiple_swaps() {
             let mut elements = [2, 0, 3, 1];
 
-            cocktail(&mut elements);
+            bidirectional(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
@@ -422,7 +448,7 @@ mod test {
         fn empty() {
             let mut elements = [usize::default(); 0];
 
-            odd_even(&mut elements);
+            parallel(&mut elements);
 
             assert_eq!(elements, []);
         }
@@ -431,7 +457,7 @@ mod test {
         fn single_element() {
             let mut elements = [0];
 
-            odd_even(&mut elements);
+            parallel(&mut elements);
 
             assert_eq!(elements, [0]);
         }
@@ -440,7 +466,7 @@ mod test {
         fn already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
-            odd_even(&mut elements);
+            parallel(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
@@ -449,7 +475,7 @@ mod test {
         fn must_swap() {
             let mut elements = [1, 0];
 
-            odd_even(&mut elements);
+            parallel(&mut elements);
 
             assert_eq!(elements, [0, 1]);
         }
@@ -458,7 +484,7 @@ mod test {
         fn odd_length() {
             let mut elements = [2, 1, 0];
 
-            odd_even(&mut elements);
+            parallel(&mut elements);
 
             assert_eq!(elements, [0, 1, 2]);
         }
@@ -467,7 +493,7 @@ mod test {
         fn multiple_swaps() {
             let mut elements = [2, 0, 3, 1];
 
-            odd_even(&mut elements);
+            parallel(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
