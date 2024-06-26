@@ -161,16 +161,36 @@ pub fn odd_even<T: Ord>(elements: &mut [T]) {
     while !sorted {
         sorted = true;
 
-        for current in (2..elements.len()).step_by(2) {
-            if elements[current - 1] > elements[current] {
-                elements.swap(current - 1, current);
+        // Sort odd indexes.
+        for current_index in (2..elements.len()).step_by(2) {
+            let Some(previous_index) = current_index.checked_sub(1) else {
+                unreachable!("loop ensures `current_index >= 2`");
+            };
+
+            let (Some(current_element), Some(previous_element)) = (elements.get(current_index), elements.get(previous_index)) else {
+                unreachable!("loop ensures both indexes are within bounds");
+            };
+
+            if previous_element > current_element {
+                elements.swap(previous_index, current_index);
+
                 sorted = false;
             }
         }
 
-        for current in (1..elements.len()).step_by(2) {
-            if elements[current - 1] > elements[current] {
-                elements.swap(current - 1, current);
+        // Sort even indexes.
+        for current_index in (1..elements.len()).step_by(2) {
+            let Some(previous_index) = current_index.checked_sub(1) else {
+                unreachable!("loop ensures `current_index >= 2`");
+            };
+
+            let (Some(current_element), Some(previous_element)) = (elements.get(current_index), elements.get(previous_index)) else {
+                unreachable!("loop ensures both indexes are within bounds");
+            };
+
+            if previous_element > current_element {
+                elements.swap(previous_index, current_index);
+
                 sorted = false;
             }
         }
