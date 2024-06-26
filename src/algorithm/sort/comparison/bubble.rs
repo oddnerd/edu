@@ -86,6 +86,29 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using cocktail shaker bubble sort.
+///
+/// Traditional implementations move larger elements to the end of the list
+/// faster than they move smaller elements to the beginning of the list because
+/// larger elements can be swapped forward per each iteration of the inner loop
+/// whereas elements can only be swapped backwards via iterations of the outer
+/// loop. This implementation merely repeats the inner loop in the opposite
+/// direction thereby allowing elements to quickly move to either end per each
+/// iteration of the outer loop.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::bubble::cocktail;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// cocktail(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn cocktail<T: Ord>(elements: &mut [T]) {
     let mut sorted = false;
 
