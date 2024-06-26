@@ -2,7 +2,7 @@
 
 [package]
 name = "rust"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2021"
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
@@ -46,7 +46,6 @@ missing_debug_implementations  = "warn" # Debug formatting for public items.
 explicit_outlives_requirements = "warn" # Prefer lifetimes on types.
 
 unit_bindings             = "deny" # Prevent binding variables to unit type.
-keyword_idents            = "deny" # Prevent using reserved keywords.
 unused_results            = "deny" # Prefer explicitly handling `Result`.
 unreachable_pub           = "deny" # Prevent inaccessible public items.
 non_ascii_idents          = "deny" # Prefer ASCII source code.
