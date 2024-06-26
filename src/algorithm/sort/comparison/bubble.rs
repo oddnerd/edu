@@ -155,11 +155,12 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using odd-even bubble sort.
+/// Sort `elements` using parallel (odd-even) bubble sort.
 ///
-/// Fundamentally the same as [`naive`], except this variation iterates the
-/// inner loop in chunks of two elements such that comparisons are independent
-/// and can be parallelized.
+/// Fundamentally the same as [`naive`], except this variation is trivially
+/// modified to execute asynchronously. Instead of the inner loop iterating
+/// over overlapping windows of two elements, this variation iterates over
+/// non-overlapping chunks of two elements
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -169,15 +170,15 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::odd_even;
+/// use rust::algorithm::sort::comparison::bubble::parallel;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
-/// odd_even(&mut elements);
+/// parallel(&mut elements);
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn odd_even<T: Ord>(elements: &mut [T]) {
+pub fn parallel<T: Ord>(elements: &mut [T]) {
     let mut sorted = false;
 
     while !sorted {
