@@ -86,6 +86,10 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
     }
 }
 
+pub fn cocktail<T: Ord>(elements: &mut [T]) {
+    todo!()
+}
+
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
