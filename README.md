@@ -25,6 +25,12 @@ Hand-written implementations in Rust for personal reference.
       - [Binary Search](/src/algorithm/sort/comparison/insertion.rs#:~:text=binary)
       - [Gnome](/src/algorithm/sort/comparison/insertion.rs#:~:text=gnome)
       - [Shell](/src/algorithm/sort/comparison/insertion.rs#:~:text=shell)
+    - [Bubble](/src/algorithm/sort/comparison/bubble.rs)
+      - [Naive](/src/algorithm/sort/comparison/bubble.rs#:~:text=naive)
+      - [Optimized](/src/algorithm/sort/comparison/bubble.rs#:~:text=optimized)
+      - [Bidirectional/Cocktail](/src/algorithm/sort/comparison/bubble.rs#:~:text=bidirectional)
+      - [Parallel/Odd-Even](/src/algorithm/sort/comparison/bubble.rs#:~:text=parallel)
+      - [Comb](/src/algorithm/sort/comparison/bubble.rs#:~:text=comb)
 
 ## Data Structures
 
