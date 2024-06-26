@@ -87,27 +87,28 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn cocktail<T: Ord>(elements: &mut [T]) {
-    let mut swapped = true;
+    let mut sorted = false;
 
-    while swapped {
-        swapped = false;
+    while !sorted {
+        sorted = true;
 
         for i in 1..elements.len() {
             if elements[i - 1] > elements[i] {
                 elements.swap(i - 1, i);
-                swapped = true;
+                sorted = false;
             }
         }
-        if !swapped {
+
+        if sorted {
             break;
         }
 
-        swapped = false;
+        sorted = true;
 
         for i in (1..elements.len()).rev() {
             if elements[i - 1] > elements[i] {
                 elements.swap(i - 1, i);
-                swapped = true;
+                sorted = false;
             }
         }
     }
