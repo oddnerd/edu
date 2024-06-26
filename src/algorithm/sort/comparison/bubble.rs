@@ -90,6 +90,7 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
     let mut sorted = false;
 
     while !sorted {
+        // Assume sorted unless the following loop has to swap elements.
         sorted = true;
 
         for current_index in 1..elements.len() {
@@ -103,14 +104,17 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
 
             if previous_element > current_element {
                 elements.swap(previous_index, current_index);
+
                 sorted = false;
             }
         }
 
+        // If the previous loop proved sorted, so will the following loop.
         if sorted {
             break;
         }
 
+        // Assume sorted unless the following loop has to swap elements.
         sorted = true;
 
         for current_index in (1..elements.len()).rev() {
@@ -124,6 +128,7 @@ pub fn cocktail<T: Ord>(elements: &mut [T]) {
 
             if previous_element > current_element {
                 elements.swap(previous_index, current_index);
+
                 sorted = false;
             }
         }
