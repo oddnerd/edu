@@ -42,15 +42,19 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 
 pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     for sorted in 0..(elements.len() / 2) {
-        let (left_sorted, elements) = elements.split_at_mut(sorted);
+        let Some(last_sorted) = elements.len().checked_sub(sorted) else {
+            unreachable!("loop ensures `sorted < elements.len()`");
+        };
 
-        let (elements, right_sorted) = elements.split_at_mut(elements.len() - sorted);
+        let Some(unsorted) = elements.get_mut(sorted..last_sorted) else {
+            unreachable!("loop ensures range is in bounds");
+        };
 
-        let Some((minimum, elements)) = elements.split_first_mut() else {
+        let Some((minimum, unsorted)) = unsorted.split_first_mut() else {
             unreachable!();
         };
 
-        let Some((maximum, elements)) = elements.split_last_mut() else {
+        let Some((maximum, unsorted)) = unsorted.split_last_mut() else {
             unreachable!();
         };
 
@@ -58,16 +62,14 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
             core::mem::swap(minimum, maximum);
         }
 
-        for element in elements {
+        for element in unsorted {
+            #[allow(clippy::else_if_without_else)]
             if element < minimum {
                 core::mem::swap(element, minimum);
-            }
-
-            if element > maximum {
+            } else if element > maximum {
                 core::mem::swap(element, maximum);
             }
         }
-
     }
 }
 
