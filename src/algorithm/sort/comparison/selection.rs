@@ -41,7 +41,31 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn stable<T: Ord>(elements: &mut [T]) {
-    todo!()
+    for sorted in 0..elements.len() {
+        let mut minimum_index = sorted;
+
+        // Find the minimum elements within the unsorted range.
+        for current_index in sorted..elements.len() {
+            let Some(minimum_element) = elements.get(minimum_index) else {
+                unreachable!("loop ensures index is within bounds");
+            };
+
+            let Some(current_element) = elements.get(current_index) else {
+                unreachable!("loop ensures index is within bounds");
+            };
+
+            if current_element < minimum_element {
+                minimum_index = current_index;
+            }
+        }
+
+        // Place the minimum element into sorted position, maintaining order.
+        let Some(shifted) = elements.get_mut(sorted..=minimum_index) else {
+            unreachable!("loop ensures range is within bounds");
+        };
+
+        shifted.rotate_right(1);
+    }
 }
 
 /// Sort `elements` using bidirectional selection sort.
