@@ -2,6 +2,9 @@
 
 /// Sort `elements` using iterative selection sort.
 ///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
 /// Iterate through the unsorted elements to select the minimum value, swapping
 /// it to the beginning of the unsorted list which is its sorted position. The
 /// unsorted list can then be reduced to exclude this first element, repeating
