@@ -37,6 +37,10 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
     }
 }
 
+pub fn bidirectional<T: Ord>(elements: &mut [T]) {
+    todo!()
+}
+
 #[cfg(test)]
 #[allow(
     clippy::undocumented_unsafe_blocks,
@@ -101,6 +105,64 @@ mod test {
             let mut elements = [2, 0, 3, 1];
 
             iterative(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+    }
+
+    mod bidirectional {
+        use super::*;
+
+        #[test]
+        fn empty() {
+            let mut elements: [usize; 0] = [];
+
+            bidirectional(&mut elements);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+
+            bidirectional(&mut elements);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            bidirectional(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+
+            bidirectional(&mut elements);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+
+            bidirectional(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+
+            bidirectional(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
