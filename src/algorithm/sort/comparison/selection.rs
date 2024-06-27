@@ -41,7 +41,34 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn bidirectional<T: Ord>(elements: &mut [T]) {
-    todo!()
+    for sorted in 0..(elements.len() / 2) {
+        let (left_sorted, elements) = elements.split_at_mut(sorted);
+
+        let (elements, right_sorted) = elements.split_at_mut(elements.len() - sorted);
+
+        let Some((minimum, elements)) = elements.split_first_mut() else {
+            unreachable!();
+        };
+
+        let Some((maximum, elements)) = elements.split_last_mut() else {
+            unreachable!();
+        };
+
+        if minimum > maximum {
+            core::mem::swap(minimum, maximum);
+        }
+
+        for element in elements {
+            if element < minimum {
+                core::mem::swap(element, minimum);
+            }
+
+            if element > maximum {
+                core::mem::swap(element, maximum);
+            }
+        }
+
+    }
 }
 
 #[cfg(test)]
