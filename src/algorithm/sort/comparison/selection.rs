@@ -40,6 +40,24 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using stable selection sort.
+///
+/// Almost identical to traditional [`iterative`] solution, except the minimum
+/// element is moved into sorted position via a rotation instead of a swap.
+///
+/// # Performance
+/// This method takes O(N<sup>3</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::selection::stable;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// stable(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn stable<T: Ord>(elements: &mut [T]) {
     for sorted in 0..elements.len() {
         let mut minimum_index = sorted;
