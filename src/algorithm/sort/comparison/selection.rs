@@ -1,7 +1,20 @@
 //! Implementations of [Selection Sort](https://en.wikipedia.org/wiki/Selection_sort).
 
 pub fn iterative<T: Ord>(elements: &mut [T]) {
-    todo!()
+    for sorted in 0..elements.len() {
+
+        let (_, unsorted) = elements.split_at_mut(sorted);
+
+        let Some((current, rest)) = unsorted.split_first_mut() else {
+            unreachable!("loop ensures there is at least one element");
+        };
+
+        for element in rest {
+            if element < current {
+                core::mem::swap(current, element);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
