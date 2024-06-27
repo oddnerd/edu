@@ -1,5 +1,25 @@
 //! Implementations of [Selection Sort](https://en.wikipedia.org/wiki/Selection_sort).
 
+/// Sort `elements` using iterative selection sort.
+///
+/// Iterate through the unsorted elements to select the minimum value, swapping
+/// it to the beginning of the unsorted list which is its sorted position. The
+/// unsorted list can then be reduced to exclude this first element, repeating
+/// until there are no elements left to be sorted.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::selection::iterative;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// iterative(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn iterative<T: Ord>(elements: &mut [T]) {
     for sorted in 0..elements.len() {
 
