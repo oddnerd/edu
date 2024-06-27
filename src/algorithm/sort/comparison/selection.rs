@@ -40,6 +40,30 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using bidirectional selection sort.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// Unlike the traditional [`iterative`] solution which only selects the
+/// minimum elements and swaps them to the beginning of the list, this
+/// variation finds both the minimum and maximum value whilst iterating through
+/// the list placing the minimum at the beginning and the maximum and the end
+/// with a decreasing section of unsorted elements in the middle.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::selection::bidirectional;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// bidirectional(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     for sorted in 0..(elements.len() / 2) {
         let Some(last_sorted) = elements.len().checked_sub(sorted) else {
