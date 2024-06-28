@@ -146,24 +146,28 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
 pub fn bingo<T: Ord>(elements: &mut [T]) {
-
-    // TODO: is this necessary?
     if elements.is_empty() {
         return;
     }
 
-    let mut minimum = 0;
+    // Assume the first element is the minimum.
+    let mut minimum_index = 0;
 
-    for index in 1..elements.len() {
-        if elements[index] < elements[minimum] {
-            minimum = index;
+    // Find the overall minimum value.
+    for (index, element) in elements.iter().enumerate() {
+        let Some(minimum_element) = elements.get(minimum_index) else {
+            unreachable!("loop ensures index is within bounds");
+        };
+
+        if element < minimum_element {
+            minimum_index = index;
         }
     }
 
     let mut output = 0;
     while output < elements.len() {
 
-        elements.swap(output, minimum);
+        elements.swap(output, minimum_index);
 
         let previous_minimum = output;
 
@@ -186,7 +190,7 @@ pub fn bingo<T: Ord>(elements: &mut [T]) {
         }
 
         if let Some(next_minimum) = next_minimum {
-            minimum = next_minimum;
+            minimum_index = next_minimum;
         } else {
             break;
         }
