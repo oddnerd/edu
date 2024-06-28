@@ -145,48 +145,51 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 
 #[allow(clippy::indexing_slicing)]
 #[allow(clippy::arithmetic_side_effects)]
-pub fn bingo<T: Ord + Clone>(elements: &mut [T]) {
+pub fn bingo<T: Ord>(elements: &mut [T]) {
 
+    // TODO: is this necessary?
     if elements.is_empty() {
         return;
     }
 
-    // Find minimum element.
-    let mut minimum = &elements[0];
-    for element in &elements[1..] {
-        if element < minimum {
-            minimum = element;
+    let mut minimum = 0;
+
+    for index in 1..elements.len() {
+        if elements[index] < elements[minimum] {
+            minimum = index;
         }
     }
 
-    // Place minimum in correct position.
-    let mut next = 0;
-    while next < elements.len() && &elements[next] == minimum {
-        next += 1;
-    }
+    let mut output = 0;
+    while output < elements.len() {
 
-    while next < elements.len() {
+        elements.swap(output, minimum);
 
-        // Find the next smallest element.
-        let mut next_minimum = elements[next].clone();
-        for element in &elements[next + 1..] {
-            if element < &next_minimum {
-                next_minimum = element.clone();
+        let previous_minimum = output;
+
+        output += 1;
+
+        let mut next_minimum = None::<usize>;
+
+        for current in output..elements.len() {
+            #[allow(clippy::else_if_without_else)]
+            if elements[current] == elements[previous_minimum] {
+                if next_minimum.is_some_and(|index| index == output) {
+                    next_minimum = Some(current);
+                }
+
+                elements.swap(output, current);
+                output += 1;
+            } else if next_minimum.is_none() || next_minimum.is_some_and(|current_minimum| elements[current] < elements[current_minimum]) {
+                next_minimum = Some(current);
             }
         }
 
-        // Move all instances of minimum value into correct position.
-        for current in next..elements.len() {
-            if elements[current] == next_minimum {
-
-                elements.swap(current, next);
-
-                elements[next] = next_minimum.clone();
-
-                next += 1;
-            }
+        if let Some(next_minimum) = next_minimum {
+            minimum = next_minimum;
+        } else {
+            break;
         }
-
     }
 
 }
