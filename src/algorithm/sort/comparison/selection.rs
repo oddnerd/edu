@@ -143,8 +143,49 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     }
 }
 
-pub fn bingo<T: Ord>(elements: &mut [T]) {
-    todo!()
+#[allow(clippy::indexing_slicing)]
+#[allow(clippy::arithmetic_side_effects)]
+pub fn bingo<T: Ord + Clone>(elements: &mut [T]) {
+
+    if elements.is_empty() {
+        return;
+    }
+
+    // Find minimum element.
+    let mut minimum = elements[0].clone();
+    for element in &elements[1..] {
+        if element < &minimum {
+            minimum = element.clone();
+        }
+    }
+
+    // Place minimum in correct position.
+    let mut next = 0;
+    while next < elements.len() && elements[next] == minimum {
+        next += 1;
+    }
+
+    while next < elements.len() {
+
+        // Find the next smallest element.
+        let mut next_minimum = elements[next].clone();
+        for element in &elements[next + 1..] {
+            if element < &next_minimum {
+                next_minimum = element.clone();
+            }
+        }
+
+        // Move all instances of minimum value into correct position.
+        for i in next..elements.len() {
+            if elements[i] == next_minimum.clone() {
+                elements[i] = elements[next].clone();
+                elements[next] = next_minimum.clone();
+                next += 1;
+            }
+        }
+
+    }
+
 }
 
 #[cfg(test)]
