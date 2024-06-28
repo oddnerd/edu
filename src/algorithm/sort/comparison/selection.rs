@@ -152,16 +152,16 @@ pub fn bingo<T: Ord + Clone>(elements: &mut [T]) {
     }
 
     // Find minimum element.
-    let mut minimum = elements[0].clone();
+    let mut minimum = &elements[0];
     for element in &elements[1..] {
-        if element < &minimum {
-            minimum = element.clone();
+        if element < minimum {
+            minimum = element;
         }
     }
 
     // Place minimum in correct position.
     let mut next = 0;
-    while next < elements.len() && elements[next] == minimum {
+    while next < elements.len() && &elements[next] == minimum {
         next += 1;
     }
 
@@ -176,10 +176,13 @@ pub fn bingo<T: Ord + Clone>(elements: &mut [T]) {
         }
 
         // Move all instances of minimum value into correct position.
-        for i in next..elements.len() {
-            if elements[i] == next_minimum.clone() {
-                elements[i] = elements[next].clone();
+        for current in next..elements.len() {
+            if elements[current] == next_minimum {
+
+                elements.swap(current, next);
+
                 elements[next] = next_minimum.clone();
+
                 next += 1;
             }
         }
