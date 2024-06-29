@@ -143,54 +143,72 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     }
 }
 
-#[allow(clippy::indexing_slicing)]
-#[allow(clippy::arithmetic_side_effects)]
 pub fn bingo<T: Ord>(elements: &mut [T]) {
-    if elements.is_empty() {
-        return;
-    }
-
     // Assume the first element is the minimum.
-    let mut minimum_index = 0;
+    let mut current_minimum = 0;
 
     // Find the overall minimum value.
     for (index, element) in elements.iter().enumerate() {
-        let Some(minimum_element) = elements.get(minimum_index) else {
+        let Some(minimum_element) = elements.get(current_minimum) else {
             unreachable!("loop ensures index is within bounds");
         };
 
         if element < minimum_element {
-            minimum_index = index;
+            current_minimum = index;
         }
     }
 
     let mut output = 0;
     while output < elements.len() {
 
-        elements.swap(output, minimum_index);
-
+        // Place the first value into position so it can be compared against.
+        elements.swap(output, current_minimum);
         let previous_minimum = output;
 
-        output += 1;
+        if let Some(incremented) = output.checked_add(1) {
+            output = incremented;
+        } else {
+            unreachable!("while-loop will exit before");
+        }
 
+        // Note the minimum for the next iteration whilst sorting the current.
         let mut next_minimum = None::<usize>;
 
-        for current in output..elements.len() {
+        #[allow(clippy::mut_range_bound)]
+        for current_index in output..elements.len() {
+            let (Some(current_element), Some(minimum_element)) = (elements.get(current_index), elements.get(previous_minimum)) else {
+                unreachable!();
+            };
+
             #[allow(clippy::else_if_without_else)]
-            if elements[current] == elements[previous_minimum] {
+            if current_element == minimum_element {
+                // Outputting the current minimum might move the next minimum.
                 if next_minimum.is_some_and(|index| index == output) {
-                    next_minimum = Some(current);
+                    next_minimum = Some(current_index);
                 }
 
-                elements.swap(output, current);
-                output += 1;
-            } else if next_minimum.is_none() || next_minimum.is_some_and(|current_minimum| elements[current] < elements[current_minimum]) {
-                next_minimum = Some(current);
+                elements.swap(output, current_index);
+
+                if let Some(incremented) = output.checked_add(1) {
+                    output = incremented;
+                } else {
+                    unreachable!("for-loop will exit before");
+                }
+            } else if let Some(index) = next_minimum {
+                let Some(element) = elements.get(index) else {
+                    unreachable!("loop ensures index is within bounds");
+                };
+
+                if current_element < element {
+                    next_minimum = Some(current_index);
+                }
+            } else {
+                next_minimum = Some(current_index);
             }
         }
 
         if let Some(next_minimum) = next_minimum {
-            minimum_index = next_minimum;
+            current_minimum = next_minimum;
         } else {
             break;
         }
