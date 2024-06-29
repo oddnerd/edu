@@ -100,12 +100,10 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 
         // Find the minimum elements within the unsorted range.
         for current_index in sorted..elements.len() {
-            let Some(minimum_element) = elements.get(minimum_index) else {
-                unreachable!("loop ensures index is within bounds");
-            };
-
-            let Some(current_element) = elements.get(current_index) else {
-                unreachable!("loop ensures index is within bounds");
+            let (Some(minimum_element), Some(current_element)) =
+                (elements.get(minimum_index), elements.get(current_index))
+            else {
+                unreachable!("loop ensures both indexes are within bounds");
             };
 
             if current_element < minimum_element {
