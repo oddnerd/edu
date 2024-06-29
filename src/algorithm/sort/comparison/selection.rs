@@ -143,77 +143,94 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     }
 }
 
-pub fn bingo<T: Ord>(elements: &mut [T]) {
+pub fn bingo<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     // Assume the first element is the minimum.
-    let mut current_minimum = 0;
+    let mut minimum_index = 0;
 
     // Find the overall minimum value.
-    for (index, element) in elements.iter().enumerate() {
-        let Some(minimum_element) = elements.get(current_minimum) else {
+    for (current_index, current_element) in elements.iter().enumerate() {
+        let Some(minimum_element) = elements.get(minimum_index) else {
             unreachable!("loop ensures index is within bounds");
         };
 
-        if element < minimum_element {
-            current_minimum = index;
+        if current_element < minimum_element {
+            minimum_index = current_index;
         }
     }
 
-    let mut output = 0;
-    while output < elements.len() {
-
+    let mut split_index = 0;
+    while split_index < elements.len() {
         // Place the first value into position so it can be compared against.
-        elements.swap(output, current_minimum);
-        let previous_minimum = output;
+        elements.swap(split_index, minimum_index);
 
-        if let Some(incremented) = output.checked_add(1) {
-            output = incremented;
+        if let Some(incremented) = split_index.checked_add(1) {
+            split_index = incremented;
         } else {
-            unreachable!("while-loop will exit before");
+            unreachable!("while-loop prevents overflow");
         }
 
-        // Note the minimum for the next iteration whilst sorting the current.
-        let mut next_minimum = None::<usize>;
+        let (sorted, unsorted) = elements.split_at_mut(split_index);
 
-        #[allow(clippy::mut_range_bound)]
-        for current_index in output..elements.len() {
-            let (Some(current_element), Some(minimum_element)) = (elements.get(current_index), elements.get(previous_minimum)) else {
-                unreachable!();
+        let Some(minimum_element) = sorted.last() else {
+            unreachable!("the first minimum value was placed into position");
+        };
+
+        // Note the minimum for the next iteration whilst sorting the current.
+        let mut next_minimum_index = None::<usize>;
+
+        // How many elements from `unsorted` that have been sorted.
+        let mut output_index = 0;
+
+        for current_index in 0..unsorted.len() {
+            let Some(current_element) = unsorted.get(current_index) else {
+                unreachable!("for-loop ensures index is within bounds");
             };
 
-            #[allow(clippy::else_if_without_else)]
             if current_element == minimum_element {
-                // Outputting the current minimum might move the next minimum.
-                if next_minimum.is_some_and(|index| index == output) {
-                    next_minimum = Some(current_index);
+                unsorted.swap(output_index, current_index);
+
+                // Outputting the current element overwrote the next minimum.
+                if next_minimum_index.is_some_and(|index| index == output_index) {
+                    next_minimum_index = Some(current_index);
                 }
 
-                elements.swap(output, current_index);
-
-                if let Some(incremented) = output.checked_add(1) {
-                    output = incremented;
+                if let Some(incremented) = output_index.checked_add(1) {
+                    output_index = incremented;
                 } else {
-                    unreachable!("for-loop will exit before");
+                    unreachable!("for-loop ensures index cannot overflow");
                 }
-            } else if let Some(index) = next_minimum {
-                let Some(element) = elements.get(index) else {
-                    unreachable!("loop ensures index is within bounds");
+            } else if let Some(index) = next_minimum_index {
+                let Some(next_minimum_element) = unsorted.get(index) else {
+                    unreachable!("for-loop ensures index is within bounds");
                 };
 
-                if current_element < element {
-                    next_minimum = Some(current_index);
+                if current_element < next_minimum_element {
+                    next_minimum_index = Some(current_index);
                 }
             } else {
-                next_minimum = Some(current_index);
+                next_minimum_index = Some(current_index);
             }
         }
 
-        if let Some(next_minimum) = next_minimum {
-            current_minimum = next_minimum;
+        // Update the minimum to the one found during this iteration.
+        if let Some(offset) = next_minimum_index {
+            let Some(index) = offset.checked_add(split_index) else {
+                unreachable!("index of a specific element, so fits in usize");
+            };
+
+            minimum_index = index;
         } else {
+            debug_assert_eq!(split_index, elements.len(), "all sorted");
             break;
         }
-    }
 
+        // Update the split between sorted and unsorted elements.
+        if let Some(incremented) = split_index.checked_add(output_index) {
+            split_index = incremented;
+        } else {
+            unreachable!("at most the number of elements, so fits in usize");
+        }
+    }
 }
 
 #[cfg(test)]
