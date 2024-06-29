@@ -40,6 +40,24 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using optimized selection sort.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::selection::optimized;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// optimized(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn optimized<T: Ord>(elements: &mut [T]) {
     for sorted_index in 0..elements.len() {
         let mut minimum_index = sorted_index;
