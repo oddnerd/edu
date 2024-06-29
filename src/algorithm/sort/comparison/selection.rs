@@ -23,7 +23,7 @@
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn iterative<T: Ord>(elements: &mut [T]) {
+pub fn naive<T: Ord>(elements: &mut [T]) {
     for sorted in 0..elements.len() {
 
         let (_, unsorted) = elements.split_at_mut(sorted);
@@ -266,14 +266,14 @@ pub fn bingo<T: Ord>(elements: &mut [T]) {
 mod test {
     use super::*;
 
-    mod iterative {
+    mod naive {
         use super::*;
 
         #[test]
         fn empty() {
             let mut elements: [usize; 0] = [];
 
-            iterative(&mut elements);
+            naive(&mut elements);
 
             assert_eq!(elements, []);
         }
@@ -282,7 +282,7 @@ mod test {
         fn single_element() {
             let mut elements = [0];
 
-            iterative(&mut elements);
+            naive(&mut elements);
 
             assert_eq!(elements, [0]);
         }
@@ -291,7 +291,7 @@ mod test {
         fn already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
-            iterative(&mut elements);
+            naive(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
@@ -300,7 +300,7 @@ mod test {
         fn must_swap() {
             let mut elements = [1, 0];
 
-            iterative(&mut elements);
+            naive(&mut elements);
 
             assert_eq!(elements, [0, 1]);
         }
@@ -309,7 +309,7 @@ mod test {
         fn odd_length() {
             let mut elements = [2, 1, 0];
 
-            iterative(&mut elements);
+            naive(&mut elements);
 
             assert_eq!(elements, [0, 1, 2]);
         }
@@ -318,7 +318,7 @@ mod test {
         fn multiple_swaps() {
             let mut elements = [2, 0, 3, 1];
 
-            iterative(&mut elements);
+            naive(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
