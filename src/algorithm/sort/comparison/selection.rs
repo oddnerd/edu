@@ -143,6 +143,28 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     }
 }
 
+/// Sort `elements` using bingo selection sort.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// Unlike traditional implementations which sort a single _element_ per
+/// iteration of the outer loop, this version sorts a single _value_ thereby
+/// making it more efficient for slices with many duplicate values.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::selection::bingo;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// bingo(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn bingo<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
     // Assume the first element is the minimum.
     let mut minimum_index = 0;
