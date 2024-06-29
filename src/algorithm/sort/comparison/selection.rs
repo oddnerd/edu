@@ -165,7 +165,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn bingo<T: Ord + core::fmt::Debug>(elements: &mut [T]) {
+pub fn bingo<T: Ord>(elements: &mut [T]) {
     // Assume the first element is the minimum.
     let mut minimum_index = 0;
 
