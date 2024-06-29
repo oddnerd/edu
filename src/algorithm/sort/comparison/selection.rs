@@ -5,27 +5,27 @@
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Iterate through the unsorted elements to select the minimum value, swapping
-/// it to the beginning of the unsorted list which is its sorted position. The
-/// unsorted list can then be reduced to exclude this first element, repeating
-/// until there are no elements left to be sorted.
+/// Assume the first unsorted element is the minimum, noting this is the sorted
+/// position for the minimum value. Iterate through the remaining unsorted
+/// elements comparing it with that first, and swapping whenever smaller. This
+/// results in the overall minimum unsorted value being swapped into sorted
+/// position. Repeat until all elements are sorted.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::selection::iterative;
+/// use rust::algorithm::sort::comparison::selection::naive;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
-/// iterative(&mut elements);
+/// naive(&mut elements);
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn naive<T: Ord>(elements: &mut [T]) {
     for sorted in 0..elements.len() {
-
         let (_, unsorted) = elements.split_at_mut(sorted);
 
         let Some((current, rest)) = unsorted.split_first_mut() else {
@@ -45,6 +45,11 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
+/// In contrast to [`naive`], this implementation iterates through the unsorted
+/// elements and stores the index of the minimum element rather than swapping
+/// the current smallest into sorted position. This means the one and only swap
+/// it does is the overall minimum unsorted element into sorted position.
+///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
 ///
@@ -63,7 +68,9 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
         let mut minimum_index = sorted_index;
 
         for current_index in sorted_index..elements.len() {
-            let (Some(minimum_element), Some(current_element)) = (elements.get(minimum_index), elements.get(current_index)) else {
+            let (Some(minimum_element), Some(current_element)) =
+                (elements.get(minimum_index), elements.get(current_index))
+            else {
                 unreachable!("loop ensures both indexes are within bounds");
             };
 
@@ -78,8 +85,10 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` using stable selection sort.
 ///
-/// Almost identical to traditional [`iterative`] solution, except the minimum
-/// element is moved into sorted position via a rotation instead of a swap.
+/// This implementation selects the minimum element the same as the
+/// [`optimized`] variant, but instead of swapping it into position, it rotates
+/// the elements in-between the sorted position and overall minimum unsorted
+/// element thereby maintaining the order of the remaining elements.
 ///
 /// # Performance
 /// This method takes O(N<sup>3</sup>) time and consumes O(1) memory.
@@ -125,11 +134,11 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Unlike the traditional [`iterative`] solution which only selects the
-/// minimum elements and swaps them to the beginning of the list, this
-/// variation finds both the minimum and maximum value whilst iterating through
-/// the list placing the minimum at the beginning and the maximum and the end
-/// with a decreasing section of unsorted elements in the middle.
+/// Unlike the [`naive`] implementation which only determines the minimum
+/// value whilst iterating through the unsorted elements, this implementation
+/// also determines the maximum placing the minimum at the leftmost position
+/// and placing the maximum at the rightmost position with the remaining
+/// unsorted elements in-between.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -182,9 +191,9 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Unlike traditional implementations which sort a single _element_ per
-/// iteration of the outer loop, this version sorts a single _value_ thereby
-/// making it more efficient for slices with many duplicate values.
+/// Unlike [`optimized`] which sorts only a single _element_ with the minimum
+/// value, this implementation sorts all elements with the minimum _value_ into
+/// sorted position thereby being more efficient for inputs with duplicates.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
