@@ -41,7 +41,21 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 }
 
 pub fn optimized<T: Ord>(elements: &mut [T]) {
-    todo!()
+    for sorted_index in 0..elements.len() {
+        let mut minimum_index = sorted_index;
+
+        for current_index in sorted_index..elements.len() {
+            let (Some(minimum_element), Some(current_element)) = (elements.get(minimum_index), elements.get(current_index)) else {
+                unreachable!("loop ensures both indexes are within bounds");
+            };
+
+            if current_element < minimum_element {
+                minimum_index = current_index;
+            }
+        }
+
+        elements.swap(sorted_index, minimum_index);
+    }
 }
 
 /// Sort `elements` using stable selection sort.
