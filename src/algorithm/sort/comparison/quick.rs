@@ -83,8 +83,45 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
     lomuto(right);
 }
 
-pub fn hoare<T: Ord>(elements: &mut [T]) {
-    todo!()
+/// TODO
+pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
+    /// TODO
+    fn partition<T: Ord + Clone>(elements: &mut [T]) -> usize {
+        let pivot = elements[0].clone();
+
+        let mut i = 0;
+        let mut j = elements.len() - 1;
+
+        loop {
+            while (i < j) && (elements[j] > pivot) {
+                i += 1;
+            }
+
+            while (j > i) && (elements[j] > pivot) {
+                j -= 1;
+            }
+
+            if i < j {
+                elements.swap(i, j);
+
+                i += 1;
+                j -= 1;
+            } else {
+                return j;
+            }
+        }
+    }
+
+    if elements.len() <= 1 {
+        return;
+    }
+
+    let pivot = partition(elements);
+
+    let (left, right) = elements.split_at_mut(pivot);
+
+    hoare(left);
+    hoare(right);
 }
 
 #[cfg(test)]
