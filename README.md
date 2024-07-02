@@ -31,6 +31,12 @@ Hand-written implementations in Rust for personal reference.
       - [Bidirectional/Cocktail](/src/algorithm/sort/comparison/bubble.rs#:~:text=bidirectional)
       - [Parallel/Odd-Even](/src/algorithm/sort/comparison/bubble.rs#:~:text=parallel)
       - [Comb](/src/algorithm/sort/comparison/bubble.rs#:~:text=comb)
+    - [Selection](/src/algorithm/sort/comparison/selection.rs)
+      - [Naive](/src/algorithm/sort/comparison/selection.rs#:~:text=naive)
+      - [Optimized](/src/algorithm/sort/comparison/selection.rs#:~:text=optimized)
+      - [Stable](/src/algorithm/sort/comparison/selection.rs#:~:text=stable)
+      - [Bidirectional](/src/algorithm/sort/comparison/selection.rs#:~:text=bidirectional)
+      - [Bingo](/src/algorithm/sort/comparison/selection.rs#:~:text=bingo)
 
 ## Data Structures
 
