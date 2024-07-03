@@ -84,7 +84,7 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 }
 
 /// TODO
-pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
+pub fn hoare<T: Ord + Clone + core::fmt::Debug>(elements: &mut [T]) {
     /// TODO
     fn partition<T: Ord + Clone>(elements: &mut [T]) -> usize {
         let pivot = elements[0].clone();
@@ -93,24 +93,28 @@ pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
         let mut j = elements.len() - 1;
 
         loop {
-            while (i < j) && (elements[j] > pivot) {
+            // Find element >= pivot from leftmost element.
+            while i < elements.len() && elements[i] < pivot {
                 i += 1;
             }
 
-            while (j > i) && (elements[j] > pivot) {
+            // Find element <= pivot from rightmost element.
+            while j > 0 && elements[j] > pivot {
                 j -= 1;
             }
 
-            if i < j {
-                elements.swap(i, j);
-
-                i += 1;
-                j -= 1;
-            } else {
+            if i >= j {
                 return j;
             }
+
+            // Two elements are misplaced, swap them.
+            elements.swap(i, j);
+            i += 1;
+            j -= 1;
         }
     }
+
+    println!("HOARE: {elements:?}");
 
     if elements.len() <= 1 {
         return;
@@ -118,7 +122,7 @@ pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
 
     let pivot = partition(elements);
 
-    let (left, right) = elements.split_at_mut(pivot);
+    let (left, right) = elements.split_at_mut(pivot + 1);
 
     hoare(left);
     hoare(right);
