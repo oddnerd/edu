@@ -88,7 +88,15 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 
 /// TODO
 pub fn hoare<T: Ord>(elements: &mut [T]) {
-    /// TODO
+    /// Partition `elements` based on the first element.
+    ///
+    /// Returns some `index` such that all elements within `[..index]` are less
+    /// than the first element, and all elements within `[index..]` are
+    /// greater. Note that this does not imply the first element is within
+    /// sorted position.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
     fn partition<T: Ord>(elements: &mut [T]) -> usize {
         // Arbitrarily set pivot to first element.
         let mut pivot_index = 0;
