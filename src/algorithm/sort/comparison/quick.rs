@@ -87,37 +87,42 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 }
 
 /// TODO
-pub fn hoare<T: Ord + Clone + core::fmt::Debug>(elements: &mut [T]) {
+pub fn hoare<T: Ord>(elements: &mut [T]) {
     /// TODO
-    fn partition<T: Ord + Clone>(elements: &mut [T]) -> usize {
-        let pivot = elements[0].clone();
+    fn partition<T: Ord>(elements: &mut [T]) -> usize {
+        let mut pivot = 0;
 
-        let mut i = 0;
-        let mut j = elements.len() - 1;
+        let mut forward = 0;
+        let mut reverse = elements.len() - 1;
 
-        loop {
+        while forward < reverse {
             // Find element >= pivot from leftmost element.
-            while i < elements.len() && elements[i] < pivot {
-                i += 1;
+            while forward < elements.len() && elements[forward] < elements[pivot] {
+                forward += 1;
             }
 
             // Find element <= pivot from rightmost element.
-            while j > 0 && elements[j] > pivot {
-                j -= 1;
+            while reverse > 0 && elements[reverse] > elements[pivot] {
+                reverse -= 1;
             }
 
-            if i >= j {
-                return j;
-            }
+            if forward < reverse {
+                #[allow(clippy::else_if_without_else)]
+                if pivot == forward {
+                    pivot = reverse;
+                } else if pivot == reverse {
+                    pivot = forward;
+                }
 
-            // Two elements are misplaced, swap them.
-            elements.swap(i, j);
-            i += 1;
-            j -= 1;
+                // Two elements are misplaced, swap them.
+                elements.swap(forward, reverse);
+                forward += 1;
+                reverse -= 1;
+            }
         }
-    }
 
-    println!("HOARE: {elements:?}");
+        reverse
+    }
 
     if elements.len() <= 1 {
         return;
