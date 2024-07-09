@@ -86,7 +86,29 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
     lomuto(right);
 }
 
-/// TODO
+/// Sort `elements` using quick sort with Hoare's partition scheme.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// Partition the elements into two subregions with the left containing all
+/// elements less than or greater to the first element, and the right
+/// containing all elements greater. Recursively sort these subregions until
+/// only a single element is contained thereby placing it into sorted position.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::quick::hoare;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// hoare(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn hoare<T: Ord>(elements: &mut [T]) {
     /// Partition `elements` based on the first element.
     ///
