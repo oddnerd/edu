@@ -90,47 +90,74 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 pub fn hoare<T: Ord>(elements: &mut [T]) {
     /// TODO
     fn partition<T: Ord>(elements: &mut [T]) -> usize {
-        let mut pivot = 0;
+        // Arbitrarily set pivot to first element.
+        let mut pivot_index = 0;
 
-        let mut forward = 0;
-        let mut reverse = elements.len() - 1;
+        let mut left = 0;
 
-        while forward < reverse {
-            // Find element >= pivot from leftmost element.
-            while forward < elements.len() && elements[forward] < elements[pivot] {
-                forward += 1;
+        let Some(mut right) = elements.len().checked_sub(1) else {
+            unreachable!("caller ensures elements is not empty");
+        };
+
+        loop {
+            let Some(pivot_element) = elements.get(pivot_index) else {
+                unreachable!("loops ensures pivot is within bounds")
+            };
+
+            // Find leftmost element that should be to the right of the pivot.
+            while elements.get(left).is_some_and(|element| element < pivot_element) {
+                if let Some(incremented) = left.checked_add(1) {
+                    left = incremented;
+                } else {
+                    break;
+                }
             }
 
-            // Find element <= pivot from rightmost element.
-            while reverse > 0 && elements[reverse] > elements[pivot] {
-                reverse -= 1;
+            // Find rightmost element that should be to the left of the pivot.
+            while elements.get(right).is_some_and(|element| element > pivot_element) {
+                if let Some(decremented) = right.checked_sub(1) {
+                    right = decremented;
+                } else {
+                    break;
+                }
             }
 
-            if forward < reverse {
+            if left < right {
+                // This swap might move the pivot element.
                 #[allow(clippy::else_if_without_else)]
-                if pivot == forward {
-                    pivot = reverse;
-                } else if pivot == reverse {
-                    pivot = forward;
+                if pivot_index == left {
+                    pivot_index = right;
+                } else if pivot_index == right {
+                    pivot_index = left;
                 }
 
-                // Two elements are misplaced, swap them.
-                elements.swap(forward, reverse);
-                forward += 1;
-                reverse -= 1;
+                // Swap left and right to be correct side of pivot.
+                elements.swap(left, right);
+
+                if let (Some(incremented), Some(decremented)) = (left.checked_add(1), right.checked_sub(1)) {
+                    left = incremented;
+                    right = decremented;
+                } else {
+                    break;
+                }
+            } else {
+                break;
             }
         }
 
-        reverse
+        right
     }
 
     if elements.len() <= 1 {
         return;
     }
 
-    let pivot = partition(elements);
+    // Ensure pivot is the last element of the left split.
+    let Some(pivot) = partition(elements).checked_add(1) else {
+        unreachable!("will be a valid index, so this is at most `usize::MAX`");
+    };
 
-    let (left, right) = elements.split_at_mut(pivot + 1);
+    let (left, right) = elements.split_at_mut(pivot);
 
     hoare(left);
     hoare(right);
