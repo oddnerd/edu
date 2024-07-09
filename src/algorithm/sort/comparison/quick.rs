@@ -204,8 +204,46 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
     hoare(right);
 }
 
-pub fn dutch<T: Ord>(elements: &mut [T]) {
-    todo!()
+/// TODO
+pub fn dutch<T: Ord + Clone>(elements: &mut [T]) {
+    /// TODO
+    fn partition<T: Ord + Clone >(elements: &mut [T]) -> (usize, usize) {
+        let pivot = elements[0].clone();
+
+        let mut less = 0;
+        let mut equal = 0;
+        let mut greater = elements.len() - 1;
+
+        while equal <= greater {
+            if elements[equal] < pivot {
+                elements.swap(equal, less);
+
+                less += 1;
+                equal += 1;
+            } else if elements[equal] > pivot {
+                elements.swap(equal, greater);
+                greater -= 1;
+            } else {
+                equal += 1;
+            }
+        }
+
+        (less, greater)
+    }
+
+    if elements.len() <= 1 {
+        return;
+    }
+
+    let (less, greater) = partition(elements);
+
+    let greater = greater - less + 1;
+
+    let (less, rest) = elements.split_at_mut(less);
+    let (_equal, greater) = rest.split_at_mut(greater);
+
+    dutch(less);
+    dutch(greater);
 }
 
 #[cfg(test)]
