@@ -29,6 +29,9 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
     /// This places the last element into sorted position, as well as ordering
     /// the remaining elements such that those less than it come before and
     /// those greater come after.
+    ///
+    /// # Performance
+    /// This method takes O(N) time and consumes O(1) memory.
     fn partition<T: Ord>(elements: &mut [T]) -> usize {
         let Some((pivot_element, elements)) = elements.split_last_mut() else {
             unreachable!("caller is responsible for ensuring not empty");
