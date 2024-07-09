@@ -113,7 +113,10 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
             };
 
             // Find leftmost element that should be to the right of the pivot.
-            while elements.get(left).is_some_and(|element| element < pivot_element) {
+            while elements
+                .get(left)
+                .is_some_and(|element| element < pivot_element)
+            {
                 if let Some(incremented) = left.checked_add(1) {
                     left = incremented;
                 } else {
@@ -122,7 +125,10 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
             }
 
             // Find rightmost element that should be to the left of the pivot.
-            while elements.get(right).is_some_and(|element| element > pivot_element) {
+            while elements
+                .get(right)
+                .is_some_and(|element| element > pivot_element)
+            {
                 if let Some(decremented) = right.checked_sub(1) {
                     right = decremented;
                 } else {
@@ -142,7 +148,9 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
                 // Swap left and right to be correct side of pivot.
                 elements.swap(left, right);
 
-                if let (Some(incremented), Some(decremented)) = (left.checked_add(1), right.checked_sub(1)) {
+                if let (Some(incremented), Some(decremented)) =
+                    (left.checked_add(1), right.checked_sub(1))
+                {
                     left = incremented;
                     right = decremented;
                 } else {
@@ -153,17 +161,16 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
             }
         }
 
-        right
+        right.checked_add(1).unwrap_or_else(|| {
+            unreachable!("will be a valid index, so at most `usize::MAX - 1`");
+        })
     }
 
     if elements.len() <= 1 {
         return;
     }
 
-    // Ensure pivot is the last element of the left split.
-    let Some(pivot) = partition(elements).checked_add(1) else {
-        unreachable!("will be a valid index, so this is at most `usize::MAX`");
-    };
+    let pivot = partition(elements);
 
     let (left, right) = elements.split_at_mut(pivot);
 
