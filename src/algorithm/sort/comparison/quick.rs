@@ -10,6 +10,8 @@
 /// the remaining unsorted sub-lists placing one element into sorted order for
 /// each call until all elements are sorted.
 ///
+/// This partition scheme averages three times the swaps of [`hoare`].
+///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
 ///
@@ -95,6 +97,8 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 /// elements less than or greater to the first element, and the right
 /// containing all elements greater. Recursively sort these subregions until
 /// only a single element is contained thereby placing it into sorted position.
+///
+/// This partition scheme averages 1/3 the swaps of [`lomuto`].
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
