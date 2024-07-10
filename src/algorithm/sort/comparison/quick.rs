@@ -146,14 +146,15 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
+pub fn hoare<T: Ord>(elements: &mut [T]) {
     recurse(elements, &|partition, pivot| {
         debug_assert!(pivot < partition.len(), "pivot must be within bounds");
 
+        // Ensure pivot is first element.
         partition.swap(pivot, 0);
 
         let mut left = 1;
-        let mut right = partition.len() - 1;
+        let mut right = partition.len().checked_sub(1).unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
 
         loop {
             #[allow(clippy::shadow_unrelated)]
@@ -161,29 +162,47 @@ pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
                 unreachable!("caller ensures there is at least one element");
             };
 
-            while left < right && &partition[left] < pivot {
-                left += 1;
+            // Find the leftmost element that should be right of the pivot.
+            while left < right && partition.get(left).is_some_and(|element| element < pivot) {
+                if let Some(incremented) = left.checked_add(1) {
+                    left = incremented;
+                } else {
+                    break;
+                }
             }
 
-            while 0 < right && &partition[right] > pivot {
-                right -= 1;
+            // Find the rightmost element that should be left of the pivot.
+            while 0 < right && partition.get(right).is_some_and(|element| element > pivot) {
+                if let Some(decremented) = right.checked_sub(1) {
+                    right = decremented;
+                } else {
+                    break;
+                }
             }
 
             if left < right {
+                // Swap the left and right elements onto correct side of pivot.
                 partition.swap(left, right);
 
-                left += 1;
-                right -= 1;
+                // Prevent infinite loop upon equivalent elements.
+                if let (Some(incremented), Some(decremented)) = (left.checked_add(1), right.checked_sub(1)) {
+                    left = incremented;
+                    right = decremented;
+                } else {
+                    break;
+                }
             } else {
-                partition.swap(0, right);
-
                 break;
             }
         }
 
+        // Place pivot element into sorted position.
+        partition.swap(0, right);
+
         #[allow(clippy::shadow_unrelated)]
         let (left, right) = partition.split_at_mut(right);
 
+        // Ignore pivot in recursive calls since it is already sorted.
         let Some((_pivot, right)) = right.split_first_mut() else {
             unreachable!("contains at least the pivot element");
         };
