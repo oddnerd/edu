@@ -226,44 +226,33 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 
 /// TODO
 pub fn three_way<T: Ord + Clone>(elements: &mut [T]) {
-    /// TODO
-    fn partition<T: Ord + Clone>(elements: &mut [T]) -> (usize, usize) {
-        let pivot = elements[0].clone();
+    recurse(elements, &|partition, pivot| {
+        let pivot = partition[pivot].clone();
 
         let mut less = 0;
         let mut equal = 0;
-        let mut greater = elements.len() - 1;
+        let mut greater = partition.len() - 1;
 
         while equal <= greater {
-            if elements[equal] < pivot {
-                elements.swap(equal, less);
+            if partition[equal] < pivot {
+                partition.swap(equal, less);
 
                 less += 1;
                 equal += 1;
-            } else if elements[equal] > pivot {
-                elements.swap(equal, greater);
+            } else if partition[equal] > pivot {
+                partition.swap(equal, greater);
                 greater -= 1;
             } else {
                 equal += 1;
             }
         }
 
+        let (rest, greater) = partition.split_at_mut(greater);
+
+        let (less, _equal) = rest.split_at_mut(less);
+
         (less, greater)
-    }
-
-    if elements.len() <= 1 {
-        return;
-    }
-
-    let (less, greater) = partition(elements);
-
-    let greater = greater - less + 1;
-
-    let (less, rest) = elements.split_at_mut(less);
-    let (_equal, greater) = rest.split_at_mut(greater);
-
-    three_way(less);
-    three_way(greater);
+    });
 }
 
 #[cfg(test)]
