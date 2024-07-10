@@ -1,6 +1,14 @@
 //! Implementations of [Quick Sort](https://en.wikipedia.org/wiki/Quicksort).
 
-/// TODO
+/// Sort `elements` via quicksort according to some `partition` scheme.
+///
+/// The provided `partition` function must divide `elements` into two
+/// sub-slices such that all elements of the left sub-slice are less-than or
+/// equal to all elements of the right sub-slice. It takes an index to a
+/// contained `pivot` element which is recommended as the value dividing the
+/// left and right partitions such that all left elements are less-than or
+/// equal to the pivot and all right elements are greater-than or equal to
+/// the pivot.
 fn recurse<T: Ord>(
     elements: &mut [T],
     partition: &impl Fn(&mut [T], usize) -> (&mut [T], &mut [T]),
