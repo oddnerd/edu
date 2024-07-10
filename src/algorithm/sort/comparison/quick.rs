@@ -154,7 +154,10 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
         partition.swap(pivot, 0);
 
         let mut left = 1;
-        let mut right = partition.len().checked_sub(1).unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
+        let mut right = partition
+            .len()
+            .checked_sub(1)
+            .unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
 
         loop {
             #[allow(clippy::shadow_unrelated)]
@@ -185,7 +188,9 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
                 partition.swap(left, right);
 
                 // Prevent infinite loop upon equivalent elements.
-                if let (Some(incremented), Some(decremented)) = (left.checked_add(1), right.checked_sub(1)) {
+                if let (Some(incremented), Some(decremented)) =
+                    (left.checked_add(1), right.checked_sub(1))
+                {
                     left = incremented;
                     right = decremented;
                 } else {
