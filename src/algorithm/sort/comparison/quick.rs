@@ -1,5 +1,40 @@
 //! Implementations of [Quick Sort](https://en.wikipedia.org/wiki/Quicksort).
 
+/// TODO
+fn recurse<T: Ord>(elements: &mut [T], partition: impl Fn(&mut [T], usize) -> (&mut [T], &mut [T])) {
+    if elements.len() <= 1 {
+        return;
+    }
+
+    let first = 0;
+
+    let mid = elements.len() / 2;
+
+    let Some(last) = elements.len().checked_sub(1) else {
+        unreachable!("above check ensures length is not zero");
+    };
+
+    // Median of three pivot selection.
+    let pivot = if (elements[first] > elements[mid]) != (elements[first] > elements[last]) {
+        first
+    } else if (elements[mid] < elements[first]) != (elements[mid] < elements[last]) {
+        mid
+    } else {
+        last
+    };
+
+    let (left, right) = partition(elements, pivot);
+
+    // First calling the shortest partition ensures O(log N) stack space.
+    if left.len() < right.len() {
+        recurse(left, &partition);
+        recurse(right, &partition);
+    } else {
+        recurse(right, &partition);
+        recurse(left, &partition);
+    }
+}
+
 /// Sort `elements` using quick sort with Lomuto's partition scheme.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
