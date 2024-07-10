@@ -1,31 +1,46 @@
 //! Implementations of [Quick Sort](https://en.wikipedia.org/wiki/Quicksort).
 
 /// TODO
-fn recurse<T: Ord>(elements: &mut [T], partition: &impl Fn(&mut [T], usize) -> (&mut [T], &mut [T])) {
+fn recurse<T: Ord>(
+    elements: &mut [T],
+    partition: &impl Fn(&mut [T], usize) -> (&mut [T], &mut [T]),
+) {
     if elements.len() <= 1 {
         return;
     }
 
-    let first = 0;
-
-    let mid = elements.len() / 2;
-
-    let Some(last) = elements.len().checked_sub(1) else {
-        unreachable!("above check ensures length is not zero");
+    let (Some(first), Some(mid), Some(last)) = (
+        elements.first(),
+        elements.get(elements.len() / 2),
+        elements.last(),
+    ) else {
+        unreachable!("there is at least one element");
     };
 
-    // Median of three pivot selection.
-    let pivot = if (elements[first] > elements[mid]) != (elements[first] > elements[last]) {
-        first
-    } else if (elements[mid] < elements[first]) != (elements[mid] < elements[last]) {
-        mid
+    // Pivot can be any arbitrary element such as the first, middle, or last.
+    // This selects the median of those three therefore most likely creating
+    // equally sized partitions thereby evenly dividing work for subsequent
+    // recursive calls. Note that not-equals is logically exclusive or.
+    let pivot = if (first > mid) != (first > last) {
+        0
+    } else if (mid < first) != (mid < last) {
+        elements.len() / 2
     } else {
-        last
+        elements
+            .len()
+            .checked_sub(1)
+            .unwrap_or_else(|| unreachable!("there is at least one element"))
     };
 
+    // Split the input into two partition based on the pivot.
     let (left, right) = partition(elements, pivot);
 
-    // First calling the shortest partition ensures O(log N) stack space.
+    // Assuming tail recursive optimization whereby the last call reuses the
+    // stack frame of this current call, forking for the smaller partition
+    // first and then tail-recursing into the larger ensures O(log N) call
+    // stack space (and therefore memory) consumed. However, note that this
+    // optimization is not explicitly guaranteed hence this technically still
+    // has O(N) memory requirement.
     if left.len() < right.len() {
         recurse(left, partition);
         recurse(right, partition);
@@ -225,7 +240,7 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 /// TODO
 pub fn dutch<T: Ord + Clone>(elements: &mut [T]) {
     /// TODO
-    fn partition<T: Ord + Clone >(elements: &mut [T]) -> (usize, usize) {
+    fn partition<T: Ord + Clone>(elements: &mut [T]) -> (usize, usize) {
         let pivot = elements[0].clone();
 
         let mut less = 0;
