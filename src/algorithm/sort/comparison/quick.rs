@@ -146,95 +146,50 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-pub fn hoare<T: Ord>(elements: &mut [T]) {
-    /// Partition `elements` based on the first element.
-    ///
-    /// Returns some `index` such that all elements within `[..index]` are less
-    /// than the first element, and all elements within `[index..]` are
-    /// greater. Note that this does not imply the first element is within
-    /// sorted position.
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
-    fn partition<T: Ord>(elements: &mut [T]) -> usize {
-        // Arbitrarily set pivot to first element.
-        let mut pivot_index = 0;
+pub fn hoare<T: Ord + Clone>(elements: &mut [T]) {
+    recurse(elements, &|partition, pivot| {
+        debug_assert!(pivot < partition.len(), "pivot must be within bounds");
 
-        let mut left = 0;
+        partition.swap(pivot, 0);
 
-        let Some(mut right) = elements.len().checked_sub(1) else {
-            unreachable!("caller ensures elements is not empty");
-        };
+        let mut left = 1;
+        let mut right = partition.len() - 1;
 
         loop {
-            let Some(pivot_element) = elements.get(pivot_index) else {
-                unreachable!("loops ensures pivot is within bounds")
+            #[allow(clippy::shadow_unrelated)]
+            let Some(pivot) = partition.first() else {
+                unreachable!("caller ensures there is at least one element");
             };
 
-            // Find leftmost element that should be to the right of the pivot.
-            while elements
-                .get(left)
-                .is_some_and(|element| element < pivot_element)
-            {
-                if let Some(incremented) = left.checked_add(1) {
-                    left = incremented;
-                } else {
-                    break;
-                }
+            while left < right && &partition[left] < pivot {
+                left += 1;
             }
 
-            // Find rightmost element that should be to the left of the pivot.
-            while elements
-                .get(right)
-                .is_some_and(|element| element > pivot_element)
-            {
-                if let Some(decremented) = right.checked_sub(1) {
-                    right = decremented;
-                } else {
-                    break;
-                }
+            while 0 < right && &partition[right] > pivot {
+                right -= 1;
             }
 
             if left < right {
-                // This swap might move the pivot element.
-                #[allow(clippy::else_if_without_else)]
-                if pivot_index == left {
-                    pivot_index = right;
-                } else if pivot_index == right {
-                    pivot_index = left;
-                }
+                partition.swap(left, right);
 
-                // Swap left and right to be correct side of pivot.
-                elements.swap(left, right);
-
-                if let (Some(incremented), Some(decremented)) =
-                    (left.checked_add(1), right.checked_sub(1))
-                {
-                    left = incremented;
-                    right = decremented;
-                } else {
-                    break;
-                }
+                left += 1;
+                right -= 1;
             } else {
+                partition.swap(0, right);
+
                 break;
             }
         }
 
-        right.checked_add(1).unwrap_or_else(|| {
-            unreachable!("will be a valid index, so at most `usize::MAX - 1`");
-        })
-    }
+        #[allow(clippy::shadow_unrelated)]
+        let (left, right) = partition.split_at_mut(right);
 
-    if elements.len() <= 1 {
-        return;
-    }
+        let Some((_pivot, right)) = right.split_first_mut() else {
+            unreachable!("contains at least the pivot element");
+        };
 
-    let pivot = partition(elements);
-
-    let (left, right) = elements.split_at_mut(pivot);
-
-    hoare(left);
-    hoare(right);
+        (left, right)
+    });
 }
 
 /// TODO
