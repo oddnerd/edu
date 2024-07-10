@@ -225,7 +225,7 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 }
 
 /// TODO
-pub fn dutch<T: Ord + Clone>(elements: &mut [T]) {
+pub fn three_way<T: Ord + Clone>(elements: &mut [T]) {
     /// TODO
     fn partition<T: Ord + Clone>(elements: &mut [T]) -> (usize, usize) {
         let pivot = elements[0].clone();
@@ -262,8 +262,8 @@ pub fn dutch<T: Ord + Clone>(elements: &mut [T]) {
     let (less, rest) = elements.split_at_mut(less);
     let (_equal, greater) = rest.split_at_mut(greater);
 
-    dutch(less);
-    dutch(greater);
+    three_way(less);
+    three_way(greater);
 }
 
 #[cfg(test)]
@@ -393,14 +393,14 @@ mod test {
         }
     }
 
-    mod dutch {
+    mod three_way {
         use super::*;
 
         #[test]
         fn empty() {
             let mut elements: [usize; 0] = [];
 
-            dutch(&mut elements);
+            three_way(&mut elements);
 
             assert_eq!(elements, []);
         }
@@ -409,7 +409,7 @@ mod test {
         fn single_element() {
             let mut elements = [0];
 
-            dutch(&mut elements);
+            three_way(&mut elements);
 
             assert_eq!(elements, [0]);
         }
@@ -418,7 +418,7 @@ mod test {
         fn already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
-            dutch(&mut elements);
+            three_way(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
@@ -427,7 +427,7 @@ mod test {
         fn must_swap() {
             let mut elements = [1, 0];
 
-            dutch(&mut elements);
+            three_way(&mut elements);
 
             assert_eq!(elements, [0, 1]);
         }
@@ -436,7 +436,7 @@ mod test {
         fn odd_length() {
             let mut elements = [2, 1, 0];
 
-            dutch(&mut elements);
+            three_way(&mut elements);
 
             assert_eq!(elements, [0, 1, 2]);
         }
@@ -445,7 +445,7 @@ mod test {
         fn multiple_swaps() {
             let mut elements = [2, 0, 3, 1];
 
-            dutch(&mut elements);
+            three_way(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
