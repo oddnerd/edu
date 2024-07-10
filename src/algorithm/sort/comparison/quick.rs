@@ -225,31 +225,50 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 }
 
 /// TODO
-pub fn three_way<T: Ord + Clone>(elements: &mut [T]) {
-    recurse(elements, &|partition, pivot| {
-        let pivot = partition[pivot].clone();
+pub fn three_way<T: Ord>(elements: &mut [T]) {
+    recurse(elements, &|partition, mut pivot| {
+        debug_assert!(pivot < partition.len(), "pivot must be within bounds");
 
-        let mut less = 0;
-        let mut equal = 0;
-        let mut greater = partition.len() - 1;
+        let mut start = 0;
+        let mut current = 0;
+        let mut end = partition.len().checked_sub(1).unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
 
-        while equal <= greater {
-            if partition[equal] < pivot {
-                partition.swap(equal, less);
+        while current <= end {
+            match partition.get(current).cmp(&partition.get(pivot)) {
+                core::cmp::Ordering::Less => {
+                    #[allow(clippy::else_if_without_else)]
+                    if pivot == current {
+                        pivot = current;
+                    } else if pivot == start {
+                        pivot = start;
+                    }
 
-                less += 1;
-                equal += 1;
-            } else if partition[equal] > pivot {
-                partition.swap(equal, greater);
-                greater -= 1;
-            } else {
-                equal += 1;
-            }
+                    partition.swap(current, start);
+
+                    start += 1;
+                    current += 1;
+                },
+                core::cmp::Ordering::Equal => {
+                    current += 1;
+                },
+                core::cmp::Ordering::Greater => {
+                    #[allow(clippy::else_if_without_else)]
+                    if pivot == current {
+                        pivot = current;
+                    } else if pivot == end {
+                        pivot = start;
+                    }
+
+                    partition.swap(current, end);
+
+                    end -= 1;
+                },
+            };
         }
 
-        let (rest, greater) = partition.split_at_mut(greater);
+        let (rest, greater) = partition.split_at_mut(end);
 
-        let (less, _equal) = rest.split_at_mut(less);
+        let (less, _equal) = rest.split_at_mut(start);
 
         (less, greater)
     });
