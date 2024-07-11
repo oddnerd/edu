@@ -63,12 +63,16 @@ fn recurse<T: Ord>(
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Place the last element into sorted order by partitioning, i.e., placing
-/// smaller elements before it and greater elements after it. Recursively sort
-/// the remaining unsorted sub-lists placing one element into sorted order for
-/// each call until all elements are sorted.
+/// Place an element into sorted order by partition the elements on it, i.e.,
+/// placing smaller elements before it and larger elements after. This is
+/// accomplished by placing the selected element at the front and then
+/// iteratively swapping the first element with any subsequent smaller element.
+/// The resulting partitions can then be independently recursively sorted since
+/// all elements of the left partition are less-than or equal to all elements
+/// within the right partition.
 ///
-/// This partition scheme averages three times the swaps of [`hoare`].
+/// This implementation averages three time the swaps of [`hoare`] and does not
+/// evenly partition strings of equivalent elements.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
