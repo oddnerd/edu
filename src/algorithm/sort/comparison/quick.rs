@@ -138,12 +138,19 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Partition the elements into two subregions with the left containing all
-/// elements less than or greater to the first element, and the right
-/// containing all elements greater. Recursively sort these subregions until
-/// only a single element is contained thereby placing it into sorted position.
+/// Place an element (the pivot) into sorted order by partition the elements on
+/// it, i.e., placing smaller elements before it and larger elements after.
+/// This is accomplished by iteratively swapping the leftmost element that
+/// should be right of the pivot and the rightmost element that should be left
+/// of the pivot until they meet which is the sorted position for the pivot.
+/// The resulting partitions can then be independently recursively sorted since
+/// all elements of the left partition are less-than or equal to all elements
+/// within the right partition.
 ///
-/// This partition scheme averages 1/3 the swaps of [`lomuto`].
+/// Compared to [`lomuto`], this implementation makes fewer swap and evenly
+/// partitions strings of equivalent elements. However, unlike [`three_way`],
+/// elements equivalent to the pivot (which were sorted by partition) are still
+/// included in the partitions recursively sorted.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
