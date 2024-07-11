@@ -232,7 +232,9 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
         // The index range containing elements equal to the pivot.
         let mut equal = 0..partition.len();
 
+        // The index of the element currently being placed into a partition.
         let mut current = 0;
+
         while current < equal.end {
             match partition.get(current).cmp(&partition.get(pivot)) {
                 core::cmp::Ordering::Less => {
