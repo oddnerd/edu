@@ -295,7 +295,7 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
                     } else {
                         unreachable!("loop will exit so at most `usize::MAX`");
                     }
-                },
+                }
                 core::cmp::Ordering::Greater => {
                     _ = equal.next_back();
 
@@ -308,14 +308,14 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
                     }
 
                     partition.swap(current, equal.end);
-                },
+                }
                 core::cmp::Ordering::Equal => {
                     if let Some(incremented) = current.checked_add(1) {
                         current = incremented;
                     } else {
                         unreachable!("loop will exit so at most `usize::MAX`");
                     }
-                },
+                }
             };
         }
 
