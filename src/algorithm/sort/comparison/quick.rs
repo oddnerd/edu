@@ -63,8 +63,8 @@ fn recurse<T: Ord>(
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Place an element into sorted order by partition the elements on it, i.e.,
-/// placing smaller elements before it and larger elements after. This is
+/// Place an element into sorted order by partitioning the elements on it,
+/// i.e., placing smaller elements before it and larger elements after. This is
 /// accomplished by placing the selected element at the front and then
 /// iteratively swapping the first element with any subsequent smaller element.
 /// The resulting partitions can then be independently recursively sorted since
@@ -138,8 +138,8 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
 ///
-/// Place an element (the pivot) into sorted order by partition the elements on
-/// it, i.e., placing smaller elements before it and larger elements after.
+/// Place an element (the pivot) into sorted order by partitioning the elements
+/// on it, i.e., placing smaller elements before it and larger elements after.
 /// This is accomplished by iteratively swapping the leftmost element that
 /// should be right of the pivot and the rightmost element that should be left
 /// of the pivot until they meet which is the sorted position for the pivot.
