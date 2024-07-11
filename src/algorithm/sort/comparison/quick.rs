@@ -248,9 +248,6 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
                     start += 1;
                     current += 1;
                 },
-                core::cmp::Ordering::Equal => {
-                    current += 1;
-                },
                 core::cmp::Ordering::Greater => {
                     #[allow(clippy::else_if_without_else)]
                     if pivot == current {
@@ -262,6 +259,9 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
                     partition.swap(current, end);
 
                     end -= 1;
+                },
+                core::cmp::Ordering::Equal => {
+                    current += 1;
                 },
             };
         }
