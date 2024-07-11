@@ -37,6 +37,10 @@ Hand-written implementations in Rust for personal reference.
       - [Stable](/src/algorithm/sort/comparison/selection.rs#:~:text=stable)
       - [Bidirectional](/src/algorithm/sort/comparison/selection.rs#:~:text=bidirectional)
       - [Bingo](/src/algorithm/sort/comparison/selection.rs#:~:text=bingo)
+    - [Quick](/src/algorithm/sort/comparison/quick.rs)
+      - [Hoare's](/src/algorithm/sort/comparison/quick.rs#:~:text=hoare)
+      - [Lomuto's](/src/algorithm/sort/comparison/quick.rs#:~:text=lomuto)
+      - [Three-Way/Dutch Flag](/src/algorithm/sort/comparison/quick.rs#:~:text=three_way)
 
 ## Data Structures
 
