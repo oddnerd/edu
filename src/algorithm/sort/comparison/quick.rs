@@ -58,81 +58,6 @@ fn recurse<T: Ord>(
     }
 }
 
-/// Sort `elements` using quick sort with Lomuto's partition scheme.
-///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
-///
-/// Place an element into sorted position by partitioning the elements on it,
-/// i.e., placing smaller elements before it and larger elements after. This is
-/// accomplished by placing the selected element at the front and then
-/// iteratively swapping the first element with any subsequent smaller element.
-/// The resulting partitions can then be independently recursively sorted since
-/// all elements of the left partition are less-than or equal to all elements
-/// within the right partition.
-///
-/// This implementation averages three time the swaps of [`hoare`] and does not
-/// evenly partition strings of equivalent elements.
-///
-/// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
-///
-/// # Examples
-/// ```
-/// use rust::algorithm::sort::comparison::quick::lomuto;
-///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
-///
-/// lomuto(&mut elements);
-///
-/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-/// ```
-pub fn lomuto<T: Ord>(elements: &mut [T]) {
-    recurse(elements, &|partition, pivot| {
-        debug_assert!(pivot < partition.len(), "pivot must be within bounds");
-
-        // Ensure pivot is the first element.
-        partition.swap(pivot, 0);
-
-        // Find the index that divides the two partitions.
-        let mut mid: usize = 0;
-
-        for current in 1..partition.len() {
-            let Some(element) = partition.get(current) else {
-                unreachable!("loop ensures index is within bounds");
-            };
-
-            #[allow(clippy::shadow_unrelated)]
-            let Some(pivot) = partition.first() else {
-                unreachable!("caller ensures there is at least one element");
-            };
-
-            if element < pivot {
-                if let Some(incremented) = mid.checked_add(1) {
-                    mid = incremented;
-                } else {
-                    unreachable!("at most the index of the last element");
-                }
-
-                partition.swap(current, mid);
-            }
-        }
-
-        // Place the pivot element at that middle index.
-        partition.swap(0, mid);
-
-        // Split into those two partitions.
-        let (left, right) = partition.split_at_mut(mid);
-
-        // Ignore the pivot element since it is in sorted position.
-        let Some((_pivot, right)) = right.split_first_mut() else {
-            unreachable!("contains at least the pivot element");
-        };
-
-        (left, right)
-    });
-}
-
 /// Sort `elements` using quick sort with Hoare's partition scheme.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
@@ -227,6 +152,81 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
         let (left, right) = partition.split_at_mut(right);
 
         // Ignore pivot in recursive calls since it is already sorted.
+        let Some((_pivot, right)) = right.split_first_mut() else {
+            unreachable!("contains at least the pivot element");
+        };
+
+        (left, right)
+    });
+}
+
+/// Sort `elements` using quick sort with Lomuto's partition scheme.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// Place an element into sorted position by partitioning the elements on it,
+/// i.e., placing smaller elements before it and larger elements after. This is
+/// accomplished by placing the selected element at the front and then
+/// iteratively swapping the first element with any subsequent smaller element.
+/// The resulting partitions can then be independently recursively sorted since
+/// all elements of the left partition are less-than or equal to all elements
+/// within the right partition.
+///
+/// This implementation averages three time the swaps of [`hoare`] and does not
+/// evenly partition strings of equivalent elements.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::quick::lomuto;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// lomuto(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
+pub fn lomuto<T: Ord>(elements: &mut [T]) {
+    recurse(elements, &|partition, pivot| {
+        debug_assert!(pivot < partition.len(), "pivot must be within bounds");
+
+        // Ensure pivot is the first element.
+        partition.swap(pivot, 0);
+
+        // Find the index that divides the two partitions.
+        let mut mid: usize = 0;
+
+        for current in 1..partition.len() {
+            let Some(element) = partition.get(current) else {
+                unreachable!("loop ensures index is within bounds");
+            };
+
+            #[allow(clippy::shadow_unrelated)]
+            let Some(pivot) = partition.first() else {
+                unreachable!("caller ensures there is at least one element");
+            };
+
+            if element < pivot {
+                if let Some(incremented) = mid.checked_add(1) {
+                    mid = incremented;
+                } else {
+                    unreachable!("at most the index of the last element");
+                }
+
+                partition.swap(current, mid);
+            }
+        }
+
+        // Place the pivot element at that middle index.
+        partition.swap(0, mid);
+
+        // Split into those two partitions.
+        let (left, right) = partition.split_at_mut(mid);
+
+        // Ignore the pivot element since it is in sorted position.
         let Some((_pivot, right)) = right.split_first_mut() else {
             unreachable!("contains at least the pivot element");
         };
@@ -338,64 +338,6 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
 mod test {
     use super::*;
 
-    mod lomuto {
-        use super::*;
-
-        #[test]
-        fn empty() {
-            let mut elements: [usize; 0] = [];
-
-            lomuto(&mut elements);
-
-            assert_eq!(elements, []);
-        }
-
-        #[test]
-        fn single_element() {
-            let mut elements = [0];
-
-            lomuto(&mut elements);
-
-            assert_eq!(elements, [0]);
-        }
-
-        #[test]
-        fn already_sorted() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-
-            lomuto(&mut elements);
-
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn must_swap() {
-            let mut elements = [1, 0];
-
-            lomuto(&mut elements);
-
-            assert_eq!(elements, [0, 1]);
-        }
-
-        #[test]
-        fn odd_length() {
-            let mut elements = [2, 1, 0];
-
-            lomuto(&mut elements);
-
-            assert_eq!(elements, [0, 1, 2]);
-        }
-
-        #[test]
-        fn multiple_swaps() {
-            let mut elements = [2, 0, 3, 1];
-
-            lomuto(&mut elements);
-
-            assert_eq!(elements, [0, 1, 2, 3]);
-        }
-    }
-
     mod hoare {
         use super::*;
 
@@ -449,6 +391,64 @@ mod test {
             let mut elements = [2, 0, 3, 1];
 
             hoare(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
+    }
+
+    mod lomuto {
+        use super::*;
+
+        #[test]
+        fn empty() {
+            let mut elements: [usize; 0] = [];
+
+            lomuto(&mut elements);
+
+            assert_eq!(elements, []);
+        }
+
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
+
+            lomuto(&mut elements);
+
+            assert_eq!(elements, [0]);
+        }
+
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            lomuto(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
+
+            lomuto(&mut elements);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
+
+            lomuto(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2]);
+        }
+
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
+
+            lomuto(&mut elements);
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
