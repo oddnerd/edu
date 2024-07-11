@@ -235,7 +235,36 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
     });
 }
 
-/// TODO
+/// Sort `elements` using quick sort with a three-way partition scheme.
+///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
+/// Place an element (the pivot) and all elements equivalent to it into sorted
+/// position by partitioning the elements on it, i.e., placing smaller elements
+/// before it and larger elements after it. This implementation is
+/// fundamentally the same as [`lomuto`], except it also keeps track of
+/// elements equivalent to the pivot placing them into a third partition
+/// between those smaller and those larger. The resulting non-equal partitions
+/// can then be independently recursively sorted since all elements of the left
+/// partition are less-than all elements within the right partition.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Dutch_national_flag_problem).
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::quick::three_way;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// three_way(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn three_way<T: Ord>(elements: &mut [T]) {
     recurse(elements, &|partition, mut pivot| {
         debug_assert!(pivot < partition.len(), "pivot must be within bounds");
