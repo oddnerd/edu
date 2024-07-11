@@ -229,36 +229,37 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
     recurse(elements, &|partition, mut pivot| {
         debug_assert!(pivot < partition.len(), "pivot must be within bounds");
 
-        let mut start = 0;
-        let mut current = 0;
-        let mut end = partition.len().checked_sub(1).unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
+        let mut equal = 0..=partition.len().checked_sub(1).unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
 
-        while current <= end {
+        let mut current = 0;
+
+        while current <= *equal.end() {
             match partition.get(current).cmp(&partition.get(pivot)) {
                 core::cmp::Ordering::Less => {
                     #[allow(clippy::else_if_without_else)]
                     if pivot == current {
-                        pivot = start;
-                    } else if pivot == start {
+                        pivot = *equal.start();
+                    } else if pivot == *equal.start() {
                         pivot = current;
                     }
 
-                    partition.swap(current, start);
+                    partition.swap(current, *equal.start());
 
-                    start += 1;
+                    _ = equal.next();
+
                     current += 1;
                 },
                 core::cmp::Ordering::Greater => {
                     #[allow(clippy::else_if_without_else)]
                     if pivot == current {
-                        pivot = end;
-                    } else if pivot == end {
+                        pivot = *equal.end();
+                    } else if pivot == *equal.end() {
                         pivot = current;
                     }
 
-                    partition.swap(current, end);
+                    partition.swap(current, *equal.end());
 
-                    end -= 1;
+                    _ = equal.next_back();
                 },
                 core::cmp::Ordering::Equal => {
                     current += 1;
@@ -266,9 +267,9 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
             };
         }
 
-        let (rest, greater) = partition.split_at_mut(end);
+        let (rest, greater) = partition.split_at_mut(*equal.end());
 
-        let (less, _equal) = rest.split_at_mut(start);
+        let (less, _equal) = rest.split_at_mut(*equal.start());
 
         (less, greater)
     });
