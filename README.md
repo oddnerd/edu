@@ -41,6 +41,7 @@ Hand-written implementations in Rust for personal reference.
       - [Hoare's](/src/algorithm/sort/comparison/quick.rs#:~:text=hoare)
       - [Lomuto's](/src/algorithm/sort/comparison/quick.rs#:~:text=lomuto)
       - [Three-Way/Dutch Flag](/src/algorithm/sort/comparison/quick.rs#:~:text=three_way)
+    - [Cycle](/src/algorithm/sort/comparison/misc.rs#:~:text=cycle)
 
 ## Data Structures
 
