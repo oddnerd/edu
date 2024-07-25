@@ -1,4 +1,4 @@
-//! Implementation of one-off sorting algorithms.
+//! Implementation of miscellaneous (no variation) sorting algorithms.
 
 /// Sort `elements` using cycle sort.
 ///
