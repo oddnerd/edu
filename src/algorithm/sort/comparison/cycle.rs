@@ -9,11 +9,9 @@ pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
 
         let mut pos = start;
 
-        for i in (start + 1)..elements.len() {
-            if elements[i] < item {
-                pos += 1;
-            }
-        }
+        let offset =elements[start + 1..].iter().filter(|element| element < &&item).count();
+
+        pos += offset;
 
         if pos == start {
             continue;
