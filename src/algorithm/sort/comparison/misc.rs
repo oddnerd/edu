@@ -1,4 +1,4 @@
-//! Implementations of [Cycle Sort](https://en.wikipedia.org/wiki/Cycle_sort).
+//! Implementation of one-off sorting algorithms.
 
 /// Sort `elements` using cycle sort.
 ///
@@ -10,6 +10,9 @@
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Cycle_sort).
 ///
 /// # Examples
 /// ```
@@ -66,57 +69,61 @@ pub fn cycle<T: Ord>(elements: &mut [T]) {
 mod test {
     use super::*;
 
-    #[test]
-    fn empty() {
-        let mut elements: [usize; 0] = [];
+    mod cycle {
+        use super::*;
 
-        cycle(&mut elements);
+        #[test]
+        fn empty() {
+            let mut elements: [usize; 0] = [];
 
-        assert_eq!(elements, []);
-    }
+            cycle(&mut elements);
 
-    #[test]
-    fn single_element() {
-        let mut elements = [0];
+            assert_eq!(elements, []);
+        }
 
-        cycle(&mut elements);
+        #[test]
+        fn single_element() {
+            let mut elements = [0];
 
-        assert_eq!(elements, [0]);
-    }
+            cycle(&mut elements);
 
-    #[test]
-    fn already_sorted() {
-        let mut elements = [0, 1, 2, 3, 4, 5];
+            assert_eq!(elements, [0]);
+        }
 
-        cycle(&mut elements);
+        #[test]
+        fn already_sorted() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
 
-        assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-    }
+            cycle(&mut elements);
 
-    #[test]
-    fn must_swap() {
-        let mut elements = [1, 0];
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
 
-        cycle(&mut elements);
+        #[test]
+        fn must_swap() {
+            let mut elements = [1, 0];
 
-        assert_eq!(elements, [0, 1]);
-    }
+            cycle(&mut elements);
 
-    #[test]
-    fn odd_length() {
-        let mut elements = [2, 1, 0];
+            assert_eq!(elements, [0, 1]);
+        }
 
-        cycle(&mut elements);
+        #[test]
+        fn odd_length() {
+            let mut elements = [2, 1, 0];
 
-        assert_eq!(elements, [0, 1, 2]);
-    }
+            cycle(&mut elements);
 
-    #[test]
-    fn multiple_swaps() {
-        let mut elements = [2, 0, 3, 1];
+            assert_eq!(elements, [0, 1, 2]);
+        }
 
-        cycle(&mut elements);
+        #[test]
+        fn multiple_swaps() {
+            let mut elements = [2, 0, 3, 1];
 
-        assert_eq!(elements, [0, 1, 2, 3]);
+            cycle(&mut elements);
+
+            assert_eq!(elements, [0, 1, 2, 3]);
+        }
     }
 }
