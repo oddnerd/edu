@@ -7,11 +7,7 @@ pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
             unreachable!("loop ensures index is within bounds");
         };
 
-        let mut pos = start;
-
-        let offset =elements[start + 1..].iter().filter(|element| element < &&item).count();
-
-        pos += offset;
+        let mut pos = start + elements[start + 1..].iter().filter(|element| element < &&item).count();
 
         if pos == start {
             continue;
