@@ -46,7 +46,10 @@ pub fn cycle<T: Ord>(elements: &mut [T]) {
             let (_, output) = rest.split_at_mut(sorted);
 
             // How many in sorted position equivalent to the current element.
-            let offset = output.iter().take_while(|element| element == &current).count();
+            let offset = output
+                .iter()
+                .take_while(|element| element == &current)
+                .count();
 
             let Some(output) = output.get_mut(offset) else {
                 unreachable!("the element was not already in sorted position");
