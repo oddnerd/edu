@@ -1,6 +1,26 @@
 //! Implementations of [Cycle Sort](https://en.wikipedia.org/wiki/Cycle_sort).
 
-/// TODO
+/// Sort `elements` using cycle sort.
+///
+/// From left to right, find the sorted position of the current element by
+/// counting how many elements to the right are less-than it. Iteratively swap
+/// it into sorted position (at the end of any run of equivalent elements
+/// already in sorted position) until the element whose sorted position is at
+/// the current position is swapped into the current position.
+///
+/// # Performance
+/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::sort::comparison::cycle::cycle;
+///
+/// let mut elements = [0, 5, 2, 3, 1, 4];
+///
+/// cycle(&mut elements);
+///
+/// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+/// ```
 pub fn cycle<T: Ord>(elements: &mut [T]) {
     for current in 0..elements.len() {
         let (_sorted, unsorted) = elements.split_at_mut(current);
