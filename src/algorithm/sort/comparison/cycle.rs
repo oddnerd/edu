@@ -10,33 +10,18 @@ pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
             unreachable!("loop ensures at least one element contained");
         };
 
-        let offset = rest.iter().filter(|element| element < &&*current).count();
+        loop {
+            let offset = rest.iter().filter(|element| element < &&*current).count();
 
-        let Some(mut offset) = offset.checked_sub(1) else {
-            continue;
-        };
-
-        let equivalent = rest[offset..].iter().take_while(|element| element == &current).count();
-
-        offset += equivalent;
-
-        core::mem::swap(current, &mut rest[offset]);
-
-        while offset != 0 {
-            offset = rest.iter().filter(|element| element < &&*current).count();
-
-            if let Some(decrement) = offset.checked_sub(1) {
-                offset = decrement;
-            } else {
+            let Some(mut offset) = offset.checked_sub(1) else {
                 break;
-            }
+            };
 
-            #[allow(clippy::shadow_unrelated)]
             let equivalent = rest[offset..].iter().take_while(|element| element == &current).count();
 
             offset += equivalent;
 
-            core::mem::swap(current, &mut rest[offset])
+            core::mem::swap(current, &mut rest[offset]);
         }
     }
 }
