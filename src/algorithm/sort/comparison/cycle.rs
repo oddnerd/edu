@@ -1,7 +1,7 @@
 //! Implementations of [Cycle Sort](https://en.wikipedia.org/wiki/Cycle_sort).
 
 /// TODO
-pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
+pub(super) fn cycle<T: Ord>(elements: &mut [T]) {
     for current in 0..elements.len() {
         let (_sorted, unsorted) = elements.split_at_mut(current);
 
@@ -11,17 +11,26 @@ pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
         };
 
         loop {
-            let offset = rest.iter().filter(|element| element < &&*current).count();
+            // How far distance to move current element into sorted position.
+            let distance = rest.iter().filter(|element| element < &&*current).count();
 
-            let Some(mut offset) = offset.checked_sub(1) else {
+            // Index of sorted position for current element.
+            let Some(sorted) = distance.checked_sub(1) else {
                 break;
             };
 
-            let equivalent = rest[offset..].iter().take_while(|element| element == &current).count();
+            // Outputting into run of equivalent elements causes infinite loop.
+            let (_, output) = rest.split_at_mut(sorted);
 
-            offset += equivalent;
+            // How many in sorted position equivalent to the current element.
+            let offset = output.iter().take_while(|element| element == &current).count();
 
-            core::mem::swap(current, &mut rest[offset]);
+            let Some(output) = output.get_mut(offset) else {
+                unreachable!("the element was not already in sorted position");
+            };
+
+            // Place the element into last possible sorted position.
+            core::mem::swap(current, output);
         }
     }
 }
