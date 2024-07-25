@@ -24,13 +24,7 @@ pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
         core::mem::swap(&mut item, &mut elements[sorted_index]);
 
         while sorted_index != current {
-            sorted_index = current;
-
-            for i in (current + 1)..elements.len() {
-                if elements[i] < item {
-                    sorted_index += 1;
-                }
-            }
+            sorted_index = current + elements[current + 1..].iter().filter(|element| element < &&item).count();
 
             while item == elements[sorted_index] {
                 sorted_index += 1;
