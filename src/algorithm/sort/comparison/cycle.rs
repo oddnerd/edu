@@ -2,37 +2,37 @@
 
 /// TODO
 pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
-    for start in 0..elements.len() {
-        let Some(mut item) = elements.get(start).cloned() else {
+    for current in 0..elements.len() {
+        let Some(mut item) = elements.get(current).cloned() else {
             unreachable!("loop ensures index is within bounds");
         };
 
-        let mut pos = start + elements[start + 1..].iter().filter(|element| element < &&item).count();
+        let mut sorted_index = current + elements[current + 1..].iter().filter(|element| element < &&item).count();
 
-        if pos == start {
+        if sorted_index == current {
             continue;
         }
 
-        while item == elements[pos] {
-            pos += 1;
+        while item == elements[sorted_index] {
+            sorted_index += 1;
         }
 
-        core::mem::swap(&mut item, &mut elements[pos]);
+        core::mem::swap(&mut item, &mut elements[sorted_index]);
 
-        while pos != start {
-            pos = start;
+        while sorted_index != current {
+            sorted_index = current;
 
-            for i in (start + 1)..elements.len() {
+            for i in (current + 1)..elements.len() {
                 if elements[i] < item {
-                    pos += 1;
+                    sorted_index += 1;
                 }
             }
 
-            while item == elements[pos] {
-                pos += 1;
+            while item == elements[sorted_index] {
+                sorted_index += 1;
             }
 
-            core::mem::swap(&mut item, &mut elements[pos]);
+            core::mem::swap(&mut item, &mut elements[sorted_index]);
         }
 
     }
