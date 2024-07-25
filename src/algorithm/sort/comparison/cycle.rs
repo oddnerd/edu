@@ -1,7 +1,7 @@
 //! Implementations of [Cycle Sort](https://en.wikipedia.org/wiki/Cycle_sort).
 
 /// TODO
-pub(super) fn cycle<T: Ord>(elements: &mut [T]) {
+pub fn cycle<T: Ord>(elements: &mut [T]) {
     for current in 0..elements.len() {
         let (_sorted, unsorted) = elements.split_at_mut(current);
 
