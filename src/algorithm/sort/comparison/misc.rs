@@ -2,6 +2,9 @@
 
 /// Sort `elements` using cycle sort.
 ///
+/// Note that this is non-stable meaning the order of equivalent elements is
+/// not preserved.
+///
 /// From left to right, find the sorted position of the current element by
 /// counting how many elements to the right are less-than it. Iteratively swap
 /// it into sorted position (at the end of any run of equivalent elements
