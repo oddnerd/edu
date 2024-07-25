@@ -3,7 +3,6 @@
 /// TODO
 pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
     for current in 0..elements.len() {
-
         // The current element being sorted.
         let Some(mut item) = elements.get(current).cloned() else {
             unreachable!("loop ensures index is within bounds");
@@ -27,35 +26,30 @@ pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
         }
 
         // Go to the end if there is a run of equivalent elements.
-        for element in &elements[sorted_index..] {
-            if element == &item {
-                sorted_index += 1;
-            } else {
-                break;
-            }
-        }
+        sorted_index += elements[sorted_index..]
+            .iter()
+            .take_while(|element| element == &&item)
+            .count();
 
         // Place `item` into sorted position.
         core::mem::swap(&mut item, &mut elements[sorted_index]);
 
         while sorted_index != current {
-            sorted_index = current + elements[current + 1..].iter().filter(|element| element < &&item).count();
+            sorted_index = current
+                + elements[current + 1..]
+                    .iter()
+                    .filter(|element| element < &&item)
+                    .count();
 
-            for element in &elements[sorted_index..] {
-                if element == &item {
-                    sorted_index += 1;
-                } else {
-                    break;
-                }
-            }
+            sorted_index += elements[sorted_index..]
+                .iter()
+                .take_while(|element| element == &&item)
+                .count();
 
             core::mem::swap(&mut item, &mut elements[sorted_index]);
         }
-
     }
 }
-
-
 
 #[cfg(test)]
 #[allow(
