@@ -3,50 +3,40 @@
 /// TODO
 pub(super) fn cycle<T: Ord + Clone>(elements: &mut [T]) {
     for current in 0..elements.len() {
-        // The current element being sorted.
-        let Some(mut item) = elements.get(current).cloned() else {
-            unreachable!("loop ensures index is within bounds");
+        let (_sorted, unsorted) = elements.split_at_mut(current);
+
+        #[allow(clippy::shadow_unrelated)]
+        let Some((current, rest)) = unsorted.split_first_mut() else {
+            unreachable!("loop ensures at least one element contained");
         };
 
-        // The index it should be in/how many after it are smaller than it.
-        let mut sorted_index = current + {
-            let (_sorted, unsorted) = elements.split_at(current);
+        let offset = rest.iter().filter(|element| element < &&*current).count();
+
+        let Some(mut offset) = offset.checked_sub(1) else {
+            continue;
+        };
+
+        let equivalent = rest[offset..].iter().take_while(|element| element == &current).count();
+
+        offset += equivalent;
+
+        core::mem::swap(current, &mut rest[offset]);
+
+        while offset != 0 {
+            offset = rest.iter().filter(|element| element < &&*current).count();
+
+            if let Some(decrement) = offset.checked_sub(1) {
+                offset = decrement;
+            } else {
+                break;
+            }
 
             #[allow(clippy::shadow_unrelated)]
-            let Some((current, rest)) = unsorted.split_first() else {
-                unreachable!("loop ensures at least one element contained");
-            };
+            let equivalent = rest[offset..].iter().take_while(|element| element == &current).count();
 
-            rest.iter().filter(|element| element < &current).count()
-        };
+            offset += equivalent;
 
-        // `item` is already in sorted position.
-        if sorted_index == current {
-            continue;
-        }
-
-        // Go to the end if there is a run of equivalent elements.
-        sorted_index += elements[sorted_index..]
-            .iter()
-            .take_while(|element| element == &&item)
-            .count();
-
-        // Place `item` into sorted position.
-        core::mem::swap(&mut item, &mut elements[sorted_index]);
-
-        while sorted_index != current {
-            sorted_index = current
-                + elements[current + 1..]
-                    .iter()
-                    .filter(|element| element < &&item)
-                    .count();
-
-            sorted_index += elements[sorted_index..]
-                .iter()
-                .take_while(|element| element == &&item)
-                .count();
-
-            core::mem::swap(&mut item, &mut elements[sorted_index]);
+            core::mem::swap(current, &mut rest[offset])
         }
     }
 }
