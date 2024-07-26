@@ -11,7 +11,7 @@
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::naive;
+/// use rust::algorithm::sort::bubble::naive;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -51,7 +51,7 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::optimized;
+/// use rust::algorithm::sort::bubble::optimized;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -107,7 +107,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::bidirectional;
+/// use rust::algorithm::sort::bubble::bidirectional;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -176,7 +176,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::parallel;
+/// use rust::algorithm::sort::bubble::parallel;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -248,7 +248,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::bubble::comb;
+/// use rust::algorithm::sort::bubble::comb;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///

@@ -18,7 +18,7 @@ use super::super::merge;
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::merge::top_down;
+/// use rust::algorithm::sort::merge::top_down;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 /// let mut auxiliary = elements.clone();
@@ -59,7 +59,7 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::merge::natural;
+/// use rust::algorithm::sort::merge::natural;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 /// let mut auxiliary = elements.clone();
@@ -117,7 +117,7 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::merge::bottom_up;
+/// use rust::algorithm::sort::merge::bottom_up;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 /// let mut auxiliary = elements.clone();
@@ -186,7 +186,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::merge::in_place;
+/// use rust::algorithm::sort::merge::in_place;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
