@@ -1,6 +1,6 @@
 //! Implementations of [Merge Sort](https://en.wikipedia.org/wiki/Merge_sort).
 
-use super::super::super::merge;
+use super::super::merge;
 
 /// Sort `elements` via top-down merge sort.
 ///
