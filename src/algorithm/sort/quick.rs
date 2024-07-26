@@ -82,7 +82,7 @@ fn recurse<T: Ord>(
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::quick::hoare;
+/// use rust::algorithm::sort::quick::hoare;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -181,7 +181,7 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::quick::lomuto;
+/// use rust::algorithm::sort::quick::lomuto;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -257,7 +257,7 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::quick::three_way;
+/// use rust::algorithm::sort::quick::three_way;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///

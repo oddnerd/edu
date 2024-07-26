@@ -16,7 +16,7 @@
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::selection::naive;
+/// use rust::algorithm::sort::selection::naive;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -55,7 +55,7 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::selection::optimized;
+/// use rust::algorithm::sort::selection::optimized;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -95,7 +95,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::selection::stable;
+/// use rust::algorithm::sort::selection::stable;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -145,7 +145,7 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::selection::bidirectional;
+/// use rust::algorithm::sort::selection::bidirectional;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -200,7 +200,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::selection::bingo;
+/// use rust::algorithm::sort::selection::bingo;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///

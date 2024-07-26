@@ -19,7 +19,7 @@
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::misc::cycle;
+/// use rust::algorithm::sort::misc::cycle;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///

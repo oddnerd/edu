@@ -13,7 +13,7 @@
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::heap::bottom_up;
+/// use rust::algorithm::sort::heap::bottom_up;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -52,7 +52,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::heap::inline;
+/// use rust::algorithm::sort::heap::inline;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -112,7 +112,7 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::heap::top_down;
+/// use rust::algorithm::sort::heap::top_down;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///

@@ -12,7 +12,7 @@
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::insertion::iterative;
+/// use rust::algorithm::sort::insertion::iterative;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -56,7 +56,7 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::insertion::recursive;
+/// use rust::algorithm::sort::insertion::recursive;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -107,7 +107,7 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::insertion::binary;
+/// use rust::algorithm::sort::insertion::binary;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -152,7 +152,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::insertion::gnome;
+/// use rust::algorithm::sort::insertion::gnome;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
@@ -211,7 +211,7 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 ///
 /// # Examples
 /// ```
-/// use rust::algorithm::sort::comparison::insertion::shell;
+/// use rust::algorithm::sort::insertion::shell;
 ///
 /// let mut elements = [0, 5, 2, 3, 1, 4];
 ///
