@@ -1,7 +1,13 @@
 //! Implementations of [search](https://en.wikipedia.org/wiki/Search_algorithm).
 
 fn linear<T: Ord>(haystack: &[T], needle: &T) -> Option<usize> {
-    todo!()
+    for (index, element) in haystack.iter().enumerate() {
+        if element == needle {
+            return Some(index);
+        }
+    }
+
+    None
 }
 
 fn binary<T: Ord>(haystack: &[T], needle: &T) -> Option<usize> {
