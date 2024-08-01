@@ -5,6 +5,9 @@
 /// # Performance
 /// This method takes O(N) time and consumes O(1) memory.
 ///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Linear_search).
+///
 /// # Examples
 /// ```
 /// use rust::algorithm::search::linear;
