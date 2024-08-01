@@ -1,5 +1,20 @@
 //! Implementations of [search](https://en.wikipedia.org/wiki/Search_algorithm).
 
+/// Find the index corresponding to an element with particular value.
+///
+/// # Performance
+/// This method takes O(N) time and consumes O(1) memory.
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::search::linear;
+///
+/// let mut slice = [0, 1, 2, 3, 4, 5];
+///
+/// let index = linear(&slice, &3);
+///
+/// assert_eq!(index, Some(3));
+/// ```
 pub fn linear<T: Ord>(haystack: &[T], needle: &T) -> Option<usize> {
     for (index, element) in haystack.iter().enumerate() {
         if element == needle {
