@@ -50,12 +50,14 @@ pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<u
 
         if current < needle {
             let Some(middle_incremented) = middle.checked_add(1) else {
+                // This implies the last element does not match, so not found.
                 break;
             };
 
             left = middle_incremented;
         } else {
             let Some(middle_decremented) = middle.checked_sub(1) else {
+                // This implies the first element does not match, so not found.
                 break;
             };
 
