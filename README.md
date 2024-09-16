@@ -41,6 +41,9 @@ Hand-written implementations in Rust for personal reference.
     - [Lomuto's](/src/algorithm/sort/quick.rs#:~:text=lomuto)
     - [Three-Way/Dutch Flag](/src/algorithm/sort/quick.rs#:~:text=three_way)
   - [Cycle](/src/algorithm/sort/misc.rs#:~:text=cycle)
+- [Search](/src/algorithm/search.rs)
+  - [linear](/src/algorithm/search.rs#:~:text=linear)
+  - [binary](/src/algorithm/search.rs#:~:text=binary)
 
 ## Data Structures
 
