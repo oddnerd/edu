@@ -2706,7 +2706,7 @@ impl core::fmt::Display for FailedAllocation {
     }
 }
 
-impl std::error::Error for FailedAllocation {}
+impl core::error::Error for FailedAllocation {}
 
 /// Error type for invalid index parameters.
 #[derive(Debug, Clone, Copy)]
@@ -2722,7 +2722,7 @@ impl core::fmt::Display for OutOfBounds {
     }
 }
 
-impl std::error::Error for OutOfBounds {}
+impl core::error::Error for OutOfBounds {}
 
 #[cfg(test)]
 #[allow(
