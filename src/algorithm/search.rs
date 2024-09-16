@@ -28,8 +28,42 @@ pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
     None
 }
 
-pub fn binary<T: Ord>(haystack: &[T], needle: &T) -> Option<usize> {
-    todo!()
+pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<usize> {
+    let mut left = 0;
+
+    let mut right = haystack.len().checked_sub(1)?;
+
+    while left <= right {
+        let offset = left.abs_diff(right).div_ceil(2);
+
+        let Some(middle) = left.checked_add(offset) else {
+            unreachable!("at most equal to right, hence cannot overflow");
+        };
+
+        let Some(current) = haystack.get(middle) else {
+            unreachable!("loop ensures index is within bounds");
+        };
+
+        if current == needle {
+            return Some(middle);
+        }
+
+        if current < needle {
+            let Some(middle_incremented) = middle.checked_add(1) else {
+                break;
+            };
+
+            left = middle_incremented;
+        } else {
+            let Some(middle_decremented) = middle.checked_sub(1) else {
+                break;
+            };
+
+            right = middle_decremented;
+        }
+    }
+
+    None
 }
 
 #[cfg(test)]
