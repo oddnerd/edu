@@ -115,6 +115,20 @@ mod test {
         }
 
         #[test]
+        fn can_find_first_element() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            assert_eq!(linear(&elements, &0), Some(0));
+        }
+
+        #[test]
+        fn can_find_last_element() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            assert_eq!(linear(&elements, &5), Some(5));
+        }
+
+        #[test]
         fn yields_none_when_not_contained() {
             let elements = [0, 1, 2, 3, 4, 5];
 
@@ -137,6 +151,20 @@ mod test {
             let elements = [0, 1, 2, 3, 4, 5];
 
             assert_eq!(binary(&elements, &2), Some(2));
+        }
+
+        #[test]
+        fn can_find_first_element() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            assert_eq!(binary(&elements, &0), Some(0));
+        }
+
+        #[test]
+        fn can_find_last_element() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            assert_eq!(binary(&elements, &5), Some(5));
         }
 
         #[test]
