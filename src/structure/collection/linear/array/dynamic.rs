@@ -902,7 +902,7 @@ impl<T> Dynamic<T> {
             .ok_or(FailedAllocation)?;
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
-        if core::mem::size_of::<T>() == 0 {
+        if size_of::<T>() == 0 {
             // Global allocator API limits allocation to `isize:MAX` bytes.
             if capacity > isize::MAX as usize {
                 return Err(FailedAllocation);
