@@ -878,7 +878,7 @@ impl<T> Dynamic<T> {
         // * start/end in bounds => source/destination valid for read/write.
         // * ranges can overlap => no aliasing restrictions.
         unsafe {
-            std::ptr::copy(source, destination, elements);
+            core::ptr::copy(source, destination, elements);
         }
     }
 
