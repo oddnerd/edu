@@ -28,6 +28,24 @@ pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
     None
 }
 
+/// Find the index corresponding to an element with particular value.
+///
+/// # Performance
+/// This method takes O(log N) time and consumes O(1) memory.
+///
+/// # See Also
+/// [Wikipedia](https://en.wikipedia.org/wiki/Binary_search).
+///
+/// # Examples
+/// ```
+/// use rust::algorithm::search::binary;
+///
+/// let mut slice = [0, 1, 2, 3, 4, 5];
+///
+/// let index = binary(&slice, &3);
+///
+/// assert_eq!(index, Some(3));
+/// ```
 pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<usize> {
     let mut left = 0;
 
