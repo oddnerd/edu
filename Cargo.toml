@@ -2,7 +2,7 @@
 
 [package]
 name = "rust"
-version = "0.14.1"
+version = "0.14.2"
 edition = "2021"
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
@@ -105,8 +105,8 @@ panic_in_result_fn          = "deny" # Prefer erroring instead of panic.
 missing_assert_message      = "deny" # Require explanation for asserts.
 
 # Vestigial Debugging
-print_stderr  = "warn" # Prevent `prinln!()`.
-print_stdout  = "warn" # Prevent `eprintln!()`.
+print_stderr  = "warn" # Prevent `eprintln!()`.
+print_stdout  = "warn" # Prevent `prinln!()`.
 dbg_macro     = "warn" # Prevent `dbg!()`.
 use_debug     = "warn" # Prevent `{:?}` formatting.
 todo          = "warn" # Prevent `todo!()`.

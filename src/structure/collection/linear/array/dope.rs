@@ -22,7 +22,7 @@ use core::ptr::NonNull;
 ///
 /// [span]: https://en.cppreference.com/w/cpp/container/span
 /// [string_view]: https://en.cppreference.com/w/cpp/string/basic_string_view
-#[derive(Clone, Copy, Hash)]
+#[derive(Clone, Copy)]
 pub struct Dope<'a, T> {
     /// Pointer to the start of the array.
     ptr: NonNull<T>,

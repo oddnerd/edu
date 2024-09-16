@@ -682,7 +682,7 @@ mod test {
                     }
 
                     unsafe {
-                        std::mem::transmute::<
+                        core::mem::transmute::<
                             [core::mem::MaybeUninit<Droppable>; 256],
                             [Droppable; 256],
                         >(uninitialized)
