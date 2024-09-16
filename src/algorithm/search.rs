@@ -18,7 +18,7 @@
 ///
 /// assert_eq!(index, Some(3));
 /// ```
-pub fn linear<T: Ord>(haystack: &[T], needle: &T) -> Option<usize> {
+pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
     for (index, element) in haystack.iter().enumerate() {
         if element == needle {
             return Some(index);
