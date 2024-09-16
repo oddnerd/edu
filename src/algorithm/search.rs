@@ -34,7 +34,7 @@ pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<u
     let mut right = haystack.len().checked_sub(1)?;
 
     while left <= right {
-        let offset = left.abs_diff(right).div_ceil(2);
+        let offset = left.abs_diff(right) / 2;
 
         let Some(middle) = left.checked_add(offset) else {
             unreachable!("at most equal to right, hence cannot overflow");
