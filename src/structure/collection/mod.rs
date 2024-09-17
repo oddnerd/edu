@@ -1,8 +1,10 @@
 //! Implementations of [`Collection`].
 
 pub mod linear;
+pub mod graph;
 
 pub use linear::Linear;
+pub use graph::Graph;
 
 /// A data structure which stores multiple elements of a single type.
 pub trait Collection {
