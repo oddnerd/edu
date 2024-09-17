@@ -18,7 +18,7 @@ Closes #
 
 - [ ] All post-conditions tested?
 - [ ] Dedicated tests for edge-cases?
-- [ ] Naming consistent with existing body?
+- [ ] Naming consistent with the existing codebase?
 - [ ] Organized into a module hierarchy?
 - [ ] `cargo test --tests` passes?
 - [ ] `MIRIFLAGS="-Zmiri-disable-stacked-borrows" cargo +nightly miri test` passes?
