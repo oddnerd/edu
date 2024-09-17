@@ -22,4 +22,10 @@ pub trait Graph : Collection {
     type Node: Node<Edge = Self::Edge>;
 
     type Edge: Edge<Node = Self::Node>;
+
+    fn nodes(&self) -> impl Iterator<Item = &impl Node>;
+    fn nodes_mut(&mut self) -> impl Iterator<Item = &mut impl Node>;
+
+    fn edges(&self) -> impl Iterator<Item = &impl Edge>;
+    fn edges_mut(&mut self) -> impl Iterator<Item = &mut impl Edge>;
 }
