@@ -2,6 +2,7 @@
 
 use super::Collection;
 
+/// An element contained within the a [`Graph`].
 pub trait Node {
     type Edge: Edge;
 
@@ -10,6 +11,7 @@ pub trait Node {
     fn edges_mut(&mut self) -> impl Iterator<Item = &mut impl Edge>;
 }
 
+/// A connection between (exactly two) [`Node`].
 pub trait Edge {
     type Node: Node;
 
@@ -18,6 +20,7 @@ pub trait Edge {
     fn nodes_mut(&mut self) -> (&mut impl Node, &mut impl Node);
 }
 
+/// Complex associations ([`Edge`]) between elements ([`Node`]).
 pub trait Graph : Collection {
     type Node: Node<Edge = Self::Edge>;
 
