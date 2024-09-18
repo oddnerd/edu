@@ -3,7 +3,9 @@
 use super::Graph;
 
 /// A [`Graph`] where the only relationships are hierarchical.
-pub trait Tree : Graph {
+///
+/// TODO: explain recursive nature.
+pub trait Tree : Graph<Node = Self> {
     /// Immutably obtain the top-level [`Node`].
     fn root(&self) -> &Self::Node;
 
