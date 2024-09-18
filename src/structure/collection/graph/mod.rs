@@ -3,7 +3,7 @@
 use super::Collection;
 
 /// An element contained within the a [`Graph`].
-pub trait Node<T> {
+pub trait Node<T> : core::ops::DerefMut<Target = T> {
     /// The type connecting this [`Node`] to others in a [`Graph`].
     type Edge: Edge<T>;
 
