@@ -1,5 +1,9 @@
 //! Implementations of [`Graph`].
 
+pub mod tree;
+
+pub use tree::Tree;
+
 use super::Collection;
 
 /// An element contained within the a [`Graph`].
