@@ -31,12 +31,12 @@ pub trait Edge<T> {
 }
 
 /// Complex associations ([`Edge`]) between elements ([`Node`]).
-pub trait Graph<T> : Collection<Element = T> {
+pub trait Graph : Collection {
     /// The type storing an element.
-    type Node: Node<T, Edge = Self::Edge>;
+    type Node: Node<Self::Element, Edge = Self::Edge>;
 
     /// The type associating elements.
-    type Edge: Edge<T, Node = Self::Node>;
+    type Edge: Edge<Self::Element, Node = Self::Node>;
 
     /// Immutable obtain all [`Node`] contained within this [`Graph`].
     fn nodes<'a>(&'a self) -> impl Iterator<Item = &'a Self::Node> where Self::Node: 'a;
