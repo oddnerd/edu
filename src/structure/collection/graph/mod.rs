@@ -3,46 +3,46 @@
 use super::Collection;
 
 /// An element contained within the a [`Graph`].
-pub trait Node {
+pub trait Node<T> {
     /// The type connecting this [`Node`] to others in a [`Graph`].
-    type Edge: Edge;
+    type Edge: Edge<T>;
 
     /// Immutably query the [`Edge`] associating this [`Node`] with another.
-    fn edges(&self) -> impl Iterator<Item = &impl Edge>;
+    fn edges<'a>(&'a self) -> impl Iterator<Item = &'a Self::Edge> where Self::Edge: 'a;
 
     /// Mutably query the [`Edge`] associating this [`Node`] with another.
-    fn edges_mut(&mut self) -> impl Iterator<Item = &mut impl Edge>;
+    fn edges_mut<'a>(&'a mut self) -> impl Iterator<Item = &'a mut Self::Edge> where Self::Edge: 'a;
 }
 
 /// A connection between (exactly two) [`Node`].
-pub trait Edge {
+pub trait Edge<T> {
     /// The type this [`Edge`] connects together.
-    type Node: Node;
+    type Node: Node<T>;
 
     /// Immutably obtain the [`Node`] connected via this [`Edge`].
-    fn nodes(&self) -> (&impl Node, &impl Node);
+    fn nodes(&self) -> (&Self::Node, &Self::Node);
 
     /// Mutably obtain the [`Node`] connected via this [`Edge`].
-    fn nodes_mut(&mut self) -> (&mut impl Node, &mut impl Node);
+    fn nodes_mut(&mut self) -> (&mut Self::Node, &mut Self::Node);
 }
 
 /// Complex associations ([`Edge`]) between elements ([`Node`]).
-pub trait Graph : Collection {
+pub trait Graph<T> : Collection<Element = T> {
     /// The type storing an element.
-    type Node: Node<Edge = Self::Edge>;
+    type Node: Node<T, Edge = Self::Edge>;
 
     /// The type associating elements.
-    type Edge: Edge<Node = Self::Node>;
+    type Edge: Edge<T, Node = Self::Node>;
 
     /// Immutable obtain all [`Node`] contained within this [`Graph`].
-    fn nodes(&self) -> impl Iterator<Item = &impl Node>;
+    fn nodes<'a>(&'a self) -> impl Iterator<Item = &'a Self::Node> where Self::Node: 'a;
 
     /// Mutably obtain all [`Node`] contained within this [`Graph`].
-    fn nodes_mut(&mut self) -> impl Iterator<Item = &mut impl Node>;
+    fn nodes_mut<'a>(&'a mut self) -> impl Iterator<Item = &'a mut Self::Node> where Self::Node: 'a;
 
     /// Immutable obtain all [`Edge`] contained within this [`Graph`].
-    fn edges(&self) -> impl Iterator<Item = &impl Edge>;
+    fn edges<'a>(&'a self) -> impl Iterator<Item = &'a Self::Edge> where Self::Edge: 'a;
 
     /// Mutably obtain all [`Edge`] contained within this [`Graph`].
-    fn edges_mut(&mut self) -> impl Iterator<Item = &mut impl Edge>;
+    fn edges_mut<'a>(&'a mut self) -> impl Iterator<Item = &'a mut Self::Edge> where Self::Edge: 'a;
 }
