@@ -9,4 +9,7 @@ pub trait Tree : Graph {
 
     /// Mutably obtain the top-level [`Node`].
     fn root_mut(&mut self) -> &mut Self::Node;
+
+    /// Query the height of the [`Tree`], the longest chain of [`Node`].
+    fn height(&self) -> usize;
 }
