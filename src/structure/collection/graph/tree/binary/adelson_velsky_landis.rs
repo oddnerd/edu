@@ -55,5 +55,15 @@ pub struct Node<T> {
     _right: Option<Box<Node<T>>>,
 }
 
+impl<T: core::fmt::Debug> core::fmt::Debug for Node<T> {
+    /// Format the element contained.
+    ///
+    /// TODO: performance; time and memory complexity.
+    /// TODO: example use case.
+    fn fmt(&self, _f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        todo!("format the contained element")
+    }
+}
+
 /// A link between two [`Node`] in a [`AdelsonVelskyLandis`].
 pub struct Edge<'a, T: 'a> (&'a Node<T>, &'a Node<T>);
