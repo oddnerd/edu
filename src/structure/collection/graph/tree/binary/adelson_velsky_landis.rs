@@ -15,7 +15,11 @@ impl<T> Binary for AdelsonVelskyLandis<T> {}
 
 impl<T> Tree for AdelsonVelskyLandis<T> {}
 
-impl<T> Graph for AdelsonVelskyLandis<T> {}
+impl<T> Graph for AdelsonVelskyLandis<T> {
+    type Node = Node<Self::Element>;
+
+    type Edge<'a> = Edge<'a, Self::Element> where Self::Element: 'a;
+}
 
 impl<T> Collection for AdelsonVelskyLandis<T> {
     type Element = T;
@@ -39,4 +43,4 @@ pub struct Node<T> {
 }
 
 /// A link between two [`Node`] in a [`AdelsonVelskyLandis`].
-pub struct Edge<'a, T> (&'a Node<T>, &'a Node<T>);
+pub struct Edge<'a, T: 'a> (&'a Node<T>, &'a Node<T>);
