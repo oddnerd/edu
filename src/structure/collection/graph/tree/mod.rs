@@ -1,6 +1,11 @@
 //! Implementations of [`Tree`].
 
+pub mod avl;
+
+pub use avl::AdelsonVelskyLandis;
+
 use super::Graph;
+use super::Collection;
 
 /// A [`Graph`] where the only relationships are hierarchical.
 ///
