@@ -11,6 +11,16 @@ pub struct AdelsonVelskyLandis<T> {
     _root: Option<Node<T>>
 }
 
+impl<T> core::fmt::Debug for AdelsonVelskyLandis<T> {
+    /// List the elements contained and their hierarchical order.
+    ///
+    /// TODO: performance; time and memory complexity.
+    /// TODO: example use case.
+    fn fmt(&self, _f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        todo!("how to format the graph into a string?")
+    }
+}
+
 impl<T> Binary for AdelsonVelskyLandis<T> {}
 
 impl<T> Tree for AdelsonVelskyLandis<T> {}
@@ -24,7 +34,6 @@ impl<T> Graph for AdelsonVelskyLandis<T> {
 impl<T> Collection for AdelsonVelskyLandis<T> {
     type Element = T;
 
-    /// TODO
     fn count(&self) -> usize {
         todo!()
     }
