@@ -16,7 +16,13 @@ pub trait Graph : Collection {
 }
 
 /// An instantiated element with a [`Graph`].
-pub trait Node {}
+pub trait Node {
+    /// The type of [`Graph`] this is from.
+    type Graph: Graph;
+}
 
 /// A connection/link/association between [`Node`] within a [`Graph`].
-pub trait Edge {}
+pub trait Edge {
+    /// The type of [`Graph`] this is from.
+    type Graph: Graph;
+}
