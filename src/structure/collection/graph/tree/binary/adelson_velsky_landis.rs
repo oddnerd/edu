@@ -11,7 +11,7 @@ pub struct AdelsonVelskyLandis<T> {
     _root: Option<Node<T>>
 }
 
-impl<T> core::fmt::Debug for AdelsonVelskyLandis<T> {
+impl<T: core::fmt::Debug> core::fmt::Debug for AdelsonVelskyLandis<T> {
     /// List the elements contained and their hierarchical order.
     ///
     /// TODO: performance; time and memory complexity.
