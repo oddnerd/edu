@@ -34,8 +34,12 @@ impl<T> Graph for AdelsonVelskyLandis<T> {
 impl<T> Collection for AdelsonVelskyLandis<T> {
     type Element = T;
 
+    /// Query how many elements are contained.
+    ///
+    /// TODO: performance; time and memory complexity.
+    /// TODO: example use case.
     fn count(&self) -> usize {
-        todo!()
+        todo!("construct and instance and compare the result to the expected value")
     }
 }
 
