@@ -67,3 +67,13 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Node<T> {
 
 /// A link between two [`Node`] in a [`AdelsonVelskyLandis`].
 pub struct Edge<'a, T: 'a> (&'a Node<T>, &'a Node<T>);
+
+impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Edge<'a, T> {
+    /// Format the linked [`Node`].
+    ///
+    /// TODO: performance; time and memory complexity.
+    /// TODO: example use case.
+    fn fmt(&self, _f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        todo!("how to format a connection between nodes?")
+    }
+}
