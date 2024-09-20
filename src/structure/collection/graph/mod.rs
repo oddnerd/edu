@@ -6,21 +6,8 @@ pub use tree::Tree;
 
 use super::Collection;
 
-/// Complex associations ([`Edge`]) between elements ([`Node`]).
-pub trait Graph : Collection {
-    /// Type used to connect via [`Edge`].
-    type Node: Node;
+pub trait Graph : Collection {}
 
-    /// Type used to represent connection between [`Node`].
-    type Edge<'a>: Edge<'a> where Self::Element: 'a;
-}
+pub trait Node {}
 
-/// An instantiated element with a [`Graph`].
-pub trait Node {
-    type Edge<'a>: Edge<'a> where Self: 'a;
-}
-
-/// A connection/link/association between [`Node`] within a [`Graph`].
-pub trait Edge<'a> {
-    type Node: Node;
-}
+pub trait Edge<'a> {}
