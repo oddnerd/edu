@@ -6,8 +6,10 @@
 #![allow(missing_docs)]
 
 pub mod tree;
+pub mod directed;
 
 pub use tree::Tree;
+pub use directed::Directed;
 
 use super::Collection;
 
