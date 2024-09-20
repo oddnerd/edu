@@ -35,7 +35,9 @@ pub trait Node : super::super::Node {
     fn level(&self) -> usize;
 }
 pub trait Edge<'a> : super::super::Edge<'a> {
+    #[must_use]
     fn parent(&self) -> &Self::Node;
 
+    #[must_use]
     fn child(&self) -> &Self::Node;
 }
