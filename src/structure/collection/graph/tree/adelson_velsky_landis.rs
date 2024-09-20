@@ -1,6 +1,6 @@
 //! Implementation of [`AdelsonVelskyLandis`].
 
-use super::Binary;
+use super::Rooted;
 use super::Tree;
 use super::Graph;
 use super::Collection;
