@@ -12,17 +12,11 @@ pub trait Graph : Collection {
     type Node: Node;
 
     /// Type used to represent connection between [`Node`].
-    type Edge<'a>: Edge where Self::Element: 'a;
+    type Edge<'a>: Edge<'a> where Self::Element: 'a;
 }
 
 /// An instantiated element with a [`Graph`].
-pub trait Node {
-    /// The type of [`Graph`] this is from.
-    type Graph: Graph;
-}
+pub trait Node {}
 
 /// A connection/link/association between [`Node`] within a [`Graph`].
-pub trait Edge {
-    /// The type of [`Graph`] this is from.
-    type Graph: Graph;
-}
+pub trait Edge<'a> {}
