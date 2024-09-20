@@ -65,7 +65,9 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Node<T> {
     }
 }
 
-impl<T> super::super::super::Node for Node<T> {}
+impl<T> super::super::super::Node for Node<T> {
+    type Edge<'a> = Edge<'a, T> where T: 'a;
+}
 
 /// A link between two [`Node`] in a [`AdelsonVelskyLandis`].
 pub struct Edge<'a, T: 'a> (&'a Node<T>, &'a Node<T>);
@@ -80,4 +82,6 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Edge<'a, T> {
     }
 }
 
-impl<'a, T: 'a> super::super::super::Edge<'a> for Edge<'a, T> {}
+impl<'a, T: 'a> super::super::super::Edge<'a> for Edge<'a, T> {
+    type Node = Node<T>;
+}

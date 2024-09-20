@@ -16,7 +16,11 @@ pub trait Graph : Collection {
 }
 
 /// An instantiated element with a [`Graph`].
-pub trait Node {}
+pub trait Node {
+    type Edge<'a>: Edge<'a> where Self: 'a;
+}
 
 /// A connection/link/association between [`Node`] within a [`Graph`].
-pub trait Edge<'a> {}
+pub trait Edge<'a> {
+    type Node: Node;
+}
