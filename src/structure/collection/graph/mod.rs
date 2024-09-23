@@ -17,17 +17,17 @@ pub trait Graph : Collection {
     type Edge<'a>: Edge<'a, Node = Self::Node>;
 
     /// Obtain all [`Edge`] contained within `self`.
-    fn edges(&self) -> impl Iterator<Item = Self::Edge<'_>>;
+    fn edges(&self) -> impl Iterator<Item = &Self::Edge<'_>>;
 
     /// Obtain all [`Node`] contained within `self`.
-    fn nodes(&self) -> impl Iterator<Item = Self::Node>;
+    fn nodes(&self) -> impl Iterator<Item = &Self::Node>;
 }
 
 pub trait Node {
     type Edge<'a>: Edge<'a> where Self: 'a;
 
     #[must_use]
-    fn edges(&self) -> impl Iterator<Item = Self::Edge<'_>>;
+    fn edges(&self) -> impl Iterator<Item = &Self::Edge<'_>>;
 }
 
 pub trait Edge<'a> {
