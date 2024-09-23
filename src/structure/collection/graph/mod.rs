@@ -23,9 +23,12 @@ pub trait Graph : Collection {
     fn nodes(&self) -> impl Iterator<Item = &Self::Node>;
 }
 
+/// An instance of an element within a [`Graph`].
 pub trait Node {
+    /// The type of [`Edge`] which connects [`Self`].
     type Edge<'a>: Edge<'a> where Self: 'a;
 
+    /// Obtain all [`Edge`] connected to `self`.
     #[must_use]
     fn edges(&self) -> impl Iterator<Item = &Self::Edge<'_>>;
 }
