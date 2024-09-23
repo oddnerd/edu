@@ -24,10 +24,13 @@ pub trait Node : super::Node {
     fn out_degree(&self) -> usize;
 }
 
+/// An association between [`Node`] in a [`Directed`] [`Graph`].
 pub trait Edge<'a> : super::Edge<'a> {
+    /// The [`Node`] `self` originates from.
     #[must_use]
     fn from(&self) -> &Self::Node;
 
+    /// The [`Node`] `self` points towards.
     #[must_use]
     fn to(&self) -> &Self::Node;
 }
