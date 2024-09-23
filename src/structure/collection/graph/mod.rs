@@ -1,14 +1,9 @@
 //! Implementations of [`Graph`].
 
-// TODO: This temporarily disables aggressive warnings within the module for
-// the sake of prototyping. This should be removed thereafter, thenceforth
-// dealing with each warning individually before even considering merging.
-#![allow(missing_docs)]
-
 pub mod tree;
-pub mod directed;
-
 pub use tree::Tree;
+
+pub mod directed;
 pub use directed::Directed;
 
 use super::Collection;
