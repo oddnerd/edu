@@ -33,9 +33,12 @@ pub trait Node {
     fn edges(&self) -> impl Iterator<Item = &Self::Edge<'_>>;
 }
 
+/// An association between two [`Node`] within a [`Graph`]
 pub trait Edge<'a> {
+    /// The type this connects.
     type Node: Node;
 
+    /// Obtain the [`Node`] that self associates.
     #[must_use]
     fn nodes(&self) -> (&Self::Node, &Self::Node);
 }
