@@ -4,7 +4,7 @@ pub mod rooted;
 pub use rooted::Rooted;
 
 pub mod adelson_velsky_landis;
-pub use adelson_velsky_landis::AdelsonVelskyLandis;
+pub use adelson_velsky_landis::AdelsonVelsoLandis;
 
 use super::Graph;
 use super::Collection;

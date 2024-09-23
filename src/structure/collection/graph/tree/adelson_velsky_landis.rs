@@ -1,12 +1,29 @@
 //! Implementation of [`AdelsonVelskyLandis`].
 
+use super::Collection;
+use super::Graph;
 use super::Rooted;
 use super::Tree;
-use super::Graph;
-use super::Collection;
 
-pub struct AdelsonVelskyLandis<T> {
-    root: Option<Node<T>>,
+pub struct AdelsonVelsoLandis<T> {
+    root: Option<Box<Node<T>>>,
+}
+
+impl<T> AdelsonVelsoLandis<T> {
+    pub fn insert(&mut self, element: T) -> Result<&mut T, T> {
+        let new = Box::new(Node {
+            data: element,
+            height: 0,
+            left: None,
+            right: None,
+        });
+
+        if self.root.is_none() {
+            return Ok(&mut self.root.insert(new).data);
+        }
+
+        Err(new.data)
+    }
 }
 
 struct Node<T> {
