@@ -22,7 +22,8 @@ struct Node<T> {
 #[allow(
     clippy::undocumented_unsafe_blocks,
     clippy::unwrap_used,
-    clippy::expect_used
+    clippy::expect_used,
+    clippy::assertions_on_result_states
 )]
 mod test {
     use super::*;
@@ -37,7 +38,7 @@ mod test {
             fn inserts_root_node_when_empty() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                instance.insert(12345);
+                assert!(instance.insert(12345).is_ok());
 
                 assert!(instance.root.is_some());
                 assert_eq!(instance.root.unwrap().data, 12345);
