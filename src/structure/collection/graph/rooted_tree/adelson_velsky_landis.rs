@@ -20,6 +20,10 @@ pub struct AdelsonVelsoLandis<T> {
 impl<T: Ord> AdelsonVelsoLandis<T> {
     /// Add a new [`Node`] with value `element`.
     ///
+    /// # Errors
+    /// Yields the `element` if an equivalent one is already contained,
+    /// alongside a mutable reference to the contained equivalent element.
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
@@ -30,14 +34,14 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// ```
     /// todo!()
     /// ```
-    pub fn insert(&mut self, element: T) -> &mut T {
+    pub fn insert(&mut self, element: T) -> Result<&mut T, (T, &mut T)> {
         let mut current = &mut self.root;
 
         while let &mut Some(ref mut parent) = current {
-            current = if element < parent.element {
-                &mut parent.left
-            } else {
-                &mut parent.right
+            current = match element.cmp(&parent.element) {
+                core::cmp::Ordering::Less => &mut parent.left,
+                core::cmp::Ordering::Greater => &mut parent.right,
+                core::cmp::Ordering::Equal => return Err((element, &mut parent.element)),
             };
         }
 
@@ -49,7 +53,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
         let node = current.insert(node);
 
-        &mut node.element
+        Ok(&mut node.element)
     }
 }
 
