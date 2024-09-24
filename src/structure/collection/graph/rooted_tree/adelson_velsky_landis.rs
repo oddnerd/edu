@@ -35,9 +35,13 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!()
     /// ```
     pub fn insert(&mut self, element: T) -> Result<&mut T, (T, &mut T)> {
+        let mut parent_ptr = None;
+
         let mut current = &mut self.root;
 
         while let &mut Some(ref mut parent) = current {
+            parent_ptr = Some(core::ptr::from_mut(parent.as_mut()));
+
             current = match element.cmp(&parent.element) {
                 core::cmp::Ordering::Less => &mut parent.left,
                 core::cmp::Ordering::Greater => &mut parent.right,
@@ -47,7 +51,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
         let node = Box::new(Node {
             element,
-            parent: None,
+            parent: parent_ptr,
             left: None,
             right: None,
         });
