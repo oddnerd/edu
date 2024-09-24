@@ -2,8 +2,7 @@
 
 use super::Collection;
 use super::Graph;
-use super::Rooted;
-use super::Tree;
+use super::RootedTree;
 
 pub struct AdelsonVelsoLandis<T> {
     root: Option<Box<Node<T>>>,

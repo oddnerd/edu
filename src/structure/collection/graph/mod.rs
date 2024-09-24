@@ -1,7 +1,7 @@
 //! Implementations of [`Graph`].
 
-pub mod tree;
-pub use tree::Tree;
+pub mod rooted_tree;
+pub use rooted_tree::RootedTree;
 
 pub mod directed;
 pub use directed::Directed;
