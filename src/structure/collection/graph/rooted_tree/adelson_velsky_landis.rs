@@ -82,6 +82,17 @@ mod test {
                 assert!(instance.root.is_some());
                 assert_eq!(instance.root.unwrap().element, 12345);
             }
+
+            #[test]
+            fn yields_element() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                let mut expected = 12345;
+
+                let actual = instance.insert(expected);
+
+                assert_eq!(actual, &mut expected);
+            }
         }
     }
 }
