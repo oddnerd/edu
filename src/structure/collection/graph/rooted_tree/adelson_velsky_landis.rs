@@ -141,6 +141,33 @@ mod test {
 
                 assert!(instance.root.is_some_and(|root| root.right.is_some_and(|right| right.element == expected)));
             }
+
+            #[test]
+            fn errors_when_equivalent_element_already_inserted() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                assert!(instance.insert(12345).is_ok());
+
+                assert!(instance.insert(12345).is_err());
+            }
+
+            #[test]
+            fn errors_with_new_element() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                assert!(instance.insert(12345).is_ok());
+
+                assert!(instance.insert(12345).is_err_and(|error| error.0 == 12345));
+            }
+
+            #[test]
+            fn error_with_existing_element() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                assert!(instance.insert(12345).is_ok());
+
+                assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
+            }
         }
     }
 }
