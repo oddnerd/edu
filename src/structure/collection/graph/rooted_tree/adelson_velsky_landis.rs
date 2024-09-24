@@ -47,6 +47,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
         let node = Box::new(Node {
             element,
+            parent: None,
             left: None,
             right: None,
         });
@@ -61,6 +62,9 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 struct Node<T> {
     /// The underlying element.
     element: T,
+
+    /// The parent of `self`, if any.
+    parent: Option<*mut Node<T>>,
 
     /// The left child, if any.
     left: Option<Box<Node<T>>>,
@@ -140,6 +144,30 @@ mod test {
                 assert!(instance.insert(expected).is_ok());
 
                 assert!(instance.root.is_some_and(|root| root.right.is_some_and(|right| right.element == expected)));
+            }
+
+            #[test]
+            fn does_not_set_parent_when_root() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                assert!(instance.insert(12345).is_ok());
+
+                assert!(instance.root.is_some_and(|root| root.parent.is_none()));
+            }
+
+            #[test]
+            fn sets_parent_when_not_root() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                // Insert root.
+                assert!(instance.insert(0).is_ok());
+
+                // Insert child.
+                assert!(instance.insert(1).is_ok());
+
+                let ptr = core::ptr::from_mut(instance.root.as_mut().unwrap().as_mut());
+
+                assert!(instance.root.is_some_and(|root| root.right.is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
             }
 
             #[test]
