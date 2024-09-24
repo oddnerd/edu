@@ -89,10 +89,11 @@ mod test {
             fn inserts_root_node_when_empty() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                _ = instance.insert(12345);
+                let expected = 12345;
 
-                assert!(instance.root.is_some());
-                assert_eq!(instance.root.unwrap().element, 12345);
+                assert!(instance.insert(expected).is_ok());
+
+                assert!(instance.root.is_some_and(|node| node.element == expected));
             }
 
             #[test]
@@ -101,9 +102,7 @@ mod test {
 
                 let mut expected = 12345;
 
-                let actual = instance.insert(expected);
-
-                assert_eq!(actual, &mut expected);
+                assert!(instance.insert(expected).is_ok_and(|actual| actual == &mut expected));
             }
 
             #[test]
@@ -111,12 +110,13 @@ mod test {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root node.
-                _ = instance.insert(0);
+                assert!(instance.insert(0).is_ok());
 
-                // Insert the child node.
-                _ = instance.insert(-1);
+                // Insert the child node that is less than root.
+                let expected = -1;
+                assert!(instance.insert(expected).is_ok());
 
-                assert_eq!(instance.root.unwrap().left.unwrap().element, -1);
+                assert!(instance.root.is_some_and(|root| root.left.is_some_and(|left| left.element == expected)));
             }
 
             #[test]
@@ -124,12 +124,13 @@ mod test {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root node.
-                _ = instance.insert(0);
+                assert!(instance.insert(0).is_ok());
 
-                // Insert the child node.
-                _ = instance.insert(1);
+                // Insert the child node that is greater than root.
+                let expected = 1;
+                assert!(instance.insert(expected).is_ok());
 
-                assert_eq!(instance.root.unwrap().right.unwrap().element, 1);
+                assert!(instance.root.is_some_and(|root| root.right.is_some_and(|right| right.element == expected)));
             }
         }
     }
