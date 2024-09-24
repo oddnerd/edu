@@ -2,35 +2,58 @@
 
 use super::Collection;
 use super::Graph;
+use super::Directed;
 use super::RootedTree;
 
+/// A self-balancing binary search tree.
+///
+/// Unlike an unbalanced binary search tree, the heights of the two child
+/// subtrees of any [`Node`] differ by at most one thereby minimizing the
+/// height of the overall tree and providing optimal lookup/search performance.
+///
+/// See Also: [Wikipedia](https://en.wikipedia.org/wiki/AVL_tree).
 pub struct AdelsonVelsoLandis<T> {
+    /// The [`Node`] that is defined as the root.
     root: Option<Box<Node<T>>>,
 }
 
 impl<T> AdelsonVelsoLandis<T> {
-    pub fn insert(&mut self, element: T) -> Result<&mut T, T> {
+    /// Add a new [`Node`] with value `element`.
+    ///
+    /// # Panics
+    /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Performance
+    /// This method takes O(log N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    pub fn insert(&mut self, element: T) -> &mut T {
         let new = Box::new(Node {
-            data: element,
-            height: 0,
+            element,
             left: None,
             right: None,
         });
 
         if self.root.is_none() {
-            return Ok(&mut self.root.insert(new).data);
+            return &mut self.root.insert(new).element;
         }
 
-        Err(new.data)
+        todo!()
     }
 }
 
+/// An instantiated element within a [`AdelsonVelskyLandis`].
 struct Node<T> {
-    data: T,
+    /// The underlying element.
+    element: T,
 
-    height: usize,
-
+    /// The left child, if any.
     left: Option<Box<Node<T>>>,
+
+    /// The right child, if any.
     right: Option<Box<Node<T>>>,
 }
 
@@ -54,12 +77,11 @@ mod test {
             fn inserts_root_node_when_empty() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                assert!(instance.insert(12345).is_ok());
+                _ = instance.insert(12345);
 
                 assert!(instance.root.is_some());
-                assert_eq!(instance.root.unwrap().data, 12345);
+                assert_eq!(instance.root.unwrap().element, 12345);
             }
-
         }
     }
 }
