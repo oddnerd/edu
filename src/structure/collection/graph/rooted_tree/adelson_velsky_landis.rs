@@ -17,7 +17,7 @@ pub struct AdelsonVelsoLandis<T> {
     root: Option<Box<Node<T>>>,
 }
 
-impl<T> AdelsonVelsoLandis<T> {
+impl<T: Ord> AdelsonVelsoLandis<T> {
     /// Add a new [`Node`] with value `element`.
     ///
     /// # Panics
@@ -31,17 +31,25 @@ impl<T> AdelsonVelsoLandis<T> {
     /// todo!()
     /// ```
     pub fn insert(&mut self, element: T) -> &mut T {
-        let new = Box::new(Node {
+        let mut current = &mut self.root;
+
+        while let &mut Some(ref mut parent) = current {
+            current = if element < parent.element {
+                &mut parent.left
+            } else {
+                &mut parent.right
+            };
+        }
+
+        let node = Box::new(Node {
             element,
             left: None,
             right: None,
         });
 
-        if self.root.is_none() {
-            return &mut self.root.insert(new).element;
-        }
+        let node = current.insert(node);
 
-        todo!()
+        &mut node.element
     }
 }
 
