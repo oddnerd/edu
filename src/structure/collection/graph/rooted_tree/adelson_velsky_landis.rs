@@ -101,6 +101,19 @@ mod test {
 
                 assert_eq!(actual, &mut expected);
             }
+
+            #[test]
+            fn left_child_when_less_than_root() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                // Insert the root node.
+                _ = instance.insert(1);
+
+                // Insert the child node.
+                _ = instance.insert(0);
+
+                assert_eq!(instance.root.unwrap().left.unwrap().element, 0);
+            }
         }
     }
 }
