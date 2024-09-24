@@ -86,7 +86,16 @@ mod test {
             use super::*;
 
             #[test]
-            fn inserts_root_node_when_empty() {
+            fn adds_element() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                assert!(instance.insert(12345).is_ok());
+
+                assert!(instance.root.is_some());
+            }
+
+            #[test]
+            fn initializes_element() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 let expected = 12345;
@@ -106,7 +115,7 @@ mod test {
             }
 
             #[test]
-            fn left_child_when_less_than_root() {
+            fn left_child_when_less() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root node.
@@ -120,7 +129,7 @@ mod test {
             }
 
             #[test]
-            fn right_child_when_greater_than_root() {
+            fn right_child_when_greater() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root node.
