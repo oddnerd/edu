@@ -172,7 +172,7 @@ mod test {
                 // Insert right child.
                 assert!(instance.insert(1).is_ok());
 
-                let ptr = core::ptr::NonNull::from(instance.root.as_mut().unwrap().as_mut());
+                let ptr = core::ptr::NonNull::from(instance.root.as_deref_mut().unwrap());
 
                 assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.parent.is_some_and(|parent| parent == ptr))));
                 assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
