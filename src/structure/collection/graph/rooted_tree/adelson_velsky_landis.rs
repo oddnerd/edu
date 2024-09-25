@@ -222,6 +222,19 @@ mod test {
 
                 assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Left));
             }
+
+            #[test]
+            fn updates_parent_balance_factor_when_only_right_child() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                // Insert the root.
+                assert!(instance.insert(0).is_ok());
+
+                // Insert a right child.
+                assert!(instance.insert(1).is_ok());
+
+                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Right));
+            }
         }
     }
 }
