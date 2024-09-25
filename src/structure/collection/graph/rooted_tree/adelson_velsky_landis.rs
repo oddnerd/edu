@@ -235,6 +235,38 @@ mod test {
 
                 assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Right));
             }
+
+            #[test]
+            fn parent_is_balanced_when_inserting_left_after_right() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                // Insert the root.
+                assert!(instance.insert(0).is_ok());
+
+                // Insert a right child.
+                assert!(instance.insert(1).is_ok());
+
+                // Insert a left child.
+                assert!(instance.insert(-1).is_ok());
+
+                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+            }
+
+            #[test]
+            fn parent_is_balanced_when_inserting_right_after_left() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                // Insert the root.
+                assert!(instance.insert(0).is_ok());
+
+                // Insert a left child.
+                assert!(instance.insert(-1).is_ok());
+
+                // Insert a right child.
+                assert!(instance.insert(1).is_ok());
+
+                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+            }
         }
     }
 }
