@@ -182,7 +182,7 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn errors_when_equivalent_element_already_inserted() {
+                fn when_equivalent_element_already_contained() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     assert!(instance.insert(12345).is_ok());
@@ -191,7 +191,7 @@ mod test {
                 }
 
                 #[test]
-                fn errors_with_new_element() {
+                fn yields_new_element() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     assert!(instance.insert(12345).is_ok());
@@ -200,7 +200,7 @@ mod test {
                 }
 
                 #[test]
-                fn error_with_existing_element() {
+                fn yields_existing_equivalent_element() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     assert!(instance.insert(12345).is_ok());
