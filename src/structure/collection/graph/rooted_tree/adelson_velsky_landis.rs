@@ -283,10 +283,25 @@ mod test {
             mod left_rotate {
                 use super::*;
 
-                #[test]
-                fn does_left_rotation_when_inserting_right_after_right() {
-                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
+                /// Insert elements to induce a left rotation.
+                ///
+                /// This is a helper function which normalizes the [`Node`]
+                /// tested within this module.
+                ///
+                /// The insertions create the following structure
+                ///
+                ///  0
+                /// / \
+                ///   1
+                ///  / \
+                ///    2
+                ///
+                /// which should be rebalanced via a left-rotation into below
+                ///
+                ///   1
+                ///  / \
+                ///  0 2
+                fn insert_elements(instance: &mut AdelsonVelsoLandis<i32>) {
                     // Insert the root.
                     assert!(instance.insert(0).is_ok());
 
@@ -295,20 +310,13 @@ mod test {
 
                     // Insert a right grandchild.
                     assert!(instance.insert(2).is_ok());
+                }
 
-                    // The insertions create the following structure
-                    //
-                    //  0
-                    // / \
-                    //   1
-                    //  / \
-                    //    2
-                    //
-                    // which should be rebalanced via a left-rotation into below
-                    //
-                    //   1
-                    //  / \
-                    //  0 2
+                #[test]
+                fn rotates_elements() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    insert_elements(&mut instance);
 
                     assert!(instance.root.as_ref().is_some_and(|root| root.element == 1));
                     assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.element == 0)));
