@@ -151,7 +151,7 @@ mod test {
             }
 
             #[test]
-            fn does_not_set_parent_when_root() {
+            fn parent_is_none_when_root() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 assert!(instance.insert(12345).is_ok());
@@ -160,7 +160,7 @@ mod test {
             }
 
             #[test]
-            fn sets_parent_when_not_root() {
+            fn parent_is_some_when_child() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert root.
