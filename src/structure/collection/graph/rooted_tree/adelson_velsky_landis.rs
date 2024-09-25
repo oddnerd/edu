@@ -213,7 +213,7 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn new_node_has_balanced_subtrees() {
+                fn inserted_node_is_balanced() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     assert!(instance.insert(0).is_ok());
@@ -222,7 +222,7 @@ mod test {
                 }
 
                 #[test]
-                fn parent_is_left_balanced_when_inserting_left_child() {
+                fn left_balanced_when_left_branch() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     // Insert the root.
@@ -235,7 +235,7 @@ mod test {
                 }
 
                 #[test]
-                fn parent_is_right_balanced_when_inserting_left_child() {
+                fn right_balanced_when_right_branch() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     // Insert the root.
@@ -248,7 +248,7 @@ mod test {
                 }
 
                 #[test]
-                fn parent_is_balanced_when_inserting_left_after_right() {
+                fn balanced_when_left_branch_and_then_right_branch() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     // Insert the root.
@@ -264,7 +264,7 @@ mod test {
                 }
 
                 #[test]
-                fn parent_is_balanced_when_inserting_right_after_left() {
+                fn balanced_when_right_branch_and_then_left_branch() {
                     let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                     // Insert the root.
