@@ -211,7 +211,7 @@ mod test {
             }
 
             #[test]
-            fn updates_parent_balance_factor_when_only_left_child() {
+            fn parent_is_left_balanced_when_inserting_left_child() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root.
@@ -224,7 +224,7 @@ mod test {
             }
 
             #[test]
-            fn updates_parent_balance_factor_when_only_right_child() {
+            fn parent_is_right_balanced_when_inserting_left_child() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root.
