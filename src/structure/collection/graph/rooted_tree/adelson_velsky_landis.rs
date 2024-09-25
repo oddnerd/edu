@@ -267,6 +267,38 @@ mod test {
 
                 assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
             }
+
+            #[test]
+            fn does_left_rotation_when_inserting_right_after_right() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                // Insert the root.
+                assert!(instance.insert(0).is_ok());
+
+                // Insert a right child.
+                assert!(instance.insert(1).is_ok());
+
+                // Insert a right grandchild.
+                assert!(instance.insert(2).is_ok());
+
+                // The insertions create the following structure
+                //
+                //  0
+                // / \
+                //   1
+                //  / \
+                //    2
+                //
+                // which should be rebalanced via a left-rotation into below
+                //
+                //   1
+                //  / \
+                //  0 2
+
+                assert!(instance.root.as_ref().is_some_and(|root| root.element == 1));
+                assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.element == 0)));
+                assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.element == 2)));
+            }
         }
     }
 }
