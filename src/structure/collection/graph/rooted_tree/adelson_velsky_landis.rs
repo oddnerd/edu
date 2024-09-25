@@ -123,7 +123,7 @@ mod test {
             }
 
             #[test]
-            fn left_child_when_less() {
+            fn into_left_branch_when_less() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root node.
@@ -137,7 +137,7 @@ mod test {
             }
 
             #[test]
-            fn right_child_when_greater() {
+            fn into_right_branch_when_greater() {
                 let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
                 // Insert the root node.
