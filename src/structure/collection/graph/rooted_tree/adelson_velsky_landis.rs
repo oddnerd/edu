@@ -200,6 +200,15 @@ mod test {
 
                 assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
             }
+
+            #[test]
+            fn new_node_has_balanced_subtrees() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                assert!(instance.insert(0).is_ok());
+
+                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+            }
         }
     }
 }
