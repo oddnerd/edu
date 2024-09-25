@@ -169,136 +169,150 @@ mod test {
                 // Insert child.
                 assert!(instance.insert(1).is_ok());
 
-                let ptr = core::ptr::from_mut(instance.root.as_mut().unwrap().as_mut());
+                let ptr = core::ptr::NonNull::from(instance.root.as_mut().unwrap().as_mut());
 
                 assert!(instance.root.is_some_and(|root| root.right.is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
             }
 
-            #[test]
-            fn errors_when_equivalent_element_already_inserted() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+            mod errors {
+                use super::*;
 
-                assert!(instance.insert(12345).is_ok());
+                #[test]
+                fn errors_when_equivalent_element_already_inserted() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                assert!(instance.insert(12345).is_err());
+                    assert!(instance.insert(12345).is_ok());
+
+                    assert!(instance.insert(12345).is_err());
+                }
+
+                #[test]
+                fn errors_with_new_element() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    assert!(instance.insert(12345).is_ok());
+
+                    assert!(instance.insert(12345).is_err_and(|error| error.0 == 12345));
+                }
+
+                #[test]
+                fn error_with_existing_element() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    assert!(instance.insert(12345).is_ok());
+
+                    assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
+                }
             }
 
-            #[test]
-            fn errors_with_new_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+            mod balance_factor {
+                use super::*;
 
-                assert!(instance.insert(12345).is_ok());
+                #[test]
+                fn new_node_has_balanced_subtrees() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                assert!(instance.insert(12345).is_err_and(|error| error.0 == 12345));
+                    assert!(instance.insert(0).is_ok());
+
+                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+                }
+
+                #[test]
+                fn parent_is_left_balanced_when_inserting_left_child() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    // Insert the root.
+                    assert!(instance.insert(0).is_ok());
+
+                    // Insert a left child.
+                    assert!(instance.insert(-1).is_ok());
+
+                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Left));
+                }
+
+                #[test]
+                fn parent_is_right_balanced_when_inserting_left_child() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    // Insert the root.
+                    assert!(instance.insert(0).is_ok());
+
+                    // Insert a right child.
+                    assert!(instance.insert(1).is_ok());
+
+                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Right));
+                }
+
+                #[test]
+                fn parent_is_balanced_when_inserting_left_after_right() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    // Insert the root.
+                    assert!(instance.insert(0).is_ok());
+
+                    // Insert a right child.
+                    assert!(instance.insert(1).is_ok());
+
+                    // Insert a left child.
+                    assert!(instance.insert(-1).is_ok());
+
+                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+                }
+
+                #[test]
+                fn parent_is_balanced_when_inserting_right_after_left() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    // Insert the root.
+                    assert!(instance.insert(0).is_ok());
+
+                    // Insert a left child.
+                    assert!(instance.insert(-1).is_ok());
+
+                    // Insert a right child.
+                    assert!(instance.insert(1).is_ok());
+
+                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+                }
             }
 
-            #[test]
-            fn error_with_existing_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+            mod left_rotate {
+                use super::*;
 
-                assert!(instance.insert(12345).is_ok());
+                #[test]
+                fn does_left_rotation_when_inserting_right_after_right() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
+                    // Insert the root.
+                    assert!(instance.insert(0).is_ok());
+
+                    // Insert a right child.
+                    assert!(instance.insert(1).is_ok());
+
+                    // Insert a right grandchild.
+                    assert!(instance.insert(2).is_ok());
+
+                    // The insertions create the following structure
+                    //
+                    //  0
+                    // / \
+                    //   1
+                    //  / \
+                    //    2
+                    //
+                    // which should be rebalanced via a left-rotation into below
+                    //
+                    //   1
+                    //  / \
+                    //  0 2
+
+                    assert!(instance.root.as_ref().is_some_and(|root| root.element == 1));
+                    assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.element == 0)));
+                    assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.element == 2)));
+                }
             }
 
-            #[test]
-            fn new_node_has_balanced_subtrees() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                assert!(instance.insert(0).is_ok());
-
-                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
-            }
-
-            #[test]
-            fn parent_is_left_balanced_when_inserting_left_child() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert a left child.
-                assert!(instance.insert(-1).is_ok());
-
-                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Left));
-            }
-
-            #[test]
-            fn parent_is_right_balanced_when_inserting_left_child() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert a right child.
-                assert!(instance.insert(1).is_ok());
-
-                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Right));
-            }
-
-            #[test]
-            fn parent_is_balanced_when_inserting_left_after_right() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert a right child.
-                assert!(instance.insert(1).is_ok());
-
-                // Insert a left child.
-                assert!(instance.insert(-1).is_ok());
-
-                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
-            }
-
-            #[test]
-            fn parent_is_balanced_when_inserting_right_after_left() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert a left child.
-                assert!(instance.insert(-1).is_ok());
-
-                // Insert a right child.
-                assert!(instance.insert(1).is_ok());
-
-                assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
-            }
-
-            #[test]
-            fn does_left_rotation_when_inserting_right_after_right() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert a right child.
-                assert!(instance.insert(1).is_ok());
-
-                // Insert a right grandchild.
-                assert!(instance.insert(2).is_ok());
-
-                // The insertions create the following structure
-                //
-                //  0
-                // / \
-                //   1
-                //  / \
-                //    2
-                //
-                // which should be rebalanced via a left-rotation into below
-                //
-                //   1
-                //  / \
-                //  0 2
-
-                assert!(instance.root.as_ref().is_some_and(|root| root.element == 1));
-                assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.element == 0)));
-                assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.element == 2)));
-            }
         }
     }
 }
