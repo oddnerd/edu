@@ -322,9 +322,21 @@ mod test {
                     assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.element == 0)));
                     assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.element == 2)));
                 }
+
+                #[test]
+                fn updates_parents() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    insert_elements(&mut instance);
+
+                    assert!(instance.root.as_ref().is_some_and(|root| root.parent.is_none()));
+
+                    let ptr = core::ptr::NonNull::from(instance.root.as_deref().unwrap());
+
+                    assert!(instance.root.as_deref().is_some_and(|root| root.left.as_deref().is_some_and(|left| left.parent.is_some_and(|parent| parent == ptr))));
+                    assert!(instance.root.as_deref().is_some_and(|root| root.right.as_deref().is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
+                }
             }
-
-
         }
     }
 }
