@@ -337,6 +337,64 @@ mod test {
                     assert!(instance.root.as_deref().is_some_and(|root| root.right.as_deref().is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
                 }
             }
+
+            mod right_rotate {
+                use super::*;
+
+                /// Insert elements to induce a right rotation.
+                ///
+                /// This is a helper function which normalizes the [`Node`]
+                /// tested within this module.
+                ///
+                /// The insertions create the following structure
+                ///
+                ///     0
+                ///    / \
+                ///   -1
+                ///   / \
+                ///  -2
+                ///
+                /// which should be rebalanced via a left-rotation into below
+                ///
+                ///   -1
+                ///  / \
+                /// -2 0
+                fn insert_elements(instance: &mut AdelsonVelsoLandis<i32>) {
+                    // Insert the root.
+                    assert!(instance.insert(0).is_ok());
+
+                    // Insert a left child.
+                    assert!(instance.insert(-1).is_ok());
+
+                    // Insert a left grandchild.
+                    assert!(instance.insert(-2).is_ok());
+                }
+
+                #[test]
+                fn rotates_elements() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    insert_elements(&mut instance);
+
+                    assert!(instance.root.as_ref().is_some_and(|root| root.element == -1));
+                    assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.element == -1)));
+                    assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.element == 0)));
+                }
+
+                #[test]
+                fn updates_parents() {
+                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+
+                    insert_elements(&mut instance);
+
+                    assert!(instance.root.as_ref().is_some_and(|root| root.parent.is_none()));
+
+                    let ptr = core::ptr::NonNull::from(instance.root.as_deref().unwrap());
+
+                    assert!(instance.root.as_deref().is_some_and(|root| root.left.as_deref().is_some_and(|left| left.parent.is_some_and(|parent| parent == ptr))));
+                    assert!(instance.root.as_deref().is_some_and(|root| root.right.as_deref().is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
+                }
+            }
         }
     }
 }
