@@ -35,6 +35,11 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!()
     /// ```
     pub fn insert(&mut self, element: T) -> Result<&mut T, (T, &mut T)> {
+        // Insert the element into position, potentially unbalancing some
+        // ancestor. This yields the parent which can be traversed up to the
+        // root to detect imbalances, alongside the node containing the new
+        // element so a reference to it can be returned after rebalancing.
+        // This uses pointers and indirection to prevent aliasing references.
         let (mut inserted, mut parent) = {
             let mut parent = None;
             let mut branch = &mut self.root;
