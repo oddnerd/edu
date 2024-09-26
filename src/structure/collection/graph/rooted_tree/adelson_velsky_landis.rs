@@ -57,7 +57,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             let node = Box::new(Node {
                 element,
                 parent,
-                balance_factor: 0,
+                balance_factor: BalanceFactor::Balanced,
                 left: None,
                 right: None,
             });
