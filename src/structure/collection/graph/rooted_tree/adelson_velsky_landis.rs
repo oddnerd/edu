@@ -62,6 +62,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 right: None,
             });
 
+            // TODO: the inserted node might move when rebalanced, I think?
             (core::ptr::NonNull::from(branch.insert(node).as_mut()), parent)
         };
 
