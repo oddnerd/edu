@@ -57,7 +57,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             let node = Box::new(Node {
                 element,
                 parent,
-                balance_factor: BalanceFactor::Balanced,
+                highest_branch: BalanceFactor::Balanced,
                 left: None,
                 right: None,
             });
@@ -81,12 +81,12 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 // child is the right branch of parent.
 
 
-                if current.balance_factor == BalanceFactor::Right {
+                if current.highest_branch == BalanceFactor::Right {
                     // The current node is right-heavy, needs rebalancing.
 
                     let grand_parent = current.parent;
 
-                    if current.right.as_deref_mut().is_some_and(|right| right.balance_factor == BalanceFactor::Left) {
+                    if current.right.as_deref_mut().is_some_and(|right| right.highest_branch == BalanceFactor::Left) {
                         // ROTATE RIGHT-LEFT
                         // Double rotation: Right(Z) then Left(X)
                         eprintln!("ROTATE RIGHT-LEFT"); break;
@@ -98,12 +98,12 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                     // ??? After rotation adapt parent link ???
                 } else {
-                    if current.balance_factor == BalanceFactor::Left {
-                        current.balance_factor = BalanceFactor::Balanced;
+                    if current.highest_branch == BalanceFactor::Left {
+                        current.highest_branch = BalanceFactor::Balanced;
                         break;
                     }
 
-                    current.balance_factor = BalanceFactor::Right;
+                    current.highest_branch = BalanceFactor::Right;
                     parent = current.parent;
                     child = core::ptr::NonNull::from(current);
                     continue;
@@ -111,12 +111,12 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             } else {
                 // child is the left branch of parent.
 
-                if current.balance_factor == BalanceFactor::Left {
+                if current.highest_branch == BalanceFactor::Left {
                     // The current node is left-heavy, needs rebalancing.
 
                     let grand_parent = current.parent;
 
-                    if current.left.as_deref_mut().is_some_and(|left| left.balance_factor == BalanceFactor::Right) {
+                    if current.left.as_deref_mut().is_some_and(|left| left.highest_branch == BalanceFactor::Right) {
                         // ROTATE LEFT-RIGHT
                         // Double rotation: Left(Z) then Right(X)
                         eprintln!("ROTATE LEFT-RIGHT"); break;
@@ -128,12 +128,12 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                     // ??? After rotation adapt parent link ???
                 } else {
-                    if current.balance_factor == BalanceFactor::Right {
-                        current.balance_factor = BalanceFactor::Balanced;
+                    if current.highest_branch == BalanceFactor::Right {
+                        current.highest_branch = BalanceFactor::Balanced;
                         break;
                     }
 
-                    current.balance_factor = BalanceFactor::Left;
+                    current.highest_branch = BalanceFactor::Left;
                     parent = current.parent;
                     child = core::ptr::NonNull::from(current);
                     continue;
@@ -178,8 +178,8 @@ struct Node<T> {
     /// The underlying element.
     element: T,
 
-    /// The difference between the [`left`] and [`right`] subtrees.
-    balance_factor: BalanceFactor,
+    /// Which branch has the subtree with the greatest height.
+    highest_branch: BalanceFactor,
 
     /// The parent of `self`, if any.
     parent: Option<core::ptr::NonNull<Node<T>>>,
@@ -332,7 +332,7 @@ mod test {
 
                     assert!(instance.insert(0).is_ok());
 
-                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+                    assert!(instance.root.is_some_and(|node| node.highest_branch == BalanceFactor::Balanced));
                 }
 
                 #[test]
@@ -345,7 +345,7 @@ mod test {
                     // Insert a left child.
                     assert!(instance.insert(-1).is_ok());
 
-                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Left));
+                    assert!(instance.root.is_some_and(|node| node.highest_branch == BalanceFactor::Left));
                 }
 
                 #[test]
@@ -358,7 +358,7 @@ mod test {
                     // Insert a right child.
                     assert!(instance.insert(1).is_ok());
 
-                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Right));
+                    assert!(instance.root.is_some_and(|node| node.highest_branch == BalanceFactor::Right));
                 }
 
                 #[test]
@@ -374,7 +374,7 @@ mod test {
                     // Insert a left child.
                     assert!(instance.insert(-1).is_ok());
 
-                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+                    assert!(instance.root.is_some_and(|node| node.highest_branch == BalanceFactor::Balanced));
                 }
 
                 #[test]
@@ -390,7 +390,7 @@ mod test {
                     // Insert a right child.
                     assert!(instance.insert(1).is_ok());
 
-                    assert!(instance.root.is_some_and(|node| node.balance_factor == BalanceFactor::Balanced));
+                    assert!(instance.root.is_some_and(|node| node.highest_branch == BalanceFactor::Balanced));
                 }
             }
 
