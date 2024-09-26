@@ -176,8 +176,13 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 /// Which branch of a [`Node`] has the subtree with the greatest height.
 #[derive(Debug, PartialEq, Eq)]
 enum BalanceFactor {
+    /// Both branches of this [`Node`] have the same height.
     Balanced,
+
+    /// The left branch of this [`Node`] has height one longer than the right.
     Left,
+
+    /// The right branch of this [`Node`] has height one longer than the left.
     Right,
 }
 
