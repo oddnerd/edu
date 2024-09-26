@@ -65,15 +65,15 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             (core::ptr::NonNull::from(branch.insert(node).as_mut()), parent)
         };
 
+        // The following loop walks up the ancestors of the inserted node.
+        // However, we need to know which branch we ascended via, so we
+        // maintain the address of the previous iteration, i.e., the child
+        // of the current parent, so we can compare without reference aliasing.
         let mut child = inserted;
 
         while let Some(mut current) = parent {
-            // X is current
-            // Z is child
-
             // SAFETY: no other references to this node exist.
             let current = unsafe { current.as_mut() };
-
 
             #[allow(clippy::redundant_else)]
             #[allow(clippy::branches_sharing_code)]
