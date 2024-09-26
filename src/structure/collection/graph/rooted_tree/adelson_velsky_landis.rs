@@ -76,65 +76,73 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             let current = unsafe { current.as_mut() };
 
             // TODO: re-enable these lints
+            // TODO: I'd prefer to arbitrarily check left then right.
             #[allow(clippy::redundant_else)]
             #[allow(clippy::branches_sharing_code)]
             if current.right.as_deref_mut().is_some_and(|node| core::ptr::addr_eq(node, child.as_ptr())) {
-                // child is the right branch of parent.
-
+                // We ascended via the right branch of the current ancestor.
 
                 if current.highest_branch == BalanceFactor::Right {
-                    // The current node is right-heavy, needs rebalancing.
-
-                    let grand_parent = current.parent;
+                    // The insertion has resulted in the right branch of this
+                    // ancestor being unbalanced.
 
                     if current.right.as_deref_mut().is_some_and(|right| right.highest_branch == BalanceFactor::Left) {
                         // ROTATE RIGHT-LEFT
-                        // Double rotation: Right(Z) then Left(X)
+                        // Double rotation: Right(child) then Left(parent)
                         eprintln!("ROTATE RIGHT-LEFT"); break;
                     } else {
                         eprintln!("ROTATE LEFT"); break;
                         // ROTATE LEFT
-                        // Single rotation Left(X)
+                        // Single rotation Left(parent)
                     }
-
-                    // ??? After rotation adapt parent link ???
                 } else {
                     if current.highest_branch == BalanceFactor::Left {
+                        // This ancestor was previously left-heavy, but the
+                        // insertion extended the right branch thereby
+                        // balancing this subtree, to there is no rebalancing
+                        // necessary.
+
                         current.highest_branch = BalanceFactor::Balanced;
                         break;
                     }
 
                     current.highest_branch = BalanceFactor::Right;
+
+                    // TODO: shared code can be placed at the end of the loop?
                     parent = current.parent;
                     child = core::ptr::NonNull::from(current);
                     continue;
                 }
             } else {
-                // child is the left branch of parent.
+                // We ascended via the left branch of the current ancestor.
 
                 if current.highest_branch == BalanceFactor::Left {
-                    // The current node is left-heavy, needs rebalancing.
-
-                    let grand_parent = current.parent;
+                    // The insertion has resulted in the left branch of this
+                    // ancestor being unbalanced.
 
                     if current.left.as_deref_mut().is_some_and(|left| left.highest_branch == BalanceFactor::Right) {
                         // ROTATE LEFT-RIGHT
-                        // Double rotation: Left(Z) then Right(X)
+                        // Double rotation: Left(child) then Right(parent)
                         eprintln!("ROTATE LEFT-RIGHT"); break;
                     } else {
                         eprintln!("ROTATE RIGHT"); break;
                         // ROTATE RIGHT
-                        // Single rotation Right(X)
+                        // Single rotation Right(parent)
                     }
-
-                    // ??? After rotation adapt parent link ???
                 } else {
                     if current.highest_branch == BalanceFactor::Right {
+                        // This ancestor was previously right-heavy, but the
+                        // insertion extended the left branch thereby
+                        // balancing this subtree, to there is no rebalancing
+                        // necessary.
+
                         current.highest_branch = BalanceFactor::Balanced;
                         break;
                     }
 
                     current.highest_branch = BalanceFactor::Left;
+
+                    // TODO: shared code can be placed at the end of the loop?
                     parent = current.parent;
                     child = core::ptr::NonNull::from(current);
                     continue;
