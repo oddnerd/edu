@@ -35,40 +35,149 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!()
     /// ```
     pub fn insert(&mut self, element: T) -> Result<&mut T, (T, &mut T)> {
-        let mut parent_ptr = None;
+        let (mut inserted, mut parent) = {
+            let mut parent = None;
+            let mut branch = &mut self.root;
 
-        let mut current = &mut self.root;
+            while let &mut Some(ref mut node) = branch {
+                parent = Some(core::ptr::NonNull::from(node.as_mut()));
 
-        while let &mut Some(ref mut parent) = current {
-            parent_ptr = Some(core::ptr::from_mut(parent.as_mut()));
+                branch = match element.cmp(&node.element) {
+                    core::cmp::Ordering::Less => &mut node.left,
+                    core::cmp::Ordering::Greater => &mut node.right,
+                    core::cmp::Ordering::Equal => return Err((element, &mut node.element)),
+                };
+            }
 
-            current = match element.cmp(&parent.element) {
-                core::cmp::Ordering::Less => &mut parent.left,
-                core::cmp::Ordering::Greater => &mut parent.right,
-                core::cmp::Ordering::Equal => return Err((element, &mut parent.element)),
-            };
+            let node = Box::new(Node {
+                element,
+                parent,
+                balance_factor: 0,
+                left: None,
+                right: None,
+            });
+
+            (core::ptr::NonNull::from(branch.insert(node).as_mut()), parent)
+        };
+
+        let mut child = inserted;
+
+        while let Some(mut current) = parent {
+            // X is current
+            // Z is child
+
+            // SAFETY: no other references to this node exist.
+            let current = unsafe { current.as_mut() };
+
+
+            #[allow(clippy::redundant_else)]
+            #[allow(clippy::branches_sharing_code)]
+            if current.right.as_deref_mut().is_some_and(|node| core::ptr::addr_eq(node, child.as_ptr())) {
+                // child is the right branch of parent.
+
+
+                if current.balance_factor == BalanceFactor::Right {
+                    // The current node is right-heavy, needs rebalancing.
+
+                    let grand_parent = current.parent;
+
+                    if current.right.as_deref_mut().is_some_and(|right| right.balance_factor == BalanceFactor::Left) {
+                        // ROTATE RIGHT-LEFT
+                        // Double rotation: Right(Z) then Left(X)
+                        eprintln!("ROTATE RIGHT-LEFT"); break;
+                    } else {
+                        eprintln!("ROTATE LEFT"); break;
+                        // ROTATE LEFT
+                        // Single rotation Left(X)
+                    }
+
+                    // ??? After rotation adapt parent link ???
+                } else {
+                    if current.balance_factor == BalanceFactor::Left {
+                        current.balance_factor = BalanceFactor::Balanced;
+                        break;
+                    }
+
+                    current.balance_factor = BalanceFactor::Right;
+                    parent = current.parent;
+                    child = core::ptr::NonNull::from(current);
+                    continue;
+                }
+            } else {
+                // child is the left branch of parent.
+
+                if current.balance_factor == BalanceFactor::Left {
+                    // The current node is left-heavy, needs rebalancing.
+
+                    let grand_parent = current.parent;
+
+                    if current.left.as_deref_mut().is_some_and(|left| left.balance_factor == BalanceFactor::Right) {
+                        // ROTATE LEFT-RIGHT
+                        // Double rotation: Left(Z) then Right(X)
+                        eprintln!("ROTATE LEFT-RIGHT"); break;
+                    } else {
+                        eprintln!("ROTATE RIGHT"); break;
+                        // ROTATE RIGHT
+                        // Single rotation Right(X)
+                    }
+
+                    // ??? After rotation adapt parent link ???
+                } else {
+                    if current.balance_factor == BalanceFactor::Right {
+                        current.balance_factor = BalanceFactor::Balanced;
+                        break;
+                    }
+
+                    current.balance_factor = BalanceFactor::Left;
+                    parent = current.parent;
+                    child = core::ptr::NonNull::from(current);
+                    continue;
+                }
+            }
+
+
+            // // After a rotation adapt parent link:
+            // // N is the new root of the rotated subtree
+            // // Height does not change: Height(N) == old Height(X)
+            // parent(N) = G;
+            // if (G != null) {
+            //     if (X == left_child(G))
+            //         left_child(G) = N;
+            //     else
+            //         right_child(G) = N;
+            // } else
+            //     tree->root = N; // N is the new root of the total tree
+            // break;
+            // // There is no fall thru, only break; or continue;
+
         }
 
-        let node = Box::new(Node {
-            element,
-            parent: parent_ptr,
-            left: None,
-            right: None,
-        });
+        // SAFETY: no other reference to this node exists.
+        let inserted = unsafe { inserted.as_mut() };
 
-        let node = current.insert(node);
-
-        Ok(&mut node.element)
+        Ok(&mut inserted.element)
     }
 }
 
+/// Which branch of a [`Node`] has the subtree with the greatest height.
+#[derive(Debug, PartialEq, Eq)]
+enum BalanceFactor {
+    Balanced,
+    Left,
+    Right,
+}
+
 /// An instantiated element within a [`AdelsonVelskyLandis`].
+#[derive(Debug)] // TODO: manually implement this.
 struct Node<T> {
     /// The underlying element.
     element: T,
 
+    /// The difference between the [`left`] and [`right`] subtrees.
+    balance_factor: BalanceFactor,
+
     /// The parent of `self`, if any.
-    parent: Option<*mut Node<T>>,
+    parent: Option<core::ptr::NonNull<Node<T>>>,
 
     /// The left child, if any.
     left: Option<Box<Node<T>>>,
