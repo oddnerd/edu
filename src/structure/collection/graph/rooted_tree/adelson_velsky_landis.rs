@@ -75,6 +75,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             // SAFETY: no other references to this node exist.
             let current = unsafe { current.as_mut() };
 
+            // TODO: re-enable these lints
             #[allow(clippy::redundant_else)]
             #[allow(clippy::branches_sharing_code)]
             if current.right.as_deref_mut().is_some_and(|node| core::ptr::addr_eq(node, child.as_ptr())) {
