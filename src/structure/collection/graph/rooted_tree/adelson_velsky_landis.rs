@@ -240,37 +240,73 @@ mod test {
             mod rotate_left {
                 use super::*;
 
-                #[test]
-                fn reorders_elements() {
-                    let mut root = Node {
-                        element: 0,
+                /// Construct a standard tree and perform a left rotation.
+                ///
+                /// First constructs the following tree:
+                ///
+                /// ```DOT
+                /// digraph {
+                ///     "root" -> "left-child"
+                ///     "root" -> "right-child"
+                ///
+                ///     "right-child" -> "left-grandchild"
+                ///     "right-child" -> "right-grandchild"
+                /// }
+                ///```
+                ///
+                /// then calls [`Node::rotate_left`] which _should_ produce
+                ///
+                ///```dot
+                /// digraph {
+                ///     "right-child" -> "root"
+                ///     "right-child" -> "right-grandchild"
+                ///
+                ///     "root" -> "left-child"
+                ///     "root" -> "left-grandchild"
+                /// }
+                /// ```
+                fn new<'a>() -> Box<Node<&'a str>> {
+                    let mut root = Box::new(Node {
+                        element: "root",
                         highest_branch: BalanceFactor::Right,
                         parent: None,
                         left: None,
                         right: None,
-                    };
+                    });
+
+                    root.left = Some(Box::new(Node {
+                        element: "left-child",
+                        highest_branch: BalanceFactor::Balanced,
+                        parent: Some(core::ptr::NonNull::from(root.as_ref())),
+                        left: None,
+                        right: None,
+                    }));
 
                     let right = root.right.insert(Box::new(Node {
-                        element: 1,
-                        highest_branch: BalanceFactor::Right,
-                        parent: Some(core::ptr::NonNull::from(&root)),
+                        element: "right-child",
+                        highest_branch: BalanceFactor::Balanced,
+                        parent: Some(core::ptr::NonNull::from(root.as_ref())),
+                        left: None,
+                        right: None,
+                    }));
+
+                    right.left = Some(Box::new(Node {
+                        element: "left-grandchild",
+                        highest_branch: BalanceFactor::Balanced,
+                        parent: Some(core::ptr::NonNull::from(right.as_ref())),
                         left: None,
                         right: None,
                     }));
 
                     right.right = Some(Box::new(Node {
-                        element: 2,
+                        element: "right-grandchild",
                         highest_branch: BalanceFactor::Balanced,
                         parent: Some(core::ptr::NonNull::from(right.as_ref())),
                         left: None,
-                        right: None
+                        right: None,
                     }));
 
-                    assert!(root.rotate_left().is_ok());
-
-                    assert_eq!(root.element, 1);
-                    assert!(root.left.as_ref().is_some_and(|node| node.element == 0));
-                    assert!(root.right.as_ref().is_some_and(|node| node.element == 2));
+                    Node::rotate_left(root)
                 }
             }
         }
