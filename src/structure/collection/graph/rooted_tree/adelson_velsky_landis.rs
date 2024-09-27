@@ -308,6 +308,24 @@ mod test {
 
                     Node::rotate_left(root)
                 }
+
+                #[test]
+                fn elements_are_reordered() {
+                    let root = new();
+                    assert_eq!(root.element, "right-child");
+
+                    let right = root.right.unwrap();
+                    assert_eq!(right.element, "right-grandchild");
+
+                    let left = root.left.unwrap();
+                    assert_eq!(left.element, "root");
+
+                    let left_left = left.left.unwrap();
+                    assert_eq!(left_left.element, "left-child");
+
+                    let left_right = left.right.unwrap();
+                    assert_eq!(left_right.element, "left-grandchild");
+                }
             }
         }
     }
