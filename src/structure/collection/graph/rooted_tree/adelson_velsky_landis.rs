@@ -35,7 +35,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// ```
     /// todo!()
     /// ```
-    pub fn insert(&mut self, element: T) -> Result<(), (T, &mut T)> {
+    pub fn insert(&mut self, element: T) -> Result<(), T> {
         let (mut parent, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
@@ -46,7 +46,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 branch = match element.cmp(&node.element) {
                     core::cmp::Ordering::Less => &mut node.left,
                     core::cmp::Ordering::Greater => &mut node.right,
-                    core::cmp::Ordering::Equal => return Err((element, &mut node.element)),
+                    core::cmp::Ordering::Equal => return Err(element),
                 };
             }
 
@@ -62,24 +62,47 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         };
 
         while let Some(mut current) = parent {
-            // SAFETY: no other references to this node exist.
-            let current = unsafe { current.as_mut() };
+            let current = {
+                let grandparent = {
+                    // SAFETY: no other references to this node exist.
+                    let current = unsafe { current.as_mut() };
 
-            if current.left.as_deref().is_some_and(|left| core::ptr::from_ref(left) == previous.as_ptr()) {
+                    current.parent
+                };
+
+                if let Some(mut grandparent) = grandparent {
+                    // SAFETY: no other references to this node exist.
+                    let grandparent = unsafe { grandparent.as_mut() };
+
+                    if grandparent.left.as_deref().is_some_and(|left| core::ptr::NonNull::from(left) == current) {
+                        &mut grandparent.left
+                    } else {
+                        &mut grandparent.right
+                    }
+                } else {
+                    &mut self.root
+                }
+            };
+
+            let Some(current) = current else {
+                unreachable!("being inside the loop implies there is a child");
+            };
+
+            if current.left.as_deref_mut().is_some_and(|left| core::ptr::from_ref(left) == previous.as_ptr()) {
                 // Ascended via the left branch.
 
                 if current.highest_branch == BalanceFactor::Left {
                     // Insertion made left branch unbalanced.
 
-                    let Some(left) = current.left.as_deref_mut() else {
+                    let Some(left) = current.left.as_mut() else {
                         unreachable!("we ascended via the left branch");
                     };
 
                     if left.highest_branch == BalanceFactor::Right {
-                        left.rotate_left();
+                        Node::rotate_left(left);
                     }
 
-                    current.rotate_right();
+                    Node::rotate_right(current);
                 } else if current.highest_branch == BalanceFactor::Right {
                     // Insertion balanced this right-heavy node.
 
@@ -89,21 +112,22 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                     // No imbalance yet, propagate balance factor up ancestors.
                     current.highest_branch = BalanceFactor::Left;
                 }
+
             } else {
                 // Ascended via the right branch.
 
                 if current.highest_branch == BalanceFactor::Right {
                     // Insertion made right branch unbalanced.
 
-                    let Some(right) = current.right.as_deref_mut() else {
+                    let Some(right) = current.right.as_mut() else {
                         unreachable!("we ascended via the right branch");
                     };
 
                     if right.highest_branch == BalanceFactor::Left {
-                        right.rotate_right();
+                        Node::rotate_right(right);
                     }
 
-                    current.rotate_left();
+                    Node::rotate_left(current);
                 } else if current.highest_branch == BalanceFactor::Left {
                     // Insertion balanced this left-heavy node.
 
@@ -116,7 +140,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             }
 
             parent = current.parent;
-            previous = core::ptr::NonNull::from(current);
+            previous = core::ptr::NonNull::from(current.as_mut());
         }
 
         Ok(())
@@ -165,26 +189,20 @@ impl<T> Node<T> {
     /// ```
     /// todo!()
     /// ```
-    fn rotate_left(&mut self) {
-        let Some(mut right) = self.right.take() else {
-            panic!()
+    fn rotate_left(branch: &mut Box<Node<T>>) {
+        let Some(mut right) = branch.right.take() else {
+            panic!(); // TODO: handle this more gracefully?
         };
 
-        core::mem::swap(&mut self.element, &mut right.element);
-
-        if let Some(mut right_right) = right.right {
-            right_right.parent = right.parent;
-            self.right = Some(right_right);
+        if let Some(mut right_left) = right.left.take() {
+            right_left.parent = Some(core::ptr::NonNull::from(branch.as_mut()));
+            branch.right = Some(right_left);
         }
 
-        right.right = right.left.take();
+        core::mem::swap(branch, &mut right);
+        core::mem::swap(&mut branch.parent, &mut right.parent);
 
-        if let Some(mut left) = self.left.take() {
-            left.parent = Some(core::ptr::NonNull::from(right.as_ref()));
-            right.left = Some(left);
-        }
-
-        self.left = Some(right);
+        branch.left = Some(right);
     }
 
     /// TODO
@@ -196,26 +214,20 @@ impl<T> Node<T> {
     /// ```
     /// todo!()
     /// ```
-    fn rotate_right(&mut self) {
-        let Some(mut left) = self.left.take() else {
-            panic!()
+    fn rotate_right(branch: &mut Box<Node<T>>) {
+        let Some(mut left) = branch.left.take() else {
+            panic!(); // TODO: handle this more gracefully?
         };
 
-        core::mem::swap(&mut self.element, &mut left.element);
-
-        if let Some(mut left_left) = left.left {
-            left_left.parent = left.parent;
-            self.left = Some(left_left);
+        if let Some(mut left_right) = left.right.take() {
+            left_right.parent = Some(core::ptr::NonNull::from(branch.as_mut()));
+            branch.left = Some(left_right);
         }
 
-        left.left = left.right.take();
+        core::mem::swap(branch, &mut left);
+        core::mem::swap(&mut branch.parent, &mut left.parent);
 
-        if let Some(mut right) = self.right.take() {
-            right.parent = Some(core::ptr::NonNull::from(left.as_ref()));
-            left.right = Some(right);
-        }
-
-        self.right = Some(left);
+        branch.right = Some(left);
     }
 }
 
