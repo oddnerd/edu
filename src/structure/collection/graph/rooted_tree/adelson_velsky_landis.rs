@@ -336,35 +336,31 @@ mod test {
                 assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
             }
 
-            mod errors {
-                use super::*;
+            #[test]
+            fn errors_when_equivalent_element_is_already_contained() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                #[test]
-                fn when_equivalent_element_already_contained() {
-                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+                assert!(instance.insert(12345).is_ok());
 
-                    assert!(instance.insert(12345).is_ok());
+                assert!(instance.insert(12345).is_err());
+            }
 
-                    assert!(instance.insert(12345).is_err());
-                }
+            #[test]
+            fn error_yields_new_element() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                #[test]
-                fn yields_new_element() {
-                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+                assert!(instance.insert(12345).is_ok());
 
-                    assert!(instance.insert(12345).is_ok());
+                assert!(instance.insert(12345).is_err_and(|error| error.0 == 12345));
+            }
 
-                    assert!(instance.insert(12345).is_err_and(|error| error.0 == 12345));
-                }
+            #[test]
+            fn error_yields_existing_equivalent_element() {
+                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
 
-                #[test]
-                fn yields_existing_equivalent_element() {
-                    let mut instance = AdelsonVelsoLandis::<i32> { root: None };
+                assert!(instance.insert(12345).is_ok());
 
-                    assert!(instance.insert(12345).is_ok());
-
-                    assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
-                }
+                assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
             }
 
             mod left_rotate {
