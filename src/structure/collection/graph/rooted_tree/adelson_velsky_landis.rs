@@ -35,7 +35,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// ```
     /// todo!()
     /// ```
-    pub fn insert(&mut self, element: T) -> Result<&mut T, (T, &mut T)> {
+    pub fn insert(&mut self, element: T) -> Result<(), (T, &mut T)> {
         let (mut parent, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
@@ -119,7 +119,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             previous = core::ptr::NonNull::from(current);
         }
 
-        todo!()
+        Ok(())
     }
 }
 
@@ -269,15 +269,6 @@ mod test {
                 assert!(instance.insert(expected).is_ok());
 
                 assert!(instance.root.is_some_and(|node| node.element == expected));
-            }
-
-            #[test]
-            fn yields_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                let mut expected = 12345;
-
-                assert!(instance.insert(expected).is_ok_and(|actual| actual == &mut expected));
             }
 
             #[test]
