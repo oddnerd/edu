@@ -326,6 +326,24 @@ mod test {
                     let left_right = left.right.unwrap();
                     assert_eq!(left_right.element, "left-grandchild");
                 }
+
+                #[test]
+                fn parents_are_updated() {
+                    let root = new();
+                    assert!(root.parent.is_none());
+
+                    let right = root.right.as_ref().unwrap();
+                    assert_eq!(right.parent, Some(core::ptr::NonNull::from(root.as_ref())));
+
+                    let left = root.left.as_ref().unwrap();
+                    assert_eq!(left.parent, Some(core::ptr::NonNull::from(root.as_ref())));
+
+                    let left_left = left.left.as_ref().unwrap();
+                    assert_eq!(left_left.parent, Some(core::ptr::NonNull::from(left.as_ref())));
+
+                    let left_right = left.right.as_ref().unwrap();
+                    assert_eq!(left_right.parent, Some(core::ptr::NonNull::from(left.as_ref())));
+                }
             }
         }
     }
