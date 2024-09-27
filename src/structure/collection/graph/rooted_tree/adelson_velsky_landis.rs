@@ -216,8 +216,21 @@ impl<T> Node<T> {
     /// ```
     /// todo!()
     /// ```
-    fn rotate_left(root: Box<Self>) -> Box<Self> {
-        todo!()
+    fn rotate_left(mut root: Box<Self>) -> Box<Self> {
+        let Some(mut right) = root.right.take() else {
+            panic!()
+        };
+
+        if let Some(mut right_left) = right.left.take() {
+            right_left.parent = Some(core::ptr::NonNull::from(root.as_ref()));
+            root.right = Some(right_left);
+        }
+
+        core::mem::swap(&mut right.parent, &mut root.parent);
+
+        right.left = Some(root);
+
+        right
     }
 
     /// TODO
