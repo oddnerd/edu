@@ -18,6 +18,7 @@ pub struct AdelsonVelsoLandis<T> {
 }
 
 impl<T: Ord> AdelsonVelsoLandis<T> {
+
     /// Add a new [`Node`] with value `element`.
     ///
     /// # Errors
@@ -35,17 +36,12 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!()
     /// ```
     pub fn insert(&mut self, element: T) -> Result<&mut T, (T, &mut T)> {
-        // Insert the element into position, potentially unbalancing some
-        // ancestor. This yields the parent which can be traversed up to the
-        // root to detect imbalances, alongside the node containing the new
-        // element so a reference to it can be returned after rebalancing.
-        // This uses pointers and indirection to prevent aliasing references.
-        let (mut inserted, mut parent) = {
+        let (mut parent, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
 
             while let &mut Some(ref mut node) = branch {
-                parent = Some(core::ptr::NonNull::from(node.as_mut()));
+                parent = Some(core::ptr::NonNull::from(node.as_ref()));
 
                 branch = match element.cmp(&node.element) {
                     core::cmp::Ordering::Less => &mut node.left,
@@ -54,123 +50,76 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 };
             }
 
-            let node = Box::new(Node {
+            let child = branch.insert(Box::new(Node {
                 element,
                 parent,
                 highest_branch: BalanceFactor::Balanced,
                 left: None,
                 right: None,
-            });
+            }));
 
-            // TODO: the inserted node might move when rebalanced, I think?
-            (core::ptr::NonNull::from(branch.insert(node).as_mut()), parent)
+            (parent, core::ptr::NonNull::from(child.as_ref()))
         };
-
-        // The following loop walks up the ancestors of the inserted node.
-        // However, we need to know which branch we ascended via, so we
-        // maintain the address of the previous iteration, i.e., the child
-        // of the current parent, so we can compare without reference aliasing.
-        let mut child = inserted;
 
         while let Some(mut current) = parent {
             // SAFETY: no other references to this node exist.
             let current = unsafe { current.as_mut() };
 
-            // TODO: re-enable these lints
-            // TODO: I'd prefer to arbitrarily check left then right.
-            #[allow(clippy::redundant_else)]
-            #[allow(clippy::branches_sharing_code)]
-            if current.right.as_deref_mut().is_some_and(|node| core::ptr::addr_eq(node, child.as_ptr())) {
-                // We ascended via the right branch of the current ancestor.
-
-                if current.highest_branch == BalanceFactor::Right {
-                    // The insertion has resulted in the right branch of this
-                    // ancestor being unbalanced.
-
-                    if current.right.as_deref_mut().is_some_and(|right| right.highest_branch == BalanceFactor::Left) {
-                        // ROTATE RIGHT-LEFT
-                        // Double rotation: Right(child) then Left(parent)
-                        eprintln!("ROTATE RIGHT-LEFT"); break;
-                    } else {
-                        eprintln!("ROTATE LEFT"); break;
-                        // ROTATE LEFT
-                        // Single rotation Left(parent)
-                    }
-                } else {
-                    if current.highest_branch == BalanceFactor::Left {
-                        // This ancestor was previously left-heavy, but the
-                        // insertion extended the right branch thereby
-                        // balancing this subtree, to there is no rebalancing
-                        // necessary.
-
-                        current.highest_branch = BalanceFactor::Balanced;
-                        break;
-                    }
-
-                    current.highest_branch = BalanceFactor::Right;
-
-                    // TODO: shared code can be placed at the end of the loop?
-                    parent = current.parent;
-                    child = core::ptr::NonNull::from(current);
-                    continue;
-                }
-            } else {
-                // We ascended via the left branch of the current ancestor.
+            if current.left.as_deref().is_some_and(|left| core::ptr::from_ref(left) == previous.as_ptr()) {
+                // Ascended via the left branch.
 
                 if current.highest_branch == BalanceFactor::Left {
-                    // The insertion has resulted in the left branch of this
-                    // ancestor being unbalanced.
+                    // Insertion made left branch unbalanced.
 
-                    if current.left.as_deref_mut().is_some_and(|left| left.highest_branch == BalanceFactor::Right) {
-                        // ROTATE LEFT-RIGHT
-                        // Double rotation: Left(child) then Right(parent)
-                        eprintln!("ROTATE LEFT-RIGHT"); break;
-                    } else {
-                        eprintln!("ROTATE RIGHT"); break;
-                        // ROTATE RIGHT
-                        // Single rotation Right(parent)
+                    let Some(left) = current.left.as_deref_mut() else {
+                        unreachable!("we ascended via the left branch");
+                    };
+
+                    if left.highest_branch == BalanceFactor::Right {
+                        // rotate_left(current.left)
                     }
+
+                    // rotate_right(current);
+                } else if current.highest_branch == BalanceFactor::Right {
+                    // Insertion balanced this right-heavy node.
+
+                    current.highest_branch = BalanceFactor::Balanced;
+                    break;
                 } else {
-                    if current.highest_branch == BalanceFactor::Right {
-                        // This ancestor was previously right-heavy, but the
-                        // insertion extended the left branch thereby
-                        // balancing this subtree, to there is no rebalancing
-                        // necessary.
+                    // No imbalance yet, propagate balance factor up ancestors.
+                    current.highest_branch = BalanceFactor::Left;
+                }
+            } else {
+                // Ascended via the right branch.
 
-                        current.highest_branch = BalanceFactor::Balanced;
-                        break;
+                if current.highest_branch == BalanceFactor::Right {
+                    // Insertion made right branch unbalanced.
+
+                    let Some(right) = current.right.as_deref_mut() else {
+                        unreachable!("we ascended via the right branch");
+                    };
+
+                    if right.highest_branch == BalanceFactor::Left {
+                        // rotate_right(current.right)
                     }
 
-                    current.highest_branch = BalanceFactor::Left;
+                    // rotate_left(current);
+                } else if current.highest_branch == BalanceFactor::Left {
+                    // Insertion balanced this left-heavy node.
 
-                    // TODO: shared code can be placed at the end of the loop?
-                    parent = current.parent;
-                    child = core::ptr::NonNull::from(current);
-                    continue;
+                    current.highest_branch = BalanceFactor::Balanced;
+                    break;
+                } else {
+                    // No imbalance yet, propagate balance factor up ancestors.
+                    current.highest_branch = BalanceFactor::Right;
                 }
             }
 
-
-            // // After a rotation adapt parent link:
-            // // N is the new root of the rotated subtree
-            // // Height does not change: Height(N) == old Height(X)
-            // parent(N) = G;
-            // if (G != null) {
-            //     if (X == left_child(G))
-            //         left_child(G) = N;
-            //     else
-            //         right_child(G) = N;
-            // } else
-            //     tree->root = N; // N is the new root of the total tree
-            // break;
-            // // There is no fall thru, only break; or continue;
-
+            parent = current.parent;
+            previous = core::ptr::NonNull::from(current);
         }
 
-        // SAFETY: no other reference to this node exists.
-        let inserted = unsafe { inserted.as_mut() };
-
-        Ok(&mut inserted.element)
+        todo!()
     }
 }
 
