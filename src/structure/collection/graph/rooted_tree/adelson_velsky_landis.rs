@@ -165,21 +165,26 @@ impl<T> Node<T> {
     /// ```
     /// todo!()
     /// ```
-    fn rotate_left(mut root: Box<Self>) -> Box<Self> {
-        let Some(mut right) = root.right.take() else {
+    fn rotate_left(&mut self) {
+        let Some(mut right) = self.right.take() else {
             panic!()
         };
 
-        if let Some(mut right_left) = right.left.take() {
-            right_left.parent = Some(core::ptr::NonNull::from(root.as_ref()));
-            root.right = Some(right_left);
+        core::mem::swap(&mut self.element, &mut right.element);
+
+        if let Some(mut right_right) = right.right {
+            right_right.parent = right.parent;
+            self.right = Some(right_right);
         }
 
-        core::mem::swap(&mut right.parent, &mut root.parent);
+        right.right = right.left.take();
 
-        right.left = Some(root);
+        if let Some(mut left) = self.left.take() {
+            left.parent = Some(core::ptr::NonNull::from(right.as_ref()));
+            right.left = Some(left);
+        }
 
-        right
+        self.left = Some(right);
     }
 
     /// TODO
@@ -191,21 +196,26 @@ impl<T> Node<T> {
     /// ```
     /// todo!()
     /// ```
-    fn rotate_right(mut root: Box<Self>) -> Box<Self> {
-        let Some(mut left) = root.left.take() else {
+    fn rotate_right(&mut self) {
+        let Some(mut left) = self.left.take() else {
             panic!()
         };
 
-        if let Some(mut left_right) = left.right.take() {
-            left_right.parent = Some(core::ptr::NonNull::from(root.as_ref()));
-            root.left = Some(left_right);
+        core::mem::swap(&mut self.element, &mut left.element);
+
+        if let Some(mut left_left) = left.left {
+            left_left.parent = left.parent;
+            self.left = Some(left_left);
         }
 
-        core::mem::swap(&mut left.parent, &mut root.parent);
+        left.left = left.right.take();
 
-        left.right = Some(root);
+        if let Some(mut right) = self.right.take() {
+            right.parent = Some(core::ptr::NonNull::from(left.as_ref()));
+            left.right = Some(right);
+        }
 
-        left
+        self.right = Some(left);
     }
 }
 
