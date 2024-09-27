@@ -219,6 +219,19 @@ impl<T> Node<T> {
     fn rotate_left(root: Box<Self>) -> Box<Self> {
         todo!()
     }
+
+    /// TODO
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// todo!()
+    /// ```
+    fn rotate_right(root: Box<Self>) -> Box<Self> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
