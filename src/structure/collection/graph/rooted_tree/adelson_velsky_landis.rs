@@ -52,41 +52,27 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
             let child = branch.insert(Box::new(Node {
                 element,
-                parent,
+                parent: (parent, core::ptr::NonNull::dangling()),
                 highest_branch: BalanceFactor::Balanced,
                 left: None,
                 right: None,
             }));
 
+            child.parent.1 = core::ptr::NonNull::from(&mut *child);
+
             (parent, core::ptr::NonNull::from(child.as_ref()))
         };
 
         while let Some(mut current) = parent {
-            let current = {
-                let grandparent = {
-                    // SAFETY: no other references to this node exist.
-                    let current = unsafe { current.as_mut() };
+            let (next, mut current) = {
+                // SAFETY: no other reference exists to alias.
+                let current = unsafe { current.as_mut() };
 
-                    current.parent
-                };
-
-                if let Some(mut grandparent) = grandparent {
-                    // SAFETY: no other references to this node exist.
-                    let grandparent = unsafe { grandparent.as_mut() };
-
-                    if grandparent.left.as_deref().is_some_and(|left| core::ptr::NonNull::from(left) == current) {
-                        &mut grandparent.left
-                    } else {
-                        &mut grandparent.right
-                    }
-                } else {
-                    &mut self.root
-                }
+                current.parent
             };
 
-            let Some(current) = current else {
-                unreachable!("being inside the loop implies there is a child");
-            };
+            // SAFETY: no other reference exists to alias.
+            let current = unsafe { current.as_mut() };
 
             if current.left.as_deref_mut().is_some_and(|left| core::ptr::from_ref(left) == previous.as_ptr()) {
                 // Ascended via the left branch.
@@ -139,7 +125,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 }
             }
 
-            parent = current.parent;
+            parent = next;
             previous = core::ptr::NonNull::from(current.as_mut());
         }
 
@@ -170,7 +156,7 @@ struct Node<T> {
     highest_branch: BalanceFactor,
 
     /// The parent of `self`, if any.
-    parent: Option<core::ptr::NonNull<Node<T>>>,
+    parent: (Option<core::ptr::NonNull<Node<T>>>, core::ptr::NonNull<Box<Node<T>>>),
 
     /// The left child, if any.
     left: Option<Box<Node<T>>>,
