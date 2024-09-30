@@ -36,6 +36,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!()
     /// ```
     pub fn insert(&mut self, element: T) -> Result<(), T> {
+        // Insert the element, potentially unbalancing `self`.
         let (mut parent, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
@@ -52,31 +53,24 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
             let child = branch.insert(Box::new(Node {
                 element,
-                parent: (parent, core::ptr::NonNull::dangling()),
+                parent,
                 highest_branch: BalanceFactor::Balanced,
                 left: None,
                 right: None,
             }));
 
-            child.parent.1 = core::ptr::NonNull::from(&mut *child);
-
             (parent, core::ptr::NonNull::from(child.as_ref()))
         };
 
-        while let Some(mut current) = parent {
-            let (next, mut current) = {
-                // SAFETY: no other reference exists to alias.
-                let current = unsafe { current.as_mut() };
-
-                current.parent
-            };
-
-            // SAFETY: no other reference exists to alias.
-            let current = unsafe { current.as_mut() };
+        // Find unbalanced ancestor, if any.
+        while let Some(mut current_ptr) = parent {
+            // SAFETY: no other reference to this node exists to alias.
+            let current = unsafe { current_ptr.as_mut() };
 
             if current.left.as_deref_mut().is_some_and(|left| core::ptr::from_ref(left) == previous.as_ptr()) {
                 // Ascended via the left branch.
 
+                #[allow(clippy::redundant_else)]
                 if current.highest_branch == BalanceFactor::Left {
                     // Insertion made left branch unbalanced.
 
@@ -88,7 +82,27 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         Node::rotate_left(left);
                     }
 
-                    Node::rotate_right(current);
+                    let branch = if let Some(mut grandparent) = current.parent {
+                        // SAFETY: no other reference to this node exists to alias.
+                        let grandparent = unsafe { grandparent.as_mut() };
+
+                        // TODO: dereferencing left causes aliasing references, does it not?
+                        if grandparent.left.as_deref_mut().is_some_and(|node| core::ptr::eq(&*node, current)) {
+                            grandparent.left.as_mut()
+                        } else {
+                            grandparent.right.as_mut()
+                        }
+                    } else {
+                        self.root.as_mut()
+                    };
+
+                    let Some(current_box) = branch else {
+                        unreachable!("the current node exists");
+                    };
+
+                    Node::rotate_right(current_box);
+
+                    break;
                 } else if current.highest_branch == BalanceFactor::Right {
                     // Insertion balanced this right-heavy node.
 
@@ -102,6 +116,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             } else {
                 // Ascended via the right branch.
 
+                #[allow(clippy::redundant_else)]
                 if current.highest_branch == BalanceFactor::Right {
                     // Insertion made right branch unbalanced.
 
@@ -113,7 +128,27 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         Node::rotate_right(right);
                     }
 
-                    Node::rotate_left(current);
+                    let branch = if let Some(mut grandparent) = current.parent {
+                        // SAFETY: no other reference to this node exists to alias.
+                        let grandparent = unsafe { grandparent.as_mut() };
+
+                        // TODO: dereferencing left causes aliasing references, does it not?
+                        if grandparent.left.as_deref_mut().is_some_and(|node| core::ptr::eq(&*node, current)) {
+                            grandparent.left.as_mut()
+                        } else {
+                            grandparent.right.as_mut()
+                        }
+                    } else {
+                        self.root.as_mut()
+                    };
+
+                    let Some(current_box) = branch else {
+                        unreachable!("the current node exists");
+                    };
+
+                    Node::rotate_left(current_box);
+
+                    break;
                 } else if current.highest_branch == BalanceFactor::Left {
                     // Insertion balanced this left-heavy node.
 
@@ -125,8 +160,8 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 }
             }
 
-            parent = next;
-            previous = core::ptr::NonNull::from(current.as_mut());
+            previous = current_ptr;
+            parent = current.parent;
         }
 
         Ok(())
@@ -156,7 +191,7 @@ struct Node<T> {
     highest_branch: BalanceFactor,
 
     /// The parent of `self`, if any.
-    parent: (Option<core::ptr::NonNull<Node<T>>>, core::ptr::NonNull<Box<Node<T>>>),
+    parent: Option<core::ptr::NonNull<Node<T>>>,
 
     /// The left child, if any.
     left: Option<Box<Node<T>>>,
