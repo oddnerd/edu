@@ -14,162 +14,184 @@ use super::RootedTree;
 /// See Also: [Wikipedia](https://en.wikipedia.org/wiki/AVL_tree).
 pub struct AdelsonVelsoLandis<T> {
     /// The [`Node`] that is defined as the root.
-    root: Option<Box<Node<T>>>,
+    root: Option<core::ptr::NonNull<Node<T>>>,
 }
 
 impl<T: Ord> AdelsonVelsoLandis<T> {
 
-    /// Add a new [`Node`] with value `element`.
-    ///
-    /// # Errors
-    /// Yields the `element` if an equivalent one is already contained,
-    /// alongside a mutable reference to the contained equivalent element.
-    ///
-    /// # Panics
-    /// The Rust runtime might panic or otherwise abort if allocation fails.
-    ///
-    /// # Performance
-    /// This method takes O(log N) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// todo!()
-    /// ```
-    pub fn insert(&mut self, element: T) -> Result<(), T> {
-        // Insert the element, potentially unbalancing `self`.
-        let (mut parent, mut previous) = {
+    /// TODO
+    pub fn insert(&mut self, element: T) -> Result<&T, (T, &T)> {
+        // Insert the element as if a non-balancing binary search tree.
+        let (mut current, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
 
-            while let &mut Some(ref mut node) = branch {
-                parent = Some(core::ptr::NonNull::from(node.as_ref()));
+            while let &mut Some(mut node) = branch {
+                parent = Some(node);
+
+                // SAFETY: no other reference to this node exists to alias.
+                let node = unsafe { node.as_mut() };
 
                 branch = match element.cmp(&node.element) {
                     core::cmp::Ordering::Less => &mut node.left,
                     core::cmp::Ordering::Greater => &mut node.right,
-                    core::cmp::Ordering::Equal => return Err(element),
-                };
+                    core::cmp::Ordering::Equal => return Err((element, &node.element)),
+                }
             }
 
-            let child = branch.insert(Box::new(Node {
+            let Some(new) = core::ptr::NonNull::new(Box::into_raw(Box::new(Node {
                 element,
                 parent,
                 highest_branch: BalanceFactor::Balanced,
                 left: None,
                 right: None,
-            }));
+            }))) else {
+                unreachable!("Box panics if allocation fails, hence not null");
+            };
 
-            (parent, core::ptr::NonNull::from(child.as_ref()))
+            (parent, *branch.insert(new))
         };
 
-        // Find unbalanced ancestor, if any.
-        while let Some(mut current_ptr) = parent {
-            // SAFETY: no other reference to this node exists to alias.
-            let current = unsafe { current_ptr.as_mut() };
+        let inserted = previous;
 
-            if current.left.as_deref_mut().is_some_and(|left| core::ptr::from_ref(left) == previous.as_ptr()) {
+        // Ascend ancestors of the inserted element to find unbalanced node.
+        while let Some(mut ancestor) = current {
+            // SAFETY: no other reference to this node exists to alias.
+            if unsafe { ancestor.as_ref() }.left.is_some_and(|left| left == previous) {
                 // Ascended via the left branch.
 
-                #[allow(clippy::redundant_else)]
-                if current.highest_branch == BalanceFactor::Left {
-                    // Insertion made left branch unbalanced.
+                // SAFETY: no other reference to this node exists to alias.
+                let Some(child) = unsafe { ancestor.as_ref() }.left else {
+                    unreachable!("ascended via the left branch");
+                };
 
-                    let Some(left) = current.left.as_mut() else {
-                        unreachable!("we ascended via the left branch");
-                    };
+                // SAFETY: no other reference to this node exists to alias.
+                match unsafe { ancestor.as_ref() }.highest_branch {
+                    BalanceFactor::Left => {
+                        // Inserted into left branch, but it was was already
+                        // longer than the right branch, so rotation needed.
 
-                    if left.highest_branch == BalanceFactor::Right {
-                        Node::rotate_left(left);
-                    }
-
-                    let branch = if let Some(mut grandparent) = current.parent {
                         // SAFETY: no other reference to this node exists to alias.
-                        let grandparent = unsafe { grandparent.as_mut() };
-
-                        // TODO: dereferencing left causes aliasing references, does it not?
-                        if grandparent.left.as_deref_mut().is_some_and(|node| core::ptr::eq(&*node, current)) {
-                            grandparent.left.as_mut()
-                        } else {
-                            grandparent.right.as_mut()
+                        if unsafe { child.as_ref() }.highest_branch == BalanceFactor::Right {
+                            // SAFETY: no other reference to this node exists to alias.
+                            unsafe { ancestor.as_mut() }.left = Some(Node::rotate_left(child));
                         }
-                    } else {
-                        self.root.as_mut()
-                    };
 
-                    let Some(current_box) = branch else {
-                        unreachable!("the current node exists");
-                    };
+                        // SAFETY: no other reference to this node exists to alias.
+                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
+                            // SAFETY: no other reference to this node exists to alias.
+                            let parent = unsafe { parent.as_mut() };
 
-                    Node::rotate_right(current_box);
+                            if parent.left.is_some_and(|left| left == ancestor) {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.left
+                            } else {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.right
+                            }
+                        } else {
+                            &mut self.root
+                        };
 
-                    break;
-                } else if current.highest_branch == BalanceFactor::Right {
-                    // Insertion balanced this right-heavy node.
+                        *branch = Some(Node::rotate_right(ancestor));
 
-                    current.highest_branch = BalanceFactor::Balanced;
-                    break;
-                } else {
-                    // No imbalance yet, propagate balance factor up ancestors.
-                    current.highest_branch = BalanceFactor::Left;
+                        // The rotation balanced the tree.
+                        break;
+                    },
+                    BalanceFactor::Right => {
+                        // Inserted into left branch, but the right branch was
+                        // the longer branch, so now both are balanced.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Balanced;
+
+                        // Further ancestors retain existing balance factors.
+                        break;
+                    },
+                    BalanceFactor::Balanced => {
+                        // Inserted into the left branch, but both branches
+                        // were equal length, so only rotating a higher
+                        // ancestor could equalize their heights.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Left;
+                    },
                 }
-
             } else {
                 // Ascended via the right branch.
 
-                #[allow(clippy::redundant_else)]
-                if current.highest_branch == BalanceFactor::Right {
-                    // Insertion made right branch unbalanced.
+                // SAFETY: no other reference to this node exists to alias.
+                let Some(child) = unsafe { ancestor.as_ref() }.right else {
+                    unreachable!("ascended via the right branch");
+                };
 
-                    let Some(right) = current.right.as_mut() else {
-                        unreachable!("we ascended via the right branch");
-                    };
+                // SAFETY: no other reference to this node exists to alias.
+                match unsafe { ancestor.as_ref() }.highest_branch {
+                    BalanceFactor::Left => {
+                        // Inserted into right branch, but the left branch was
+                        // the longer branch, so now both are balanced.
 
-                    if right.highest_branch == BalanceFactor::Left {
-                        Node::rotate_right(right);
-                    }
-
-                    let branch = if let Some(mut grandparent) = current.parent {
                         // SAFETY: no other reference to this node exists to alias.
-                        let grandparent = unsafe { grandparent.as_mut() };
+                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Balanced;
 
-                        // TODO: dereferencing left causes aliasing references, does it not?
-                        if grandparent.left.as_deref_mut().is_some_and(|node| core::ptr::eq(&*node, current)) {
-                            grandparent.left.as_mut()
-                        } else {
-                            grandparent.right.as_mut()
+                        // Further ancestors retain existing balance factors.
+                        break;
+                    },
+                    BalanceFactor::Right => {
+                        // Inserted into right branch, but it was was already
+                        // longer than the left branch, so rotation needed.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        if unsafe { child.as_ref() }.highest_branch == BalanceFactor::Left {
+                            // SAFETY: no other reference to this node exists to alias.
+                            unsafe { ancestor.as_mut() }.left = Some(Node::rotate_right(child));
                         }
-                    } else {
-                        self.root.as_mut()
-                    };
 
-                    let Some(current_box) = branch else {
-                        unreachable!("the current node exists");
-                    };
+                        // SAFETY: no other reference to this node exists to alias.
+                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
+                            // SAFETY: no other reference to this node exists to alias.
+                            let parent = unsafe { parent.as_mut() };
 
-                    Node::rotate_left(current_box);
+                            if parent.left.is_some_and(|left| left == ancestor) {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.left
+                            } else {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.right
+                            }
+                        } else {
+                            &mut self.root
+                        };
 
-                    break;
-                } else if current.highest_branch == BalanceFactor::Left {
-                    // Insertion balanced this left-heavy node.
+                        *branch = Some(Node::rotate_left(ancestor));
 
-                    current.highest_branch = BalanceFactor::Balanced;
-                    break;
-                } else {
-                    // No imbalance yet, propagate balance factor up ancestors.
-                    current.highest_branch = BalanceFactor::Right;
+                        // The rotation balanced the tree.
+                        break;
+                    },
+                    BalanceFactor::Balanced => {
+                        // Inserted into the right branch, but both branches
+                        // were equal length, so only rotating a higher
+                        // ancestor could equalize their heights.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Left;
+                    },
                 }
             }
 
-            previous = current_ptr;
-            parent = current.parent;
+            previous = ancestor;
+
+            // SAFETY: no other reference to this node exists to alias.
+            current = unsafe { ancestor.as_ref() }.parent;
         }
 
-        Ok(())
+        // SAFETY: no other reference to this node exists to alias.
+        Ok(&unsafe { inserted.as_ref() }.element)
     }
 }
 
 /// Which branch of a [`Node`] has the subtree with the greatest height.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 enum BalanceFactor {
     /// Both branches of this [`Node`] have the same height.
     Balanced,
@@ -182,7 +204,6 @@ enum BalanceFactor {
 }
 
 /// An instantiated element within a [`AdelsonVelskyLandis`].
-#[derive(Debug)] // TODO: manually implement this.
 struct Node<T> {
     /// The underlying element.
     element: T,
@@ -190,65 +211,68 @@ struct Node<T> {
     /// Which branch has the subtree with the greatest height.
     highest_branch: BalanceFactor,
 
-    /// The parent of `self`, if any.
+    /// The [`Node`] for whom this is the left or right child.
     parent: Option<core::ptr::NonNull<Node<T>>>,
 
     /// The left child, if any.
-    left: Option<Box<Node<T>>>,
+    left: Option<core::ptr::NonNull<Node<T>>>,
 
     /// The right child, if any.
-    right: Option<Box<Node<T>>>,
+    right: Option<core::ptr::NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+#[allow(dead_code)]
+impl<T: Ord> Node<T> {
     /// TODO
-    ///
-    /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// todo!()
-    /// ```
-    fn rotate_left(branch: &mut Box<Node<T>>) {
-        let Some(mut right) = branch.right.take() else {
-            panic!(); // TODO: handle this more gracefully?
+    fn rotate_left(mut root: core::ptr::NonNull<Self>) -> core::ptr::NonNull<Self> {
+        // SAFETY: no other reference to this node exists to alias.
+        let root_node = unsafe { root.as_mut() };
+
+        let Some(mut right) = root_node.right.take() else {
+            panic!("it is a logic error to rotate left without a right child");
         };
 
-        if let Some(mut right_left) = right.left.take() {
-            right_left.parent = Some(core::ptr::NonNull::from(branch.as_mut()));
-            branch.right = Some(right_left);
+        // SAFETY: no other reference to this node exists to alias.
+        let right_node = unsafe { right.as_mut() };
+
+        if let Some(mut right_left) = right_node.left.take() {
+            // SAFETY: no other reference to this node exists to alias.
+            let right_left_node = unsafe { right_left.as_mut() };
+
+            right_left_node.parent = Some(root);
+            root_node.right = Some(right_left);
         }
 
-        core::mem::swap(branch, &mut right);
-        core::mem::swap(&mut branch.parent, &mut right.parent);
+        core::mem::swap(&mut root_node.parent, &mut right_node.parent);
+        right_node.left = Some(root);
 
-        branch.left = Some(right);
+        right
     }
 
     /// TODO
-    ///
-    /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// todo!()
-    /// ```
-    fn rotate_right(branch: &mut Box<Node<T>>) {
-        let Some(mut left) = branch.left.take() else {
-            panic!(); // TODO: handle this more gracefully?
+    fn rotate_right(mut root: core::ptr::NonNull<Self>) -> core::ptr::NonNull<Self> {
+        // SAFETY: no other reference to this node exists to alias.
+        let root_node = unsafe { root.as_mut() };
+
+        let Some(mut left) = root_node.left.take() else {
+            panic!("it is a logic error to rotate left without a right child");
         };
 
-        if let Some(mut left_right) = left.right.take() {
-            left_right.parent = Some(core::ptr::NonNull::from(branch.as_mut()));
-            branch.left = Some(left_right);
+        // SAFETY: no other reference to this node exists to alias.
+        let left_node = unsafe { left.as_mut() };
+
+        if let Some(mut left_right) = left_node.right.take() {
+            // SAFETY: no other reference to this node exists to alias.
+            let left_right_node = unsafe { left_right.as_mut() };
+
+            left_right_node.parent = Some(root);
+            root_node.left = Some(left_right);
         }
 
-        core::mem::swap(branch, &mut left);
-        core::mem::swap(&mut branch.parent, &mut left.parent);
+        core::mem::swap(&mut root_node.parent, &mut left_node.parent);
+        left_node.right = Some(root);
 
-        branch.right = Some(left);
+        left
     }
 }
 
@@ -261,151 +285,4 @@ impl<T> Node<T> {
 )]
 mod test {
     use super::*;
-
-    mod node {
-        use super::*;
-
-        mod method {
-            use super::*;
-
-            mod rotate_left {
-                use super::*;
-            }
-
-            mod rotate_right {
-                use super::*;
-            }
-        }
-    }
-
-    mod method {
-        use super::*;
-
-        mod insert {
-            use super::*;
-
-            #[test]
-            fn adds_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                assert!(instance.insert(12345).is_ok());
-
-                assert!(instance.root.is_some());
-            }
-
-            #[test]
-            fn initializes_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                let expected = 12345;
-
-                assert!(instance.insert(expected).is_ok());
-
-                assert!(instance.root.is_some_and(|node| node.element == expected));
-            }
-
-            #[test]
-            fn into_left_branch_when_less() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root node.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert the child node that is less than root.
-                let expected = -1;
-                assert!(instance.insert(expected).is_ok());
-
-                assert!(instance.root.is_some_and(|root| root.left.is_some_and(|left| left.element == expected)));
-            }
-
-            #[test]
-            fn into_right_branch_when_greater() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert the root node.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert the child node that is greater than root.
-                let expected = 1;
-                assert!(instance.insert(expected).is_ok());
-
-                assert!(instance.root.is_some_and(|root| root.right.is_some_and(|right| right.element == expected)));
-            }
-
-            #[test]
-            fn parent_is_none_when_root() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                assert!(instance.insert(12345).is_ok());
-
-                assert!(instance.root.is_some_and(|root| root.parent.is_none()));
-            }
-
-            #[test]
-            fn parent_is_some_when_child() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                // Insert root.
-                assert!(instance.insert(0).is_ok());
-
-                // Insert left child.
-                assert!(instance.insert(-1).is_ok());
-
-                // Insert right child.
-                assert!(instance.insert(1).is_ok());
-
-                let ptr = core::ptr::NonNull::from(instance.root.as_deref().unwrap());
-
-                assert!(instance.root.as_ref().is_some_and(|root| root.left.as_ref().is_some_and(|left| left.parent.is_some_and(|parent| parent == ptr))));
-                assert!(instance.root.as_ref().is_some_and(|root| root.right.as_ref().is_some_and(|right| right.parent.is_some_and(|parent| parent == ptr))));
-            }
-
-            #[test]
-            fn errors_when_equivalent_element_is_already_contained() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                assert!(instance.insert(12345).is_ok());
-
-                assert!(instance.insert(12345).is_err());
-            }
-
-            #[test]
-            fn error_yields_new_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                assert!(instance.insert(12345).is_ok());
-
-                assert!(instance.insert(12345).is_err_and(|error| error.0 == 12345));
-            }
-
-            #[test]
-            fn error_yields_existing_equivalent_element() {
-                let mut instance = AdelsonVelsoLandis::<i32> { root: None };
-
-                assert!(instance.insert(12345).is_ok());
-
-                assert!(instance.insert(12345).is_err_and(|error| error.1 == &mut 12345));
-            }
-
-            mod left_rotate {
-                use super::*;
-
-            }
-
-            mod right_rotate {
-                use super::*;
-
-            }
-
-            mod left_right_rotate {
-                use super::*;
-
-            }
-
-            mod right_left_rotate {
-                use super::*;
-
-            }
-        }
-    }
 }
