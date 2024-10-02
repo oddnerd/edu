@@ -18,7 +18,6 @@ pub struct AdelsonVelsoLandis<T> {
 }
 
 impl<T: Ord> AdelsonVelsoLandis<T> {
-
     /// TODO
     pub fn insert(&mut self, element: T) -> Result<&T, (T, &T)> {
         // Insert the element as if a non-balancing binary search tree.
@@ -187,6 +186,25 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
         // SAFETY: no other reference to this node exists to alias.
         Ok(&unsafe { inserted.as_ref() }.element)
+    }
+}
+
+impl<T> Default for AdelsonVelsoLandis<T> {
+    /// Construct an empty instance.
+    ///
+    /// # Performance
+    /// This method takes O(1) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::graph::rooted_tree::AdelsonVelskyLandis;
+    ///
+    /// let instance = AdelsonVelskyLandis::default();
+    ///
+    /// todo!("show that it is empty");
+    /// ```
+    fn default() -> Self {
+        Self { root: None }
     }
 }
 
