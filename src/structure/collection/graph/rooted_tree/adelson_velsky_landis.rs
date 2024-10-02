@@ -303,4 +303,28 @@ impl<T: Ord> Node<T> {
 )]
 mod test {
     use super::*;
+
+    mod method {
+        use super::*;
+
+        mod insert {
+            use super::*;
+
+            #[test]
+            fn when_empty() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                assert!(instance.insert(0).is_ok_and(|inserted| {
+                    inserted == &0
+                }));
+
+                assert!(instance.root.is_some_and(|ptr| {
+                    // SAFETY: no other references to this node exist to alias.
+                    let node = unsafe { ptr.as_ref() };
+
+                    node.element == 0
+                }));
+            }
+        }
+    }
 }
