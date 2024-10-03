@@ -375,6 +375,43 @@ mod test {
                         })
                 }));
             }
+
+            #[test]
+            fn does_left_rotation_when_left_left_imbalance() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                // The following insertions would create the graph depicted:
+                //
+                //    3
+                //   / \
+                //   2
+                //  / \
+                //  1
+                //
+                // This causes an imbalance where the left branch of the root
+                // has height of 2 whereas the right branch has height of 0.
+                assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
+                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+
+                // The last insertion should invoke a `left-rotation` thereby
+                // balancing the tree and resulting in the graph depicted:
+                //
+                //   2
+                //  / \
+                // 1  3
+
+                // SAFETY: [`AdelsonVelskyLandis`] does not internally store
+                // references, so no other reference exist to alias those
+                // created within this block.
+                unsafe {
+                    let root = instance.root.unwrap().as_ref();
+
+                    assert_eq!(root.element, 2);
+                    assert_eq!(root.left.unwrap().as_ref().element, 1);
+                    assert_eq!(root.right.unwrap().as_ref().element, 3);
+                }
+            }
         }
     }
 }
