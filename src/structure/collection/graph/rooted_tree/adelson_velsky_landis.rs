@@ -392,82 +392,126 @@ mod test {
             }
 
             #[test]
-            fn does_left_rotation_when_left_left_imbalance() {
+            #[allow(clippy::cognitive_complexity, reason = "checks each node")]
+            fn does_no_rotation_when_insertion_order_self_balances() {
+                // The following order-sensitive insertions create the
+                // depicted graph:
+                //
+                //    0
+                //   / \
+                // -1  2
+                //    / \
+                //   1  3
+                //
+                // Although the right branch is longer than the left, the
+                // balance factor is at most one after each insertion hence
+                // no rotation would perfectly balance the tree, so the
+                // expected result is no left/right rotation occurs.
+
                 let mut instance = AdelsonVelsoLandis::<i32>::default();
 
-                // The following insertions would create the graph depicted:
-                //
-                //    3
-                //   / \
-                //   2
-                //  / \
-                //  1
-                //
-                // This causes an imbalance where the left branch of the root
-                // has height of 2 whereas the right branch has height of 0.
-                assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
-                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                // The root node.
+                assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+
+                // Children of the root.
+                assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1));
                 assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
 
-                // The last insertion should invoke a `left-rotation` thereby
-                // balancing the tree and resulting in the graph depicted:
-                //
-                //   2
-                //  / \
-                // 1  3
+                // Children of the right child.
+                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
 
                 let root_ptr = instance.root.unwrap();
 
                 // SAFETY: no other reference to this node exist to alias.
                 let root = unsafe { root_ptr.as_ref() };
 
-                assert_eq!(root.element, 2);
-                assert_eq!(root.balance, BalanceFactor::Balanced);
+                assert_eq!(root.element, 0);
+                assert_eq!(root.balance, BalanceFactor::Right);
                 assert_eq!(root.parent, None);
 
                 // SAFETY: no other reference to this node exist to alias.
                 let left = unsafe { root.left.unwrap().as_ref() };
 
-                assert_eq!(left.element, 1);
+                assert_eq!(left.element, -1);
                 assert_eq!(left.balance, BalanceFactor::Balanced);
                 assert_eq!(left.parent, Some(root_ptr));
                 assert_eq!(left.left, None);
                 assert_eq!(left.right, None);
 
-                // SAFETY: no other reference to this node exist to alias.
-                let right = unsafe { root.right.unwrap().as_ref() };
+                let right_ptr = root.right.unwrap();
 
-                assert_eq!(right.element, 3);
+                // SAFETY: no other reference to this node exist to alias.
+                let right = unsafe { right_ptr.as_ref() };
+
+                assert_eq!(right.element, 2);
                 assert_eq!(right.balance, BalanceFactor::Balanced);
                 assert_eq!(right.parent, Some(root_ptr));
-                assert_eq!(right.left, None);
-                assert_eq!(right.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right_left = unsafe { right.left.unwrap().as_ref() };
+
+                assert_eq!(right_left.element, 1);
+                assert_eq!(right_left.balance, BalanceFactor::Balanced);
+                assert_eq!(right_left.parent, Some(right_ptr));
+                assert_eq!(right_left.left, None);
+                assert_eq!(right_left.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right_right = unsafe { right.right.unwrap().as_ref() };
+
+                assert_eq!(right_right.element, 3);
+                assert_eq!(right_right.balance, BalanceFactor::Balanced);
+                assert_eq!(right_right.parent, Some(right_ptr));
+                assert_eq!(right_right.left, None);
+                assert_eq!(right_right.right, None);
             }
 
             #[test]
-            fn does_right_rotation_when_right_right_imbalance() {
+            #[allow(clippy::cognitive_complexity, reason = "checks each node")]
+            fn does_left_rotation_when_right_right_imbalance() {
                 let mut instance = AdelsonVelsoLandis::<i32>::default();
 
-                // The following insertions would create the graph depicted:
+                // The following order-sensitive insertions create the
+                // depicted graph:
                 //
-                //    1
+                //    0
                 //   / \
-                //     2
+                // -1  2
                 //    / \
-                //      3
+                //   1  3
+                //       \
+                //       4
                 //
-                // This causes an imbalance where the right branch of the root
-                // has height of 2 whereas the left branch has height of 0.
+                // This causes an imbalance where the right branch with nodes
+                // '0 -> 2 -> 3 -> 4' has height three whereas the left branch
+                // with nodes '0 -> -1' has height one, an imbalance of two,
+                // thereby requiring a left-rotation about the root. Note that
+                // the elements are inserted such that the imbalance occurs
+                // only when the final element, 4, is inserted.
+
+                // The root node.
+                assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+
+                // Children of the root.
+                assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1));
                 assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+
+                // Children of the right child.
                 assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
                 assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
 
-                // The last insertion should invoke a `right-rotation` thereby
-                // balancing the tree and resulting in the graph depicted:
+                // This insertion triggers a left-rotation.
+                assert!(instance.insert(4).is_ok_and(|inserted| inserted == &4));
+
+                // Inserting the last element should invoke a left-rotation
+                // thereby balancing the tree resulting in the depicted graph:
                 //
-                //   2
-                //  / \
-                // 1  3
+                //       2
+                //      / \
+                //     0  3
+                //    / \  \
+                //  -1  1  4
 
                 let root_ptr = instance.root.unwrap();
 
@@ -478,23 +522,153 @@ mod test {
                 assert_eq!(root.balance, BalanceFactor::Balanced);
                 assert_eq!(root.parent, None);
 
-                // SAFETY: no other reference to this node exist to alias.
-                let left = unsafe { root.left.unwrap().as_ref() };
+                let left_ptr = root.left.unwrap();
 
-                assert_eq!(left.element, 1);
+                // SAFETY: no other reference to this node exist to alias.
+                let left = unsafe { left_ptr.as_ref() };
+
+                assert_eq!(left.element, 0);
                 assert_eq!(left.balance, BalanceFactor::Balanced);
                 assert_eq!(left.parent, Some(root_ptr));
-                assert_eq!(left.left, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let left_left = unsafe { left.left.unwrap().as_ref() };
+
+                assert_eq!(left_left.element, -1);
+                assert_eq!(left_left.balance, BalanceFactor::Balanced);
+                assert_eq!(left_left.parent, Some(left_ptr));
+                assert_eq!(left_left.left, None);
+                assert_eq!(left_left.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let left_right = unsafe { left.right.unwrap().as_ref() };
+
+                assert_eq!(left_right.element, 1);
+                assert_eq!(left_right.balance, BalanceFactor::Balanced);
+                assert_eq!(left_right.parent, Some(left_ptr));
+                assert_eq!(left_right.left, None);
+                assert_eq!(left_right.right, None);
+
+                let right_ptr = root.right.unwrap();
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right = unsafe { right_ptr.as_ref() };
+
+                assert_eq!(right.element, 3);
+                assert_eq!(right.balance, BalanceFactor::Right);
+                assert_eq!(right.parent, Some(root_ptr));
+                assert_eq!(right.left, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right_right = unsafe { right.right.unwrap().as_ref() };
+
+                assert_eq!(right_right.element, 4);
+                assert_eq!(right_right.balance, BalanceFactor::Balanced);
+                assert_eq!(right_right.parent, Some(right_ptr));
+                assert_eq!(right_right.left, None);
+                assert_eq!(right_right.right, None);
+            }
+
+            #[test]
+            #[allow(clippy::cognitive_complexity, reason = "checks each node")]
+            fn does_right_rotation_when_left_left_imbalance() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                // The following order-sensitive insertions create the
+                // depicted graph:
+                //
+                //       5
+                //      / \
+                //     3  6
+                //    / \
+                //   2  4
+                //  /
+                // 1
+                //
+                // This causes an imbalance where the left branch with nodes
+                // '5 -> 3 -> 2 -> 1' has height three whereas the right branch
+                // with nodes '5 -> 6' has height one, an imbalance of two,
+                // thereby requiring a right-rotation about the root. Note that
+                // the elements are inserted such that the imbalance occurs
+                // only when the final element, 1, is inserted.
+
+                // The root node.
+                assert!(instance.insert(5).is_ok_and(|inserted| inserted == &5));
+
+                // Children of the root.
+                assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
+                assert!(instance.insert(6).is_ok_and(|inserted| inserted == &6));
+
+                // Children of the left child.
+                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                assert!(instance.insert(4).is_ok_and(|inserted| inserted == &4));
+
+                // This insertion triggers a right-rotation.
+                assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+
+                // Inserting the last element should invoke a right-rotation
+                // thereby balancing the tree resulting in the depicted graph:
+                //
+                //       3
+                //      / \
+                //     2  5
+                //    /  / \
+                //   1  4  6
+
+                let root_ptr = instance.root.unwrap();
+
+                // SAFETY: no other reference to this node exist to alias.
+                let root = unsafe { root_ptr.as_ref() };
+
+                assert_eq!(root.element, 3);
+                assert_eq!(root.balance, BalanceFactor::Balanced);
+                assert_eq!(root.parent, None);
+
+                let left_ptr = root.left.unwrap();
+
+                // SAFETY: no other reference to this node exist to alias.
+                let left = unsafe { left_ptr.as_ref() };
+
+                assert_eq!(left.element, 2);
+                assert_eq!(left.balance, BalanceFactor::Left);
+                assert_eq!(left.parent, Some(root_ptr));
                 assert_eq!(left.right, None);
 
                 // SAFETY: no other reference to this node exist to alias.
-                let right = unsafe { root.right.unwrap().as_ref() };
+                let left_left = unsafe { left.left.unwrap().as_ref() };
 
-                assert_eq!(right.element, 3);
+                assert_eq!(left_left.element, 1);
+                assert_eq!(left_left.balance, BalanceFactor::Balanced);
+                assert_eq!(left_left.parent, Some(left_ptr));
+                assert_eq!(left_left.left, None);
+                assert_eq!(left_left.right, None);
+
+                let right_ptr = root.right.unwrap();
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right = unsafe { right_ptr.as_ref() };
+
+                assert_eq!(right.element, 5);
                 assert_eq!(right.balance, BalanceFactor::Balanced);
                 assert_eq!(right.parent, Some(root_ptr));
-                assert_eq!(right.left, None);
-                assert_eq!(right.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right_left = unsafe { right.left.unwrap().as_ref() };
+
+                assert_eq!(right_left.element, 4);
+                assert_eq!(right_left.balance, BalanceFactor::Balanced);
+                assert_eq!(right_left.parent, Some(right_ptr));
+                assert_eq!(right_left.left, None);
+                assert_eq!(right_left.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right_right = unsafe { right.right.unwrap().as_ref() };
+
+                assert_eq!(right_right.element, 6);
+                assert_eq!(right_right.balance, BalanceFactor::Balanced);
+                assert_eq!(right_right.parent, Some(right_ptr));
+                assert_eq!(right_right.left, None);
+                assert_eq!(right_right.right, None);
             }
         }
     }
