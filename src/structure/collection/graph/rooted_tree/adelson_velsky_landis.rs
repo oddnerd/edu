@@ -41,7 +41,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             let Some(new) = core::ptr::NonNull::new(Box::into_raw(Box::new(Node {
                 element,
                 parent,
-                highest_branch: BalanceFactor::Balanced,
+                balance: BalanceFactor::Balanced,
                 left: None,
                 right: None,
             }))) else {
@@ -65,13 +65,13 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 };
 
                 // SAFETY: no other reference to this node exists to alias.
-                match unsafe { ancestor.as_ref() }.highest_branch {
+                match unsafe { ancestor.as_ref() }.balance {
                     BalanceFactor::Left => {
                         // Inserted into left branch, but it was was already
                         // longer than the right branch, so rotation needed.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        if unsafe { child.as_ref() }.highest_branch == BalanceFactor::Right {
+                        if unsafe { child.as_ref() }.balance == BalanceFactor::Right {
                             // SAFETY: no other reference to this node exists to alias.
                             unsafe { ancestor.as_mut() }.left = Some(Node::rotate_left(child));
                         }
@@ -102,7 +102,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // the longer branch, so now both are balanced.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Balanced;
+                        unsafe{ ancestor.as_mut() }.balance = BalanceFactor::Balanced;
 
                         // Further ancestors retain existing balance factors.
                         break;
@@ -113,7 +113,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // ancestor could equalize their heights.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Left;
+                        unsafe{ ancestor.as_mut() }.balance = BalanceFactor::Left;
                     },
                 }
             } else {
@@ -125,13 +125,13 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 };
 
                 // SAFETY: no other reference to this node exists to alias.
-                match unsafe { ancestor.as_ref() }.highest_branch {
+                match unsafe { ancestor.as_ref() }.balance {
                     BalanceFactor::Left => {
                         // Inserted into right branch, but the left branch was
                         // the longer branch, so now both are balanced.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Balanced;
+                        unsafe{ ancestor.as_mut() }.balance = BalanceFactor::Balanced;
 
                         // Further ancestors retain existing balance factors.
                         break;
@@ -141,7 +141,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // longer than the left branch, so rotation needed.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        if unsafe { child.as_ref() }.highest_branch == BalanceFactor::Left {
+                        if unsafe { child.as_ref() }.balance == BalanceFactor::Left {
                             // SAFETY: no other reference to this node exists to alias.
                             unsafe { ancestor.as_mut() }.left = Some(Node::rotate_right(child));
                         }
@@ -173,7 +173,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // ancestor could equalize their heights.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        unsafe{ ancestor.as_mut() }.highest_branch = BalanceFactor::Left;
+                        unsafe{ ancestor.as_mut() }.balance = BalanceFactor::Left;
                     },
                 }
             }
@@ -227,7 +227,7 @@ struct Node<T> {
     element: T,
 
     /// Which branch has the subtree with the greatest height.
-    highest_branch: BalanceFactor,
+    balance: BalanceFactor,
 
     /// The [`Node`] for whom this is the left or right child.
     parent: Option<core::ptr::NonNull<Node<T>>>,
@@ -321,7 +321,7 @@ mod test {
                 let root = unsafe { instance.root.unwrap().as_ref() };
 
                 assert_eq!(root.element, 0);
-                assert_eq!(root.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(root.balance, BalanceFactor::Balanced);
                 assert_eq!(root.parent, None);
                 assert_eq!(root.left, None);
                 assert_eq!(root.right, None);
@@ -345,7 +345,7 @@ mod test {
                 let root = unsafe { root_ptr.as_ref() };
 
                 assert_eq!(root.element, 0);
-                assert_eq!(root.highest_branch, BalanceFactor::Left);
+                assert_eq!(root.balance, BalanceFactor::Left);
                 assert_eq!(root.parent, None);
                 assert_eq!(root.right, None);
 
@@ -353,7 +353,7 @@ mod test {
                 let left = unsafe { root.left.unwrap().as_ref() };
 
                 assert_eq!(left.element, 0);
-                assert_eq!(left.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(left.balance, BalanceFactor::Balanced);
                 assert_eq!(left.parent, Some(root_ptr));
                 assert_eq!(left.left, None);
                 assert_eq!(left.right, None);
@@ -377,7 +377,7 @@ mod test {
                 let root = unsafe { root_ptr.as_ref() };
 
                 assert_eq!(root.element, 0);
-                assert_eq!(root.highest_branch, BalanceFactor::Right);
+                assert_eq!(root.balance, BalanceFactor::Right);
                 assert_eq!(root.parent, None);
                 assert_eq!(root.left, None);
 
@@ -385,7 +385,7 @@ mod test {
                 let right = unsafe { root.right.unwrap().as_ref() };
 
                 assert_eq!(right.element, 1);
-                assert_eq!(right.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(right.balance, BalanceFactor::Balanced);
                 assert_eq!(right.parent, Some(root_ptr));
                 assert_eq!(right.left, None);
                 assert_eq!(right.right, None);
@@ -422,14 +422,14 @@ mod test {
                 let root = unsafe { root_ptr.as_ref() };
 
                 assert_eq!(root.element, 2);
-                assert_eq!(root.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(root.balance, BalanceFactor::Balanced);
                 assert_eq!(root.parent, None);
 
                 // SAFETY: no other reference to this node exist to alias.
                 let left = unsafe { root.left.unwrap().as_ref() };
 
                 assert_eq!(left.element, 1);
-                assert_eq!(left.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(left.balance, BalanceFactor::Balanced);
                 assert_eq!(left.parent, Some(root_ptr));
                 assert_eq!(left.left, None);
                 assert_eq!(left.right, None);
@@ -438,7 +438,7 @@ mod test {
                 let right = unsafe { root.right.unwrap().as_ref() };
 
                 assert_eq!(right.element, 3);
-                assert_eq!(right.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(right.balance, BalanceFactor::Balanced);
                 assert_eq!(right.parent, Some(root_ptr));
                 assert_eq!(right.left, None);
                 assert_eq!(right.right, None);
@@ -475,14 +475,14 @@ mod test {
                 let root = unsafe { root_ptr.as_ref() };
 
                 assert_eq!(root.element, 2);
-                assert_eq!(root.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(root.balance, BalanceFactor::Balanced);
                 assert_eq!(root.parent, None);
 
                 // SAFETY: no other reference to this node exist to alias.
                 let left = unsafe { root.left.unwrap().as_ref() };
 
                 assert_eq!(left.element, 1);
-                assert_eq!(left.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(left.balance, BalanceFactor::Balanced);
                 assert_eq!(left.parent, Some(root_ptr));
                 assert_eq!(left.left, None);
                 assert_eq!(left.right, None);
@@ -491,7 +491,7 @@ mod test {
                 let right = unsafe { root.right.unwrap().as_ref() };
 
                 assert_eq!(right.element, 3);
-                assert_eq!(right.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(right.balance, BalanceFactor::Balanced);
                 assert_eq!(right.parent, Some(root_ptr));
                 assert_eq!(right.left, None);
                 assert_eq!(right.right, None);
