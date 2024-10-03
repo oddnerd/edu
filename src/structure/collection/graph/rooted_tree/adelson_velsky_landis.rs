@@ -340,6 +340,16 @@ mod test {
                     inserted == & -1
                 }));
 
+                let root_ptr = instance.root.unwrap();
+
+                // SAFETY: no other reference exists to this node to alias.
+                let root = unsafe { root_ptr.as_ref() };
+
+                assert_eq!(root.element, 0);
+                assert_eq!(root.highest_branch, BalanceFactor::Left);
+                assert_eq!(root.parent, None);
+                assert_eq!(root.right, None);
+
                 assert!(instance.root.is_some_and(|root_ptr| {
                         // SAFETY: no other reference to this node exists to alias.
                         let root_node = unsafe { root_ptr.as_ref() };
