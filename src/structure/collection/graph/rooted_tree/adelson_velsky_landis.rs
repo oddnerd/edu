@@ -318,12 +318,14 @@ mod test {
                     inserted == &0
                 }));
 
-                assert!(instance.root.is_some_and(|ptr| {
-                    // SAFETY: no other reference to this node exist to alias.
-                    let node = unsafe { ptr.as_ref() };
+                // SAFETY: no other reference exists to this node to alias.
+                let root = unsafe { instance.root.unwrap().as_ref() };
 
-                    node.element == 0
-                }));
+                assert_eq!(root.element, 0);
+                assert_eq!(root.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(root.parent, None);
+                assert_eq!(root.left, None);
+                assert_eq!(root.right, None);
             }
 
             #[test]
