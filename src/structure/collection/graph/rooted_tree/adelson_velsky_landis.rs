@@ -367,22 +367,29 @@ mod test {
                 // The root value.
                 assert!(instance.insert(0).is_ok());
 
-                // The value greater than the root being tested.
+                // The value less than the root being tested.
                 assert!(instance.insert(1).is_ok_and(|inserted| {
                     inserted == & 1
                 }));
 
-                assert!(instance.root.is_some_and(|root_ptr| {
-                        // SAFETY: no other reference to this node exists to alias.
-                        let root_node = unsafe { root_ptr.as_ref() };
+                let root_ptr = instance.root.unwrap();
 
-                        root_node.left.is_some_and(|right_ptr| {
-                            // SAFETY: no other reference to this node exists to alias.
-                            let right_node = unsafe { right_ptr.as_ref() };
+                // SAFETY: no other reference exists to this node to alias.
+                let root = unsafe { root_ptr.as_ref() };
 
-                            right_node.element == 1
-                        })
-                }));
+                assert_eq!(root.element, 0);
+                assert_eq!(root.highest_branch, BalanceFactor::Right);
+                assert_eq!(root.parent, None);
+                assert_eq!(root.left, None);
+
+                // SAFETY: no other reference exists to this node to alias.
+                let right = unsafe { root.right.unwrap().as_ref() };
+
+                assert_eq!(right.element, 1);
+                assert_eq!(right.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(right.parent, Some(root_ptr));
+                assert_eq!(right.left, None);
+                assert_eq!(right.right, None);
             }
 
             #[test]
