@@ -401,16 +401,32 @@ mod test {
                 //  / \
                 // 1  3
 
-                // SAFETY: [`AdelsonVelskyLandis`] does not internally store
-                // references, so no other reference exist to alias those
-                // created within this block.
-                unsafe {
-                    let root = instance.root.unwrap().as_ref();
+                let root_ptr = instance.root.unwrap();
 
-                    assert_eq!(root.element, 2);
-                    assert_eq!(root.left.unwrap().as_ref().element, 1);
-                    assert_eq!(root.right.unwrap().as_ref().element, 3);
-                }
+                // SAFETY: no other reference to this node exist to alias.
+                let root = unsafe { root_ptr.as_ref() };
+
+                assert_eq!(root.element, 2);
+                assert_eq!(root.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(root.parent, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let left = unsafe { root.left.unwrap().as_ref() };
+
+                assert_eq!(left.element, 1);
+                assert_eq!(left.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(left.parent, Some(root_ptr));
+                assert_eq!(left.left, None);
+                assert_eq!(left.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right = unsafe { root.right.unwrap().as_ref() };
+
+                assert_eq!(right.element, 3);
+                assert_eq!(right.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(right.parent, Some(root_ptr));
+                assert_eq!(right.left, None);
+                assert_eq!(right.right, None);
             }
         }
     }
