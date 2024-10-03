@@ -444,6 +444,59 @@ mod test {
                 assert_eq!(right.left, None);
                 assert_eq!(right.right, None);
             }
+
+            #[test]
+            fn does_right_rotation_when_right_right_imbalance() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                // The following insertions would create the graph depicted:
+                //
+                //    1
+                //   / \
+                //     2
+                //    / \
+                //      3
+                //
+                // This causes an imbalance where the right branch of the root
+                // has height of 2 whereas the left branch has height of 0.
+                assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
+
+                // The last insertion should invoke a `right-rotation` thereby
+                // balancing the tree and resulting in the graph depicted:
+                //
+                //   2
+                //  / \
+                // 1  3
+
+                let root_ptr = instance.root.unwrap();
+
+                // SAFETY: no other reference to this node exist to alias.
+                let root = unsafe { root_ptr.as_ref() };
+
+                assert_eq!(root.element, 2);
+                assert_eq!(root.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(root.parent, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let left = unsafe { root.left.unwrap().as_ref() };
+
+                assert_eq!(left.element, 1);
+                assert_eq!(left.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(left.parent, Some(root_ptr));
+                assert_eq!(left.left, None);
+                assert_eq!(left.right, None);
+
+                // SAFETY: no other reference to this node exist to alias.
+                let right = unsafe { root.right.unwrap().as_ref() };
+
+                assert_eq!(right.element, 3);
+                assert_eq!(right.highest_branch, BalanceFactor::Balanced);
+                assert_eq!(right.parent, Some(root_ptr));
+                assert_eq!(right.left, None);
+                assert_eq!(right.right, None);
+            }
         }
     }
 }
