@@ -239,7 +239,6 @@ struct Node<T> {
     right: Option<core::ptr::NonNull<Node<T>>>,
 }
 
-#[allow(dead_code)]
 impl<T: Ord> Node<T> {
     /// TODO
     fn rotate_left(mut root: core::ptr::NonNull<Self>) -> core::ptr::NonNull<Self> {
