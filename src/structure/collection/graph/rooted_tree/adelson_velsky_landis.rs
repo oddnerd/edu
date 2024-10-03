@@ -319,10 +319,35 @@ mod test {
                 }));
 
                 assert!(instance.root.is_some_and(|ptr| {
-                    // SAFETY: no other references to this node exist to alias.
+                    // SAFETY: no other reference to this node exist to alias.
                     let node = unsafe { ptr.as_ref() };
 
                     node.element == 0
+                }));
+            }
+
+            #[test]
+            fn descends_left_branch_when_less() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                // The root value.
+                assert!(instance.insert(0).is_ok());
+
+                // The value less than the root being tested.
+                assert!(instance.insert(-1).is_ok_and(|inserted| {
+                    inserted == & -1
+                }));
+
+                assert!(instance.root.is_some_and(|root_ptr| {
+                        // SAFETY: no other reference to this node exists to alias.
+                        let root_node = unsafe { root_ptr.as_ref() };
+
+                        root_node.left.is_some_and(|left_ptr| {
+                            // SAFETY: no other reference to this node exists to alias.
+                            let left_node = unsafe { left_ptr.as_ref() };
+
+                            left_node.element == -1
+                        })
                 }));
             }
         }
