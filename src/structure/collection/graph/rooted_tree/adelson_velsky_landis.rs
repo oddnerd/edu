@@ -350,6 +350,31 @@ mod test {
                         })
                 }));
             }
+
+            #[test]
+            fn descends_right_branch_when_greater() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                // The root value.
+                assert!(instance.insert(0).is_ok());
+
+                // The value greater than the root being tested.
+                assert!(instance.insert(1).is_ok_and(|inserted| {
+                    inserted == & 1
+                }));
+
+                assert!(instance.root.is_some_and(|root_ptr| {
+                        // SAFETY: no other reference to this node exists to alias.
+                        let root_node = unsafe { root_ptr.as_ref() };
+
+                        root_node.left.is_some_and(|right_ptr| {
+                            // SAFETY: no other reference to this node exists to alias.
+                            let right_node = unsafe { right_ptr.as_ref() };
+
+                            right_node.element == 1
+                        })
+                }));
+            }
         }
     }
 }
