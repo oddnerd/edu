@@ -260,7 +260,8 @@ impl<T: Ord> Node<T> {
             root_node.right = Some(right_left_ptr);
         }
 
-        core::mem::swap(&mut root_node.parent, &mut right_node.parent);
+        right_node.parent = root_node.parent.replace(right_ptr);
+
         right_node.left = Some(root);
 
         // TODO: reconsider
@@ -284,12 +285,12 @@ impl<T: Ord> Node<T> {
         // SAFETY: no other reference to this node exists to alias.
         let root_node = unsafe { root.as_mut() };
 
-        let Some(mut left) = root_node.left.take() else {
+        let Some(mut left_ptr) = root_node.left.take() else {
             panic!("it is a logic error to rotate left without a right child");
         };
 
         // SAFETY: no other reference to this node exists to alias.
-        let left_node = unsafe { left.as_mut() };
+        let left_node = unsafe { left_ptr.as_mut() };
 
         if let Some(mut left_right) = left_node.right.take() {
             // SAFETY: no other reference to this node exists to alias.
@@ -299,7 +300,8 @@ impl<T: Ord> Node<T> {
             root_node.left = Some(left_right);
         }
 
-        core::mem::swap(&mut root_node.parent, &mut left_node.parent);
+        left_node.parent = root_node.parent.replace(left_ptr);
+
         left_node.right = Some(root);
 
         // TODO: reconsider
@@ -315,7 +317,7 @@ impl<T: Ord> Node<T> {
             (Some(_), None) | (None, Some(_)) => unreachable!("logic error to rotate when not imbalanced"),
         };
 
-        left
+        left_ptr
     }
 }
 
