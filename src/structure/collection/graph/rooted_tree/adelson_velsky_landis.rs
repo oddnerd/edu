@@ -415,10 +415,10 @@ mod test {
 
                 // Children of the root.
                 assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1));
-                assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
 
                 // Children of the right child.
-                assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
                 assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
 
                 let root_ptr = instance.root.unwrap();
