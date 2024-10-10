@@ -173,7 +173,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // ancestor could equalize their heights.
 
                         // SAFETY: no other reference to this node exists to alias.
-                        unsafe{ ancestor.as_mut() }.balance = BalanceFactor::Left;
+                        unsafe{ ancestor.as_mut() }.balance = BalanceFactor::Right;
                     },
                 }
             }
