@@ -245,25 +245,38 @@ impl<T: Ord> Node<T> {
         // SAFETY: no other reference to this node exists to alias.
         let root_node = unsafe { root.as_mut() };
 
-        let Some(mut right) = root_node.right.take() else {
+        let Some(mut right_ptr) = root_node.right.take() else {
             panic!("it is a logic error to rotate left without a right child");
         };
 
         // SAFETY: no other reference to this node exists to alias.
-        let right_node = unsafe { right.as_mut() };
+        let right_node = unsafe { right_ptr.as_mut() };
 
-        if let Some(mut right_left) = right_node.left.take() {
+        if let Some(mut right_left_ptr) = right_node.left.take() {
             // SAFETY: no other reference to this node exists to alias.
-            let right_left_node = unsafe { right_left.as_mut() };
+            let right_left_node = unsafe { right_left_ptr.as_mut() };
 
             right_left_node.parent = Some(root);
-            root_node.right = Some(right_left);
+            root_node.right = Some(right_left_ptr);
         }
 
         core::mem::swap(&mut root_node.parent, &mut right_node.parent);
         right_node.left = Some(root);
 
-        right
+        // TODO: reconsider
+        right_node.balance = match (right_node.left, right_node.right) {
+            (Some(_), Some(_)) => BalanceFactor::Balanced,
+            (None, None | Some(_)) => unreachable!("old root should become the left child"),
+            (Some(_), None) => unreachable!("logic error to rotate when not imbalanced"),
+        };
+
+        // TODO: reconsider
+        root_node.balance = match (root_node.left, root_node.right) {
+            (Some(_), Some(_)) | (None, None) => BalanceFactor::Balanced,
+            (Some(_), None) | (None, Some(_)) => unreachable!("logic error to rotate when not imbalanced"),
+        };
+
+        right_ptr
     }
 
     /// TODO
@@ -288,6 +301,19 @@ impl<T: Ord> Node<T> {
 
         core::mem::swap(&mut root_node.parent, &mut left_node.parent);
         left_node.right = Some(root);
+
+        // TODO: reconsider
+        left_node.balance = match (left_node.left, left_node.right) {
+            (Some(_), Some(_)) => BalanceFactor::Balanced,
+            (None | Some(_), None) => unreachable!("old root should become the right child"),
+            (None, Some(_)) => unreachable!("logic error to rotate when not imbalanced"),
+        };
+
+        // TODO: reconsider
+        root_node.balance = match (root_node.left, root_node.right) {
+            (Some(_), Some(_)) | (None, None) => BalanceFactor::Balanced,
+            (Some(_), None) | (None, Some(_)) => unreachable!("logic error to rotate when not imbalanced"),
+        };
 
         left
     }
