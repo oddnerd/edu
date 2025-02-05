@@ -387,6 +387,15 @@ mod test {
                 assert!(root.right.is_none());
             }
 
+            #[test]
+            fn yield_element() {
+                let mut instance = AdelsonVelsoLandis::default();
+
+                for element in 0..=5 {
+                    assert_eq!(instance.insert(element), Ok(&element));
+                }
+            }
+
             mod no_rotation {
                 use super::*;
 
