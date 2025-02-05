@@ -18,7 +18,25 @@ pub struct AdelsonVelsoLandis<T> {
 }
 
 impl<T: Ord> AdelsonVelsoLandis<T> {
-    /// TODO
+    /// Move an `element` into [`Self`].
+    ///
+    /// # Errors
+    /// Yields the `element` and a reference to the corresponding equivalent
+    /// value if it already exists within [`Self`].
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method takes O(log N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::graph::rooted_tree::AdelsonVelskyLandis;
+    ///
+    /// todo!("yields ok element");
+    /// todo!("yields err element");
+    /// ```
     pub fn insert(&mut self, element: T) -> Result<&T, (T, &T)> {
         // Insert the element as if a non-balancing binary search tree.
         let (mut current, mut previous) = {
