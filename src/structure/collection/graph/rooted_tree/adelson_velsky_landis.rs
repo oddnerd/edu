@@ -1106,6 +1106,17 @@ mod test {
             }
 
             #[test]
+            fn when_only_root() {
+                let mut instance = AdelsonVelsoLandis::default();
+
+                assert!(instance.insert(0).is_ok());
+
+                assert_eq!(instance.remove(&0), Some(0));
+
+                assert!(instance.root.is_none());
+            }
+
+            #[test]
             fn when_not_contained() {
                 let mut instance = AdelsonVelsoLandis::<usize>::default();
 
