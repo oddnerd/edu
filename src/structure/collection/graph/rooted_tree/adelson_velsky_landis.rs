@@ -205,6 +205,22 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         // SAFETY: no other reference to this node exists to alias.
         Ok(&unsafe { inserted.as_ref() }.element)
     }
+
+    /// Move the element with value `element` out of [`Self`], if it exists.
+    ///
+    /// # Performance
+    /// This method takes O(log N) times and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::graph::rooted_tree::AdelsonVelskyLandis;
+    ///
+    /// todo!("yields some element if found");
+    /// todo!("yields none if not found");
+    /// ```
+    pub fn remove(&mut self, element: &T) -> Option<T> {
+        todo!("remove the element")
+    }
 }
 
 impl<T> Default for AdelsonVelsoLandis<T> {
@@ -1074,6 +1090,10 @@ mod test {
                     assert_eq!(right_right.right, None);
                 }
             }
+        }
+
+        mod remove {
+            use super::*;
         }
     }
 }
