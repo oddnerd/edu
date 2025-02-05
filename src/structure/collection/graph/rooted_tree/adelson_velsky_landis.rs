@@ -1133,6 +1133,144 @@ mod test {
 
             mod no_rotation {
                 use super::*;
+
+                mod when_left_leaf_of_balanced_parent {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///   2
+                    ///  / \
+                    /// 1  3
+                    /// ```
+                    ///
+                    /// then removing element `1` becoming:
+                    ///
+                    /// ```
+                    ///  2
+                    /// / \
+                    ///   3
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        let mut instance = AdelsonVelsoLandis::default();
+
+                        // root node.
+                        assert!(instance.insert(2).is_ok());
+
+                        // children.
+                        assert!(instance.insert(1).is_ok());
+                        assert!(instance.insert(3).is_ok());
+
+                        // remove left leaf.
+                        assert!(instance.remove(&1).is_some());
+
+                        instance
+                    }
+
+                    #[test]
+                    fn updates_root() {
+                        let instance = setup();
+
+                        // SAFETY: no other reference to this node exist to alias.
+                        let root = unsafe { instance.root.unwrap().as_ref() };
+
+                        assert_eq!(root.element, 2);
+                        assert_eq!(root.balance, BalanceFactor::Right);
+                        assert_eq!(root.parent, None);
+                        assert!(root.left.is_none());
+                        assert!(root.right.is_some());
+
+                    }
+
+                    #[test]
+                    fn does_not_modify_right_child() {
+                        let instance = setup();
+
+                        let root_ptr = instance.root.unwrap();
+
+                        // SAFETY: no other reference to this node exist to alias.
+                        let root = unsafe { root_ptr.as_ref() };
+
+                        // SAFETY: no other reference to this node exist to alias.
+                        let right = unsafe { root.right.unwrap().as_ref() };
+
+                        assert_eq!(right.element, 3);
+                        assert_eq!(right.balance, BalanceFactor::Balanced);
+                        assert_eq!(right.parent, Some(root_ptr));
+                        assert!(right.left.is_none());
+                        assert!(right.right.is_none());
+                    }
+                }
+
+                mod when_right_leaf_of_balanced_parent {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///   2
+                    ///  / \
+                    /// 1  3
+                    /// ```
+                    ///
+                    /// then removing element `1` becoming:
+                    ///
+                    /// ```
+                    ///   2
+                    ///  / \
+                    /// 1
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        let mut instance = AdelsonVelsoLandis::default();
+
+                        // root node.
+                        assert!(instance.insert(2).is_ok());
+
+                        // children.
+                        assert!(instance.insert(1).is_ok());
+                        assert!(instance.insert(3).is_ok());
+
+                        // remove left leaf.
+                        assert!(instance.remove(&3).is_some());
+
+                        instance
+                    }
+
+                    #[test]
+                    fn updates_root() {
+                        let instance = setup();
+
+                        // SAFETY: no other reference to this node exist to alias.
+                        let root = unsafe { instance.root.unwrap().as_ref() };
+
+                        assert_eq!(root.element, 2);
+                        assert_eq!(root.balance, BalanceFactor::Left);
+                        assert_eq!(root.parent, None);
+                        assert!(root.left.is_some());
+                        assert!(root.right.is_none());
+
+                    }
+
+                    #[test]
+                    fn does_not_modify_left_child() {
+                        let instance = setup();
+
+                        let root_ptr = instance.root.unwrap();
+
+                        // SAFETY: no other reference to this node exist to alias.
+                        let root = unsafe { root_ptr.as_ref() };
+
+                        // SAFETY: no other reference to this node exist to alias.
+                        let left = unsafe { root.left.unwrap().as_ref() };
+
+                        assert_eq!(left.element, 1);
+                        assert_eq!(left.balance, BalanceFactor::Balanced);
+                        assert_eq!(left.parent, Some(root_ptr));
+                        assert!(left.left.is_none());
+                        assert!(left.right.is_none());
+                    }
+                }
             }
 
             mod left_rotation {
