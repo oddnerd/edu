@@ -404,7 +404,7 @@ mod test {
                         let mut instance = AdelsonVelsoLandis::<i32>::default();
 
                         // The root value.
-                        assert!(instance.insert(0).is_ok());
+                        assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
 
                         // The value less than the root being tested.
                         assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1 ));
@@ -460,7 +460,7 @@ mod test {
                         let mut instance = AdelsonVelsoLandis::<i32>::default();
 
                         // The root value.
-                        assert!(instance.insert(0).is_ok());
+                        assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
 
                         // The value greater than the root being tested.
                         assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1 ));
