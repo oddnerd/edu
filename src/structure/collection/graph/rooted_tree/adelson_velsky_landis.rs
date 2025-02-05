@@ -1102,6 +1102,21 @@ mod test {
                 assert_eq!(instance.remove(&0), None);
             }
 
+            #[test]
+            fn when_not_contained() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                // TODO: use FromIterator or similar.
+                assert!(instance.insert(0).is_ok());
+                assert!(instance.insert(1).is_ok());
+                assert!(instance.insert(2).is_ok());
+                assert!(instance.insert(3).is_ok());
+                assert!(instance.insert(4).is_ok());
+                assert!(instance.insert(5).is_ok());
+
+                assert_eq!(instance.remove(&6), None);
+            }
+
             mod no_rotation {
                 use super::*;
             }
