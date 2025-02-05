@@ -1094,6 +1094,25 @@ mod test {
 
         mod remove {
             use super::*;
+
+            #[test]
+            fn when_empty() {
+                let mut instance = AdelsonVelsoLandis::<i32>::default();
+
+                assert_eq!(instance.remove(&0), None);
+            }
+
+            mod no_rotation {
+                use super::*;
+            }
+
+            mod left_rotation {
+                use super::*;
+            }
+
+            mod right_rotation {
+                use super::*;
+            }
         }
     }
 }
