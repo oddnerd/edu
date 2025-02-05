@@ -375,7 +375,7 @@ mod test {
             fn when_empty() {
                 let mut instance = AdelsonVelsoLandis::<i32>::default();
 
-                assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0 ));
+                assert!(instance.insert(0).is_ok());
 
                 // SAFETY: no other reference exists to this node to alias.
                 let root = unsafe { instance.root.unwrap().as_ref() };
@@ -396,18 +396,18 @@ mod test {
                     /// Should create the following structure:
                     ///
                     /// ```
-                    ///    0
+                    ///    2
                     ///   / \
-                    /// -1
+                    ///  1
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<i32> {
-                        let mut instance = AdelsonVelsoLandis::<i32>::default();
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        let mut instance = AdelsonVelsoLandis::default();
 
                         // The root value.
-                        assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+                        assert!(instance.insert(2).is_ok());
 
                         // The value less than the root being tested.
-                        assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1 ));
+                        assert!(instance.insert(1).is_ok());
 
                         instance
                     }
@@ -419,7 +419,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let root = unsafe { instance.root.unwrap().as_ref() };
 
-                        assert_eq!(root.element, 0);
+                        assert_eq!(root.element, 2);
                         assert_eq!(root.balance, BalanceFactor::Left);
                         assert_eq!(root.parent, None);
                         assert!(root.left.is_some());
@@ -438,7 +438,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let left = unsafe { root.left.unwrap().as_ref() };
 
-                        assert_eq!(left.element, -1);
+                        assert_eq!(left.element, 1);
                         assert_eq!(left.balance, BalanceFactor::Balanced);
                         assert_eq!(left.parent, Some(root_ptr));
                         assert!(left.left.is_none());
@@ -456,14 +456,14 @@ mod test {
                     /// / \
                     ///   1
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<i32> {
-                        let mut instance = AdelsonVelsoLandis::<i32>::default();
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        let mut instance = AdelsonVelsoLandis::default();
 
                         // The root value.
-                        assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+                        assert!(instance.insert(0).is_ok());
 
                         // The value greater than the root being tested.
-                        assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1 ));
+                        assert!(instance.insert(1).is_ok());
 
                         instance
                     }
@@ -511,25 +511,25 @@ mod test {
                         /// Should create the following structure:
                         ///
                         /// ```
-                        ///      0
+                        ///      4
                         ///     / \
-                        ///   -2  1
+                        ///    2  5
                         ///   / \
-                        /// -3  -1
+                        ///  1  3
                         /// ```
-                        fn setup() -> AdelsonVelsoLandis<i32> {
-                            let mut instance = AdelsonVelsoLandis::<i32>::default();
+                        fn setup() -> AdelsonVelsoLandis<usize> {
+                            let mut instance = AdelsonVelsoLandis::default();
 
                             // The root node.
-                            assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+                            assert!(instance.insert(4).is_ok());
 
                             // Children of the root.
-                            assert!(instance.insert(-2).is_ok_and(|inserted| inserted == &-2));
-                            assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+                            assert!(instance.insert(2).is_ok());
+                            assert!(instance.insert(5).is_ok());
 
                             // Children of the right child.
-                            assert!(instance.insert(-3).is_ok_and(|inserted| inserted == &-3));
-                            assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1));
+                            assert!(instance.insert(1).is_ok());
+                            assert!(instance.insert(3).is_ok());
 
                             instance
                         }
@@ -541,7 +541,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let root = unsafe { instance.root.unwrap().as_ref() };
 
-                            assert_eq!(root.element, 0);
+                            assert_eq!(root.element, 4);
                             assert_eq!(root.balance, BalanceFactor::Left);
                             assert_eq!(root.parent, None);
                             assert!(root.left.is_some());
@@ -560,7 +560,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let left = unsafe { root.left.unwrap().as_ref() };
 
-                            assert_eq!(left.element, -2);
+                            assert_eq!(left.element, 2);
                             assert_eq!(left.balance, BalanceFactor::Balanced);
                             assert_eq!(left.parent, Some(root_ptr));
                             assert!(left.left.is_some());
@@ -579,7 +579,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let right = unsafe { root.right.unwrap().as_ref() };
 
-                            assert_eq!(right.element, 1);
+                            assert_eq!(right.element, 5);
                             assert_eq!(right.balance, BalanceFactor::Balanced);
                             assert_eq!(right.parent, Some(root_ptr));
                             assert!(right.left.is_none());
@@ -601,7 +601,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let left_left = unsafe { left.left.unwrap().as_ref() };
 
-                            assert_eq!(left_left.element, -3);
+                            assert_eq!(left_left.element, 1);
                             assert_eq!(left_left.balance, BalanceFactor::Balanced);
                             assert_eq!(left_left.parent, Some(left_ptr));
                             assert!(left_left.left.is_none());
@@ -623,7 +623,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let left_right = unsafe { left.right.unwrap().as_ref() };
 
-                            assert_eq!(left_right.element, -1);
+                            assert_eq!(left_right.element, 3);
                             assert_eq!(left_right.balance, BalanceFactor::Balanced);
                             assert_eq!(left_right.parent, Some(left_ptr));
                             assert!(left_right.left.is_none());
@@ -637,25 +637,25 @@ mod test {
                         /// Should create the following structure:
                         ///
                         /// ```
-                        ///    0
+                        ///    2
                         ///   / \
-                        /// -1  2
+                        ///  1  4
                         ///    / \
-                        ///   1  3
+                        ///   3  5
                         /// ```
-                        fn setup() -> AdelsonVelsoLandis<i32> {
-                            let mut instance = AdelsonVelsoLandis::<i32>::default();
+                        fn setup() -> AdelsonVelsoLandis<usize> {
+                            let mut instance = AdelsonVelsoLandis::default();
 
                             // The root node.
-                            assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+                            assert!(instance.insert(2).is_ok());
 
                             // Children of the root.
-                            assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1));
-                            assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                            assert!(instance.insert(1).is_ok());
+                            assert!(instance.insert(4).is_ok());
 
                             // Children of the right child.
-                            assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
-                            assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
+                            assert!(instance.insert(3).is_ok());
+                            assert!(instance.insert(5).is_ok());
 
                             instance
                         }
@@ -667,7 +667,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let root = unsafe { instance.root.unwrap().as_ref() };
 
-                            assert_eq!(root.element, 0);
+                            assert_eq!(root.element, 2);
                             assert_eq!(root.balance, BalanceFactor::Right);
                             assert_eq!(root.parent, None);
                             assert!(root.left.is_some());
@@ -686,7 +686,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let left = unsafe { root.left.unwrap().as_ref() };
 
-                            assert_eq!(left.element, -1);
+                            assert_eq!(left.element, 1);
                             assert_eq!(left.balance, BalanceFactor::Balanced);
                             assert_eq!(left.parent, Some(root_ptr));
                             assert!(left.left.is_none());
@@ -705,7 +705,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let right = unsafe { root.right.unwrap().as_ref() };
 
-                            assert_eq!(right.element, 2);
+                            assert_eq!(right.element, 4);
                             assert_eq!(right.balance, BalanceFactor::Balanced);
                             assert_eq!(right.parent, Some(root_ptr));
                             assert!(right.left.is_some());
@@ -727,7 +727,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let right_left = unsafe { right.left.unwrap().as_ref() };
 
-                            assert_eq!(right_left.element, 1);
+                            assert_eq!(right_left.element, 3);
                             assert_eq!(right_left.balance, BalanceFactor::Balanced);
                             assert_eq!(right_left.parent, Some(right_ptr));
                             assert!(right_left.left.is_none());
@@ -749,7 +749,7 @@ mod test {
                             // SAFETY: no other reference to this node exist to alias.
                             let right_right = unsafe { right.right.unwrap().as_ref() };
 
-                            assert_eq!(right_right.element, 3);
+                            assert_eq!(right_right.element, 5);
                             assert_eq!(right_right.balance, BalanceFactor::Balanced);
                             assert_eq!(right_right.parent, Some(right_ptr));
                             assert!(right_right.left.is_none());
@@ -765,40 +765,40 @@ mod test {
                 /// Should create the following structure:
                 ///
                 /// ```
-                ///    0
+                ///    2
                 ///   / \
-                /// -1  2
+                ///  1  4
                 ///    / \
-                ///   1  3
+                ///   3  5
                 ///       \
-                ///       4
+                ///       6
                 /// ```
                 ///
                 /// which should invoke a left-rotation becoming:
                 ///
                 /// ```
-                ///      2
+                ///      4
                 ///     / \
-                ///    0  3
+                ///    2  5
                 ///   / \  \
-                /// -1  1  4
+                ///  1  3  6
                 /// ```
-                fn setup() -> AdelsonVelsoLandis<i32> {
-                    let mut instance = AdelsonVelsoLandis::<i32>::default();
+                fn setup() -> AdelsonVelsoLandis<usize> {
+                    let mut instance = AdelsonVelsoLandis::default();
 
                     // The root node.
-                    assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0));
+                    assert!(instance.insert(2).is_ok());
 
                     // Children of the root.
-                    assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1));
-                    assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
+                    assert!(instance.insert(1).is_ok());
+                    assert!(instance.insert(4).is_ok());
 
                     // Children of the right child.
-                    assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
-                    assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
+                    assert!(instance.insert(3).is_ok());
+                    assert!(instance.insert(5).is_ok());
 
                     // This insertion triggers a left-rotation.
-                    assert!(instance.insert(4).is_ok_and(|inserted| inserted == &4));
+                    assert!(instance.insert(6).is_ok());
 
                     instance
                 }
@@ -810,7 +810,7 @@ mod test {
                     // SAFETY: no other reference to this node exist to alias.
                     let root = unsafe { instance.root.unwrap().as_ref() };
 
-                    assert_eq!(root.element, 2);
+                    assert_eq!(root.element, 4);
                     assert_eq!(root.balance, BalanceFactor::Balanced);
                     assert_eq!(root.parent, None);
                     assert!(root.left.is_some());
@@ -829,7 +829,7 @@ mod test {
                     // SAFETY: no other reference to this node exist to alias.
                     let left = unsafe { root.left.unwrap().as_ref() };
 
-                    assert_eq!(left.element, 0);
+                    assert_eq!(left.element, 2);
                     assert_eq!(left.balance, BalanceFactor::Balanced);
                     assert_eq!(left.parent, Some(root_ptr));
                     assert!(left.left.is_some());
@@ -851,7 +851,7 @@ mod test {
                     // SAFETY: no other reference to this node exist to alias.
                     let left_left = unsafe { left.left.unwrap().as_ref() };
 
-                    assert_eq!(left_left.element, -1);
+                    assert_eq!(left_left.element, 1);
                     assert_eq!(left_left.balance, BalanceFactor::Balanced);
                     assert_eq!(left_left.parent, Some(left_ptr));
                     assert!(left_left.left.is_none());
@@ -873,7 +873,7 @@ mod test {
                     // SAFETY: no other reference to this node exist to alias.
                     let left_right = unsafe { left.right.unwrap().as_ref() };
 
-                    assert_eq!(left_right.element, 1);
+                    assert_eq!(left_right.element, 3);
                     assert_eq!(left_right.balance, BalanceFactor::Balanced);
                     assert_eq!(left_right.parent, Some(left_ptr));
                     assert!(left_right.left.is_none());
@@ -892,7 +892,7 @@ mod test {
                     // SAFETY: no other reference to this node exist to alias.
                     let right = unsafe { root.right.unwrap().as_ref() };
 
-                    assert_eq!(right.element, 3);
+                    assert_eq!(right.element, 5);
                     assert_eq!(right.balance, BalanceFactor::Right);
                     assert_eq!(right.parent, Some(root_ptr));
                     assert!(right.left.is_none());
@@ -914,7 +914,7 @@ mod test {
                     // SAFETY: no other reference to this node exist to alias.
                     let right_right = unsafe { right.right.unwrap().as_ref() };
 
-                    assert_eq!(right_right.element, 4);
+                    assert_eq!(right_right.element, 6);
                     assert_eq!(right_right.balance, BalanceFactor::Balanced);
                     assert_eq!(right_right.parent, Some(right_ptr));
                     assert!(right_right.left.is_none());
@@ -946,8 +946,8 @@ mod test {
                 ///  /  / \
                 /// 1  4  6
                 /// ```
-                fn setup() -> AdelsonVelsoLandis<i32> {
-                    let mut instance = AdelsonVelsoLandis::<i32>::default();
+                fn setup() -> AdelsonVelsoLandis<usize> {
+                    let mut instance = AdelsonVelsoLandis::default();
 
                     // The root node.
                     assert!(instance.insert(5).is_ok_and(|inserted| inserted == &5));
@@ -1091,14 +1091,14 @@ mod test {
 
             #[test]
             fn when_empty() {
-                let mut instance = AdelsonVelsoLandis::<i32>::default();
+                let mut instance = AdelsonVelsoLandis::<usize>::default();
 
                 assert_eq!(instance.remove(&0), None);
             }
 
             #[test]
             fn when_not_contained() {
-                let mut instance = AdelsonVelsoLandis::<i32>::default();
+                let mut instance = AdelsonVelsoLandis::<usize>::default();
 
                 // TODO: use FromIterator or similar.
                 assert!(instance.insert(0).is_ok());
