@@ -383,8 +383,8 @@ mod test {
                 assert_eq!(root.element, 0);
                 assert_eq!(root.balance, BalanceFactor::Balanced);
                 assert_eq!(root.parent, None);
-                assert_eq!(root.left, None);
-                assert_eq!(root.right, None);
+                assert!(root.left.is_none());
+                assert!(root.right.is_none());
             }
 
             mod no_rotation {
@@ -423,7 +423,7 @@ mod test {
                         assert_eq!(root.balance, BalanceFactor::Left);
                         assert_eq!(root.parent, None);
                         assert!(root.left.is_some());
-                        assert_eq!(root.right, None);
+                        assert!(root.right.is_none());
                     }
 
                     #[test]
@@ -441,8 +441,8 @@ mod test {
                         assert_eq!(left.element, -1);
                         assert_eq!(left.balance, BalanceFactor::Balanced);
                         assert_eq!(left.parent, Some(root_ptr));
-                        assert_eq!(left.left, None);
-                        assert_eq!(left.right, None);
+                        assert!(left.left.is_none());
+                        assert!(left.right.is_none());
                     }
                 }
 
@@ -478,7 +478,7 @@ mod test {
                         assert_eq!(root.element, 0);
                         assert_eq!(root.balance, BalanceFactor::Right);
                         assert_eq!(root.parent, None);
-                        assert_eq!(root.left, None);
+                        assert!(root.left.is_none());
                         assert!(root.right.is_some());
                     }
 
@@ -497,8 +497,8 @@ mod test {
                         assert_eq!(right.element, 1);
                         assert_eq!(right.balance, BalanceFactor::Balanced);
                         assert_eq!(right.parent, Some(root_ptr));
-                        assert_eq!(right.left, None);
-                        assert_eq!(right.right, None);
+                        assert!(right.left.is_none());
+                        assert!(right.right.is_none());
                     }
                 }
 
@@ -582,8 +582,8 @@ mod test {
                             assert_eq!(right.element, 1);
                             assert_eq!(right.balance, BalanceFactor::Balanced);
                             assert_eq!(right.parent, Some(root_ptr));
-                            assert_eq!(right.left, None);
-                            assert_eq!(right.right, None);
+                            assert!(right.left.is_none());
+                            assert!(right.right.is_none());
                         }
 
                         #[test]
@@ -604,8 +604,8 @@ mod test {
                             assert_eq!(left_left.element, -3);
                             assert_eq!(left_left.balance, BalanceFactor::Balanced);
                             assert_eq!(left_left.parent, Some(left_ptr));
-                            assert_eq!(left_left.left, None);
-                            assert_eq!(left_left.right, None);
+                            assert!(left_left.left.is_none());
+                            assert!(left_left.right.is_none());
                         }
 
                         #[test]
@@ -626,8 +626,8 @@ mod test {
                             assert_eq!(left_right.element, -1);
                             assert_eq!(left_right.balance, BalanceFactor::Balanced);
                             assert_eq!(left_right.parent, Some(left_ptr));
-                            assert_eq!(left_right.left, None);
-                            assert_eq!(left_right.right, None);
+                            assert!(left_right.left.is_none());
+                            assert!(left_right.right.is_none());
                         }
                     }
 
@@ -689,8 +689,8 @@ mod test {
                             assert_eq!(left.element, -1);
                             assert_eq!(left.balance, BalanceFactor::Balanced);
                             assert_eq!(left.parent, Some(root_ptr));
-                            assert_eq!(left.left, None);
-                            assert_eq!(left.right, None);
+                            assert!(left.left.is_none());
+                            assert!(left.right.is_none());
                         }
 
                         #[test]
@@ -730,8 +730,8 @@ mod test {
                             assert_eq!(right_left.element, 1);
                             assert_eq!(right_left.balance, BalanceFactor::Balanced);
                             assert_eq!(right_left.parent, Some(right_ptr));
-                            assert_eq!(right_left.left, None);
-                            assert_eq!(right_left.right, None);
+                            assert!(right_left.left.is_none());
+                            assert!(right_left.right.is_none());
                         }
 
                         #[test]
@@ -752,8 +752,8 @@ mod test {
                             assert_eq!(right_right.element, 3);
                             assert_eq!(right_right.balance, BalanceFactor::Balanced);
                             assert_eq!(right_right.parent, Some(right_ptr));
-                            assert_eq!(right_right.left, None);
-                            assert_eq!(right_right.right, None);
+                            assert!(right_right.left.is_none());
+                            assert!(right_right.right.is_none());
                         }
                     }
                 }
@@ -854,8 +854,8 @@ mod test {
                     assert_eq!(left_left.element, -1);
                     assert_eq!(left_left.balance, BalanceFactor::Balanced);
                     assert_eq!(left_left.parent, Some(left_ptr));
-                    assert_eq!(left_left.left, None);
-                    assert_eq!(left_left.right, None);
+                    assert!(left_left.left.is_none());
+                    assert!(left_left.right.is_none());
                 }
 
                 #[test]
@@ -876,8 +876,8 @@ mod test {
                     assert_eq!(left_right.element, 1);
                     assert_eq!(left_right.balance, BalanceFactor::Balanced);
                     assert_eq!(left_right.parent, Some(left_ptr));
-                    assert_eq!(left_right.left, None);
-                    assert_eq!(left_right.right, None);
+                    assert!(left_right.left.is_none());
+                    assert!(left_right.right.is_none());
                 }
 
                 #[test]
@@ -895,7 +895,7 @@ mod test {
                     assert_eq!(right.element, 3);
                     assert_eq!(right.balance, BalanceFactor::Right);
                     assert_eq!(right.parent, Some(root_ptr));
-                    assert_eq!(right.left, None);
+                    assert!(right.left.is_none());
                     assert!(right.right.is_some());
                 }
 
@@ -917,8 +917,8 @@ mod test {
                     assert_eq!(right_right.element, 4);
                     assert_eq!(right_right.balance, BalanceFactor::Balanced);
                     assert_eq!(right_right.parent, Some(right_ptr));
-                    assert_eq!(right_right.left, None);
-                    assert_eq!(right_right.right, None);
+                    assert!(right_right.left.is_none());
+                    assert!(right_right.right.is_none());
                 }
             }
 
@@ -996,7 +996,7 @@ mod test {
                     assert_eq!(left.balance, BalanceFactor::Left);
                     assert_eq!(left.parent, Some(root_ptr));
                     assert!(left.left.is_some());
-                    assert_eq!(left.right, None);
+                    assert!(left.right.is_none());
                 }
 
                 #[test]
@@ -1017,8 +1017,8 @@ mod test {
                     assert_eq!(left_left.element, 1);
                     assert_eq!(left_left.balance, BalanceFactor::Balanced);
                     assert_eq!(left_left.parent, Some(left_ptr));
-                    assert_eq!(left_left.left, None);
-                    assert_eq!(left_left.right, None);
+                    assert!(left_left.left.is_none());
+                    assert!(left_left.right.is_none());
                 }
 
                 #[test]
@@ -1058,8 +1058,8 @@ mod test {
                     assert_eq!(right_left.element, 4);
                     assert_eq!(right_left.balance, BalanceFactor::Balanced);
                     assert_eq!(right_left.parent, Some(right_ptr));
-                    assert_eq!(right_left.left, None);
-                    assert_eq!(right_left.right, None);
+                    assert!(right_left.left.is_none());
+                    assert!(right_left.right.is_none());
                 }
 
                 #[test]
@@ -1080,8 +1080,8 @@ mod test {
                     assert_eq!(right_right.element, 6);
                     assert_eq!(right_right.balance, BalanceFactor::Balanced);
                     assert_eq!(right_right.parent, Some(right_ptr));
-                    assert_eq!(right_right.left, None);
-                    assert_eq!(right_right.right, None);
+                    assert!(right_right.left.is_none());
+                    assert!(right_right.right.is_none());
                 }
             }
         }
