@@ -388,7 +388,7 @@ mod test {
             }
 
             #[test]
-            fn yield_element() {
+            fn yields_element() {
                 let mut instance = AdelsonVelsoLandis::default();
 
                 for element in 0..=5 {
