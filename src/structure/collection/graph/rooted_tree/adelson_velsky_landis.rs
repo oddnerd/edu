@@ -375,9 +375,7 @@ mod test {
             fn when_empty() {
                 let mut instance = AdelsonVelsoLandis::<i32>::default();
 
-                assert!(instance.insert(0).is_ok_and(|inserted| {
-                    inserted == &0
-                }));
+                assert!(instance.insert(0).is_ok_and(|inserted| inserted == &0 ));
 
                 // SAFETY: no other reference exists to this node to alias.
                 let root = unsafe { instance.root.unwrap().as_ref() };
@@ -409,9 +407,7 @@ mod test {
                         assert!(instance.insert(0).is_ok());
 
                         // The value less than the root being tested.
-                        assert!(instance.insert(-1).is_ok_and(|inserted| {
-                            inserted == &-1
-                        }));
+                        assert!(instance.insert(-1).is_ok_and(|inserted| inserted == &-1 ));
 
                         instance
                     }
@@ -467,9 +463,7 @@ mod test {
                         assert!(instance.insert(0).is_ok());
 
                         // The value greater than the root being tested.
-                        assert!(instance.insert(1).is_ok_and(|inserted| {
-                            inserted == &1
-                        }));
+                        assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1 ));
 
                         instance
                     }
