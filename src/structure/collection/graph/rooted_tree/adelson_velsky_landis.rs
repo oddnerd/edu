@@ -1117,7 +1117,20 @@ mod test {
             }
 
             #[test]
-            fn when_not_contained() {
+            fn yields_element() {
+                let mut instance = AdelsonVelsoLandis::<usize>::default();
+
+                for element in 0..=5 {
+                    assert!(instance.insert(element).is_ok());
+                }
+
+                for element in 0..=5 {
+                    assert_eq!(instance.remove(&element), Some(element));
+                }
+            }
+
+            #[test]
+            fn none_when_not_contained() {
                 let mut instance = AdelsonVelsoLandis::<usize>::default();
 
                 // TODO: use FromIterator or similar.
