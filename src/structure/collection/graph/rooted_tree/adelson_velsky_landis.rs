@@ -388,7 +388,7 @@ mod test {
             }
 
             #[test]
-            fn yields_element() {
+            fn yields_element_when_not_contained() {
                 let mut instance = AdelsonVelsoLandis::default();
 
                 for element in 0..=5 {
@@ -396,701 +396,962 @@ mod test {
                 }
             }
 
-            mod no_rotation {
+            #[test]
+            fn yields_error_when_already_contained() {
+                todo!()
+            }
+
+            mod does_no_rotation {
                 use super::*;
 
-                mod when_left_of_root {
+                mod when_extending_root {
                     use super::*;
 
-                    /// Should create the following structure:
-                    ///
-                    /// ```
-                    ///    2
-                    ///   / \
-                    ///  1
-                    /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
-
-                        // The root value.
-                        assert!(instance.insert(2).is_ok());
-
-                        // The value less than the root being tested.
-                        assert!(instance.insert(1).is_ok());
-
-                        instance
-                    }
-
-                    #[test]
-                    fn updates_root() {
-                        let instance = setup();
-
-                        // SAFETY: no other reference exists to this node to alias.
-                        let root = unsafe { instance.root.unwrap().as_ref() };
-
-                        assert_eq!(root.element, 2);
-                        assert_eq!(root.balance, BalanceFactor::Left);
-                        assert_eq!(root.parent, None);
-                        assert!(root.left.is_some());
-                        assert!(root.right.is_none());
-                    }
-
-                    #[test]
-                    fn initializes_child() {
-                        let instance = setup();
-
-                        let root_ptr = instance.root.unwrap();
-
-                        // SAFETY: no other reference exists to this node to alias.
-                        let root = unsafe { root_ptr.as_ref() };
-
-                        // SAFETY: no other reference exists to this node to alias.
-                        let left = unsafe { root.left.unwrap().as_ref() };
-
-                        assert_eq!(left.element, 1);
-                        assert_eq!(left.balance, BalanceFactor::Balanced);
-                        assert_eq!(left.parent, Some(root_ptr));
-                        assert!(left.left.is_none());
-                        assert!(left.right.is_none());
-                    }
-                }
-
-                mod when_right_of_root {
-                    use super::*;
-
-                    /// Should create the following structure:
-                    ///
-                    /// ```
-                    ///  0
-                    /// / \
-                    ///   1
-                    /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
-
-                        // The root value.
-                        assert!(instance.insert(0).is_ok());
-
-                        // The value greater than the root being tested.
-                        assert!(instance.insert(1).is_ok());
-
-                        instance
-                    }
-
-                    #[test]
-                    fn updates_root() {
-                        let instance = setup();
-
-                        // SAFETY: no other reference exists to this node to alias.
-                        let root = unsafe { instance.root.unwrap().as_ref() };
-
-                        assert_eq!(root.element, 0);
-                        assert_eq!(root.balance, BalanceFactor::Right);
-                        assert_eq!(root.parent, None);
-                        assert!(root.left.is_none());
-                        assert!(root.right.is_some());
-                    }
-
-                    #[test]
-                    fn initializes_child() {
-                        let instance = setup();
-
-                        let root_ptr = instance.root.unwrap();
-
-                        // SAFETY: no other reference exists to this node to alias.
-                        let root = unsafe { root_ptr.as_ref() };
-
-                        // SAFETY: no other reference exists to this node to alias.
-                        let right = unsafe { root.right.unwrap().as_ref() };
-
-                        assert_eq!(right.element, 1);
-                        assert_eq!(right.balance, BalanceFactor::Balanced);
-                        assert_eq!(right.parent, Some(root_ptr));
-                        assert!(right.left.is_none());
-                        assert!(right.right.is_none());
-                    }
-                }
-
-                mod when_extending_balanced_tree {
-                    use super::*;
-
-                    mod to_the_left {
+                    mod when_leaf_is_left_child {
                         use super::*;
 
                         /// Should create the following structure:
                         ///
                         /// ```
-                        ///      4
-                        ///     / \
-                        ///    2  5
-                        ///   / \
-                        ///  1  3
+                        ///   2
+                        ///  / \
+                        /// 1
                         /// ```
+                        ///
+                        /// The final insertion of element '1' should invoke
+                        /// no rotation therefore remaining the same structure.
                         fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
-
-                            // The root node.
-                            assert!(instance.insert(4).is_ok());
-
-                            // Children of the root.
-                            assert!(instance.insert(2).is_ok());
-                            assert!(instance.insert(5).is_ok());
-
-                            // Children of the right child.
-                            assert!(instance.insert(1).is_ok());
-                            assert!(instance.insert(3).is_ok());
-
-                            instance
+                            todo!()
                         }
 
                         #[test]
-                        fn updates_root() {
-                            let instance = setup();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
-
-                            assert_eq!(root.element, 4);
-                            assert_eq!(root.balance, BalanceFactor::Left);
-                            assert_eq!(root.parent, None);
-                            assert!(root.left.is_some());
-                            assert!(root.right.is_some());
+                        fn root() {
+                            todo!()
                         }
 
                         #[test]
-                        fn updates_left_child() {
-                            let instance = setup();
+                        fn left_child() {
+                            todo!()
+                        }
+                    }
 
-                            let root_ptr = instance.root.unwrap();
+                    mod when_leaf_is_right_child {
+                        use super::*;
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { root_ptr.as_ref() };
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left = unsafe { root.left.unwrap().as_ref() };
-
-                            assert_eq!(left.element, 2);
-                            assert_eq!(left.balance, BalanceFactor::Balanced);
-                            assert_eq!(left.parent, Some(root_ptr));
-                            assert!(left.left.is_some());
-                            assert!(left.right.is_some());
+                        /// Should create the following structure:
+                        ///
+                        /// ```
+                        ///   1
+                        ///  / \
+                        ///    2
+                        /// ```
+                        ///
+                        /// The final insertion of element '2' should invoke
+                        /// no rotation therefore remaining the same structure.
+                        fn setup() -> AdelsonVelsoLandis<usize> {
+                            todo!()
                         }
 
                         #[test]
-                        fn does_not_modify_right_child() {
-                            let instance = setup();
-
-                            let root_ptr = instance.root.unwrap();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { root_ptr.as_ref() };
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right = unsafe { root.right.unwrap().as_ref() };
-
-                            assert_eq!(right.element, 5);
-                            assert_eq!(right.balance, BalanceFactor::Balanced);
-                            assert_eq!(right.parent, Some(root_ptr));
-                            assert!(right.left.is_none());
-                            assert!(right.right.is_none());
+                        fn root() {
+                            todo!()
                         }
 
                         #[test]
-                        fn initializes_left_grandchild() {
-                            let instance = setup();
+                        fn right_child() {
+                            todo!()
+                        }
+                    }
+                }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
+                mod when_creates_single_imbalance {
+                    use super::*;
 
-                            let left_ptr = root.left.unwrap();
+                    mod to_the_left {
+                        use super::*;
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left = unsafe { left_ptr.as_ref() };
+                        mod when_leaf_is_left_child {
+                            use super::*;
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left_left = unsafe { left.left.unwrap().as_ref() };
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///     3
+                            ///    / \
+                            ///   2  4
+                            ///  / \
+                            /// 1
+                            /// ```
+                            ///
+                            /// The final insertion of element '1' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
 
-                            assert_eq!(left_left.element, 1);
-                            assert_eq!(left_left.balance, BalanceFactor::Balanced);
-                            assert_eq!(left_left.parent, Some(left_ptr));
-                            assert!(left_left.left.is_none());
-                            assert!(left_left.right.is_none());
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_left_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
                         }
 
-                        #[test]
-                        fn initializes_right_grandchild() {
-                            let instance = setup();
+                        mod when_leaf_is_right_child {
+                            use super::*;
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///     3
+                            ///    / \
+                            ///   1  4
+                            ///  / \
+                            ///    2
+                            /// ```
+                            ///
+                            /// The final insertion of element '2' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
 
-                            let left_ptr = root.left.unwrap();
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left = unsafe { left_ptr.as_ref() };
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left_right = unsafe { left.right.unwrap().as_ref() };
+                            #[test]
+                            fn left_right_grandchild() {
+                                todo!()
+                            }
 
-                            assert_eq!(left_right.element, 3);
-                            assert_eq!(left_right.balance, BalanceFactor::Balanced);
-                            assert_eq!(left_right.parent, Some(left_ptr));
-                            assert!(left_right.left.is_none());
-                            assert!(left_right.right.is_none());
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
                         }
                     }
 
                     mod to_the_right {
                         use super::*;
 
-                        /// Should create the following structure:
-                        ///
-                        /// ```
-                        ///    2
-                        ///   / \
-                        ///  1  4
-                        ///    / \
-                        ///   3  5
-                        /// ```
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
+                        mod when_leaf_is_left_child {
+                            use super::*;
 
-                            // The root node.
-                            assert!(instance.insert(2).is_ok());
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///     2
+                            ///    / \
+                            ///   1  4
+                            ///     / \
+                            ///    3
+                            /// ```
+                            ///
+                            /// The final insertion of element '3' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
 
-                            // Children of the root.
-                            assert!(instance.insert(1).is_ok());
-                            assert!(instance.insert(4).is_ok());
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
 
-                            // Children of the right child.
-                            assert!(instance.insert(3).is_ok());
-                            assert!(instance.insert(5).is_ok());
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
 
-                            instance
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_left_grandchild() {
+                                todo!()
+                            }
                         }
 
-                        #[test]
-                        fn updates_root() {
-                            let instance = setup();
+                        mod when_leaf_is_right_child {
+                            use super::*;
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///     2
+                            ///    / \
+                            ///   1  3
+                            ///     / \
+                            ///       4
+                            /// ```
+                            ///
+                            /// The final insertion of element '4' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
 
-                            assert_eq!(root.element, 2);
-                            assert_eq!(root.balance, BalanceFactor::Right);
-                            assert_eq!(root.parent, None);
-                            assert!(root.left.is_some());
-                            assert!(root.right.is_some());
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_right_grandchild() {
+                                todo!()
+                            }
+                        }
+                    }
+                }
+
+                mod when_balancing_unbalanced_tree {
+                    use super::*;
+
+                    mod left_imbalance {
+                        use super::*;
+
+                        mod when_leaf_is_left_child {
+                            use super::*;
+
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///      4
+                            ///    /   \
+                            ///   2    6
+                            ///  / \  / \
+                            /// 1  3 5
+                            /// ```
+                            ///
+                            /// The final insertion of element '5' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_left_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_right_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_left_grandchild() {
+                                todo!()
+                            }
                         }
 
-                        #[test]
-                        fn does_not_modify_left_child() {
-                            let instance = setup();
+                        mod when_leaf_is_right_child {
+                            use super::*;
 
-                            let root_ptr = instance.root.unwrap();
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///      4
+                            ///    /   \
+                            ///   2    5
+                            ///  / \  / \
+                            /// 1  3    6
+                            /// ```
+                            ///
+                            /// The final insertion of element '6' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { root_ptr.as_ref() };
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left = unsafe { root.left.unwrap().as_ref() };
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
 
-                            assert_eq!(left.element, 1);
-                            assert_eq!(left.balance, BalanceFactor::Balanced);
-                            assert_eq!(left.parent, Some(root_ptr));
-                            assert!(left.left.is_none());
-                            assert!(left.right.is_none());
+                            #[test]
+                            fn left_left_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_right_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_right_grandchild() {
+                                todo!()
+                            }
+                        }
+                    }
+
+                    mod right_imbalance {
+                        use super::*;
+
+                        mod when_leaf_is_left_child {
+                            use super::*;
+
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///      3
+                            ///    /   \
+                            ///   2    5
+                            ///  / \  / \
+                            /// 1    4  6
+                            /// ```
+                            ///
+                            /// The final insertion of element '1' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_left_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_left_grandchild() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_right_grandchild() {
+                                todo!()
+                            }
                         }
 
-                        #[test]
-                        fn updates_right_child() {
-                            let instance = setup();
+                        mod when_leaf_is_right_child {
+                            use super::*;
 
-                            let root_ptr = instance.root.unwrap();
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///      3
+                            ///    /   \
+                            ///   1    5
+                            ///  / \  / \
+                            ///    2 4  6
+                            /// ```
+                            ///
+                            /// The final insertion of element '2' should
+                            /// invoke no rotation therefore remaining the
+                            /// same structure.
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { root_ptr.as_ref() };
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right = unsafe { root.right.unwrap().as_ref() };
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
 
-                            assert_eq!(right.element, 4);
-                            assert_eq!(right.balance, BalanceFactor::Balanced);
-                            assert_eq!(right.parent, Some(root_ptr));
-                            assert!(right.left.is_some());
-                            assert!(right.right.is_some());
-                        }
+                            #[test]
+                            fn left_right_grandchild() {
+                                todo!()
+                            }
 
-                        #[test]
-                        fn initializes_left_grandchild() {
-                            let instance = setup();
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
+                            #[test]
+                            fn right_left_grandchild() {
+                                todo!()
+                            }
 
-                            let right_ptr = root.right.unwrap();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right = unsafe { right_ptr.as_ref() };
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right_left = unsafe { right.left.unwrap().as_ref() };
-
-                            assert_eq!(right_left.element, 3);
-                            assert_eq!(right_left.balance, BalanceFactor::Balanced);
-                            assert_eq!(right_left.parent, Some(right_ptr));
-                            assert!(right_left.left.is_none());
-                            assert!(right_left.right.is_none());
-                        }
-
-                        #[test]
-                        fn initializes_right_grandchild() {
-                            let instance = setup();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
-
-                            let right_ptr = root.right.unwrap();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right = unsafe { right_ptr.as_ref() };
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right_right = unsafe { right.right.unwrap().as_ref() };
-
-                            assert_eq!(right_right.element, 5);
-                            assert_eq!(right_right.balance, BalanceFactor::Balanced);
-                            assert_eq!(right_right.parent, Some(right_ptr));
-                            assert!(right_right.left.is_none());
-                            assert!(right_right.right.is_none());
+                            #[test]
+                            fn right_right_grandchild() {
+                                todo!()
+                            }
                         }
                     }
                 }
             }
 
-            mod left_rotation {
+            mod does_left_rotation {
                 use super::*;
 
-                /// Should create the following structure:
-                ///
-                /// ```
-                ///    2
-                ///   / \
-                ///  1  4
-                ///    / \
-                ///   3  5
-                ///       \
-                ///       6
-                /// ```
-                ///
-                /// which should invoke a left-rotation becoming:
-                ///
-                /// ```
-                ///      4
-                ///     / \
-                ///    2  5
-                ///   / \  \
-                ///  1  3  6
-                /// ```
-                fn setup() -> AdelsonVelsoLandis<usize> {
-                    let mut instance = AdelsonVelsoLandis::default();
+                mod when_leaf_is_left_child {
+                    use super::*;
 
-                    // The root node.
-                    assert!(instance.insert(2).is_ok());
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///   2
+                    ///  / \
+                    /// 1  4
+                    ///   / \
+                    ///  3  6
+                    ///    / \
+                    ///   5
+                    /// ```
+                    ///
+                    /// The final insertion of element '5' should invoke a
+                    /// left-rotation about element '2' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   2    6
+                    ///  / \  / \
+                    /// 1  3 5
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
 
-                    // Children of the root.
-                    assert!(instance.insert(1).is_ok());
-                    assert!(instance.insert(4).is_ok());
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
 
-                    // Children of the right child.
-                    assert!(instance.insert(3).is_ok());
-                    assert!(instance.insert(5).is_ok());
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
 
-                    // This insertion triggers a left-rotation.
-                    assert!(instance.insert(6).is_ok());
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
 
-                    instance
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
                 }
 
-                #[test]
-                fn updates_root() {
-                    let instance = setup();
+                mod when_leaf_is_right_child {
+                    use super::*;
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///   2
+                    ///  / \
+                    /// 1  4
+                    ///   / \
+                    ///  3  5
+                    ///    / \
+                    ///      6
+                    /// ```
+                    ///
+                    /// The final insertion of element '6' should invoke a
+                    /// left-rotation about element '2' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   2    5
+                    ///  / \  / \
+                    /// 1  3    6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
 
-                    assert_eq!(root.element, 4);
-                    assert_eq!(root.balance, BalanceFactor::Balanced);
-                    assert_eq!(root.parent, None);
-                    assert!(root.left.is_some());
-                    assert!(root.right.is_some());
-                }
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
 
-                #[test]
-                fn updates_left_child() {
-                    let instance = setup();
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
 
-                    let root_ptr = instance.root.unwrap();
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { root_ptr.as_ref() };
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left = unsafe { root.left.unwrap().as_ref() };
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
 
-                    assert_eq!(left.element, 2);
-                    assert_eq!(left.balance, BalanceFactor::Balanced);
-                    assert_eq!(left.parent, Some(root_ptr));
-                    assert!(left.left.is_some());
-                    assert!(left.right.is_some());
-                }
-
-                #[test]
-                fn updates_left_left_grandchild() {
-                    let instance = setup();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
-
-                    let left_ptr = root.left.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left = unsafe { left_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left_left = unsafe { left.left.unwrap().as_ref() };
-
-                    assert_eq!(left_left.element, 1);
-                    assert_eq!(left_left.balance, BalanceFactor::Balanced);
-                    assert_eq!(left_left.parent, Some(left_ptr));
-                    assert!(left_left.left.is_none());
-                    assert!(left_left.right.is_none());
-                }
-
-                #[test]
-                fn updates_left_right_grandchild() {
-                    let instance = setup();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
-
-                    let left_ptr = root.left.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left = unsafe { left_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left_right = unsafe { left.right.unwrap().as_ref() };
-
-                    assert_eq!(left_right.element, 3);
-                    assert_eq!(left_right.balance, BalanceFactor::Balanced);
-                    assert_eq!(left_right.parent, Some(left_ptr));
-                    assert!(left_right.left.is_none());
-                    assert!(left_right.right.is_none());
-                }
-
-                #[test]
-                fn updates_right_child() {
-                    let instance = setup();
-
-                    let root_ptr = instance.root.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { root_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right = unsafe { root.right.unwrap().as_ref() };
-
-                    assert_eq!(right.element, 5);
-                    assert_eq!(right.balance, BalanceFactor::Right);
-                    assert_eq!(right.parent, Some(root_ptr));
-                    assert!(right.left.is_none());
-                    assert!(right.right.is_some());
-                }
-
-                #[test]
-                fn updates_right_grandchild() {
-                    let instance = setup();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
-
-                    let right_ptr = root.right.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right = unsafe { right_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right_right = unsafe { right.right.unwrap().as_ref() };
-
-                    assert_eq!(right_right.element, 6);
-                    assert_eq!(right_right.balance, BalanceFactor::Balanced);
-                    assert_eq!(right_right.parent, Some(right_ptr));
-                    assert!(right_right.left.is_none());
-                    assert!(right_right.right.is_none());
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
                 }
             }
 
-            mod right_rotation {
+            mod does_left_right_rotation {
                 use super::*;
 
-                /// Should create the following structure:
-                ///
-                /// ```
-                ///       5
-                ///      / \
-                ///     3  6
-                ///    / \
-                ///   2  4
-                ///  /
-                /// 1
-                /// ```
-                ///
-                /// which should invoke a right-rotation becoming:
-                ///
-                /// ```
-                ///     3
-                ///    / \
-                ///   2  5
-                ///  /  / \
-                /// 1  4  6
-                /// ```
-                fn setup() -> AdelsonVelsoLandis<usize> {
-                    let mut instance = AdelsonVelsoLandis::default();
+                mod when_leaf_is_left_child {
+                    use super::*;
 
-                    // The root node.
-                    assert!(instance.insert(5).is_ok_and(|inserted| inserted == &5));
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///     5
+                    ///    / \
+                    ///   3  6
+                    ///  / \
+                    /// 1  4
+                    ///   / \
+                    ///  2
+                    /// ```
+                    ///
+                    /// The final insertion of element '2' should invoke a
+                    /// left-rotation about element '3' followed by a
+                    /// right-rotation about element '5' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   3    5
+                    ///  / \  / \
+                    /// 1  2    6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
 
-                    // Children of the root.
-                    assert!(instance.insert(3).is_ok_and(|inserted| inserted == &3));
-                    assert!(instance.insert(6).is_ok_and(|inserted| inserted == &6));
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
 
-                    // Children of the left child.
-                    assert!(instance.insert(2).is_ok_and(|inserted| inserted == &2));
-                    assert!(instance.insert(4).is_ok_and(|inserted| inserted == &4));
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
 
-                    // This insertion triggers a right-rotation.
-                    assert!(instance.insert(1).is_ok_and(|inserted| inserted == &1));
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
 
-                    instance
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
                 }
 
-                #[test]
-                fn updates_root() {
-                    let instance = setup();
+                mod when_leaf_is_right_child {
+                    use super::*;
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///     5
+                    ///    / \
+                    ///   2  6
+                    ///  / \
+                    /// 1  3
+                    ///   / \
+                    ///     4
+                    /// ```
+                    ///
+                    /// The final insertion of element '4' should invoke a
+                    /// left-rotation about element '2' followed by a
+                    /// right-rotation about element '5' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      3
+                    ///    /   \
+                    ///   2    5
+                    ///  / \  / \
+                    /// 1    4  6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
 
-                    assert_eq!(root.element, 3);
-                    assert_eq!(root.balance, BalanceFactor::Balanced);
-                    assert_eq!(root.parent, None);
-                    assert!(root.left.is_some());
-                    assert!(root.right.is_some());
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
+            }
+
+            mod does_right_rotation {
+                use super::*;
+
+                mod when_leaf_is_left_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///       5
+                    ///      / \
+                    ///     3  6
+                    ///    / \
+                    ///   2  4
+                    ///  / \
+                    /// 1
+                    /// ```
+                    ///
+                    /// The final insertion of element '1' should invoke a
+                    /// right-rotation about element '5' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      3
+                    ///    /   \
+                    ///   2    5
+                    ///  / \  / \
+                    /// 1    4  6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
                 }
 
-                #[test]
-                fn updates_left_child() {
-                    let instance = setup();
+                mod when_leaf_is_right_child {
+                    use super::*;
 
-                    let root_ptr = instance.root.unwrap();
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///       5
+                    ///      / \
+                    ///     3  6
+                    ///    / \
+                    ///   1  4
+                    ///  / \
+                    ///    2
+                    /// ```
+                    ///
+                    /// The final insertion of element '2' should invoke a
+                    /// right-rotation about element '5' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      3
+                    ///    /   \
+                    ///   1    5
+                    ///  / \  / \
+                    ///    2 4  6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { root_ptr.as_ref() };
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left = unsafe { root.left.unwrap().as_ref() };
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
 
-                    assert_eq!(left.element, 2);
-                    assert_eq!(left.balance, BalanceFactor::Left);
-                    assert_eq!(left.parent, Some(root_ptr));
-                    assert!(left.left.is_some());
-                    assert!(left.right.is_none());
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
+            }
+
+            mod does_right_left_rotation {
+                use super::*;
+
+                mod when_leaf_is_left_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///    4
+                    ///   / \
+                    ///  2  5
+                    ///    / \
+                    ///   3  6
+                    ///  / \
+                    /// 1
+                    /// ```
+                    ///
+                    /// The final insertion of element '1' should invoke a
+                    /// right-rotation about element '5' followed by a
+                    /// left-rotation about element '4' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      3
+                    ///    /   \
+                    ///   4    5
+                    ///  / \  / \
+                    /// 2  1    6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
                 }
 
-                #[test]
-                fn updates_left_grandchild() {
-                    let instance = setup();
+                mod when_leaf_is_right_child {
+                    use super::*;
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///   4
+                    ///  / \
+                    /// 1  5
+                    ///   / \
+                    ///  2  6
+                    /// / \
+                    ///   3
+                    /// ```
+                    ///
+                    /// The final insertion of element '3' should invoke a
+                    /// right-rotation about element '5' followed by a
+                    /// left-rotation about element '4' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      2
+                    ///    /   \
+                    ///   4    5
+                    ///  / \  / \
+                    /// 1    3  6
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
 
-                    let left_ptr = root.left.unwrap();
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left = unsafe { left_ptr.as_ref() };
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
 
-                    // SAFETY: no other reference to this node exist to alias.
-                    let left_left = unsafe { left.left.unwrap().as_ref() };
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
 
-                    assert_eq!(left_left.element, 1);
-                    assert_eq!(left_left.balance, BalanceFactor::Balanced);
-                    assert_eq!(left_left.parent, Some(left_ptr));
-                    assert!(left_left.left.is_none());
-                    assert!(left_left.right.is_none());
-                }
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
 
-                #[test]
-                fn updates_right_child() {
-                    let instance = setup();
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
 
-                    let root_ptr = instance.root.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { root_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right = unsafe { root.right.unwrap().as_ref() };
-
-                    assert_eq!(right.element, 5);
-                    assert_eq!(right.balance, BalanceFactor::Balanced);
-                    assert_eq!(right.parent, Some(root_ptr));
-                    assert!(right.left.is_some());
-                    assert!(right.right.is_some());
-                }
-
-                #[test]
-                fn updates_right_left_grandchild() {
-                    let instance = setup();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
-
-                    let right_ptr = root.right.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right = unsafe { right_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right_left = unsafe { right.left.unwrap().as_ref() };
-
-                    assert_eq!(right_left.element, 4);
-                    assert_eq!(right_left.balance, BalanceFactor::Balanced);
-                    assert_eq!(right_left.parent, Some(right_ptr));
-                    assert!(right_left.left.is_none());
-                    assert!(right_left.right.is_none());
-                }
-
-                #[test]
-                fn updates_right_right_grandchild() {
-                    let instance = setup();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let root = unsafe { instance.root.unwrap().as_ref() };
-
-                    let right_ptr = root.right.unwrap();
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right = unsafe { right_ptr.as_ref() };
-
-                    // SAFETY: no other reference to this node exist to alias.
-                    let right_right = unsafe { right.right.unwrap().as_ref() };
-
-                    assert_eq!(right_right.element, 6);
-                    assert_eq!(right_right.balance, BalanceFactor::Balanced);
-                    assert_eq!(right_right.parent, Some(right_ptr));
-                    assert!(right_right.left.is_none());
-                    assert!(right_right.right.is_none());
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
                 }
             }
         }
@@ -1106,18 +1367,7 @@ mod test {
             }
 
             #[test]
-            fn when_only_root() {
-                let mut instance = AdelsonVelsoLandis::default();
-
-                assert!(instance.insert(0).is_ok());
-
-                assert_eq!(instance.remove(&0), Some(0));
-
-                assert!(instance.root.is_none());
-            }
-
-            #[test]
-            fn yields_element() {
+            fn yields_element_when_contained() {
                 let mut instance = AdelsonVelsoLandis::<usize>::default();
 
                 for element in 0..=5 {
@@ -1130,7 +1380,7 @@ mod test {
             }
 
             #[test]
-            fn none_when_not_contained() {
+            fn yields_none_when_not_contained() {
                 let mut instance = AdelsonVelsoLandis::<usize>::default();
 
                 // TODO: use FromIterator or similar.
@@ -1144,81 +1394,81 @@ mod test {
                 assert_eq!(instance.remove(&6), None);
             }
 
-            mod no_rotation {
+            mod does_no_rotation {
                 use super::*;
 
-                mod leaf_of_balanced_parent {
+                mod when_removing_root {
                     use super::*;
 
-                    mod left_leaf {
-                        use super::*;
-
-                        /// Should create the following structure:
-                        ///
-                        /// ```
-                        ///   2
-                        ///  / \
-                        /// 1  3
-                        /// ```
-                        ///
-                        /// then removes element `1` becoming:
-                        ///
-                        /// ```
-                        ///  2
-                        /// / \
-                        ///   3
-                        /// ```
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
-
-                            // root node.
-                            assert!(instance.insert(2).is_ok());
-
-                            // children.
-                            assert!(instance.insert(1).is_ok());
-                            assert!(instance.insert(3).is_ok());
-
-                            // remove left leaf.
-                            assert!(instance.remove(&1).is_some());
-
-                            instance
-                        }
-
-                        #[test]
-                        fn updates_root() {
-                            let instance = setup();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
-
-                            assert_eq!(root.element, 2);
-                            assert_eq!(root.balance, BalanceFactor::Right);
-                            assert_eq!(root.parent, None);
-                            assert!(root.left.is_none());
-                            assert!(root.right.is_some());
-                        }
-
-                        #[test]
-                        fn does_not_modify_right_child() {
-                            let instance = setup();
-
-                            let root_ptr = instance.root.unwrap();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { root_ptr.as_ref() };
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let right = unsafe { root.right.unwrap().as_ref() };
-
-                            assert_eq!(right.element, 3);
-                            assert_eq!(right.balance, BalanceFactor::Balanced);
-                            assert_eq!(right.parent, Some(root_ptr));
-                            assert!(right.left.is_none());
-                            assert!(right.right.is_none());
-                        }
+                    #[test]
+                    fn when_only_root() {
+                        todo!()
                     }
 
-                    mod right_leaf {
+                    #[test]
+                    fn when_only_left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn when_only_right_child() {
+                        todo!()
+                    }
+
+                    mod when_both_children {
+                        use super::*;
+
+                        /// Should create the following structure:
+                        ///
+                        /// ```
+                        ///   2
+                        ///  / \
+                        /// 1   4
+                        ///    / \
+                        ///   3  5
+                        /// ```
+                        ///
+                        /// The removal of element '2' should swap elements
+                        /// '2' and '4' followed by a swap of elements '2' and
+                        /// '5' thenceforth modifying the structure to become:
+                        ///
+                        /// ```
+                        ///   4
+                        ///  / \
+                        /// 1  5
+                        ///   / \
+                        ///  3
+                        /// ```
+                        fn setup() -> AdelsonVelsoLandis<usize> {
+                            todo!()
+                        }
+
+                        #[test]
+                        fn root() {
+                            todo!()
+                        }
+
+                        #[test]
+                        fn left_child() {
+                            todo!()
+                        }
+
+                        #[test]
+                        fn right_child() {
+                            todo!()
+                        }
+
+                        #[test]
+                        fn right_left_grandchild() {
+                            todo!()
+                        }
+                    }
+                }
+
+                mod when_creates_single_imbalance {
+                    use super::*;
+
+                    mod when_left_imbalance {
                         use super::*;
 
                         /// Should create the following structure:
@@ -1229,7 +1479,9 @@ mod test {
                         /// 1  3
                         /// ```
                         ///
-                        /// then removes element `3` becoming:
+                        /// The deletion of element '3' should invoke no
+                        /// rotation thenceforth modifying the structure
+                        /// to become:
                         ///
                         /// ```
                         ///   2
@@ -1237,134 +1489,783 @@ mod test {
                         /// 1
                         /// ```
                         fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
-
-                            // root node.
-                            assert!(instance.insert(2).is_ok());
-
-                            // children.
-                            assert!(instance.insert(1).is_ok());
-                            assert!(instance.insert(3).is_ok());
-
-                            // remove right leaf.
-                            assert!(instance.remove(&3).is_some());
-
-                            instance
+                            todo!()
                         }
 
                         #[test]
-                        fn updates_root() {
-                            let instance = setup();
-
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
-
-                            assert_eq!(root.element, 2);
-                            assert_eq!(root.balance, BalanceFactor::Left);
-                            assert_eq!(root.parent, None);
-                            assert!(root.left.is_some());
-                            assert!(root.right.is_none());
-
+                        fn root() {
+                            todo!()
                         }
 
                         #[test]
-                        fn does_not_modify_left_child() {
-                            let instance = setup();
+                        fn left_child() {
+                            todo!()
+                        }
+                    }
 
-                            let root_ptr = instance.root.unwrap();
+                    mod when_right_imbalance {
+                        use super::*;
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let root = unsafe { root_ptr.as_ref() };
+                        /// Should create the following structure:
+                        ///
+                        /// ```
+                        ///   2
+                        ///  / \
+                        /// 1  3
+                        /// ```
+                        ///
+                        /// The deletion of element '1' should invoke no
+                        /// rotation thenceforth modifying the structure
+                        /// to become:
+                        ///
+                        /// ```
+                        ///  2
+                        /// / \
+                        ///   3
+                        /// ```
+                        fn setup() -> AdelsonVelsoLandis<usize> {
+                            todo!()
+                        }
 
-                            // SAFETY: no other reference to this node exist to alias.
-                            let left = unsafe { root.left.unwrap().as_ref() };
+                        #[test]
+                        fn root() {
+                            todo!()
+                        }
 
-                            assert_eq!(left.element, 1);
-                            assert_eq!(left.balance, BalanceFactor::Balanced);
-                            assert_eq!(left.parent, Some(root_ptr));
-                            assert!(left.left.is_none());
-                            assert!(left.right.is_none());
+                        #[test]
+                        fn right_child() {
+                            todo!()
                         }
                     }
                 }
 
-                mod has_one_child {
+                mod when_balancing_unbalanced_tree {
                     use super::*;
+
+                    mod when_left_imbalance {
+                        use super::*;
+
+                        mod when_leaf_is_left_child {
+                            use super::*;
+
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///     3
+                            ///    / \
+                            ///   2   4
+                            ///  / \
+                            /// 1
+                            /// ```
+                            ///
+                            /// The deletion of element '1' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   3
+                            ///  / \
+                            /// 2  4
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+                        }
+
+                        mod when_leaf_is_right_child {
+                            use super::*;
+
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///    3
+                            ///   / \
+                            ///  1   4
+                            /// / \
+                            ///   2
+                            /// ```
+                            ///
+                            /// The deletion of element '2' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   3
+                            ///  / \
+                            /// 1  4
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+                        }
+                    }
+
+                    mod when_right_imbalance {
+                        use super::*;
+
+                        mod when_leaf_is_left_child {
+                            use super::*;
+
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1   4
+                            ///    / \
+                            ///   3
+                            /// ```
+                            ///
+                            /// The deletion of element '3' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1  4
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+                        }
+
+                        mod when_leaf_is_right_child {
+                            use super::*;
+
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1   3
+                            ///    / \
+                            ///      4
+                            /// ```
+                            ///
+                            /// The deletion of element '4' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1  3
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn root() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn left_child() {
+                                todo!()
+                            }
+
+                            #[test]
+                            fn right_child() {
+                                todo!()
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod does_left_rotation {
+                use super::*;
+
+                mod when_leaf_is_left_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///      3
+                    ///    /   \
+                    ///   2     6
+                    ///  / \   / \
+                    /// 1     4  7
+                    ///         / \
+                    ///        5  8
+                    /// ```
+                    ///
+                    /// The deletion of element '1' should invoke a
+                    /// left-rotation about element '3' thenceforth
+                    /// modifying the structure to become:
+                    ///
+                    /// ```
+                    ///      6
+                    ///    /   \
+                    ///   3    7
+                    ///  / \  / \
+                    /// 2  4 5  8
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
 
                     #[test]
                     fn left_child() {
-                        let mut instance = AdelsonVelsoLandis::default();
+                        todo!()
+                    }
 
-                        // Should create the following structure:
-                        //
-                        // ```
-                        //   2
-                        //  / \
-                        // 1
-                        // ```
-                        assert!(instance.insert(2).is_ok());
-                        assert!(instance.insert(1).is_ok());
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
 
-                        // Should create the following structure:
-                        //
-                        // ```
-                        //  1
-                        // / \
-                        //
-                        // ```
-                        assert!(instance.remove(&2).is_some());
-
-                        // SAFETY: no other reference to this node exist to alias.
-                        let root = unsafe { instance.root.unwrap().as_ref() };
-
-                        assert_eq!(root.element, 1);
-                        assert_eq!(root.balance, BalanceFactor::Balanced);
-                        assert_eq!(root.parent, None);
-                        assert!(root.left.is_none());
-                        assert!(root.right.is_none());
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
                     }
 
                     #[test]
                     fn right_child() {
-                        let mut instance = AdelsonVelsoLandis::default();
+                        todo!()
+                    }
 
-                        // Should create the following structure:
-                        //
-                        // ```
-                        //   1
-                        //  / \
-                        //    2
-                        // ```
-                        assert!(instance.insert(1).is_ok());
-                        assert!(instance.insert(2).is_ok());
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
 
-                        // Should create the following structure:
-                        //
-                        // ```
-                        //  2
-                        // / \
-                        //
-                        // ```
-                        assert!(instance.remove(&1).is_some());
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
 
-                        // SAFETY: no other reference to this node exist to alias.
-                        let root = unsafe { instance.root.unwrap().as_ref() };
+                mod when_leaf_is_right_child {
+                    use super::*;
 
-                        assert_eq!(root.element, 2);
-                        assert_eq!(root.balance, BalanceFactor::Balanced);
-                        assert_eq!(root.parent, None);
-                        assert!(root.left.is_none());
-                        assert!(root.right.is_none());
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///     3
+                    ///   /   \
+                    ///  1     6
+                    /// / \   / \
+                    ///   2  4  7
+                    ///        / \
+                    ///       5  8
+                    /// ```
+                    ///
+                    /// The deletion of element '2' should invoke a
+                    /// left-rotation about element '3' thenceforth
+                    /// modifying the structure to become:
+                    ///
+                    /// ```
+                    ///      6
+                    ///    /   \
+                    ///   3    7
+                    ///  / \  / \
+                    /// 1  2 5  8
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
                     }
                 }
             }
 
-            mod left_rotation {
+            mod does_left_right_rotation {
                 use super::*;
+
+                mod when_leaf_is_left_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///       6
+                    ///    /     \
+                    ///   3      8
+                    ///  / \    / \
+                    /// 1  4   7
+                    ///   / \
+                    ///  2  5
+                    /// ```
+                    ///
+                    /// The deletion of element '7' should invoke a
+                    /// left-rotation about element '3' followed by a
+                    /// right-rotation about element '6' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   3    6
+                    ///  / \  / \
+                    /// 1  2 5  8
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
+
+                mod when_leaf_is_right_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///      6
+                    ///    /   \
+                    ///   3    7
+                    ///  / \  / \
+                    /// 1  4    8
+                    ///   / \
+                    ///  2  5
+                    /// ```
+                    ///
+                    /// The deletion of element '8' should invoke a
+                    /// left-rotation about element '3' followed by a
+                    /// right-rotation about element '6' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   3    6
+                    ///  / \  / \
+                    /// 1  2 5  7
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
             }
 
-            mod right_rotation {
+            mod does_right_rotation {
                 use super::*;
+
+                mod when_leaf_is_left_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///        6
+                    ///      /   \
+                    ///     4    8
+                    ///    / \  / \
+                    ///   2  5 7
+                    ///  / \
+                    /// 1  3
+                    /// ```
+                    ///
+                    /// The deletion of element '7' should invoke a
+                    /// right-rotation about element '6' thenceforth
+                    /// modifying the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   2    6
+                    ///  / \  / \
+                    /// 1  3 5  8
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
+
+                mod when_leaf_is_right_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///        6
+                    ///      /   \
+                    ///     4    7
+                    ///    / \  / \
+                    ///   2  5    8
+                    ///  / \
+                    /// 1  3
+                    /// ```
+                    ///
+                    /// The deletion of element '8' should invoke a
+                    /// right-rotation about element '6' thenceforth
+                    /// modifying the structure to become:
+                    ///
+                    /// ```
+                    ///      4
+                    ///    /   \
+                    ///   2    6
+                    ///  / \  / \
+                    /// 1  3 5  7
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
+            }
+
+            mod does_right_left_rotation {
+                use super::*;
+
+                mod when_leaf_is_left_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///       4
+                    ///    /    \
+                    ///   2     7
+                    ///  / \   / \
+                    /// 1     5  8
+                    ///      / \
+                    ///     3  6
+                    /// ```
+                    ///
+                    /// The deletion of element '1' should invoke a
+                    /// right-rotation about element '7' followed by a
+                    /// left-rotation about element '4' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      5
+                    ///    /   \
+                    ///   4    7
+                    ///  / \  / \
+                    /// 2  3 6  8
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
+
+                mod when_leaf_is_right_child {
+                    use super::*;
+
+                    /// Should create the following structure:
+                    ///
+                    /// ```
+                    ///      4
+                    ///   /    \
+                    ///  1     7
+                    /// / \   / \
+                    ///   2  5  8
+                    ///     / \
+                    ///    3  6
+                    /// ```
+                    ///
+                    /// The deletion of element '2' should invoke a
+                    /// right-rotation about element '7' followed by a
+                    /// left-rotation about element '4' thenceforth modifying
+                    /// the structure to become:
+                    ///
+                    /// ```
+                    ///      5
+                    ///    /   \
+                    ///   4    7
+                    ///  / \  / \
+                    /// 1  3 6  8
+                    /// ```
+                    fn setup() -> AdelsonVelsoLandis<usize> {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn root() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn left_right_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_child() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_left_grandchild() {
+                        todo!()
+                    }
+
+                    #[test]
+                    fn right_right_grandchild() {
+                        todo!()
+                    }
+                }
             }
         }
     }
