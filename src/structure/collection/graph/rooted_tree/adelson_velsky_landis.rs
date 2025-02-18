@@ -431,7 +431,14 @@ mod test {
 
             #[test]
             fn yields_error_when_already_contained() {
-                todo!()
+                let elements = 0..8;
+
+                #[allow(clippy::from_iter_instead_of_collect)]
+                let mut instance = AdelsonVelsoLandis::from_iter(elements.clone());
+
+                for element in elements {
+                    assert!(instance.insert(element).is_err());
+                }
             }
 
             mod does_no_rotation {
