@@ -244,8 +244,10 @@ impl<T> Default for AdelsonVelsoLandis<T> {
     }
 }
 
-impl<T> FromIterator<T> for AdelsonVelsoLandis<T> {
+impl<T: Ord> FromIterator<T> for AdelsonVelsoLandis<T> {
     /// Construct by moving elements from an iterator.
+    ///
+    /// Elements are inserted in order, later duplicates being dropped.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
@@ -263,7 +265,13 @@ impl<T> FromIterator<T> for AdelsonVelsoLandis<T> {
     /// todo!("show that it contains those elements in that order");
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
-        todo!()
+        let mut instance = AdelsonVelsoLandis::default();
+
+        for element in iter {
+            drop(instance.insert(element));
+        }
+
+        instance
     }
 }
 
