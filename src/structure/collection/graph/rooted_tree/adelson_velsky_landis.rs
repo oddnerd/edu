@@ -676,11 +676,11 @@ mod test {
                             /// Should create the following structure:
                             ///
                             /// ```
-                            ///     3
-                            ///    / \
-                            ///   1  4
-                            ///  / \
-                            ///    2
+                            ///    3
+                            ///   / \
+                            ///  1  4
+                            /// / \
+                            ///   2
                             /// ```
                             ///
                             /// The final insertion of element '2' should
@@ -784,11 +784,11 @@ mod test {
                             /// Should create the following structure:
                             ///
                             /// ```
-                            ///     2
-                            ///    / \
-                            ///   1  4
-                            ///     / \
-                            ///    3
+                            ///   2
+                            ///  / \
+                            /// 1  4
+                            ///   / \
+                            ///  3
                             /// ```
                             ///
                             /// The final insertion of element '3' should
@@ -825,11 +825,11 @@ mod test {
                             /// Should create the following structure:
                             ///
                             /// ```
-                            ///     2
-                            ///    / \
-                            ///   1  3
-                            ///     / \
-                            ///       4
+                            ///   2
+                            ///  / \
+                            /// 1  3
+                            ///   / \
+                            ///     4
                             /// ```
                             ///
                             /// The final insertion of element '4' should
