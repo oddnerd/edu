@@ -242,6 +242,29 @@ impl<T> Default for AdelsonVelsoLandis<T> {
     }
 }
 
+impl<T> FromIterator<T> for AdelsonVelsoLandis<T> {
+    /// Construct by moving elements from an iterator.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This methods takes O(N * log(N)) time and consumes O(N) memory for the
+    /// result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::graph::rooted_tree::AdelsonVelskyLandis;
+    ///
+    /// let instance = AdelsonVelskyLandis::from_iter(1..=5);
+    ///
+    /// todo!("show that it contains those elements in that order");
+    /// ```
+    fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
+        todo!()
+    }
+}
+
 /// Which branch of a [`Node`] has the subtree with the greatest height.
 #[derive(PartialEq, Eq, Debug)]
 enum BalanceFactor {
