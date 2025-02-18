@@ -1,5 +1,7 @@
 //! Implementation of [`AdelsonVelskyLandis`].
 
+extern crate alloc;
+
 use super::Collection;
 use super::Graph;
 use super::Directed;
@@ -2316,6 +2318,20 @@ mod test {
                 let instance = AdelsonVelsoLandis::<usize>::from_iter(core::iter::empty());
 
                 assert!(instance.root.is_none());
+            }
+
+            mod ignores_duplicate_elements {
+                use super::*;
+
+                #[test]
+                fn does_not_modify_existing_element() {
+                    todo!()
+                }
+
+                #[test]
+                fn drops_duplicates() {
+                    todo!()
+                }
             }
         }
     }
