@@ -2303,4 +2303,20 @@ mod test {
             assert!(instance.root.is_none());
         }
     }
+
+    mod iterator {
+        use super::*;
+
+        mod from {
+            use super::*;
+
+            #[test]
+            fn when_empty() {
+                #[expect(clippy::from_iter_instead_of_collect)]
+                let instance = AdelsonVelsoLandis::<usize>::from_iter(core::iter::empty());
+
+                assert!(instance.root.is_none());
+            }
+        }
+    }
 }
