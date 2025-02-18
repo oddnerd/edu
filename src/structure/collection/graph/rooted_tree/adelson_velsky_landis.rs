@@ -2292,4 +2292,15 @@ mod test {
             }
         }
     }
+
+    mod default {
+        use super::*;
+
+        #[test]
+        fn is_empty() {
+            let instance = AdelsonVelsoLandis::<usize>::default();
+
+            assert!(instance.root.is_none());
+        }
+    }
 }
