@@ -517,17 +517,45 @@ mod test {
                         /// The final insertion of element '2' should invoke
                         /// no rotation therefore remaining the same structure.
                         fn setup() -> AdelsonVelsoLandis<usize> {
-                            todo!()
+                            let mut instance = AdelsonVelsoLandis::default();
+
+                            assert!(instance.insert(1).is_ok());
+                            assert!(instance.insert(2).is_ok());
+
+                            instance
                         }
 
                         #[test]
                         fn root() {
-                            todo!()
+                            let instance = setup();
+
+                            // SAFETY: no other reference exists to this node to alias.
+                            let root = unsafe { instance.root.unwrap().as_ref() };
+
+                            assert_eq!(root.element, 1);
+                            assert_eq!(root.balance, BalanceFactor::Right);
+                            assert_eq!(root.parent, None);
+                            assert!(root.left.is_some());
+                            assert!(root.right.is_none());
                         }
 
                         #[test]
                         fn right_child() {
-                            todo!()
+                            let instance = setup();
+
+                            let root_ptr = instance.root.unwrap();
+
+                            // SAFETY: no other reference exists to this node to alias.
+                            let root = unsafe { root_ptr.as_ref() };
+
+                            // SAFETY: no other reference exists to this node to alias.
+                            let right = unsafe { root.right.unwrap().as_ref() };
+
+                            assert_eq!(right.element, 2);
+                            assert_eq!(right.balance, BalanceFactor::Balanced);
+                            assert_eq!(right.parent, Some(root_ptr));
+                            assert!(right.left.is_some());
+                            assert!(right.right.is_none());
                         }
                     }
                 }
