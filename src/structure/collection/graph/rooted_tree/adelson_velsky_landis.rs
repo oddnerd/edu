@@ -938,10 +938,10 @@ mod test {
                                 let left = unsafe { root.left.unwrap().as_ref() };
 
                                 assert_eq!(left.element, 1);
-                                assert_eq!(root.balance, BalanceFactor::Balanced);
-                                assert_eq!(root.parent, Some(root_ptr));
-                                assert!(root.left.is_none());
-                                assert!(root.right.is_none());
+                                assert_eq!(left.balance, BalanceFactor::Balanced);
+                                assert_eq!(left.parent, Some(root_ptr));
+                                assert!(left.left.is_none());
+                                assert!(left.right.is_none());
                             }
 
                             #[test]
@@ -957,10 +957,10 @@ mod test {
                                 let right = unsafe { root.right.unwrap().as_ref() };
 
                                 assert_eq!(right.element, 4);
-                                assert_eq!(root.balance, BalanceFactor::Right);
-                                assert_eq!(root.parent, Some(root_ptr));
-                                assert!(root.left.is_none());
-                                assert!(root.right.is_some());
+                                assert_eq!(right.balance, BalanceFactor::Right);
+                                assert_eq!(right.parent, Some(root_ptr));
+                                assert!(right.left.is_none());
+                                assert!(right.right.is_some());
                             }
 
                             #[test]
