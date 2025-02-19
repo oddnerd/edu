@@ -1380,7 +1380,7 @@ mod test {
                                 // SAFETY: no other reference exists to this node to alias.
                                 let left_left = unsafe { left.left.unwrap().as_ref() };
 
-                                assert_eq!(left_left.element, 2);
+                                assert_eq!(left_left.element, 1);
                                 assert_eq!(left_left.balance, BalanceFactor::Balanced);
                                 assert_eq!(left_left.parent, Some(left_ptr));
                                 assert!(left_left.left.is_none());
