@@ -982,7 +982,7 @@ mod test {
                                 assert_eq!(right_right.balance, BalanceFactor::Balanced);
                                 assert_eq!(right_right.parent, Some(right_ptr));
                                 assert!(right_right.left.is_none());
-                                assert!(right_right.right.is_some());
+                                assert!(right_right.right.is_none());
                             }
                         }
                     }
