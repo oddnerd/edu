@@ -1759,13 +1759,13 @@ mod test {
                         let right = unsafe { right_ptr.as_ref() };
 
                         // SAFETY: no other reference exists to this node to alias.
-                        let right_right = unsafe { right.right.unwrap().as_ref() };
+                        let right_left = unsafe { right.left.unwrap().as_ref() };
 
-                        assert_eq!(right_right.element, 5);
-                        assert_eq!(right_right.balance, BalanceFactor::Balanced);
-                        assert_eq!(right_right.parent, Some(right_ptr));
-                        assert!(right_right.left.is_none());
-                        assert!(right_right.right.is_none());
+                        assert_eq!(right_left.element, 5);
+                        assert_eq!(right_left.balance, BalanceFactor::Balanced);
+                        assert_eq!(right_left.parent, Some(right_ptr));
+                        assert!(right_left.left.is_none());
+                        assert!(right_left.right.is_none());
                     }
                 }
 
@@ -1922,7 +1922,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let right_right = unsafe { right.right.unwrap().as_ref() };
 
-                        assert_eq!(right_right.element, 5);
+                        assert_eq!(right_right.element, 6);
                         assert_eq!(right_right.balance, BalanceFactor::Balanced);
                         assert_eq!(right_right.parent, Some(right_ptr));
                         assert!(right_right.left.is_none());
