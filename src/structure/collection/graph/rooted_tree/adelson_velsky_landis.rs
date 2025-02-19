@@ -1326,7 +1326,7 @@ mod test {
 
                                 assert!(instance.insert(1).is_ok());
 
-                                assert!(instance.insert(1).is_ok());
+                                assert!(instance.insert(4).is_ok());
                                 assert!(instance.insert(6).is_ok());
 
                                 instance
