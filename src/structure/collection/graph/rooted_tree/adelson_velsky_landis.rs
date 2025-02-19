@@ -554,7 +554,7 @@ mod test {
                             assert_eq!(right.element, 2);
                             assert_eq!(right.balance, BalanceFactor::Balanced);
                             assert_eq!(right.parent, Some(root_ptr));
-                            assert!(right.left.is_some());
+                            assert!(right.left.is_none());
                             assert!(right.right.is_none());
                         }
                     }
