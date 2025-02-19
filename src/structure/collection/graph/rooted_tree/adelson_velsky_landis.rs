@@ -660,7 +660,7 @@ mod test {
                                 let root = unsafe { root_ptr.as_ref() };
 
                                 // SAFETY: no other reference exists to this node to alias.
-                                let right = unsafe { root.left.unwrap().as_ref() };
+                                let right = unsafe { root.right.unwrap().as_ref() };
 
                                 assert_eq!(right.element, 4);
                                 assert_eq!(right.balance, BalanceFactor::Balanced);
