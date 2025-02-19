@@ -1564,7 +1564,7 @@ mod test {
                                 // SAFETY: no other reference exists to this node to alias.
                                 let root = unsafe { instance.root.unwrap().as_ref() };
 
-                                let right_ptr = root.left.unwrap();
+                                let right_ptr = root.right.unwrap();
 
                                 // SAFETY: no other reference exists to this node to alias.
                                 let right = unsafe { right_ptr.as_ref() };
@@ -1586,7 +1586,7 @@ mod test {
                                 // SAFETY: no other reference exists to this node to alias.
                                 let root = unsafe { instance.root.unwrap().as_ref() };
 
-                                let right_ptr = root.left.unwrap();
+                                let right_ptr = root.right.unwrap();
 
                                 // SAFETY: no other reference exists to this node to alias.
                                 let right = unsafe { right_ptr.as_ref() };
