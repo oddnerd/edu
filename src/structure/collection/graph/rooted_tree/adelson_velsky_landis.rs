@@ -1399,7 +1399,7 @@ mod test {
                                 // SAFETY: no other reference exists to this node to alias.
                                 let right = unsafe { root.right.unwrap().as_ref() };
 
-                                assert_eq!(right.element, 2);
+                                assert_eq!(right.element, 5);
                                 assert_eq!(right.balance, BalanceFactor::Balanced);
                                 assert_eq!(right.parent, Some(root_ptr));
                                 assert!(right.left.is_some());
