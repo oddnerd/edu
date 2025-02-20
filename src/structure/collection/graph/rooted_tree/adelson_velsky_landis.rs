@@ -2924,13 +2924,12 @@ mod test {
 
             #[test]
             fn yields_element_when_contained() {
-                let mut instance = AdelsonVelsoLandis::<usize>::default();
+                let elements = 0..8;
 
-                for element in 0..=5 {
-                    assert!(instance.insert(element).is_ok());
-                }
+                #[allow(clippy::from_iter_instead_of_collect)]
+                let mut instance = AdelsonVelsoLandis::from_iter(elements.clone());
 
-                for element in 0..=5 {
+                for element in elements {
                     assert_eq!(instance.remove(&element), Some(element));
                 }
             }
