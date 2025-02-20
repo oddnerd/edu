@@ -163,7 +163,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // SAFETY: no other reference to this node exists to alias.
                         if unsafe { child.as_ref() }.balance == BalanceFactor::Left {
                             // SAFETY: no other reference to this node exists to alias.
-                            unsafe { ancestor.as_mut() }.left = Some(Node::rotate_right(child));
+                            unsafe { ancestor.as_mut() }.right = Some(Node::rotate_right(child));
                         }
 
                         // SAFETY: no other reference to this node exists to alias.
