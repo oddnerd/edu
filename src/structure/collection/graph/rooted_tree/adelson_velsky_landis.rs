@@ -2596,39 +2596,39 @@ mod test {
                     /// Should create the following structure:
                     ///
                     /// ```
-                    ///    4
+                    ///    2
                     ///   / \
-                    ///  2  5
+                    ///  1  5
                     ///    / \
-                    ///   3  6
+                    ///   4  6
                     ///  / \
-                    /// 1
+                    /// 3
                     /// ```
                     ///
-                    /// The final insertion of element '1' should invoke a
+                    /// The final insertion of element '3' should invoke a
                     /// right-rotation about element '5' followed by a
-                    /// left-rotation about element '4' thenceforth modifying
+                    /// left-rotation about element '2' thenceforth modifying
                     /// the structure to become:
                     ///
                     /// ```
-                    ///      3
+                    ///      4
                     ///    /   \
-                    ///   4    5
+                    ///   2    5
                     ///  / \  / \
-                    /// 2  1    6
+                    /// 1  3    6
                     /// ```
                     fn setup() -> AdelsonVelsoLandis<usize> {
                         let mut instance = AdelsonVelsoLandis::default();
 
-                        assert!(instance.insert(4).is_ok());
-
                         assert!(instance.insert(2).is_ok());
-                        assert!(instance.insert(5).is_ok());
-
-                        assert!(instance.insert(3).is_ok());
-                        assert!(instance.insert(6).is_ok());
 
                         assert!(instance.insert(1).is_ok());
+                        assert!(instance.insert(5).is_ok());
+
+                        assert!(instance.insert(4).is_ok());
+                        assert!(instance.insert(6).is_ok());
+
+                        assert!(instance.insert(3).is_ok());
 
                         instance
                     }
@@ -2640,7 +2640,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let root = unsafe { instance.root.unwrap().as_ref() };
 
-                        assert_eq!(root.element, 3);
+                        assert_eq!(root.element, 4);
                         assert_eq!(root.balance, BalanceFactor::Balanced);
                         assert_eq!(root.parent, None);
                         assert!(root.left.is_some());
@@ -2659,7 +2659,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let left = unsafe { root.left.unwrap().as_ref() };
 
-                        assert_eq!(left.element, 4);
+                        assert_eq!(left.element, 2);
                         assert_eq!(left.balance, BalanceFactor::Balanced);
                         assert_eq!(left.parent, Some(root_ptr));
                         assert!(left.left.is_some());
@@ -2681,7 +2681,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let left_left = unsafe { left.left.unwrap().as_ref() };
 
-                        assert_eq!(left_left.element, 2);
+                        assert_eq!(left_left.element, 1);
                         assert_eq!(left_left.balance, BalanceFactor::Balanced);
                         assert_eq!(left_left.parent, Some(left_ptr));
                         assert!(left_left.left.is_none());
@@ -2703,7 +2703,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let left_right = unsafe { left.right.unwrap().as_ref() };
 
-                        assert_eq!(left_right.element, 1);
+                        assert_eq!(left_right.element, 3);
                         assert_eq!(left_right.balance, BalanceFactor::Balanced);
                         assert_eq!(left_right.parent, Some(left_ptr));
                         assert!(left_right.left.is_none());
