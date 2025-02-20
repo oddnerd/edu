@@ -2758,39 +2758,39 @@ mod test {
                     /// Should create the following structure:
                     ///
                     /// ```
-                    ///   4
+                    ///   2
                     ///  / \
                     /// 1  5
                     ///   / \
-                    ///  2  6
+                    ///  3  6
                     /// / \
-                    ///   3
+                    ///   4
                     /// ```
                     ///
-                    /// The final insertion of element '3' should invoke a
+                    /// The final insertion of element '4' should invoke a
                     /// right-rotation about element '5' followed by a
-                    /// left-rotation about element '4' thenceforth modifying
+                    /// left-rotation about element '2' thenceforth modifying
                     /// the structure to become:
                     ///
                     /// ```
-                    ///      2
+                    ///      3
                     ///    /   \
-                    ///   4    5
+                    ///   2    5
                     ///  / \  / \
-                    /// 1    3  6
+                    /// 1    4  6
                     /// ```
                     fn setup() -> AdelsonVelsoLandis<usize> {
                         let mut instance = AdelsonVelsoLandis::default();
 
-                        assert!(instance.insert(4).is_ok());
+                        assert!(instance.insert(2).is_ok());
 
                         assert!(instance.insert(1).is_ok());
                         assert!(instance.insert(5).is_ok());
 
-                        assert!(instance.insert(2).is_ok());
+                        assert!(instance.insert(3).is_ok());
                         assert!(instance.insert(6).is_ok());
 
-                        assert!(instance.insert(3).is_ok());
+                        assert!(instance.insert(4).is_ok());
 
                         instance
                     }
@@ -2802,7 +2802,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let root = unsafe { instance.root.unwrap().as_ref() };
 
-                        assert_eq!(root.element, 2);
+                        assert_eq!(root.element, 3);
                         assert_eq!(root.balance, BalanceFactor::Balanced);
                         assert_eq!(root.parent, None);
                         assert!(root.left.is_some());
@@ -2862,7 +2862,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let right = unsafe { root.right.unwrap().as_ref() };
 
-                        assert_eq!(right.element, 2);
+                        assert_eq!(right.element, 5);
                         assert_eq!(right.balance, BalanceFactor::Balanced);
                         assert_eq!(right.parent, Some(root_ptr));
                         assert!(right.left.is_some());
@@ -2884,7 +2884,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let right_left = unsafe { right.left.unwrap().as_ref() };
 
-                        assert_eq!(right_left.element, 3);
+                        assert_eq!(right_left.element, 4);
                         assert_eq!(right_left.balance, BalanceFactor::Balanced);
                         assert_eq!(right_left.parent, Some(right_ptr));
                         assert!(right_left.left.is_none());
