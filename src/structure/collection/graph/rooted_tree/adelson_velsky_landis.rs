@@ -331,14 +331,12 @@ impl<T: Ord> Node<T> {
 
         right_node.left = Some(root);
 
-        // TODO: reconsider
         right_node.balance = match (right_node.left, right_node.right) {
             (Some(_), Some(_)) => BalanceFactor::Balanced,
             (Some(_), None) => BalanceFactor::Left,
             (None, None | Some(_)) => unreachable!("old root should become the left child"),
         };
 
-        // TODO: reconsider
         root_node.balance = match (root_node.left, root_node.right) {
             (Some(_), Some(_)) | (None, None) => BalanceFactor::Balanced,
             (Some(_), None) => BalanceFactor::Left,
@@ -372,18 +370,16 @@ impl<T: Ord> Node<T> {
 
         left_node.right = Some(root);
 
-        // TODO: reconsider
         left_node.balance = match (left_node.left, left_node.right) {
             (Some(_), Some(_)) => BalanceFactor::Balanced,
+            (None, Some(_)) => BalanceFactor::Right,
             (None | Some(_), None) => unreachable!("old root should become the right child"),
-            (None, Some(_)) => unreachable!("logic error to rotate when not imbalanced"),
         };
 
-        // TODO: reconsider
         root_node.balance = match (root_node.left, root_node.right) {
             (Some(_), Some(_)) | (None, None) => BalanceFactor::Balanced,
-            (Some(_), None) => unreachable!("logic error to rotate when not imbalanced"),
             (None, Some(_)) => BalanceFactor::Right,
+            (Some(_), None) => unreachable!("logic error to rotate when not imbalanced"),
         };
 
         left_ptr
