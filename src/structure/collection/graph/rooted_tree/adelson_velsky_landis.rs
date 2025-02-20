@@ -2936,17 +2936,11 @@ mod test {
 
             #[test]
             fn yields_none_when_not_contained() {
-                let mut instance = AdelsonVelsoLandis::<usize>::default();
+                let mut instance = (0..8).collect::<AdelsonVelsoLandis<_>>();
 
-                // TODO: use FromIterator or similar.
-                assert!(instance.insert(0).is_ok());
-                assert!(instance.insert(1).is_ok());
-                assert!(instance.insert(2).is_ok());
-                assert!(instance.insert(3).is_ok());
-                assert!(instance.insert(4).is_ok());
-                assert!(instance.insert(5).is_ok());
-
-                assert_eq!(instance.remove(&6), None);
+                for element in 8..16 {
+                    assert!(instance.remove(&element).is_none());
+                }
             }
 
             mod does_no_rotation {
