@@ -3371,7 +3371,18 @@ mod test {
                             /// 1  4
                             /// ```
                             fn setup() -> AdelsonVelsoLandis<usize> {
-                                todo!()
+                                let mut instance = AdelsonVelsoLandis::default();
+
+                                assert!(instance.insert(3).is_ok());
+
+                                assert!(instance.insert(1).is_ok());
+                                assert!(instance.insert(4).is_ok());
+
+                                assert!(instance.insert(2).is_ok());
+
+                                assert_eq!(instance.remove(&2), Some(2));
+
+                                instance
                             }
 
                             #[test]
