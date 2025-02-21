@@ -3604,7 +3604,21 @@ mod test {
 
                             #[test]
                             fn right_child() {
-                                todo!()
+                                let instance = setup();
+
+                                let root_ptr = instance.root.unwrap();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { root_ptr.as_ref() };
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let right = unsafe { root.right.unwrap().as_ref() };
+
+                                assert_eq!(right.element, 3);
+                                assert_eq!(right.balance, BalanceFactor::Balanced);
+                                assert_eq!(right.parent, Some(root_ptr));
+                                assert!(right.left.is_none());
+                                assert!(right.right.is_none());
                             }
                         }
                     }
