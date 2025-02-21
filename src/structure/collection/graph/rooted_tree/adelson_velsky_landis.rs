@@ -2981,7 +2981,21 @@ mod test {
 
                     #[test]
                     fn when_only_right_child() {
-                        todo!()
+                        let mut instance = AdelsonVelsoLandis::default();
+
+                        assert!(instance.insert(1).is_ok());
+                        assert!(instance.insert(2).is_ok());
+
+                        assert_eq!(instance.remove(&1), Some(1));
+
+                        // SAFETY: no other reference exists to this node to alias.
+                        let root = unsafe { instance.root.unwrap().as_ref() };
+
+                        assert_eq!(root.element, 2);
+                        assert_eq!(root.balance, BalanceFactor::Balanced);
+                        assert_eq!(root.parent, None);
+                        assert!(root.left.is_none());
+                        assert!(root.right.is_none());
                     }
 
                     mod when_both_children {
