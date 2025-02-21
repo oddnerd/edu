@@ -3040,7 +3040,16 @@ mod test {
 
                         #[test]
                         fn root() {
-                            todo!()
+                            let instance = setup();
+
+                            // SAFETY: no other reference exists to this node to alias.
+                            let root = unsafe { instance.root.unwrap().as_ref() };
+
+                            assert_eq!(root.element, 4);
+                            assert_eq!(root.balance, BalanceFactor::Balanced);
+                            assert_eq!(root.parent, None);
+                            assert!(root.left.is_some());
+                            assert!(root.right.is_some());
                         }
 
                         #[test]
