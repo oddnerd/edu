@@ -4470,7 +4470,24 @@ mod test {
 
                     #[test]
                     fn left_left_grandchild() {
-                        todo!()
+                        let instance = setup();
+
+                        // SAFETY: no other reference exists to this node to alias.
+                        let root = unsafe { instance.root.unwrap().as_ref() };
+
+                        let left_ptr = root.left.unwrap();
+
+                        // SAFETY: no other reference exists to this node to alias.
+                        let left = unsafe { left_ptr.as_ref() };
+
+                        // SAFETY: no other reference exists to this node to alias.
+                        let left_left = unsafe { left.left.unwrap().as_ref() };
+
+                        assert_eq!(left_left.element, 1);
+                        assert_eq!(left_left.balance, BalanceFactor::Balanced);
+                        assert_eq!(left_left.parent, Some(left_ptr));
+                        assert!(left_left.left.is_none());
+                        assert!(left_left.right.is_none());
                     }
 
                     #[test]
