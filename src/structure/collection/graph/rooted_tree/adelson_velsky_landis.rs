@@ -221,7 +221,43 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!("yields none if not found");
     /// ```
     pub fn remove(&mut self, element: &T) -> Option<T> {
-        todo!("remove the element")
+        // Remove the element as if a non-balancing binary search tree.
+        let (mut current, mut removed) = {
+            let mut parent = None;
+            let mut branch = &mut self.root;
+
+            while let &mut Some(mut node_ptr) = branch {
+                // SAFETY: no other reference to this node exists to alias.
+                let node = unsafe { node_ptr.as_mut() };
+
+                branch = match element.cmp(&node.element) {
+                    core::cmp::Ordering::Less => &mut node.left,
+                    core::cmp::Ordering::Greater => &mut node.right,
+                    core::cmp::Ordering::Equal => break,
+                };
+
+                parent = Some(node_ptr);
+            }
+
+            let removed = branch.take()?;
+
+            // SAFETY:
+            // * The pointer is constructed via `Box::into_raw`.
+            // * The pointer is removed and cannot be interacted with again.
+            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
+
+            *branch = match (removed.left, removed.right) {
+                (None, None) => None,
+                (Some(child), None) | (None, Some(child)) => Some(child),
+                (Some(left), Some(right)) => todo!("successor or removed element")
+            };
+
+            (parent, removed)
+        };
+
+        }
+
+        Some(result)
     }
 }
 
