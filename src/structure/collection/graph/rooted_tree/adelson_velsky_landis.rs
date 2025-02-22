@@ -4205,27 +4205,42 @@ mod test {
                     /// ```
                     ///      6
                     ///    /   \
-                    ///   3    7
+                    ///   2    7
                     ///  / \  / \
                     /// 1  4    8
                     ///   / \
-                    ///  2  5
+                    ///  3  5
                     /// ```
                     ///
                     /// The deletion of element '8' should invoke a
-                    /// left-rotation about element '3' followed by a
+                    /// left-rotation about element '2' followed by a
                     /// right-rotation about element '6' thenceforth modifying
                     /// the structure to become:
                     ///
                     /// ```
                     ///      4
                     ///    /   \
-                    ///   3    6
+                    ///   2    6
                     ///  / \  / \
-                    /// 1  2 5  7
+                    /// 1  3 5  7
                     /// ```
                     fn setup() -> AdelsonVelsoLandis<usize> {
-                        todo!()
+                        let mut instance = AdelsonVelsoLandis::default();
+
+                        assert!(instance.insert(6).is_ok());
+
+                        assert!(instance.insert(2).is_ok());
+                        assert!(instance.insert(7).is_ok());
+
+                        assert!(instance.insert(1).is_ok());
+                        assert!(instance.insert(4).is_ok());
+
+                        assert!(instance.insert(8).is_ok());
+
+                        assert!(instance.insert(3).is_ok());
+                        assert!(instance.insert(5).is_ok());
+
+                        instance
                     }
 
                     #[test]
