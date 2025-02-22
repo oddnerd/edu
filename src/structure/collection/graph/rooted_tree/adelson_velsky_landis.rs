@@ -5056,8 +5056,8 @@ mod test {
                         assert_eq!(left_left.element, 1);
                         assert_eq!(left_left.balance, BalanceFactor::Balanced);
                         assert_eq!(left_left.parent, Some(left_ptr));
-                        assert!(left_left.left.is_some());
-                        assert!(left_left.right.is_some());
+                        assert!(left_left.left.is_none());
+                        assert!(left_left.right.is_none());
                     }
 
                     #[test]
