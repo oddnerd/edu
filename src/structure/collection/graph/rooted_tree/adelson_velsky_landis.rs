@@ -390,10 +390,11 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         // STEP 3: Actually remove the node.
 
         // SAFETY:
-        // * Construct via `Box::to_inner`.
+        // * Constructed via `Box::to_inner`.
         // * The following removes the pointer so it will be inaccessible.
         let mut removed = unsafe { Box::from_raw(to_remove.as_ptr()) };
 
+        // Owning pointer to the removed node.
         let branch = if let Some(mut parent) = removed.parent {
             // SAFETY: no other reference to this node exists to alias.
             let parent = unsafe { parent.as_mut() };
@@ -409,7 +410,8 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             &mut self.root
         };
 
-        *branch = match (removed.left, removed.right) {
+        // Reconnecting the subtree rooted by the removed node.
+        *branch = match (removed.left.take(), removed.right.take()) {
             (None, None) => None,
             (Some(mut child), None) | (None, Some(mut child)) => {
                 // SAFETY: no other reference to this node exists to alias.
@@ -420,7 +422,37 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 Some(child)
             },
             (Some(left), Some(right)) => {
-                todo!("find successor node")
+                // Find the in-order successor, the smallest node
+                // in the right subtree.
+
+                let mut successor = &mut removed.right;
+
+                loop {
+                    let Some(mut next) = successor.clone() else {
+                        unreachable!("previous loop iteration ensures some");
+                    };
+
+                    // SAFETY: no other reference to this node exists to alias.
+                    if unsafe { next.as_ref() }.left.is_some() {
+                        // SAFETY: no other reference to this node exists to alias.
+                        successor = &mut unsafe { next.as_mut() }.left;
+                    } else {
+                        break;
+                    }
+                }
+
+                let Some(mut successor) = successor.take() else {
+                    unreachable!("there is at least the right child");
+                };
+
+                // SAFETY: no other reference to this node exists to alias.
+                let moved = unsafe { successor.as_mut() };
+
+                moved.parent = removed.parent.take();
+                moved.left = Some(left);
+                moved.right = Some(right);
+
+                Some(successor)
             },
         };
 
