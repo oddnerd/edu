@@ -221,8 +221,8 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!("yields none if not found");
     /// ```
     pub fn remove(&mut self, element: &T) -> Option<T> {
-        // Remove the element as if a non-balancing binary search tree.
-        let (mut current, mut removed) = {
+        // Find the element to be removed.
+        let (mut current, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
 
@@ -239,25 +239,115 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 parent = Some(node_ptr);
             }
 
-            let removed = branch.take()?;
+            // TODO: actually remove the node, maybe after rebalancing?
 
-            // SAFETY:
-            // * The pointer is constructed via `Box::into_raw`.
-            // * The pointer is removed and cannot be interacted with again.
-            let removed = unsafe { Box::from_raw(removed.as_ptr()) };
-
-            *branch = match (removed.left, removed.right) {
-                (None, None) => None,
-                (Some(child), None) | (None, Some(child)) => Some(child),
-                (Some(left), Some(right)) => todo!("successor or removed element")
-            };
-
-            (parent, removed)
+            (parent, branch.clone()?)
         };
 
+        // X is ancestor
+        // z is taken
+        // N is the new root of the rotated subtree
+
+        while let Some(ancestor) = current {
+            // SAFETY: no other reference to this node exists to alias.
+            let g = unsafe { ancestor.as_ref() }.parent.clone();
+
+            // SAFETY: no other reference to this node exists to alias.
+            if unsafe { ancestor.as_ref() }.left.is_some_and(|left| left == previous) {
+                // Ascended via the left branch.
+
+                // // SAFETY: no other reference to this node exists to alias.
+                let ancestor = unsafe { ancestor.as_ref() };
+
+                // SAFETY: no other reference to this node exists to alias.
+                if ancestor.balance == BalanceFactor::Right {
+                    // Removed from left branch, but the right branch was
+                    // already longer than the left branch, so rotation needed.
+
+                    let Some(z) = ancestor.right.take() else {
+                        unreachable!("right balance factor => right child");
+                    };
+
+                    // SAFETY: no other reference to this node exists to alias.
+                    let b = unsafe { z.as_ref() }.balance;
+
+                    if b == BalanceFactor::Left {
+                        // let n = rotate_right_left(X, Z)
+                        // right(Z) then left(X)
+                    } else {
+                        // let n = rotate_left(X, Z)
+                        // left(X)
+                    }
+                } else {
+                    if ancestor.balance == BalanceFactor::Balanced {
+                        ancestor.balance = BalanceFactor::Right;
+                        break;
+                    }
+
+                    // let n = x;
+                    // n.balance = BalanceFactor::Balanced;
+                    continue;
+                }
+
+            } else {
+                // Ascended via the right branch.
+
+                // SAFETY: no other reference to this node exists to alias.
+                let ancestor = unsafe { ancestor.as_ref() };
+
+                if ancestor.balance == BalanceFactor::Left {
+                    // Removed from the right branch, but the left branch
+                    // was already longer than the right branch,
+                    // so rotation needed.
+
+                    let Some(z) = ancestor.left.take() else {
+                        unreachable!("left balance factor => left child");
+                    };
+
+                    // SAFETY: no other reference to this node exists to alias.
+                    let b = unsafe { z.as_ref() }.balance;
+
+                    if b == BalanceFactor::Right {
+                        // let n = rotate_left_right(X, Z)
+                        // left(Z) then right(X)
+                    } else {
+                        // let n = rotate_right(X, Z)
+                        // right(X)
+                    }
+                } else {
+                    if ancestor.balance == BalanceFactor::Balanced {
+                        ancestor.balance = BalanceFactor::Left;
+                        break;
+                    }
+                    // n = X;
+                    // n.balance = BalanceFactor::Balanced;
+                    continue;
+                }
+            }
+
+            // After a rotation adapt parent link
+
+            // n.parent = g; // ancestor.parent
+
+            if let Some(g) = g {
+                // SAFETY: no other reference to this node exists to alias.
+                let g = unsafe { g.as_ref() };
+
+                if g.left.is_some_and(|left| left == ancestor) {
+                    // g.left = N;
+                } else {
+                    // g.right = N;
+                }
+            } else {
+                // self.root = N;
+            }
+
+            // if b == BalanceFactor::Balanced {
+            //     break;
+            // }
         }
 
-        Some(result)
+        todo!("yield the removed element")
     }
 }
 
