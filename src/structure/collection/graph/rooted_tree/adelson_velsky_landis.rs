@@ -220,8 +220,9 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// todo!("yields some element if found");
     /// todo!("yields none if not found");
     /// ```
+    #[allow(clippy::too_many_lines)]
     pub fn remove(&mut self, element: &T) -> Option<T> {
-        // Find the element to be removed.
+        // STEP 1: Find the element to be removed.
         let (mut current, mut previous) = {
             let mut parent = None;
             let mut branch = &mut self.root;
@@ -239,15 +240,12 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 parent = Some(node_ptr);
             }
 
-            // TODO: actually remove the node, maybe after rebalancing?
-
             (parent, branch.clone()?)
         };
 
-        // X is ancestor
-        // z is taken
-        // N is the new root of the rotated subtree
+        let to_remove = previous;
 
+        // STEP 2: Rebalance the subtree rooted by that node.
         while let Some(mut ancestor) = current {
             // SAFETY: no other reference to this node exists to alias.
             if unsafe { ancestor.as_ref() }.left.is_some_and(|left| left == previous) {
@@ -389,7 +387,44 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             // }
         }
 
-        todo!("yield the removed element")
+        // STEP 3: Actually remove the node.
+
+        // SAFETY:
+        // * Construct via `Box::to_inner`.
+        // * The following removes the pointer so it will be inaccessible.
+        let mut removed = unsafe { Box::from_raw(to_remove.as_ptr()) };
+
+        let branch = if let Some(mut parent) = removed.parent {
+            // SAFETY: no other reference to this node exists to alias.
+            let parent = unsafe { parent.as_mut() };
+
+            if parent.left.is_some_and(|left| left == to_remove) {
+                // Removed is the left child of its parent.
+                &mut parent.left
+            } else {
+                // Removed is the left child of its parent.
+                &mut parent.right
+            }
+        } else {
+            &mut self.root
+        };
+
+        *branch = match (removed.left, removed.right) {
+            (None, None) => None,
+            (Some(mut child), None) | (None, Some(mut child)) => {
+                // SAFETY: no other reference to this node exists to alias.
+                let node = unsafe { child.as_mut() };
+
+                node.parent = removed.parent.take();
+
+                Some(child)
+            },
+            (Some(left), Some(right)) => {
+                todo!("find successor node")
+            },
+        };
+
+        Some(removed.element)
     }
 }
 
