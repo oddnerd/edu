@@ -444,6 +444,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 // SAFETY: no other reference to this node exists to alias.
                 let node = unsafe { successor.as_mut() };
 
+                node.balance = removed.balance;
                 node.parent = removed.parent.take();
 
                 // SAFETY: no other reference to this node exists to alias.
