@@ -410,7 +410,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             &mut self.root
         };
 
-        // Reconnecting the subtree rooted by the removed node.
+        // Reconnect the subtree rooted by the removed node.
         *branch = match (removed.left.take(), removed.right.take()) {
             (None, None) => None,
             (Some(mut child), None) | (None, Some(mut child)) => {
@@ -421,36 +421,35 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                 Some(child)
             },
-            (Some(left), Some(right)) => {
-                // Find the in-order successor, the smallest node
-                // in the right subtree.
-
-                let mut successor = &mut removed.right;
-
-                loop {
-                    let Some(mut next) = successor.clone() else {
-                        unreachable!("previous loop iteration ensures some");
-                    };
-
-                    // SAFETY: no other reference to this node exists to alias.
-                    if unsafe { next.as_ref() }.left.is_some() {
-                        // SAFETY: no other reference to this node exists to alias.
-                        successor = &mut unsafe { next.as_mut() }.left;
-                    } else {
-                        break;
-                    }
-                }
-
-                let Some(mut successor) = successor.take() else {
-                    unreachable!("there is at least the right child");
-                };
+            (Some(left), Some(mut right)) => {
+                // Swap the removed value with the in-order successor.
 
                 // SAFETY: no other reference to this node exists to alias.
-                let moved = unsafe { successor.as_mut() };
+                let mut successor = &mut unsafe { right.as_mut() }.left;
 
-                moved.parent = removed.parent.take();
-                moved.left = Some(left);
-                moved.right = Some(right);
+                // Find the smallest (leftmost) node in the right subtree.
+                while let Some(next) = successor {
+                    // SAFETY: no other reference to this node exists to alias.
+                    let node = unsafe { next.as_mut() };
+
+                    if node.left.is_none() {
+                        break;
+                    }
+
+                    successor = &mut node.left;
+                }
+
+                let mut successor = successor.unwrap_or(right);
+
+                // SAFETY: no other reference to this node exists to alias.
+                let node = unsafe { successor.as_mut() };
+
+                node.parent = removed.parent.take();
+                node.left = Some(left);
+
+                if successor != right {
+                    node.right = Some(right);
+                }
 
                 Some(successor)
             },
