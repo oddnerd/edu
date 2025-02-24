@@ -421,7 +421,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                 Some(child)
             },
-            (Some(left), Some(mut right)) => {
+            (Some(mut left), Some(mut right)) => {
                 // Swap the removed value with the in-order successor.
 
                 // SAFETY: no other reference to this node exists to alias.
@@ -445,9 +445,16 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 let node = unsafe { successor.as_mut() };
 
                 node.parent = removed.parent.take();
+
+                // SAFETY: no other reference to this node exists to alias.
+                unsafe { left.as_mut() }.parent = Some(successor);
+
                 node.left = Some(left);
 
                 if successor != right {
+                    // SAFETY: no other reference to this node exists to alias.
+                    unsafe { right.as_mut() }.parent = Some(successor);
+
                     node.right = Some(right);
                 }
 
