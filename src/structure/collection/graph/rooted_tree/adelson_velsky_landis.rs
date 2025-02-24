@@ -248,99 +248,141 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         // z is taken
         // N is the new root of the rotated subtree
 
-        while let Some(ancestor) = current {
-            // SAFETY: no other reference to this node exists to alias.
-            let g = unsafe { ancestor.as_ref() }.parent.clone();
-
+        while let Some(mut ancestor) = current {
             // SAFETY: no other reference to this node exists to alias.
             if unsafe { ancestor.as_ref() }.left.is_some_and(|left| left == previous) {
                 // Ascended via the left branch.
 
-                // // SAFETY: no other reference to this node exists to alias.
-                let ancestor = unsafe { ancestor.as_ref() };
+                // SAFETY: no other reference to this node exists to alias.
+                let Some(child) = unsafe { ancestor.as_ref() }.left else {
+                    unreachable!("ascended via the left branch");
+                };
 
                 // SAFETY: no other reference to this node exists to alias.
-                if ancestor.balance == BalanceFactor::Right {
-                    // Removed from left branch, but the right branch was
-                    // already longer than the left branch, so rotation needed.
+                match unsafe { ancestor.as_ref() }.balance {
+                    BalanceFactor::Left => {
+                        // Removed from left branch, but the left branch was
+                        // the longer branch, so now both are balanced.
 
-                    let Some(z) = ancestor.right.take() else {
-                        unreachable!("right balance factor => right child");
-                    };
+                        // N = ancestor
 
-                    // SAFETY: no other reference to this node exists to alias.
-                    let b = unsafe { z.as_ref() }.balance;
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe { ancestor.as_mut() }.balance = BalanceFactor::Balanced;
 
-                    if b == BalanceFactor::Left {
-                        // let n = rotate_right_left(X, Z)
-                        // right(Z) then left(X)
-                    } else {
-                        // let n = rotate_left(X, Z)
-                        // left(X)
-                    }
-                } else {
-                    if ancestor.balance == BalanceFactor::Balanced {
-                        ancestor.balance = BalanceFactor::Right;
+                        continue;
+                    },
+                    BalanceFactor::Right => {
+                        // Removed from left branch, but the right
+                        // branch was already longer than the left
+                        // branch, so rotation needed.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        if unsafe { child.as_ref() }.balance == BalanceFactor::Left {
+                            // SAFETY: no other reference to this node exists to alias.
+                            unsafe { ancestor.as_mut() }.right = Some(Node::rotate_right(child));
+                        }
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
+                            // SAFETY: no other reference to this node exists to alias.
+                            let parent = unsafe { parent.as_mut() };
+
+                            if parent.left.is_some_and(|left| left == ancestor) {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.left
+                            } else {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.right
+                            }
+                        } else {
+                            &mut self.root
+                        };
+
+                        *branch = Some(Node::rotate_left(ancestor));
+
+                        // The rotation balanced the tree.
+                        // break;
+                    },
+                    BalanceFactor::Balanced => {
+                        // Removed from left branch, but both branches were
+                        // equal length, so now the right branch is longer.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe { ancestor.as_mut() }.balance = BalanceFactor::Right;
+
                         break;
-                    }
-
-                    // let n = x;
-                    // n.balance = BalanceFactor::Balanced;
-                    continue;
+                    },
                 }
 
             } else {
                 // Ascended via the right branch.
 
                 // SAFETY: no other reference to this node exists to alias.
-                let ancestor = unsafe { ancestor.as_ref() };
+                let Some(child) = unsafe { ancestor.as_ref() }.right else {
+                    unreachable!("ascended via the right branch");
+                };
 
-                if ancestor.balance == BalanceFactor::Left {
-                    // Removed from the right branch, but the left branch
-                    // was already longer than the right branch,
-                    // so rotation needed.
-
-                    let Some(z) = ancestor.left.take() else {
-                        unreachable!("left balance factor => left child");
-                    };
-
-                    // SAFETY: no other reference to this node exists to alias.
-                    let b = unsafe { z.as_ref() }.balance;
-
-                    if b == BalanceFactor::Right {
-                        // let n = rotate_left_right(X, Z)
-                        // left(Z) then right(X)
-                    } else {
-                        // let n = rotate_right(X, Z)
-                        // right(X)
-                    }
-                } else {
-                    if ancestor.balance == BalanceFactor::Balanced {
-                        ancestor.balance = BalanceFactor::Left;
-                        break;
-                    }
-                    // n = X;
-                    // n.balance = BalanceFactor::Balanced;
-                    continue;
-                }
-            }
-
-            // After a rotation adapt parent link
-
-            // n.parent = g; // ancestor.parent
-
-            if let Some(g) = g {
                 // SAFETY: no other reference to this node exists to alias.
-                let g = unsafe { g.as_ref() };
+                match unsafe { ancestor.as_ref() }.balance {
+                    BalanceFactor::Left => {
+                        // Removed from right branch, but the left
+                        // branch was already longer than the right
+                        // branch, so rotation needed.
 
-                if g.left.is_some_and(|left| left == ancestor) {
-                    // g.left = N;
-                } else {
-                    // g.right = N;
+                        // SAFETY: no other reference to this node exists to alias.
+                        if unsafe { child.as_ref() }.balance == BalanceFactor::Right {
+                            // SAFETY: no other reference to this node exists to alias.
+                            unsafe { ancestor.as_mut() }.right = Some(Node::rotate_left(child));
+                        }
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
+                            // SAFETY: no other reference to this node exists to alias.
+                            let parent = unsafe { parent.as_mut() };
+
+                            if parent.left.is_some_and(|left| left == ancestor) {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.left
+                            } else {
+                                // Ancestor is the left child of its parent.
+                                &mut parent.right
+                            }
+                        } else {
+                            &mut self.root
+                        };
+
+                        *branch = Some(Node::rotate_right(ancestor));
+
+                        // The rotation balanced the tree.
+                        // break;
+                    },
+                    BalanceFactor::Right => {
+                        // Removed from right branch, but the right branch was
+                        // the longer branch, so now both are balanced.
+
+                        // n = X;
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe { ancestor.as_mut() }.balance = BalanceFactor::Balanced;
+
+                        continue;
+                    },
+                    BalanceFactor::Balanced => {
+                        // Removed from right branch, but both branches were
+                        // equal length, so now the left branch is longer.
+
+                        // SAFETY: no other reference to this node exists to alias.
+                        unsafe { ancestor.as_mut() }.balance = BalanceFactor::Left;
+
+                        break;
+                    },
                 }
-            } else {
-                // self.root = N;
             }
+
+            previous = ancestor;
+
+            // SAFETY: no other reference to this node exists to alias.
+            current = unsafe { ancestor.as_ref() }.parent;
 
             // if b == BalanceFactor::Balanced {
             //     break;
