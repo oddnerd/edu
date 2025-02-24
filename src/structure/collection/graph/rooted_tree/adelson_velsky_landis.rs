@@ -3246,16 +3246,16 @@ mod test {
                         ///   3  5
                         /// ```
                         ///
-                        /// The removal of element '2' should swap elements
-                        /// '2' and '4' followed by a swap of elements '2' and
-                        /// '5' thenceforth modifying the structure to become:
+                        /// The removal of element '2' should raise the next
+                        /// in-order successor element, '3', to  it's place
+                        /// thenceforth modifying the structure to become:
                         ///
                         /// ```
-                        ///   4
+                        ///   3
                         ///  / \
-                        /// 1  5
+                        /// 1  4
                         ///   / \
-                        ///  3
+                        ///     5
                         /// ```
                         fn setup() -> AdelsonVelsoLandis<usize> {
                             let mut instance = AdelsonVelsoLandis::default();
@@ -3280,7 +3280,7 @@ mod test {
                             // SAFETY: no other reference exists to this node to alias.
                             let root = unsafe { instance.root.unwrap().as_ref() };
 
-                            assert_eq!(root.element, 4);
+                            assert_eq!(root.element, 3);
                             assert_eq!(root.balance, BalanceFactor::Right);
                             assert_eq!(root.parent, None);
                             assert!(root.left.is_some());
@@ -3318,15 +3318,15 @@ mod test {
                             // SAFETY: no other reference exists to this node to alias.
                             let right = unsafe { root.right.unwrap().as_ref() };
 
-                            assert_eq!(right.element, 5);
-                            assert_eq!(right.balance, BalanceFactor::Left);
+                            assert_eq!(right.element, 4);
+                            assert_eq!(right.balance, BalanceFactor::Right);
                             assert_eq!(right.parent, Some(root_ptr));
-                            assert!(right.left.is_some());
-                            assert!(right.right.is_none());
+                            assert!(right.left.is_none());
+                            assert!(right.right.is_some());
                         }
 
                         #[test]
-                        fn right_left_grandchild() {
+                        fn right_right_grandchild() {
                             let instance = setup();
 
                             // SAFETY: no other reference exists to this node to alias.
@@ -3338,13 +3338,13 @@ mod test {
                             let right = unsafe { right_ptr.as_ref() };
 
                             // SAFETY: no other reference exists to this node to alias.
-                            let right_left = unsafe { right.left.unwrap().as_ref() };
+                            let right_right = unsafe { right.right.unwrap().as_ref() };
 
-                            assert_eq!(right_left.element, 3);
-                            assert_eq!(right_left.balance, BalanceFactor::Balanced);
-                            assert_eq!(right_left.parent, Some(right_ptr));
-                            assert!(right_left.left.is_none());
-                            assert!(right_left.right.is_none());
+                            assert_eq!(right_right.element, 5);
+                            assert_eq!(right_right.balance, BalanceFactor::Balanced);
+                            assert_eq!(right_right.parent, Some(right_ptr));
+                            assert!(right_right.left.is_none());
+                            assert!(right_right.right.is_none());
                         }
                     }
                 }
