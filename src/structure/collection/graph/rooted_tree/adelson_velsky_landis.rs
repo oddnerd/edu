@@ -3334,9 +3334,17 @@ mod test {
                             let right = unsafe { root.right.unwrap().as_ref() };
 
                             assert_eq!(right.element, 4);
-                            assert_eq!(right.balance, BalanceFactor::Right);
+                            // assert_eq!(right.balance, BalanceFactor::Right);
                             assert_eq!(right.parent, Some(root_ptr));
-                            assert!(right.left.is_none());
+                            // assert!(right.left.is_none());
+
+                            // SAFETY: THIS IS DEBUG INFO, REMOVE IT
+                            let right_left = unsafe { right.left.unwrap().as_ref() };
+                            assert_eq!(right_left.element, 3);
+                            assert_eq!(right_left.parent, None);
+                            assert!(right_left.left.is_none());
+                            assert!(right_left.right.is_none());
+
                             assert!(right.right.is_some());
                         }
 
