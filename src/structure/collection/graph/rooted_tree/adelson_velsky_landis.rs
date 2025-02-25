@@ -243,7 +243,15 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             (parent, branch.clone()?)
         };
 
-        let to_remove = previous;
+        // POTENTIAL NEXT STEPS IF REORDERED?
+        // STEP 2: Shuffle removed node down to leaf whilst maintaining AVL.
+        // STEP 3: Rebalance upwards from the removed down to root.
+        // STEP 4: Actually remove the node and yield result.
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+        let to_remove = previous.clone();
 
         // STEP 2: Rebalance the subtree rooted by that node.
         while let Some(mut ancestor) = current {
