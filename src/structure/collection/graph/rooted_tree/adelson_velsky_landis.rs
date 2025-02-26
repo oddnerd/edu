@@ -223,7 +223,8 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     #[allow(clippy::too_many_lines)]
     pub fn remove(&mut self, element: &T) -> Option<T> {
         // STEP 1: Find the element to be removed.
-        let (mut current, mut previous) = {
+
+        let (mut parent, mut removing) = {
             let mut parent = None;
             let mut branch = &mut self.root;
 
@@ -243,20 +244,41 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             (parent, branch.clone()?)
         };
 
-        // POTENTIAL NEXT STEPS IF REORDERED?
-        // STEP 2: Shuffle removed node down to leaf whilst maintaining AVL.
-        // STEP 3: Rebalance upwards from the removed down to root.
-        // STEP 4: Actually remove the node and yield result.
+        // STEP 2: Swap the node to remove with its in-order successor.
 
-
-////////////////////////////////////////////////////////////////////////////////
-
-        let to_remove = previous.clone();
-
-        // STEP 2: Rebalance the subtree rooted by that node.
-        while let Some(mut ancestor) = current {
+        // TODO: this just combines two unsafe reads, consider refactor.
+        let tmp = {
             // SAFETY: no other reference to this node exists to alias.
-            if unsafe { ancestor.as_ref() }.left.is_some_and(|left| left == previous) {
+            let removing = unsafe { removing.as_ref() };
+
+            (removing.left, removing.right)
+        };
+
+        if let (Some(left), Some(right)) = tmp {
+            // Descend down the right branch, then find leftmost descendant.
+            parent = Some(removing);
+            removing = right;
+
+            let mut original = removing;
+
+            // SAFETY: no other reference to this node exists to alias.
+            while let Some(successor) = unsafe { removing.as_ref() }.left {
+                parent = Some(removing);
+                removing = successor;
+            }
+
+            // SAFETY: no other reference to this node exists to alias.
+            core::mem::swap(&mut unsafe { original.as_mut() }.element, &mut unsafe { removing.as_mut() }.element);
+        }
+
+        // STEP 3: Rebalance upwards from the parent of the node being removed.
+
+        // TODO: name these better
+        let (tmp_parent, tmp_removing) = (parent, removing);
+
+        while let Some(mut ancestor) = parent {
+            // SAFETY: no other reference to this node exists to alias.
+            if unsafe { ancestor.as_ref() }.left.is_some_and(|left| left == removing) {
                 // Ascended via the left branch.
 
                 // SAFETY: no other reference to this node exists to alias.
@@ -319,7 +341,6 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         break;
                     },
                 }
-
             } else {
                 // Ascended via the right branch.
 
@@ -385,29 +406,29 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 }
             }
 
-            previous = ancestor;
+            removing = ancestor;
 
             // SAFETY: no other reference to this node exists to alias.
-            current = unsafe { ancestor.as_ref() }.parent;
+            parent = unsafe { ancestor.as_ref() }.parent;
 
             // if b == BalanceFactor::Balanced {
             //     break;
             // }
         }
 
-        // STEP 3: Actually remove the node.
+        // STEP 4: Actually remove the node.
 
         // SAFETY:
         // * Constructed via `Box::to_inner`.
         // * The following removes the pointer so it will be inaccessible.
-        let mut removed = unsafe { Box::from_raw(to_remove.as_ptr()) };
+        let mut removed = unsafe { Box::from_raw(tmp_removing.as_ptr()) };
 
         // Owning pointer to the removed node.
-        let branch = if let Some(mut parent) = removed.parent {
+        let branch = if let Some(mut parent) = parent {
             // SAFETY: no other reference to this node exists to alias.
             let parent = unsafe { parent.as_mut() };
 
-            if parent.left.is_some_and(|left| left == to_remove) {
+            if parent.left.is_some_and(|left| left == tmp_removing) {
                 // Removed is the left child of its parent.
                 &mut parent.left
             } else {
@@ -418,7 +439,6 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             &mut self.root
         };
 
-        // Reconnect the subtree rooted by the removed node.
         *branch = match (removed.left.take(), removed.right.take()) {
             (None, None) => None,
             (Some(mut child), None) | (None, Some(mut child)) => {
@@ -429,46 +449,9 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                 Some(child)
             },
-            (Some(mut left), Some(mut right)) => {
-                // Swap the removed value with the in-order successor.
-
-                // SAFETY: no other reference to this node exists to alias.
-                let mut successor = &mut unsafe { right.as_mut() }.left;
-
-                // Find the smallest (leftmost) node in the right subtree.
-                while let Some(next) = successor {
-                    // SAFETY: no other reference to this node exists to alias.
-                    let node = unsafe { next.as_mut() };
-
-                    if node.left.is_none() {
-                        break;
-                    }
-
-                    successor = &mut node.left;
-                }
-
-                let mut successor = successor.unwrap_or(right);
-
-                // SAFETY: no other reference to this node exists to alias.
-                let node = unsafe { successor.as_mut() };
-
-                node.balance = removed.balance;
-                node.parent = removed.parent.take();
-
-                // SAFETY: no other reference to this node exists to alias.
-                unsafe { left.as_mut() }.parent = Some(successor);
-
-                node.left = Some(left);
-
-                if successor != right {
-                    // SAFETY: no other reference to this node exists to alias.
-                    unsafe { right.as_mut() }.parent = Some(successor);
-
-                    node.right = Some(right);
-                }
-
-                Some(successor)
-            },
+            (Some(left), Some(right)) => {
+                unreachable!("step 2 already handled this special case");
+            }
         };
 
         Some(removed.element)
