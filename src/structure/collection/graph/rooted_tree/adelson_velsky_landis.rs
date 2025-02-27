@@ -222,15 +222,14 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// ```
     #[allow(clippy::too_many_lines)]
     pub fn remove(&mut self, element: &T) -> Option<T> {
-        // STEP 1: Find the element to be removed.
-
+        // STEP 1: Find the element to be removed and its parent.
         let (mut parent, mut removing) = {
             let mut parent = None;
             let mut branch = &mut self.root;
 
-            while let &mut Some(mut node_ptr) = branch {
+            while let &mut Some(mut next) = branch {
                 // SAFETY: no other reference to this node exists to alias.
-                let node = unsafe { node_ptr.as_mut() };
+                let node = unsafe { next.as_mut() };
 
                 branch = match element.cmp(&node.element) {
                     core::cmp::Ordering::Less => &mut node.left,
@@ -238,38 +237,36 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                     core::cmp::Ordering::Equal => break,
                 };
 
-                parent = Some(node_ptr);
+                parent = Some(next);
             }
 
             (parent, branch.clone()?)
         };
 
         // STEP 2: Swap the node to remove with its in-order successor.
-
-        // TODO: this just combines two unsafe reads, consider refactor.
-        let tmp = {
+        let (mut parent, mut removing) = {
             // SAFETY: no other reference to this node exists to alias.
-            let removing = unsafe { removing.as_ref() };
+            let node = unsafe { removing.as_ref() };
 
-            (removing.left, removing.right)
-        };
+            if let (Some(_left), Some(right)) = (node.left, node.right) {
+                let mut actual = removing;
 
-        if let (Some(left), Some(right)) = tmp {
-            let mut actual = removing;
-
-            // Descend down the right branch, then find leftmost descendant.
-            parent = Some(removing);
-            removing = right;
-
-            // SAFETY: no other reference to this node exists to alias.
-            while let Some(successor) = unsafe { removing.as_ref() }.left {
+                // Descend down the right branch, then find leftmost descendant.
                 parent = Some(removing);
-                removing = successor;
+                removing = right;
+
+                // SAFETY: no other reference to this node exists to alias.
+                while let Some(successor) = unsafe { removing.as_ref() }.left {
+                    parent = Some(removing);
+                    removing = successor;
+                }
+
+                // SAFETY: no other reference to this node exists to alias.
+                core::mem::swap(&mut unsafe { actual.as_mut() }.element, &mut unsafe { removing.as_mut() }.element);
             }
 
-            // SAFETY: no other reference to this node exists to alias.
-            core::mem::swap(&mut unsafe { actual.as_mut() }.element, &mut unsafe { removing.as_mut() }.element);
-        }
+            (parent, removing)
+        };
 
         // STEP 3: Rebalance upwards from the parent of the node being removed.
 
