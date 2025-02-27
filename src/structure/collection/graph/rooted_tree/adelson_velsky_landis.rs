@@ -292,12 +292,11 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // Removed from left branch, but the left branch was
                         // the longer branch, so now both are balanced.
 
-                        // N = ancestor
-
                         // SAFETY: no other reference to this node exists to alias.
                         unsafe { ancestor.as_mut() }.balance = BalanceFactor::Balanced;
 
-                        continue;
+                        // TODO: can exit scope or need to `N = ancestor` and continue?
+                        // continue;
                     },
                     BalanceFactor::Right => {
                         // Removed from left branch, but the right
@@ -387,12 +386,11 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         // Removed from right branch, but the right branch was
                         // the longer branch, so now both are balanced.
 
-                        // n = X;
-
                         // SAFETY: no other reference to this node exists to alias.
                         unsafe { ancestor.as_mut() }.balance = BalanceFactor::Balanced;
 
-                        continue;
+                        // TODO: can exit scope or need to `N = ancestor` and continue?
+                        // continue;
                     },
                     BalanceFactor::Balanced => {
                         // Removed from right branch, but both branches were
