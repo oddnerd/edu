@@ -243,14 +243,13 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             (parent, branch.clone()?)
         };
 
-        // STEP 2: Swap the node to remove with its in-order successor.
+        // STEP 2: Handle special case of removing having both children.
         let (mut parent, mut removing) = {
             // SAFETY: no other reference to this node exists to alias.
-            let node = unsafe { removing.as_ref() };
+            let root = unsafe { removing.as_mut() };
 
-            if let (Some(_left), Some(right)) = (node.left, node.right) {
-                let mut actual = removing;
-
+            // Swap removing's element with its in-order successor's.
+            if let (Some(_left), Some(right)) = (root.left, root.right) {
                 // Descend down the right branch, then find leftmost descendant.
                 parent = Some(removing);
                 removing = right;
@@ -262,7 +261,9 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                 }
 
                 // SAFETY: no other reference to this node exists to alias.
-                core::mem::swap(&mut unsafe { actual.as_mut() }.element, &mut unsafe { removing.as_mut() }.element);
+                let successor = unsafe { removing.as_mut() };
+
+                core::mem::swap(&mut root.element, &mut successor.element);
             }
 
             (parent, removing)
