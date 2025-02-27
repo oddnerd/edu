@@ -447,7 +447,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                 Some(child)
             },
-            (Some(left), Some(right)) => {
+            (Some(_), Some(_)) => {
                 unreachable!("step 2 already handled this special case");
             }
         };
