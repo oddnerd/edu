@@ -255,11 +255,11 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         };
 
         if let (Some(left), Some(right)) = tmp {
+            let mut actual = removing;
+
             // Descend down the right branch, then find leftmost descendant.
             parent = Some(removing);
             removing = right;
-
-            let mut original = removing;
 
             // SAFETY: no other reference to this node exists to alias.
             while let Some(successor) = unsafe { removing.as_ref() }.left {
@@ -268,7 +268,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             }
 
             // SAFETY: no other reference to this node exists to alias.
-            core::mem::swap(&mut unsafe { original.as_mut() }.element, &mut unsafe { removing.as_mut() }.element);
+            core::mem::swap(&mut unsafe { actual.as_mut() }.element, &mut unsafe { removing.as_mut() }.element);
         }
 
         // STEP 3: Rebalance upwards from the parent of the node being removed.
