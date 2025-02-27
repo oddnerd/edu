@@ -3234,123 +3234,558 @@ mod test {
                     mod when_both_children {
                         use super::*;
 
-                        /// Should create the following structure:
-                        ///
-                        /// ```
-                        ///   2
-                        ///  / \
-                        /// 1   4
-                        ///    / \
-                        ///   3  5
-                        /// ```
-                        ///
-                        /// The removal of element '2' should raise the next
-                        /// in-order successor element, '3', to  it's place
-                        /// thenceforth modifying the structure to become:
-                        ///
-                        /// ```
-                        ///   3
-                        ///  / \
-                        /// 1  4
-                        ///   / \
-                        ///     5
-                        /// ```
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
+                        mod when_no_right_grandchildren {
+                            use super::*;
 
-                            assert!(instance.insert(2).is_ok());
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1   3
+                            /// ```
+                            ///
+                            /// The deletion of element '2' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   3
+                            ///  / \
+                            /// 1
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                let mut instance = AdelsonVelsoLandis::default();
 
-                            assert!(instance.insert(1).is_ok());
-                            assert!(instance.insert(4).is_ok());
+                                assert!(instance.insert(2).is_ok());
 
-                            assert!(instance.insert(3).is_ok());
-                            assert!(instance.insert(5).is_ok());
+                                assert!(instance.insert(1).is_ok());
+                                assert!(instance.insert(3).is_ok());
 
-                            assert_eq!(instance.remove(&2), Some(2));
+                                assert_eq!(instance.remove(&2), Some(2));
 
-                            instance
+                                instance
+                            }
+
+                            #[test]
+                            fn root() {
+                                let instance = setup();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                assert_eq!(root.element, 3);
+                                assert_eq!(root.balance, BalanceFactor::Left);
+                                assert_eq!(root.parent, None);
+                                assert!(root.left.is_some());
+                                assert!(root.right.is_none());
+                            }
+
+                            #[test]
+                            fn left() {
+                                let instance = setup();
+
+                                let root_ptr = instance.root.unwrap();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { root_ptr.as_ref() };
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let left = unsafe { root.left.unwrap().as_ref() };
+
+                                assert_eq!(left.element, 1);
+                                assert_eq!(left.balance, BalanceFactor::Balanced);
+                                assert_eq!(left.parent, Some(root_ptr));
+                                assert!(left.left.is_none());
+                                assert!(left.right.is_none());
+                            }
                         }
 
-                        #[test]
-                        fn root() {
-                            let instance = setup();
+                        mod when_only_right_left_grandchild {
+                            use super::*;
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1   4
+                            ///    / \
+                            ///   3
+                            /// ```
+                            ///
+                            /// The deletion of element '2' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   3
+                            ///  / \
+                            /// 1  4
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                let mut instance = AdelsonVelsoLandis::default();
 
-                            assert_eq!(root.element, 3);
-                            assert_eq!(root.balance, BalanceFactor::Right);
-                            assert_eq!(root.parent, None);
-                            assert!(root.left.is_some());
-                            assert!(root.right.is_some());
+                                assert!(instance.insert(2).is_ok());
+
+                                assert!(instance.insert(1).is_ok());
+                                assert!(instance.insert(4).is_ok());
+
+                                assert!(instance.insert(3).is_ok());
+
+                                assert_eq!(instance.remove(&2), Some(2));
+
+                                instance
+                            }
+
+                            #[test]
+                            fn root() {
+                                let instance = setup();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                assert_eq!(root.element, 3);
+                                assert_eq!(root.balance, BalanceFactor::Balanced);
+                                assert_eq!(root.parent, None);
+                                assert!(root.left.is_some());
+                                assert!(root.right.is_some());
+                            }
+
+                            #[test]
+                            fn left() {
+                                let instance = setup();
+
+                                let root_ptr = instance.root.unwrap();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { root_ptr.as_ref() };
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let left = unsafe { root.left.unwrap().as_ref() };
+
+                                assert_eq!(left.element, 1);
+                                assert_eq!(left.balance, BalanceFactor::Balanced);
+                                assert_eq!(left.parent, Some(root_ptr));
+                                assert!(left.left.is_none());
+                                assert!(left.right.is_none());
+                            }
+
+                            #[test]
+                            fn right() {
+                                let instance = setup();
+
+                                let root_ptr = instance.root.unwrap();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { root_ptr.as_ref() };
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let right = unsafe { root.right.unwrap().as_ref() };
+
+                                assert_eq!(right.element, 4);
+                                assert_eq!(right.balance, BalanceFactor::Balanced);
+                                assert_eq!(right.parent, Some(root_ptr));
+                                assert!(right.left.is_none());
+                                assert!(right.right.is_none());
+                            }
                         }
 
-                        #[test]
-                        fn left_child() {
-                            let instance = setup();
+                        mod when_only_right_right_grandchild {
+                            use super::*;
 
-                            let root_ptr = instance.root.unwrap();
+                            /// Should create the following structure:
+                            ///
+                            /// ```
+                            ///   2
+                            ///  / \
+                            /// 1   3
+                            ///    / \
+                            ///      4
+                            /// ```
+                            ///
+                            /// The deletion of element '2' should invoke no
+                            /// rotation thenceforth modifying the structure
+                            /// to become:
+                            ///
+                            /// ```
+                            ///   3
+                            ///  / \
+                            /// 1   4
+                            /// ```
+                            fn setup() -> AdelsonVelsoLandis<usize> {
+                                let mut instance = AdelsonVelsoLandis::default();
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let root = unsafe { root_ptr.as_ref() };
+                                assert!(instance.insert(2).is_ok());
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let left = unsafe { root.left.unwrap().as_ref() };
+                                assert!(instance.insert(1).is_ok());
+                                assert!(instance.insert(3).is_ok());
 
-                            assert_eq!(left.element, 1);
-                            assert_eq!(left.balance, BalanceFactor::Balanced);
-                            assert_eq!(left.parent, Some(root_ptr));
-                            assert!(left.left.is_none());
-                            assert!(left.right.is_none());
+                                assert!(instance.insert(4).is_ok());
+
+                                assert_eq!(instance.remove(&2), Some(2));
+
+                                instance
+                            }
+
+                            #[test]
+                            fn root() {
+                                let instance = setup();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                assert_eq!(root.element, 3);
+                                assert_eq!(root.balance, BalanceFactor::Balanced);
+                                assert_eq!(root.parent, None);
+                                assert!(root.left.is_some());
+                                assert!(root.right.is_some());
+                            }
+
+                            #[test]
+                            fn left() {
+                                let instance = setup();
+
+                                let root_ptr = instance.root.unwrap();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { root_ptr.as_ref() };
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let left = unsafe { root.left.unwrap().as_ref() };
+
+                                assert_eq!(left.element, 1);
+                                assert_eq!(left.balance, BalanceFactor::Balanced);
+                                assert_eq!(left.parent, Some(root_ptr));
+                                assert!(left.left.is_none());
+                                assert!(left.right.is_none());
+                            }
+
+                            #[test]
+                            fn right() {
+                                let instance = setup();
+
+                                let root_ptr = instance.root.unwrap();
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let root = unsafe { root_ptr.as_ref() };
+
+                                // SAFETY: no other reference exists to this node to alias.
+                                let right = unsafe { root.right.unwrap().as_ref() };
+
+                                assert_eq!(right.element, 4);
+                                assert_eq!(right.balance, BalanceFactor::Balanced);
+                                assert_eq!(right.parent, Some(root_ptr));
+                                assert!(right.left.is_none());
+                                assert!(right.right.is_none());
+                            }
                         }
 
-                        #[test]
-                        fn right_child() {
-                            let instance = setup();
+                        mod when_both_grandchildren {
+                            use super::*;
 
-                            let root_ptr = instance.root.unwrap();
+                            mod when_no_great_grandchild {
+                                use super::*;
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let root = unsafe { root_ptr.as_ref() };
+                                /// Should create the following structure:
+                                ///
+                                /// ```
+                                ///   2
+                                ///  / \
+                                /// 1   4
+                                ///    / \
+                                ///   3  5
+                                /// ```
+                                ///
+                                /// The deletion of element '2' should invoke no
+                                /// rotation thenceforth modifying the structure
+                                /// to become:
+                                ///
+                                /// ```
+                                ///   3
+                                ///  / \
+                                /// 1   4
+                                ///    / \
+                                ///      5
+                                /// ```
+                                fn setup() -> AdelsonVelsoLandis<usize> {
+                                    let mut instance = AdelsonVelsoLandis::default();
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let right = unsafe { root.right.unwrap().as_ref() };
+                                    assert!(instance.insert(2).is_ok());
 
-                            assert_eq!(right.element, 4);
-                            // assert_eq!(right.balance, BalanceFactor::Right);
-                            assert_eq!(right.parent, Some(root_ptr));
-                            // assert!(right.left.is_none());
+                                    assert!(instance.insert(1).is_ok());
+                                    assert!(instance.insert(4).is_ok());
 
-                            // SAFETY: THIS IS DEBUG INFO, REMOVE IT
-                            let right_left = unsafe { right.left.unwrap().as_ref() };
-                            assert_eq!(right_left.element, 3);
-                            assert_eq!(right_left.parent, None);
-                            assert!(right_left.left.is_none());
-                            assert!(right_left.right.is_none());
+                                    assert!(instance.insert(3).is_ok());
+                                    assert!(instance.insert(5).is_ok());
 
-                            assert!(right.right.is_some());
-                        }
+                                    assert_eq!(instance.remove(&2), Some(2));
 
-                        #[test]
-                        fn right_right_grandchild() {
-                            let instance = setup();
+                                    instance
+                                }
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let root = unsafe { instance.root.unwrap().as_ref() };
+                                #[test]
+                                fn root() {
+                                    let instance = setup();
 
-                            let right_ptr = root.right.unwrap();
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let right = unsafe { right_ptr.as_ref() };
+                                    assert_eq!(root.element, 3);
+                                    assert_eq!(root.balance, BalanceFactor::Balanced);
+                                    assert_eq!(root.parent, None);
+                                    assert!(root.left.is_some());
+                                    assert!(root.right.is_some());
+                                }
 
-                            // SAFETY: no other reference exists to this node to alias.
-                            let right_right = unsafe { right.right.unwrap().as_ref() };
+                                #[test]
+                                fn left() {
+                                    let instance = setup();
 
-                            assert_eq!(right_right.element, 5);
-                            assert_eq!(right_right.balance, BalanceFactor::Balanced);
-                            assert_eq!(right_right.parent, Some(right_ptr));
-                            assert!(right_right.left.is_none());
-                            assert!(right_right.right.is_none());
+                                    let root_ptr = instance.root.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { root_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let left = unsafe { root.left.unwrap().as_ref() };
+
+                                    assert_eq!(left.element, 1);
+                                    assert_eq!(left.balance, BalanceFactor::Balanced);
+                                    assert_eq!(left.parent, Some(root_ptr));
+                                    assert!(left.left.is_none());
+                                    assert!(left.right.is_none());
+                                }
+
+                                #[test]
+                                fn right() {
+                                    let instance = setup();
+
+                                    let root_ptr = instance.root.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { root_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right = unsafe { root.right.unwrap().as_ref() };
+
+                                    assert_eq!(right.element, 4);
+                                    assert_eq!(right.balance, BalanceFactor::Right);
+                                    assert_eq!(right.parent, Some(root_ptr));
+                                    assert!(right.left.is_none());
+                                    assert!(right.right.is_some());
+                                }
+
+                                #[test]
+                                fn right_right() {
+                                    let instance = setup();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                    let right_ptr = root.right.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right = unsafe { right_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right_right = unsafe { right.right.unwrap().as_ref() };
+
+                                    assert_eq!(right_right.element, 5);
+                                    assert_eq!(right_right.balance, BalanceFactor::Balanced);
+                                    assert_eq!(right_right.parent, Some(right_ptr));
+                                    assert!(right_right.left.is_none());
+                                    assert!(right_right.right.is_none());
+                                }
+                            }
+
+                            mod when_great_grandchild {
+                                use super::*;
+
+                                /// Should create the following structure:
+                                ///
+                                /// ```
+                                ///      4
+                                ///    /   \
+                                ///   2     7
+                                ///  / \   / \
+                                /// 1  3  5  8
+                                ///      / \
+                                ///        6
+                                /// ```
+                                ///
+                                /// The deletion of element '4' should invoke no
+                                /// rotation thenceforth modifying the structure
+                                /// to become:
+                                ///
+                                /// ```
+                                ///      5
+                                ///    /   \
+                                ///   2     7
+                                ///  / \   / \
+                                /// 1  3  6  8
+                                /// ```
+                                fn setup() -> AdelsonVelsoLandis<usize> {
+                                    let mut instance = AdelsonVelsoLandis::default();
+
+                                    assert!(instance.insert(4).is_ok());
+
+                                    assert!(instance.insert(2).is_ok());
+                                    assert!(instance.insert(7).is_ok());
+
+                                    assert!(instance.insert(1).is_ok());
+                                    assert!(instance.insert(3).is_ok());
+
+                                    assert!(instance.insert(5).is_ok());
+                                    assert!(instance.insert(8).is_ok());
+
+                                    assert!(instance.insert(6).is_ok());
+
+                                    assert_eq!(instance.remove(&4), Some(4));
+
+                                    instance
+                                }
+
+                                #[test]
+                                fn root() {
+                                    let instance = setup();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                    assert_eq!(root.element, 5);
+                                    assert_eq!(root.balance, BalanceFactor::Balanced);
+                                    assert_eq!(root.parent, None);
+                                    assert!(root.left.is_some());
+                                    assert!(root.right.is_some());
+                                }
+
+                                #[test]
+                                fn left() {
+                                    let instance = setup();
+
+                                    let root_ptr = instance.root.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { root_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let left = unsafe { root.left.unwrap().as_ref() };
+
+                                    assert_eq!(left.element, 2);
+                                    assert_eq!(left.balance, BalanceFactor::Balanced);
+                                    assert_eq!(left.parent, Some(root_ptr));
+                                    assert!(left.left.is_some());
+                                    assert!(left.right.is_some());
+                                }
+
+                                #[test]
+                                fn left_left() {
+                                    let instance = setup();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                    let left_ptr = root.left.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let left = unsafe { left_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let left_left = unsafe { left.left.unwrap().as_ref() };
+
+                                    assert_eq!(left_left.element, 1);
+                                    assert_eq!(left_left.balance, BalanceFactor::Balanced);
+                                    assert_eq!(left_left.parent, Some(left_ptr));
+                                    assert!(left_left.left.is_none());
+                                    assert!(left_left.right.is_none());
+                                }
+
+                                #[test]
+                                fn left_right() {
+                                    let instance = setup();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                    let left_ptr = root.left.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let left = unsafe { left_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let left_right = unsafe { left.right.unwrap().as_ref() };
+
+                                    assert_eq!(left_right.element, 3);
+                                    assert_eq!(left_right.balance, BalanceFactor::Balanced);
+                                    assert_eq!(left_right.parent, Some(left_ptr));
+                                    assert!(left_right.left.is_none());
+                                    assert!(left_right.right.is_none());
+                                }
+
+                                #[test]
+                                fn right() {
+                                    let instance = setup();
+
+                                    let root_ptr = instance.root.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { root_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right = unsafe { root.right.unwrap().as_ref() };
+
+                                    assert_eq!(right.element, 7);
+                                    assert_eq!(right.balance, BalanceFactor::Left);
+                                    assert_eq!(right.parent, Some(root_ptr));
+                                    assert!(right.left.is_some());
+                                    assert!(right.right.is_none());
+                                }
+
+                                #[test]
+                                fn right_left() {
+                                    let instance = setup();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                    let right_ptr = root.right.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right = unsafe { right_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right_left = unsafe { right.left.unwrap().as_ref() };
+
+                                    assert_eq!(right_left.element, 6);
+                                    assert_eq!(right_left.balance, BalanceFactor::Balanced);
+                                    assert_eq!(right_left.parent, Some(right_ptr));
+                                    assert!(right_left.left.is_none());
+                                    assert!(right_left.right.is_none());
+                                }
+
+                                #[test]
+                                fn right_right() {
+                                    let instance = setup();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let root = unsafe { instance.root.unwrap().as_ref() };
+
+                                    let right_ptr = root.right.unwrap();
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right = unsafe { right_ptr.as_ref() };
+
+                                    // SAFETY: no other reference exists to this node to alias.
+                                    let right_right = unsafe { right.right.unwrap().as_ref() };
+
+                                    assert_eq!(right_right.element, 8);
+                                    assert_eq!(right_right.balance, BalanceFactor::Balanced);
+                                    assert_eq!(right_right.parent, Some(right_ptr));
+                                    assert!(right_right.left.is_none());
+                                    assert!(right_right.right.is_none());
+                                }
+                            }
                         }
                     }
                 }
