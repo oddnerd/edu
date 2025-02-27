@@ -310,16 +310,16 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         }
 
                         // SAFETY: no other reference to this node exists to alias.
-                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
+                        let branch = if let Some(mut grand_parent) = unsafe { ancestor.as_ref() }.parent {
                             // SAFETY: no other reference to this node exists to alias.
-                            let parent = unsafe { parent.as_mut() };
+                            let grand_parent = unsafe { grand_parent.as_mut() };
 
-                            if parent.left.is_some_and(|left| left == ancestor) {
+                            if grand_parent.left.is_some_and(|left| left == ancestor) {
                                 // Ancestor is the left child of its parent.
-                                &mut parent.left
+                                &mut grand_parent.left
                             } else {
                                 // Ancestor is the left child of its parent.
-                                &mut parent.right
+                                &mut grand_parent.right
                             }
                         } else {
                             &mut self.root
@@ -362,16 +362,16 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                         }
 
                         // SAFETY: no other reference to this node exists to alias.
-                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
+                        let branch = if let Some(mut grand_parent) = unsafe { ancestor.as_ref() }.parent {
                             // SAFETY: no other reference to this node exists to alias.
-                            let parent = unsafe { parent.as_mut() };
+                            let grand_parent = unsafe { grand_parent.as_mut() };
 
-                            if parent.left.is_some_and(|left| left == ancestor) {
+                            if grand_parent.left.is_some_and(|left| left == ancestor) {
                                 // Ancestor is the left child of its parent.
-                                &mut parent.left
+                                &mut grand_parent.left
                             } else {
                                 // Ancestor is the left child of its parent.
-                                &mut parent.right
+                                &mut grand_parent.right
                             }
                         } else {
                             &mut self.root
