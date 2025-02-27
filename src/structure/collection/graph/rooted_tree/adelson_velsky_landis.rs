@@ -422,16 +422,16 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         let mut removed = unsafe { Box::from_raw(tmp_removing.as_ptr()) };
 
         // Owning pointer to the removed node.
-        let branch = if let Some(mut parent) = parent {
+        let branch = if let Some(mut grand_parent) = tmp_parent {
             // SAFETY: no other reference to this node exists to alias.
-            let parent = unsafe { parent.as_mut() };
+            let grand_parent = unsafe { grand_parent.as_mut() };
 
-            if parent.left.is_some_and(|left| left == tmp_removing) {
+            if grand_parent.left.is_some_and(|left| left == tmp_removing) {
                 // Removed is the left child of its parent.
-                &mut parent.left
+                &mut grand_parent.left
             } else {
                 // Removed is the left child of its parent.
-                &mut parent.right
+                &mut grand_parent.right
             }
         } else {
             &mut self.root
