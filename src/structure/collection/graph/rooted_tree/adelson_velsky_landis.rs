@@ -4519,7 +4519,7 @@ mod test {
                     ///    /   \
                     ///   3    7
                     ///  / \  / \
-                    /// 1  2 6  8
+                    /// 1  4 6  8
                     /// ```
                     fn setup() -> AdelsonVelsoLandis<usize> {
                         let mut instance = AdelsonVelsoLandis::default();
@@ -4612,7 +4612,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let left_right = unsafe { left.right.unwrap().as_ref() };
 
-                        assert_eq!(left_right.element, 2);
+                        assert_eq!(left_right.element, 4);
                         assert_eq!(left_right.balance, BalanceFactor::Balanced);
                         assert_eq!(left_right.parent, Some(left_ptr));
                         assert!(left_right.left.is_none());
