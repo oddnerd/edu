@@ -416,44 +416,48 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         }) (parent, removing);
 
         // STEP 4: Actually remove the node.
+        let removed = {
+            // SAFETY:
+            // * Constructed via `Box::to_inner`.
+            // * The following removes the pointer so it will be inaccessible.
+            let mut removed = unsafe { Box::from_raw(removing.as_ptr()) };
 
-        // SAFETY:
-        // * Constructed via `Box::to_inner`.
-        // * The following removes the pointer so it will be inaccessible.
-        let mut removed = unsafe { Box::from_raw(removing.as_ptr()) };
-
-        // Owning pointer to the removed node.
-        let branch = if let Some(mut grand_parent) = parent {
-            // SAFETY: no other reference to this node exists to alias.
-            let grand_parent = unsafe { grand_parent.as_mut() };
-
-            if grand_parent.left.is_some_and(|left| left == removing) {
-                // Removed is the left child of its parent.
-                &mut grand_parent.left
-            } else {
-                // Removed is the left child of its parent.
-                &mut grand_parent.right
-            }
-        } else {
-            &mut self.root
-        };
-
-        *branch = match (removed.left.take(), removed.right.take()) {
-            (None, None) => None,
-            (Some(mut child), None) | (None, Some(mut child)) => {
+            // Owning pointer to the removed node.
+            let branch = if let Some(mut grand_parent) = parent {
                 // SAFETY: no other reference to this node exists to alias.
-                let node = unsafe { child.as_mut() };
+                let grand_parent = unsafe { grand_parent.as_mut() };
 
-                node.parent = removed.parent.take();
+                if grand_parent.left.is_some_and(|left| left == removing) {
+                    // Removed is the left child of its parent.
+                    &mut grand_parent.left
+                } else {
+                    // Removed is the left child of its parent.
+                    &mut grand_parent.right
+                }
+            } else {
+                &mut self.root
+            };
 
-                Some(child)
-            },
-            (Some(_), Some(_)) => {
-                unreachable!("step 2 already handled this special case");
-            }
+            // Connect parent to the child of the removed node.
+            *branch = match (removed.left.take(), removed.right.take()) {
+                (None, None) => None,
+                (Some(mut child), None) | (None, Some(mut child)) => {
+                    // SAFETY: no other reference to this node exists to alias.
+                    let node = unsafe { child.as_mut() };
+
+                    node.parent = removed.parent.take();
+
+                    Some(child)
+                },
+                (Some(_), Some(_)) => {
+                    unreachable!("step 2 already handled this special case");
+                }
+            };
+
+            removed.element
         };
 
-        Some(removed.element)
+        Some(removed)
     }
 }
 
