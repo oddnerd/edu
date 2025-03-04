@@ -101,21 +101,10 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
                             unsafe { ancestor.as_mut() }.left = Some(Node::rotate_left(child));
                         }
 
-                        // SAFETY: no other reference to this node exists to alias.
-                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
-                            // SAFETY: no other reference to this node exists to alias.
-                            let parent = unsafe { parent.as_mut() };
-
-                            if parent.left.is_some_and(|left| left == ancestor) {
-                                // Ancestor is the left child of its parent.
-                                &mut parent.left
-                            } else {
-                                // Ancestor is the left child of its parent.
-                                &mut parent.right
-                            }
-                        } else {
-                            &mut self.root
-                        };
+                        // SAFETY:
+                        // * No reference to ancestor exists to alias.
+                        // * No reference to its parent exists to alias.
+                        let branch = unsafe { self.branch_of(ancestor) };
 
                         *branch = Some(Node::rotate_right(ancestor));
 
@@ -171,21 +160,10 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
                             unsafe { ancestor.as_mut() }.right = Some(Node::rotate_right(child));
                         }
 
-                        // SAFETY: no other reference to this node exists to alias.
-                        let branch = if let Some(mut parent) = unsafe { ancestor.as_ref() }.parent {
-                            // SAFETY: no other reference to this node exists to alias.
-                            let parent = unsafe { parent.as_mut() };
-
-                            if parent.left.is_some_and(|left| left == ancestor) {
-                                // Ancestor is the left child of its parent.
-                                &mut parent.left
-                            } else {
-                                // Ancestor is the left child of its parent.
-                                &mut parent.right
-                            }
-                        } else {
-                            &mut self.root
-                        };
+                        // SAFETY:
+                        // * No reference to ancestor exists to alias.
+                        // * No reference to its parent exists to alias.
+                        let branch = unsafe { self.branch_of(ancestor) };
 
                         *branch = Some(Node::rotate_left(ancestor));
 
@@ -316,21 +294,10 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
                                 unsafe { ancestor.as_mut() }.right = Some(Node::rotate_right(child));
                             }
 
-                            // SAFETY: no other reference to this node exists to alias.
-                            let branch = if let Some(mut grand_parent) = unsafe { ancestor.as_ref() }.parent {
-                                // SAFETY: no other reference to this node exists to alias.
-                                let grand_parent = unsafe { grand_parent.as_mut() };
-
-                                if grand_parent.left.is_some_and(|left| left == ancestor) {
-                                    // Ancestor is the left child of its parent.
-                                    &mut grand_parent.left
-                                } else {
-                                    // Ancestor is the left child of its parent.
-                                    &mut grand_parent.right
-                                }
-                            } else {
-                                &mut self.root
-                            };
+                            // SAFETY:
+                            // * No reference to ancestor exists to alias.
+                            // * No reference to its parent exists to alias.
+                            let branch = unsafe { self.branch_of(ancestor) };
 
                             *branch = Some(Node::rotate_left(ancestor));
 
@@ -368,21 +335,10 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
                                 unsafe { ancestor.as_mut() }.left = Some(Node::rotate_left(child));
                             }
 
-                            // SAFETY: no other reference to this node exists to alias.
-                            let branch = if let Some(mut grand_parent) = unsafe { ancestor.as_ref() }.parent {
-                                // SAFETY: no other reference to this node exists to alias.
-                                let grand_parent = unsafe { grand_parent.as_mut() };
-
-                                if grand_parent.left.is_some_and(|left| left == ancestor) {
-                                    // Ancestor is the left child of its parent.
-                                    &mut grand_parent.left
-                                } else {
-                                    // Ancestor is the left child of its parent.
-                                    &mut grand_parent.right
-                                }
-                            } else {
-                                &mut self.root
-                            };
+                            // SAFETY:
+                            // * No reference to ancestor exists to alias.
+                            // * No reference to its parent exists to alias.
+                            let branch = unsafe { self.branch_of(ancestor) };
 
                             *branch = Some(Node::rotate_right(ancestor));
 
@@ -422,21 +378,10 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
             // * The following removes the pointer so it will be inaccessible.
             let mut removed = unsafe { Box::from_raw(removing.as_ptr()) };
 
-            // Owning pointer to the removed node.
-            let branch = if let Some(mut grand_parent) = parent {
-                // SAFETY: no other reference to this node exists to alias.
-                let grand_parent = unsafe { grand_parent.as_mut() };
-
-                if grand_parent.left.is_some_and(|left| left == removing) {
-                    // Removed is the left child of its parent.
-                    &mut grand_parent.left
-                } else {
-                    // Removed is the left child of its parent.
-                    &mut grand_parent.right
-                }
-            } else {
-                &mut self.root
-            };
+            // SAFETY:
+            // * No reference to removing exists to alias.
+            // * No reference to its parent exists to alias.
+            let branch = unsafe { self.branch_of(removing) };
 
             // Connect parent to the child of the removed node.
             *branch = match (removed.left.take(), removed.right.take()) {
@@ -458,6 +403,29 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
         };
 
         Some(removed)
+    }
+
+    /// Obtain the branch owning some contained [`Node`].
+    ///
+    /// # Safety
+    /// This method will create mutable references to `node` and its parent.
+    ///
+    /// # Performance
+    /// This method takes O(1) times and consumes O(1) memory.
+    unsafe fn branch_of(&mut self, mut node: core::ptr::NonNull<Node<T>>) -> &mut Option<core::ptr::NonNull<Node<T>>> {
+        // SAFETY: caller promises no other reference to this node exists.
+        if let Some(mut parent) = unsafe { node.as_mut() }.parent {
+            // SAFETY: caller promises no other reference to this node exists.
+            let parent = unsafe { parent.as_mut() };
+
+            if parent.left.is_some_and(|left| left == node) {
+                &mut parent.left
+            } else {
+                &mut parent.right
+            }
+        } else {
+            &mut self.root
+        }
     }
 }
 
