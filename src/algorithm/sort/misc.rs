@@ -1,6 +1,6 @@
 //! Implementation of miscellaneous (no variation) sorting algorithms.
 
-/// Sort `elements` using cycle sort.
+/// Sort `elements` via cycle sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
