@@ -415,22 +415,19 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
             }
         }) (parent, removing);
 
-        // TODO: name these better
-        let (tmp_parent, tmp_removing) = (parent, removing);
-
         // STEP 4: Actually remove the node.
 
         // SAFETY:
         // * Constructed via `Box::to_inner`.
         // * The following removes the pointer so it will be inaccessible.
-        let mut removed = unsafe { Box::from_raw(tmp_removing.as_ptr()) };
+        let mut removed = unsafe { Box::from_raw(removing.as_ptr()) };
 
         // Owning pointer to the removed node.
-        let branch = if let Some(mut grand_parent) = tmp_parent {
+        let branch = if let Some(mut grand_parent) = parent {
             // SAFETY: no other reference to this node exists to alias.
             let grand_parent = unsafe { grand_parent.as_mut() };
 
-            if grand_parent.left.is_some_and(|left| left == tmp_removing) {
+            if grand_parent.left.is_some_and(|left| left == removing) {
                 // Removed is the left child of its parent.
                 &mut grand_parent.left
             } else {
