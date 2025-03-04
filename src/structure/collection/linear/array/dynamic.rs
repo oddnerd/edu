@@ -1259,7 +1259,7 @@ impl<T> ExactSizeIterator for Dynamic<T> {}
 
 impl<T> core::iter::FusedIterator for Dynamic<T> {}
 
-impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
+impl<T> FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
     ///
     /// # Panics
@@ -1424,7 +1424,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Collection for Dynamic<T> {
+impl<T> Collection for Dynamic<T> {
     type Element = T;
 
     /// Query the number of initialized elements contained.
