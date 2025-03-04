@@ -328,7 +328,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                             *branch = Some(Node::rotate_left(ancestor));
 
                             // The rotation balanced the tree.
-                            // break;
+                            break;
                         },
                         BalanceFactor::Balanced => {
                             // Removed from left branch, but both branches were
@@ -380,7 +380,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                             *branch = Some(Node::rotate_right(ancestor));
 
                             // The rotation balanced the tree.
-                            // break;
+                            break;
                         },
                         BalanceFactor::Right => {
                             // Removed from right branch, but the right branch was
@@ -4503,11 +4503,11 @@ mod test {
                     /// ```
                     ///     3
                     ///   /   \
-                    ///  1     6
+                    ///  1     5
                     /// / \   / \
                     ///   2  4  7
                     ///        / \
-                    ///       5  8
+                    ///       6  8
                     /// ```
                     ///
                     /// The deletion of element '2' should invoke a
@@ -4515,11 +4515,11 @@ mod test {
                     /// modifying the structure to become:
                     ///
                     /// ```
-                    ///      6
+                    ///      5
                     ///    /   \
                     ///   3    7
                     ///  / \  / \
-                    /// 1  2 5  8
+                    /// 1  2 6  8
                     /// ```
                     fn setup() -> AdelsonVelsoLandis<usize> {
                         let mut instance = AdelsonVelsoLandis::default();
@@ -4527,14 +4527,14 @@ mod test {
                         assert!(instance.insert(3).is_ok());
 
                         assert!(instance.insert(1).is_ok());
-                        assert!(instance.insert(6).is_ok());
+                        assert!(instance.insert(5).is_ok());
 
                         assert!(instance.insert(2).is_ok());
 
                         assert!(instance.insert(4).is_ok());
                         assert!(instance.insert(7).is_ok());
 
-                        assert!(instance.insert(5).is_ok());
+                        assert!(instance.insert(6).is_ok());
                         assert!(instance.insert(8).is_ok());
 
                         assert_eq!(instance.remove(&2), Some(2));
@@ -4549,7 +4549,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let root = unsafe { instance.root.unwrap().as_ref() };
 
-                        assert_eq!(root.element, 6);
+                        assert_eq!(root.element, 5);
                         assert_eq!(root.balance, BalanceFactor::Balanced);
                         assert_eq!(root.parent, None);
                         assert!(root.left.is_some());
@@ -4653,7 +4653,7 @@ mod test {
                         // SAFETY: no other reference exists to this node to alias.
                         let right_left = unsafe { right.left.unwrap().as_ref() };
 
-                        assert_eq!(right_left.element, 5);
+                        assert_eq!(right_left.element, 6);
                         assert_eq!(right_left.balance, BalanceFactor::Balanced);
                         assert_eq!(right_left.parent, Some(right_ptr));
                         assert!(right_left.left.is_none());
