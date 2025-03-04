@@ -3739,10 +3739,10 @@ mod test {
                                     let right = unsafe { root.right.unwrap().as_ref() };
 
                                     assert_eq!(right.element, 7);
-                                    assert_eq!(right.balance, BalanceFactor::Left);
+                                    assert_eq!(right.balance, BalanceFactor::Balanced);
                                     assert_eq!(right.parent, Some(root_ptr));
                                     assert!(right.left.is_some());
-                                    assert!(right.right.is_none());
+                                    assert!(right.right.is_some());
                                 }
 
                                 #[test]
