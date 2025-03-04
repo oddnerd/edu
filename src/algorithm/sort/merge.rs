@@ -44,7 +44,7 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     merge::iterative(left_auxiliary, right_auxiliary, elements);
 }
 
-/// Sort `elements` using natural merge sort.
+/// Sort `elements` via natural merge sort.
 ///
 /// Unlike traditional [`top_down`] merge sort, this algorithm takes advantage
 /// of natural runs of sorted elements. In effect, this variation first splits
@@ -152,7 +152,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     }
 }
 
-/// Sort `elements` using in-place merge sort.
+/// Sort `elements` via in-place merge sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.

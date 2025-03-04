@@ -58,7 +58,7 @@ fn recurse<T: Ord>(
     }
 }
 
-/// Sort `elements` using quick sort with Hoare's partition scheme.
+/// Sort `elements` via quick sort with Hoare's partition scheme.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -160,7 +160,7 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
     });
 }
 
-/// Sort `elements` using quick sort with Lomuto's partition scheme.
+/// Sort `elements` via quick sort with Lomuto's partition scheme.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -235,7 +235,7 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
     });
 }
 
-/// Sort `elements` using quick sort with a three-way partition scheme.
+/// Sort `elements` via quick sort with a three-way partition scheme.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.

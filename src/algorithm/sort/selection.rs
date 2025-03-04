@@ -1,6 +1,6 @@
 //! Implementations of [Selection Sort](https://en.wikipedia.org/wiki/Selection_sort).
 
-/// Sort `elements` using iterative selection sort.
+/// Sort `elements` via naive selection sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -40,7 +40,7 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using optimized selection sort.
+/// Sort `elements` via optimized selection sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -83,7 +83,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using stable selection sort.
+/// Sort `elements` via stable selection sort.
 ///
 /// This implementation selects the minimum element the same as the
 /// [`optimized`] variant, but instead of swapping it into position, it rotates
@@ -129,7 +129,7 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using bidirectional selection sort.
+/// Sort `elements` via bidirectional selection sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -186,7 +186,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using bingo selection sort.
+/// Sort `elements` via bingo selection sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.

@@ -1,6 +1,6 @@
 //! Implementations of [Bubble Sort](https://en.wikipedia.org/wiki/Bubble_sort).
 
-/// Sort `elements` using naive bubble sort.
+/// Sort `elements` via naive bubble sort.
 ///
 /// Iteratively 'bubble up' the largest yet to be sorted element by iterating
 /// adjacent pairs from the start of the list and swapping the largest element
@@ -39,7 +39,7 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using optimized bubble sort.
+/// Sort `elements` via optimized bubble sort.
 ///
 /// Fundamentally the same as the [`naive`] implementation, but takes advantage
 /// of the fact that if no swap occurs past some index, then the elements
@@ -88,7 +88,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using bidirectional (cocktail shaker) bubble sort.
+/// Sort `elements` via bidirectional (cocktail shaker) bubble sort.
 ///
 /// The [`optimized`] solution moves larger elements to the end of the list
 /// faster than it can move smaller elements to the front because larger
@@ -161,7 +161,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using parallel (odd-even) bubble sort.
+/// Sort `elements` via parallel (odd-even) bubble sort.
 ///
 /// Fundamentally the same as [`naive`], except this variation is trivially
 /// modified to execute asynchronously. Instead of the inner loop iterating
@@ -232,7 +232,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using parallel (odd-even) bubble sort.
+/// Sort `elements` via comb bubble sort.
 ///
 /// Fundamentally the same as [`naive`], except instead of comparing directly
 /// adjacent elements, this variation compares elements separated by some

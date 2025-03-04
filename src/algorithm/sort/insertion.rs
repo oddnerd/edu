@@ -1,6 +1,6 @@
 //! Implementations of [Insertion Sort](https://en.wikipedia.org/wiki/Insertion_sort).
 
-/// Sort `elements` using iterative insertion sort.
+/// Sort `elements` via iterative insertion sort.
 ///
 /// Starting from the first element of the slice which in isolation is a sorted
 /// subsection, iteratively move the element to the right of the sorted
@@ -46,7 +46,7 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using recursive insertion sort.
+/// Sort `elements` via recursive insertion sort.
 ///
 /// Recursively sort all but the last element, then move the last element
 /// to the left into sorted position within the sorted section.
@@ -93,7 +93,7 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using recursive insertion sort.
+/// Sort `elements` via binary insertion sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
@@ -139,7 +139,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using gnome variation of insertion sort.
+/// Sort `elements` via gnome insertion sort.
 ///
 /// Similar to [`iterative`] except the index is manually manipulated instead
 /// of utilizing for loops.
@@ -183,7 +183,7 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using shell variation of insertion sort.
+/// Sort `elements` via shell insertion sort.
 ///
 /// This variation sorts elements separated by some gap such that starting from
 /// some index, every element at an index offset by a multiple of gap is in
