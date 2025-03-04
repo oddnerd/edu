@@ -642,6 +642,26 @@ mod test {
                 _ = Node::rotate_left(instance);
             }
         }
+
+        mod rotate_right {
+            use super::*;
+
+            #[test]
+            #[should_panic(expected = "it is a logic error to rotate right without a left child")]
+            fn panics_when_no_left_child() {
+                let mut instance = Node {
+                    element: 0,
+                    left: None,
+                    right: None,
+                    balance: BalanceFactor::Balanced,
+                    parent: None,
+                };
+
+                let instance = core::ptr::NonNull::from(&mut instance);
+
+                _ = Node::rotate_right(instance);
+            }
+        }
     }
 
     mod method {
