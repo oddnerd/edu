@@ -217,8 +217,13 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     /// ```
     /// use rust::structure::collection::graph::rooted_tree::AdelsonVelskyLandis;
     ///
-    /// todo!("yields some element if found");
-    /// todo!("yields none if not found");
+    /// let mut instance = AdelsonVelskyLandis::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// // None when not contained.
+    /// assert_eq!(instance.remove(&6), None);
+    ///
+    /// // Some when contained.
+    /// assert_eq!(instance.remove(&1), Some(1));
     /// ```
     #[allow(clippy::too_many_lines)]
     pub fn remove(&mut self, element: &T) -> Option<T> {
