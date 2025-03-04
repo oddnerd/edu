@@ -1,6 +1,6 @@
 //! Implementations of [Selection Sort](https://en.wikipedia.org/wiki/Selection_sort).
 
-/// Sort `elements` using iterative selection sort.
+/// Sort `elements` using naive selection sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
