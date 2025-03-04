@@ -245,7 +245,7 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
                 parent = Some(next);
             }
 
-            (parent, branch.clone()?)
+            (parent, (*branch)?)
         };
 
         // STEP 2: Handle special case of removing having both children.
