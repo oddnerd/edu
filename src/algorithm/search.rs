@@ -1,6 +1,6 @@
 //! Implementations of [search](https://en.wikipedia.org/wiki/Search_algorithm).
 
-/// Find the index corresponding to an element with particular value.
+/// Find the index of `needle` within `haystack` using linear search.
 ///
 /// # Performance
 /// This method takes O(N) time and consumes O(1) memory.
@@ -28,7 +28,7 @@ pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
     None
 }
 
-/// Find the index corresponding to an element with particular value.
+/// Find the index of `needle` within `haystack` using binary search.
 ///
 /// # Performance
 /// This method takes O(log N) time and consumes O(1) memory.
