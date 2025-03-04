@@ -36,8 +36,13 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
     /// ```
     /// use rust::structure::collection::graph::rooted_tree::AdelsonVelskyLandis;
     ///
-    /// todo!("yields ok element");
-    /// todo!("yields err element");
+    /// let mut instance = AdelsonVelskyLandis::default();
+    ///
+    /// // Ok with reference to inserted when not already contained.
+    /// assert_eq!(instance.insert(0), Ok(&0));
+    ///
+    /// // Err with element and reference to existing when already contained.
+    /// assert_eq!(instance.insert(0), Err((0, &0)));
     /// ```
     pub fn insert(&mut self, element: T) -> Result<&T, (T, &T)> {
         // Insert the element as if a non-balancing binary search tree.
