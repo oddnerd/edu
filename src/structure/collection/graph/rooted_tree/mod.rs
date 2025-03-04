@@ -1,7 +1,7 @@
 //! Implementation of [`Rooted`].
 
 pub mod adelson_velsky_landis;
-pub use adelson_velsky_landis::AdelsonVelsoLandis;
+pub use adelson_velsky_landis::AdelsonVelskyLandis;
 
 use super::Graph;
 use super::Collection;

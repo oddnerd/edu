@@ -14,12 +14,12 @@ use super::RootedTree;
 /// height of the overall tree and providing optimal lookup/search performance.
 ///
 /// See Also: [Wikipedia](https://en.wikipedia.org/wiki/AVL_tree).
-pub struct AdelsonVelsoLandis<T> {
+pub struct AdelsonVelskyLandis<T> {
     /// The [`Node`] that is defined as the root.
     root: Option<core::ptr::NonNull<Node<T>>>,
 }
 
-impl<T: Ord> AdelsonVelsoLandis<T> {
+impl<T: Ord> AdelsonVelskyLandis<T> {
     /// Move an `element` into [`Self`].
     ///
     /// # Errors
@@ -456,7 +456,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     }
 }
 
-impl<T> Default for AdelsonVelsoLandis<T> {
+impl<T> Default for AdelsonVelskyLandis<T> {
     /// Construct an empty instance.
     ///
     /// # Performance
@@ -475,7 +475,7 @@ impl<T> Default for AdelsonVelsoLandis<T> {
     }
 }
 
-impl<T: Ord> FromIterator<T> for AdelsonVelsoLandis<T> {
+impl<T: Ord> FromIterator<T> for AdelsonVelskyLandis<T> {
     /// Construct by moving elements from an iterator.
     ///
     /// Elements are inserted in order, later duplicates being dropped.
@@ -496,7 +496,7 @@ impl<T: Ord> FromIterator<T> for AdelsonVelsoLandis<T> {
     /// todo!("show that it contains those elements in that order");
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
-        let mut instance = AdelsonVelsoLandis::default();
+        let mut instance = AdelsonVelskyLandis::default();
 
         for element in iter {
             drop(instance.insert(element));
@@ -635,7 +635,7 @@ mod test {
 
             #[test]
             fn when_empty() {
-                let mut instance = AdelsonVelsoLandis::<i32>::default();
+                let mut instance = AdelsonVelskyLandis::<i32>::default();
 
                 assert!(instance.insert(0).is_ok());
 
@@ -651,7 +651,7 @@ mod test {
 
             #[test]
             fn yields_element_when_not_contained() {
-                let mut instance = AdelsonVelsoLandis::default();
+                let mut instance = AdelsonVelskyLandis::default();
 
                 for element in 0..=5 {
                     assert_eq!(instance.insert(element), Ok(&element));
@@ -663,7 +663,7 @@ mod test {
                 let elements = 0..8;
 
                 #[allow(clippy::from_iter_instead_of_collect)]
-                let mut instance = AdelsonVelsoLandis::from_iter(elements.clone());
+                let mut instance = AdelsonVelskyLandis::from_iter(elements.clone());
 
                 for element in elements {
                     assert!(instance.insert(element).is_err());
@@ -689,8 +689,8 @@ mod test {
                         ///
                         /// The final insertion of element '1' should invoke
                         /// no rotation therefore remaining the same structure.
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
+                        fn setup() -> AdelsonVelskyLandis<usize> {
+                            let mut instance = AdelsonVelskyLandis::default();
 
                             assert!(instance.insert(2).is_ok());
                             assert!(instance.insert(1).is_ok());
@@ -745,8 +745,8 @@ mod test {
                         ///
                         /// The final insertion of element '2' should invoke
                         /// no rotation therefore remaining the same structure.
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
+                        fn setup() -> AdelsonVelskyLandis<usize> {
+                            let mut instance = AdelsonVelskyLandis::default();
 
                             assert!(instance.insert(1).is_ok());
                             assert!(instance.insert(2).is_ok());
@@ -811,8 +811,8 @@ mod test {
                             /// The final insertion of element '1' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(3).is_ok());
 
@@ -915,8 +915,8 @@ mod test {
                             /// The final insertion of element '2' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(3).is_ok());
 
@@ -1023,8 +1023,8 @@ mod test {
                             /// The final insertion of element '3' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -1127,8 +1127,8 @@ mod test {
                             /// The final insertion of element '4' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -1239,8 +1239,8 @@ mod test {
                             /// The final insertion of element '5' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(4).is_ok());
 
@@ -1390,8 +1390,8 @@ mod test {
                             /// The final insertion of element '6' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(4).is_ok());
 
@@ -1545,8 +1545,8 @@ mod test {
                             /// The final insertion of element '1' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(3).is_ok());
 
@@ -1696,8 +1696,8 @@ mod test {
                             /// The final insertion of element '2' should
                             /// invoke no rotation therefore remaining the
                             /// same structure.
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(3).is_ok());
 
@@ -1863,8 +1863,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3 5
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(4).is_ok());
 
@@ -2024,8 +2024,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3    6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(2).is_ok());
 
@@ -2190,8 +2190,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3    6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(5).is_ok());
 
@@ -2352,8 +2352,8 @@ mod test {
                     ///  / \  / \
                     /// 1    4  6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(5).is_ok());
 
@@ -2517,8 +2517,8 @@ mod test {
                     ///  / \  / \
                     /// 1    4  6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(5).is_ok());
 
@@ -2678,8 +2678,8 @@ mod test {
                     ///  / \  / \
                     ///    2 4  6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(5).is_ok());
 
@@ -2844,8 +2844,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3    6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(2).is_ok());
 
@@ -3006,8 +3006,8 @@ mod test {
                     ///  / \  / \
                     /// 1    4  6
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(2).is_ok());
 
@@ -3148,7 +3148,7 @@ mod test {
 
             #[test]
             fn when_empty() {
-                let mut instance = AdelsonVelsoLandis::<usize>::default();
+                let mut instance = AdelsonVelskyLandis::<usize>::default();
 
                 assert_eq!(instance.remove(&0), None);
             }
@@ -3158,7 +3158,7 @@ mod test {
                 let elements = 0..8;
 
                 #[allow(clippy::from_iter_instead_of_collect)]
-                let mut instance = AdelsonVelsoLandis::from_iter(elements.clone());
+                let mut instance = AdelsonVelskyLandis::from_iter(elements.clone());
 
                 for element in elements {
                     assert_eq!(instance.remove(&element), Some(element));
@@ -3167,7 +3167,7 @@ mod test {
 
             #[test]
             fn yields_none_when_not_contained() {
-                let mut instance = (0..8).collect::<AdelsonVelsoLandis<_>>();
+                let mut instance = (0..8).collect::<AdelsonVelskyLandis<_>>();
 
                 for element in 8..16 {
                     assert!(instance.remove(&element).is_none());
@@ -3182,7 +3182,7 @@ mod test {
 
                     #[test]
                     fn when_only_root() {
-                        let mut instance = AdelsonVelsoLandis::default();
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(0).is_ok());
 
@@ -3193,7 +3193,7 @@ mod test {
 
                     #[test]
                     fn when_only_left_child() {
-                        let mut instance = AdelsonVelsoLandis::default();
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(2).is_ok());
                         assert!(instance.insert(1).is_ok());
@@ -3212,7 +3212,7 @@ mod test {
 
                     #[test]
                     fn when_only_right_child() {
-                        let mut instance = AdelsonVelsoLandis::default();
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(1).is_ok());
                         assert!(instance.insert(2).is_ok());
@@ -3252,8 +3252,8 @@ mod test {
                             ///  / \
                             /// 1
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -3321,8 +3321,8 @@ mod test {
                             ///  / \
                             /// 1  4
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -3411,8 +3411,8 @@ mod test {
                             ///  / \
                             /// 1   4
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -3506,8 +3506,8 @@ mod test {
                                 ///    / \
                                 ///      5
                                 /// ```
-                                fn setup() -> AdelsonVelsoLandis<usize> {
-                                    let mut instance = AdelsonVelsoLandis::default();
+                                fn setup() -> AdelsonVelskyLandis<usize> {
+                                    let mut instance = AdelsonVelskyLandis::default();
 
                                     assert!(instance.insert(2).is_ok());
 
@@ -3623,8 +3623,8 @@ mod test {
                                 ///  / \   / \
                                 /// 1  3  6  8
                                 /// ```
-                                fn setup() -> AdelsonVelsoLandis<usize> {
-                                    let mut instance = AdelsonVelsoLandis::default();
+                                fn setup() -> AdelsonVelskyLandis<usize> {
+                                    let mut instance = AdelsonVelskyLandis::default();
 
                                     assert!(instance.insert(4).is_ok());
 
@@ -3811,8 +3811,8 @@ mod test {
                         ///  / \
                         /// 1
                         /// ```
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
+                        fn setup() -> AdelsonVelskyLandis<usize> {
+                            let mut instance = AdelsonVelskyLandis::default();
 
                             assert!(instance.insert(2).is_ok());
 
@@ -3878,8 +3878,8 @@ mod test {
                         /// / \
                         ///   3
                         /// ```
-                        fn setup() -> AdelsonVelsoLandis<usize> {
-                            let mut instance = AdelsonVelsoLandis::default();
+                        fn setup() -> AdelsonVelskyLandis<usize> {
+                            let mut instance = AdelsonVelskyLandis::default();
 
                             assert!(instance.insert(2).is_ok());
 
@@ -3954,8 +3954,8 @@ mod test {
                             ///  / \
                             /// 2  4
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(3).is_ok());
 
@@ -4044,8 +4044,8 @@ mod test {
                             ///  / \
                             /// 1  4
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(3).is_ok());
 
@@ -4138,8 +4138,8 @@ mod test {
                             ///  / \
                             /// 1  4
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -4228,8 +4228,8 @@ mod test {
                             ///  / \
                             /// 1  3
                             /// ```
-                            fn setup() -> AdelsonVelsoLandis<usize> {
-                                let mut instance = AdelsonVelsoLandis::default();
+                            fn setup() -> AdelsonVelskyLandis<usize> {
+                                let mut instance = AdelsonVelskyLandis::default();
 
                                 assert!(instance.insert(2).is_ok());
 
@@ -4328,8 +4328,8 @@ mod test {
                     ///  / \  / \
                     /// 2  4 6  8
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(3).is_ok());
 
@@ -4516,8 +4516,8 @@ mod test {
                     ///  / \  / \
                     /// 1  4 6  8
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(3).is_ok());
 
@@ -4709,8 +4709,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3 5  8
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(6).is_ok());
 
@@ -4898,8 +4898,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3 5  7
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(6).is_ok());
 
@@ -5090,8 +5090,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3 5  8
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(6).is_ok());
 
@@ -5278,8 +5278,8 @@ mod test {
                     ///  / \  / \
                     /// 1  3 5  7
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(6).is_ok());
 
@@ -5471,8 +5471,8 @@ mod test {
                     ///  / \  / \
                     /// 2  4 6  8
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(3).is_ok());
 
@@ -5660,8 +5660,8 @@ mod test {
                     ///  / \  / \
                     /// 1  4 6  8
                     /// ```
-                    fn setup() -> AdelsonVelsoLandis<usize> {
-                        let mut instance = AdelsonVelsoLandis::default();
+                    fn setup() -> AdelsonVelskyLandis<usize> {
+                        let mut instance = AdelsonVelskyLandis::default();
 
                         assert!(instance.insert(3).is_ok());
 
@@ -5830,7 +5830,7 @@ mod test {
 
         #[test]
         fn is_empty() {
-            let instance = AdelsonVelsoLandis::<usize>::default();
+            let instance = AdelsonVelskyLandis::<usize>::default();
 
             assert!(instance.root.is_none());
         }
@@ -5845,7 +5845,7 @@ mod test {
             #[test]
             fn when_empty() {
                 #[expect(clippy::from_iter_instead_of_collect)]
-                let instance = AdelsonVelsoLandis::<usize>::from_iter(core::iter::empty());
+                let instance = AdelsonVelskyLandis::<usize>::from_iter(core::iter::empty());
 
                 assert!(instance.root.is_none());
             }
