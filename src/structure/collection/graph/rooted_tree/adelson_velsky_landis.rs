@@ -223,7 +223,7 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
     #[allow(clippy::too_many_lines)]
     pub fn remove(&mut self, element: &T) -> Option<T> {
         // STEP 1: Find the element to be removed and its parent.
-        let (mut parent, mut removing) = {
+        let (parent, removing) = {
             let mut parent = None;
             let mut branch = &mut self.root;
 
@@ -244,7 +244,10 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
         };
 
         // STEP 2: Handle special case of removing having both children.
-        let (mut parent, mut removing) = {
+        let (parent, removing) = {
+            let mut parent = parent;
+            let mut removing = removing;
+
             // SAFETY: no other reference to this node exists to alias.
             let root = unsafe { removing.as_mut() };
 
