@@ -282,11 +282,6 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                     // Ascended via the left branch.
 
                     // SAFETY: no other reference to this node exists to alias.
-                    let Some(child) = unsafe { ancestor.as_ref() }.left else {
-                        unreachable!("ascended via the left branch");
-                    };
-
-                    // SAFETY: no other reference to this node exists to alias.
                     match unsafe { ancestor.as_ref() }.balance {
                         BalanceFactor::Left => {
                             // Removed from left branch, but the left branch was
@@ -302,6 +297,11 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                             // Removed from left branch, but the right
                             // branch was already longer than the left
                             // branch, so rotation needed.
+
+                            // SAFETY: no other reference to this node exists to alias.
+                            let Some(child) = unsafe { ancestor.as_ref() }.right else {
+                                unreachable!("balanced right implies existence of right child");
+                            };
 
                             // SAFETY: no other reference to this node exists to alias.
                             if unsafe { child.as_ref() }.balance == BalanceFactor::Left {
@@ -344,11 +344,6 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                     // Ascended via the right branch.
 
                     // SAFETY: no other reference to this node exists to alias.
-                    let Some(child) = unsafe { ancestor.as_ref() }.right else {
-                        unreachable!("ascended via the right branch");
-                    };
-
-                    // SAFETY: no other reference to this node exists to alias.
                     match unsafe { ancestor.as_ref() }.balance {
                         BalanceFactor::Left => {
                             // Removed from right branch, but the left
@@ -356,9 +351,14 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
                             // branch, so rotation needed.
 
                             // SAFETY: no other reference to this node exists to alias.
+                            let Some(child) = unsafe { ancestor.as_ref() }.left else {
+                                unreachable!("balanced left implies existence of left child");
+                            };
+
+                            // SAFETY: no other reference to this node exists to alias.
                             if unsafe { child.as_ref() }.balance == BalanceFactor::Right {
                                 // SAFETY: no other reference to this node exists to alias.
-                                unsafe { ancestor.as_mut() }.right = Some(Node::rotate_left(child));
+                                unsafe { ancestor.as_mut() }.left = Some(Node::rotate_left(child));
                             }
 
                             // SAFETY: no other reference to this node exists to alias.
