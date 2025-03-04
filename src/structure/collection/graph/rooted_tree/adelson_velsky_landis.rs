@@ -402,10 +402,6 @@ impl<T: Ord> AdelsonVelsoLandis<T> {
 
                 // SAFETY: no other reference to this node exists to alias.
                 parent = unsafe { ancestor.as_ref() }.parent;
-
-                // if b == BalanceFactor::Balanced {
-                //     break;
-                // }
             }
         }) (parent, removing);
 
