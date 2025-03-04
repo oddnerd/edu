@@ -232,7 +232,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using parallel (odd-even) bubble sort.
+/// Sort `elements` using comb bubble sort.
 ///
 /// Fundamentally the same as [`naive`], except instead of comparing directly
 /// adjacent elements, this variation compares elements separated by some
