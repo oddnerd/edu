@@ -585,7 +585,7 @@ impl<T: Ord> Node<T> {
         root_node.balance = match (root_node.left, root_node.right) {
             (Some(_), Some(_)) | (None, None) => BalanceFactor::Balanced,
             (Some(_), None) => BalanceFactor::Left,
-            (None, Some(_)) => unreachable!("logic error to rotate when not imbalanced"),
+            (None, Some(_)) => BalanceFactor::Right,
         };
 
         right_ptr
@@ -632,8 +632,8 @@ impl<T: Ord> Node<T> {
 
         root_node.balance = match (root_node.left, root_node.right) {
             (Some(_), Some(_)) | (None, None) => BalanceFactor::Balanced,
+            (Some(_), None) => BalanceFactor::Left,
             (None, Some(_)) => BalanceFactor::Right,
-            (Some(_), None) => unreachable!("logic error to rotate when not imbalanced"),
         };
 
         left_ptr
