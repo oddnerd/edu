@@ -139,7 +139,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using gnome variation of insertion sort.
+/// Sort `elements` using gnome insertion sort.
 ///
 /// Similar to [`iterative`] except the index is manually manipulated instead
 /// of utilizing for loops.
@@ -183,7 +183,7 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using shell variation of insertion sort.
+/// Sort `elements` using shell insertion sort.
 ///
 /// This variation sorts elements separated by some gap such that starting from
 /// some index, every element at an index offset by a multiple of gap is in
