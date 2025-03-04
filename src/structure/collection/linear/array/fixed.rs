@@ -146,7 +146,7 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> IntoIterator for Fixed<T, N> {
+impl<T, const N: usize> IntoIterator for Fixed<T, N> {
     type Item = T;
 
     type IntoIter = IntoIter<T, N>;
@@ -206,7 +206,7 @@ impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Collection for Fixed<T, N> {
+impl<T, const N: usize> Collection for Fixed<T, N> {
     type Element = T;
 
     /// Query how many elements are contained.
@@ -304,7 +304,7 @@ impl<T, const N: usize> Linear for Fixed<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> Array for Fixed<T, N> {
+impl<T, const N: usize> Array for Fixed<T, N> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Performance
@@ -499,7 +499,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
+impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     /// Obtain the final element, if there are any left.
     ///
     /// # Performance
@@ -534,9 +534,9 @@ impl<'a, T: 'a, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     }
 }
 
-impl<'a, T: 'a, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
+impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 
-impl<'a, T: 'a, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
+impl<T, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 
 #[cfg(test)]
 #[allow(
