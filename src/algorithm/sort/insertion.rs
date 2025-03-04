@@ -93,7 +93,7 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
     }
 }
 
-/// Sort `elements` using recursive insertion sort.
+/// Sort `elements` using binary insertion sort.
 ///
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
