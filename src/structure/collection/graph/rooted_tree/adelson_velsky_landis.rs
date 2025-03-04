@@ -579,7 +579,7 @@ impl<T: Ord> Node<T> {
         right_node.balance = match (right_node.left, right_node.right) {
             (Some(_), Some(_)) => BalanceFactor::Balanced,
             (Some(_), None) => BalanceFactor::Left,
-            (None, None | Some(_)) => unreachable!("old root should become the left child"),
+            (None, None | Some(_)) => unreachable!("left child was assigned to be root"),
         };
 
         root_node.balance = match (root_node.left, root_node.right) {
@@ -627,7 +627,7 @@ impl<T: Ord> Node<T> {
         left_node.balance = match (left_node.left, left_node.right) {
             (Some(_), Some(_)) => BalanceFactor::Balanced,
             (None, Some(_)) => BalanceFactor::Right,
-            (None | Some(_), None) => unreachable!("old root should become the right child"),
+            (None | Some(_), None) => unreachable!("right child was assigned to be root"),
         };
 
         root_node.balance = match (root_node.left, root_node.right) {
