@@ -591,7 +591,16 @@ impl<T: Ord> Node<T> {
         right_ptr
     }
 
-    /// TODO
+    /// Perform a right rotation about the `root` of a subtree.
+    ///
+    /// This function will alter the structure of a subtree such that the
+    /// left child will become the root maintaining AVL invariants.
+    ///
+    /// # Panics
+    /// This method panics if `root` has no left child.
+    ///
+    /// # Performance
+    /// This method takes O(1) times and consumes O(1) memory.
     fn rotate_right(mut root: core::ptr::NonNull<Self>) -> core::ptr::NonNull<Self> {
         // SAFETY: no other reference to this node exists to alias.
         let root_node = unsafe { root.as_mut() };
