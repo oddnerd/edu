@@ -4919,6 +4919,8 @@ mod test {
                         assert!(instance.insert(3).is_ok());
                         assert!(instance.insert(5).is_ok());
 
+                        assert_eq!(instance.remove(&8), Some(8));
+
                         instance
                     }
 
