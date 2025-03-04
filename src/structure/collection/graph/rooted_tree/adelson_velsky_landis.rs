@@ -514,7 +514,8 @@ impl<T: Ord> Node<T> {
     /// Perform a left rotation about the `root` of a subtree.
     ///
     /// This function will alter the structure of a subtree such that the
-    /// right child will become the root maintaining AVL invariants.
+    /// right child will become the root maintaining AVL invariants. Yields a
+    /// pointer to the new root so branches to the subtree may be updated.
     ///
     /// # Panics
     /// This method panics if `root` has no right child.
@@ -562,7 +563,8 @@ impl<T: Ord> Node<T> {
     /// Perform a right rotation about the `root` of a subtree.
     ///
     /// This function will alter the structure of a subtree such that the
-    /// left child will become the root maintaining AVL invariants.
+    /// left child will become the root maintaining AVL invariants. Yields a
+    /// pointer to the new root so branches to the subtree may be updated.
     ///
     /// # Panics
     /// This method panics if `root` has no left child.
