@@ -3535,7 +3535,7 @@ mod test {
                                     let root = unsafe { instance.root.unwrap().as_ref() };
 
                                     assert_eq!(root.element, 3);
-                                    assert_eq!(root.balance, BalanceFactor::Balanced);
+                                    assert_eq!(root.balance, BalanceFactor::Right);
                                     assert_eq!(root.parent, None);
                                     assert!(root.left.is_some());
                                     assert!(root.right.is_some());
