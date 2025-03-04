@@ -277,7 +277,7 @@ impl<T: Ord> AdelsonVelskyLandis<T> {
             (parent, removing)
         };
 
-        // STEP 3: Rebalance upwards from the parent of the node being removed.
+        // STEP 3: Ascend ancestors of the removed element to find imbalance.
         #[allow(clippy::shadow_unrelated)]
         #[allow(clippy::redundant_closure_call)]
         (|mut parent: Option<core::ptr::NonNull<Node<T>>>, mut removing: core::ptr::NonNull<Node<T>>| {
