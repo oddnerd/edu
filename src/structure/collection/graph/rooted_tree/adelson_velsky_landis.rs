@@ -576,7 +576,7 @@ impl<T: Ord> Node<T> {
         let root_node = unsafe { root.as_mut() };
 
         let Some(mut left_ptr) = root_node.left.take() else {
-            panic!("it is a logic error to rotate left without a right child");
+            panic!("it is a logic error to rotate right without a left child");
         };
 
         // SAFETY: no other reference to this node exists to alias.
