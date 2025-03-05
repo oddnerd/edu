@@ -45,15 +45,15 @@ missing_copy_implementations   = "warn" # Prefer deriving `Copy`.
 missing_debug_implementations  = "warn" # Debug formatting for public items.
 explicit_outlives_requirements = "warn" # Prefer lifetimes on types.
 
-unit_bindings             = "deny" # Prevent binding variables to unit type.
-unused_results            = "deny" # Prefer explicitly handling `Result`.
-unreachable_pub           = "deny" # Prevent inaccessible public items.
-non_ascii_idents          = "deny" # Prefer ASCII source code.
-unstable_features         = "deny" # Prevent unstable features.
-unused_qualifications     = "deny" # Prefer names in scope.
-trivial_numeric_casts     = "deny" # Prevent casting to same type.
-unsafe_op_in_unsafe_fn    = "deny" # Require unsafe block in unsafe function.
-elided_lifetimes_in_paths = "deny" # Prefer explicit lifetimes.
+unit_bindings                          = "deny" # Prevent binding variables to unit type.
+unused_results                         = "deny" # Prefer explicitly handling `Result`.
+unreachable_pub                        = "deny" # Prevent inaccessible public items.
+non_ascii_idents                       = "deny" # Prefer ASCII source code.
+unstable_features                      = "deny" # Prevent unstable features.
+unused_qualifications                  = "deny" # Prefer names in scope.
+trivial_numeric_casts                  = "deny" # Prevent casting to same type.
+unsafe_op_in_unsafe_fn                 = "deny" # Require unsafe block in unsafe function.
+elided_lifetimes_in_paths              = "deny" # Prefer explicit lifetimes.
 absolute_paths_not_starting_with_crate = "deny" # Prefer `crate::`.
 
 [lints.clippy]
@@ -126,17 +126,17 @@ panic_in_result_fn          = "deny" # Prefer erroring instead of panic.
 missing_assert_message      = "deny" # Require explanation for asserts.
 
 # Debugging
-todo                         = "warn" # Prevent `todo!()`.
-dbg_macro                    = "warn" # Prevent `dbg!()`.
-use_debug                    = "warn" # Prevent `{:?}` formatting.
-print_stderr                 = "warn" # Prevent `eprintln!()`.
-print_stdout                 = "warn" # Prevent `prinln!()`.
-unimplemented                = "deny" # Prevent `unimplemented!()`.
-debug_assert_with_mut_call   = "deny" # Prevent debug/release divergence.
+todo                       = "warn" # Prevent `todo!()`.
+dbg_macro                  = "warn" # Prevent `dbg!()`.
+use_debug                  = "warn" # Prevent `{:?}` formatting.
+print_stderr               = "warn" # Prevent `eprintln!()`.
+print_stdout               = "warn" # Prevent `prinln!()`.
+unimplemented              = "deny" # Prevent `unimplemented!()`.
+debug_assert_with_mut_call = "deny" # Prevent debug/release divergence.
 
 # Misleading
-rc_buffer                            = "warn" # Prevent `Rc<Vec/String>`.
 rc_mutex                             = "warn" # Prevent `Rc<Mutex>`.
+rc_buffer                            = "warn" # Prevent `Rc<Vec/String>`.
 mutex_atomic                         = "warn" # Prefer atomics over mutex.
 suboptimal_flops                     = "warn" # Prefer float functions.
 or_fun_call                          = "deny" # Prefer `or_else()`.
