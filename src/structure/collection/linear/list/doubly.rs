@@ -2181,7 +2181,7 @@ mod test {
 
     mod index {
         use super::*;
-        use core::ops::Index;
+        use core::ops::Index as _;
 
         #[test]
         fn correct_element() {
@@ -2204,7 +2204,7 @@ mod test {
 
     mod index_mut {
         use super::*;
-        use core::ops::IndexMut;
+        use core::ops::IndexMut as _;
 
         #[test]
         fn correct_element() {
@@ -3601,7 +3601,7 @@ mod test {
     }
 
     mod stack {
-        use super::super::super::super::Stack;
+        use super::super::super::super::Stack as _;
         use super::*;
 
         mod push {
@@ -3731,7 +3731,7 @@ mod test {
     }
 
     mod queue {
-        use super::super::super::super::Queue;
+        use super::super::super::super::Queue as _;
         use super::*;
 
         mod push {

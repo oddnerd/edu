@@ -1259,7 +1259,7 @@ impl<T> ExactSizeIterator for Dynamic<T> {}
 
 impl<T> core::iter::FusedIterator for Dynamic<T> {}
 
-impl<'a, T: 'a> FromIterator<T> for Dynamic<T> {
+impl<T> FromIterator<T> for Dynamic<T> {
     /// Construct by moving elements from an iterator.
     ///
     /// # Panics
@@ -1424,7 +1424,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     }
 }
 
-impl<'a, T: 'a> Collection for Dynamic<T> {
+impl<T> Collection for Dynamic<T> {
     type Element = T;
 
     /// Query the number of initialized elements contained.
@@ -4084,7 +4084,7 @@ mod test {
 
     mod index {
         use super::*;
-        use core::ops::Index;
+        use core::ops::Index as _;
 
         #[test]
         fn correct_element() {
@@ -4107,7 +4107,7 @@ mod test {
 
     mod index_mut {
         use super::*;
-        use core::ops::IndexMut;
+        use core::ops::IndexMut as _;
 
         #[test]
         fn correct_element() {
@@ -4994,7 +4994,7 @@ mod test {
 
     mod list {
         use super::*;
-        use crate::structure::collection::linear::list::List;
+        use crate::structure::collection::linear::list::List as _;
 
         mod insert {
             use super::*;
@@ -5663,7 +5663,7 @@ mod test {
     }
 
     mod stack {
-        use super::super::super::super::Stack;
+        use super::super::super::super::Stack as _;
         use super::*;
 
         mod push {
@@ -5792,7 +5792,7 @@ mod test {
     }
 
     mod queue {
-        use super::super::super::super::Queue;
+        use super::super::super::super::Queue as _;
         use super::*;
 
         mod push {
