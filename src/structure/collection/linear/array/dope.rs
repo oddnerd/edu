@@ -432,7 +432,7 @@ mod test {
 
     mod index {
         use super::*;
-        use core::ops::Index;
+        use core::ops::Index as _;
 
         #[test]
         fn correct_element() {
@@ -461,7 +461,7 @@ mod test {
 
     mod index_mut {
         use super::*;
-        use core::ops::IndexMut;
+        use core::ops::IndexMut as _;
 
         #[test]
         fn correct_element() {
