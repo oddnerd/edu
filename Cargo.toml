@@ -97,7 +97,6 @@ mutex_integer                     = "deny" # Prefer atomics over mutex.
 multiple_inherent_impl            = "deny" # Prevent multiple impl blocks.
 let_underscore_untyped            = "deny" # Prefer ignoring type alongside value.
 unneeded_field_pattern            = "deny" # Prefer `..` over `_`.
-elidable_lifetime_names           = "deny" # Prefer anonymous lifetimes.
 redundant_type_annotations        = "deny" # Prevent repeating type.
 unseparated_literal_suffix        = "deny" # Prevent literal suffix without underscore.
 empty_structs_with_brackets       = "deny" # Prevent empty struct body.
@@ -116,9 +115,7 @@ fn_to_numeric_cast_any = "deny" # Prevent casting function pointers.
 # Error Handling
 unwrap_used                 = "warn" # Prevent `unwrap()`.
 expect_used                 = "warn" # Prevent `expect()`.
-return_and_then             = "warn" # Prefer question mark operator.
 indexing_slicing            = "warn" # Prefer failable `get` over indexing.
-single_option_map           = "warn" # Prevent unnecessary `Option` wrapper.
 option_if_let_else          = "warn" # Prefer `map_or()` amd `map_or_else()`.
 if_then_some_else_none      = "warn" # Prefer Boolean `then`.
 assertions_on_result_states = "warn" # Prevent asserting `is_ok` and `is_err`.
@@ -136,7 +133,6 @@ print_stderr                 = "warn" # Prevent `eprintln!()`.
 print_stdout                 = "warn" # Prevent `prinln!()`.
 unimplemented                = "deny" # Prevent `unimplemented!()`.
 debug_assert_with_mut_call   = "deny" # Prevent debug/release divergence.
-unnecessary_debug_formatting = "deny" # Prefer display formatting for `OsStr` and `Path`.
 
 # Misleading
 rc_buffer                            = "warn" # Prevent `Rc<Vec/String>`.
@@ -146,12 +142,10 @@ suboptimal_flops                     = "warn" # Prefer float functions.
 or_fun_call                          = "deny" # Prefer `or_else()`.
 manual_clamp                         = "deny" # Prefer `clamp`.
 str_to_string                        = "deny" # Prefer `to_owned()`.
-manual_midpoint                      = "deny" # Prefer `midpoint()`.
 clone_on_ref_ptr                     = "deny" # Prefer `Rc::clone()`.
 string_to_string                     = "deny" # Prefer `clone()`.
 assigning_clones                     = "deny" # Prefer `clone_from()`.
 equatable_if_let                     = "deny" # Prevent Yoda (backwards) conditions.
-unnecessary_semicolon                = "deny" # Prevent meaningless semicolon.
 used_underscore_items                = "deny" # Prevent using symbols lead by underscoe.
 manual_is_power_of_two               = "deny" # Prefer `is_power_of_two()`.
 suspicious_xor_used_as_pow           = "deny" # Prevent XOR decimal numbers.
@@ -175,7 +169,6 @@ string_lit_chars_any                = "deny" # Prefer `matches!()`.
 unnecessary_literal_bound           = "deny" # Prevent limiting literal lifetime.
 
 # Restricted Features
-non_std_lazy_statics              = "warn" # Prefer `std::sync::LazyLock`.
 field_scoped_visibility_modifiers = "warn" # Prefer visibility of struct.
 exit                              = "deny" # Prevent crashing via `exit`.
 mem_forget                        = "deny" # Prevent leaking memory.
@@ -195,7 +188,6 @@ set_contains_or_insert         = "warn" # Prefer checking the result of `insert`
 arithmetic_side_effects        = "warn" # Prevent implicit underflow/overflow.
 let_underscore_must_use        = "warn" # Prevent ignoring must use.
 needless_pass_by_ref_mut       = "warn" # Prefer immutable borrow.
-precedence_bits                = "deny" # Prefer explicit order of bitwise operations.
 shadow_unrelated               = "deny" # Prevent name shadowing.
 useless_let_if_seq             = "deny" # Prefer inline if/else assignment.
 else_if_without_else           = "deny" # Prevent else if without else.
