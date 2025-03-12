@@ -2783,7 +2783,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let _actual = Dynamic::<()>::with_capacity(capacity).expect("ZSTs do not occupy memory");
             }
@@ -2950,7 +2950,7 @@ mod test {
 
                     _ = actual.reserve(capacity).expect("successful allocation");
 
-                    let capacity = capacity.checked_next_power_of_two().unwrap();
+                    let capacity = capacity.checked_next_power_of_two().expect("loop conditions ensures this will fit");
 
                     assert_eq!(actual.capacity(), capacity);
                 }
@@ -3039,7 +3039,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::default();
 
@@ -3140,7 +3140,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::default();
 
@@ -3241,7 +3241,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::default();
 
@@ -3361,7 +3361,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::with_capacity(capacity).expect("successful allocation");
 
@@ -3476,7 +3476,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::with_capacity(capacity).expect("successful allocation");
 
@@ -3591,7 +3591,7 @@ mod test {
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::with_capacity(capacity).expect("successful allocation");
 
@@ -3888,7 +3888,7 @@ mod test {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 for elements in 1..=actual.initialized {
-                    let elements = isize::try_from(elements).unwrap();
+                    let elements = isize::try_from(elements).expect("there are less than isize::MAX elements");
 
                     _ = actual.resize(-elements).expect_err("not enough capacity");
                 }

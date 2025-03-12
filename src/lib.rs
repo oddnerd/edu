@@ -16,7 +16,6 @@
         // implies the failure of that test which panicking invokes. Since
         // use of this feature is allowed only within tests, the potential
         // unrecoverable error is the explicit purpose of using it.
-        clippy::unwrap_used,
         clippy::expect_used,
 
         // Indexing/slicing inside tests ought to be so obviously within bounds
