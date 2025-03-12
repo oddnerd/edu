@@ -24,7 +24,7 @@
 #[allow(clippy::indexing_slicing)]
 pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
-        panic!("output slice cannot be big enough to store inputs");
+        panic!("output must be larger than usize::MAX which is impossible");
     };
 
     assert_eq!(
@@ -95,7 +95,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 #[allow(clippy::arithmetic_side_effects)]
 pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
-        panic!("output slice cannot be big enough to store inputs");
+        panic!("output must be larger than usize::MAX which is impossible");
     };
 
     assert_eq!(
