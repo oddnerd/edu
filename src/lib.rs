@@ -19,9 +19,6 @@
         clippy::unwrap_used,
         clippy::expect_used,
 
-        // TODO: struggling to justify this one
-        // clippy::assertions_on_result_states,
-
         // Indexing/slicing inside tests ought to be so obviously within bounds
         // that requiring use of `get` and then unwrapping the result would be
         // unnecessarily verbose. To the extent that invalid bounds may still

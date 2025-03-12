@@ -2676,7 +2676,7 @@ mod test {
             fn when_empty() {
                 let mut actual = Singly::<usize>::default();
 
-                assert!(actual.insert(0, 12345).is_ok());
+                _ = actual.insert(0, 12345).expect("successful allocation");
             }
 
             #[test]
@@ -2807,7 +2807,8 @@ mod test {
             fn when_empty() {
                 let mut actual = Singly::<usize>::default();
 
-                assert!(actual.prepend(0).is_ok());
+                _ = actual.prepend(0).expect("successful allocation");
+
                 assert!(actual.eq([0]));
             }
         }
@@ -2860,7 +2861,8 @@ mod test {
             fn when_empty() {
                 let mut actual = Singly::<usize>::default();
 
-                assert!(actual.append(0).is_ok());
+                _ = actual.append(0).expect("successful allocation");
+
                 assert!(actual.eq([0]));
             }
         }
@@ -3346,7 +3348,8 @@ mod test {
             fn when_empty() {
                 let mut actual = Singly::<usize>::default();
 
-                assert!(actual.push(0).is_ok());
+                _ = actual.push(0).expect("successful allocation");
+
                 assert!(actual.eq([0]));
             }
         }
@@ -3475,7 +3478,8 @@ mod test {
             fn when_empty() {
                 let mut actual = Singly::<usize>::default();
 
-                assert!(actual.push(0).is_ok());
+                _ = actual.push(0).expect("successful allocation");
+
                 assert!(actual.eq([0]));
             }
         }
