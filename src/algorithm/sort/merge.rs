@@ -55,7 +55,7 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(log N) memory.
+/// This method takes O(N * log N) time and consumes O(N) memory.
 ///
 /// # Examples
 /// ```
