@@ -374,7 +374,7 @@ mod test {
         }
 
         #[test]
-        #[should_panic(expected = "output length must be sum of input lengths")]
+        #[should_panic = "output length must be sum of input lengths"]
         fn output_cannot_be_smaller() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
@@ -384,7 +384,7 @@ mod test {
         }
 
         #[test]
-        #[should_panic(expected = "output length must be sum of input lengths")]
+        #[should_panic = "output length must be sum of input lengths"]
         fn output_cannot_be_larger() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
