@@ -18,11 +18,10 @@
         // unrecoverable error is the explicit purpose of using it.
         clippy::expect_used,
 
-        // Indexing/slicing inside tests ought to be so obviously within bounds
-        // that requiring use of `get` and then unwrapping the result would be
-        // unnecessarily verbose. To the extent that invalid bounds may still
-        // be used, that code will never be ran in production and it will
-        // invoke a panic thusly failing that test until corrected.
+        // An index being out of expected bounds implies the failure of that
+        // test which panicking invokes. Since use of this feature is allowed
+        // only within tests, the potential unrecoverable error is the explicit
+        // purpose of using it.
         clippy::indexing_slicing
     )
 )]
