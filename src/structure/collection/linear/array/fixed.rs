@@ -539,11 +539,6 @@ impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 impl<T, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used
-)]
 mod test {
     use super::*;
 

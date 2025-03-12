@@ -362,11 +362,6 @@ impl<'a, T: 'a> Array for Dope<'a, T> {
 }
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used
-)]
 mod test {
     use super::*;
 

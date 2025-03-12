@@ -1999,13 +1999,6 @@ impl<T, F: FnMut(&T) -> bool> ExactSizeIterator for Withdraw<'_, T, F> {}
 impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {}
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::assertions_on_result_states,
-    clippy::indexing_slicing
-)]
 mod test {
     use super::*;
 
