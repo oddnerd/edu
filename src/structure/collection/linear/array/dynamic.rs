@@ -2725,13 +2725,6 @@ impl core::fmt::Display for OutOfBounds {
 impl core::error::Error for OutOfBounds {}
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::assertions_on_result_states,
-    clippy::indexing_slicing
-)]
 mod test {
     use super::*;
 
@@ -2785,18 +2778,15 @@ mod test {
 
             #[test]
             fn zero_capacity_cannot_fail() {
-                let actual = Dynamic::<usize>::with_capacity(0);
-
-                assert!(actual.is_ok());
+                let _actual = Dynamic::<usize>::with_capacity(0).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
-                let actual = Dynamic::<()>::with_capacity(capacity);
-
-                assert!(actual.is_ok());
+                let _actual =
+                    Dynamic::<()>::with_capacity(capacity).expect("ZSTs do not occupy memory");
             }
         }
 
@@ -2961,7 +2951,9 @@ mod test {
 
                     _ = actual.reserve(capacity).expect("successful allocation");
 
-                    let capacity = capacity.checked_next_power_of_two().unwrap();
+                    let capacity = capacity
+                        .checked_next_power_of_two()
+                        .expect("loop conditions ensures this will fit");
 
                     assert_eq!(actual.capacity(), capacity);
                 }
@@ -2972,7 +2964,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-                assert!(actual.reserve(0).is_ok());
+                _ = actual.reserve(0).expect("does not alter allocation");
+
                 assert_eq!(actual.capacity(), 256);
             }
 
@@ -2984,7 +2977,7 @@ mod test {
 
                 let existing_allocation = actual.buffer.as_ptr();
 
-                assert!(actual.reserve(256).is_ok());
+                _ = actual.reserve(256).expect("does no reallocation");
 
                 assert_eq!(actual.buffer.as_ptr(), existing_allocation);
             }
@@ -3044,16 +3037,16 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.reserve(0).is_ok());
+                _ = actual.reserve(0).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::default();
 
-                assert!(actual.reserve(capacity).is_ok());
+                _ = actual.reserve(capacity).expect("ZSTs do not occupy memory");
             }
         }
 
@@ -3074,7 +3067,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-                assert!(actual.reserve_front(0).is_ok());
+                _ = actual.reserve_front(0).expect("does not alter allocation");
+
                 assert_eq!(actual.capacity_front(), 256);
             }
 
@@ -3144,16 +3138,18 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.reserve_front(0).is_ok());
+                _ = actual.reserve_front(0).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::default();
 
-                assert!(actual.reserve_front(capacity).is_ok());
+                _ = actual
+                    .reserve_front(capacity)
+                    .expect("ZSTs do not occupy memory");
             }
         }
 
@@ -3174,7 +3170,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
-                assert!(actual.reserve_back(0).is_ok());
+                _ = actual.reserve_back(0).expect("does not alter allocation");
+
                 assert_eq!(actual.capacity_back(), 256);
             }
 
@@ -3244,16 +3241,18 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.reserve_back(0).is_ok());
+                _ = actual.reserve_back(0).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).unwrap();
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
                 let mut actual = Dynamic::<()>::default();
 
-                assert!(actual.reserve_back(capacity).is_ok());
+                _ = actual
+                    .reserve_back(capacity)
+                    .expect("ZSTs do not occupy memory");
             }
         }
 
@@ -3285,7 +3284,8 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                assert!(actual.shrink(Some(256)).is_ok());
+                _ = actual.shrink(Some(256)).expect("does not alter allocation");
+
                 assert_eq!(actual.capacity(), 64);
             }
 
@@ -3363,14 +3363,17 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.shrink(None).is_ok());
+                _ = actual.shrink(None).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
-                assert!(actual.shrink(None).is_ok());
+                let mut actual =
+                    Dynamic::<()>::with_capacity(capacity).expect("successful allocation");
+
+                _ = actual.shrink(None).expect("ZSTs do not occupy memory");
             }
         }
 
@@ -3406,7 +3409,10 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                assert!(actual.shrink_front(Some(256)).is_ok());
+                _ = actual
+                    .shrink_front(Some(256))
+                    .expect("does not alter allocation");
+
                 assert_eq!(actual.capacity(), 64);
             }
 
@@ -3475,14 +3481,19 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.shrink_front(None).is_ok());
+                _ = actual.shrink_front(None).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
-                assert!(actual.shrink_front(None).is_ok());
+                let mut actual =
+                    Dynamic::<()>::with_capacity(capacity).expect("successful allocation");
+
+                _ = actual
+                    .shrink_front(None)
+                    .expect("ZSTs do not occupy memory");
             }
         }
 
@@ -3518,7 +3529,10 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                assert!(actual.shrink_back(Some(256)).is_ok());
+                _ = actual
+                    .shrink_back(Some(256))
+                    .expect("does not alter allocation");
+
                 assert_eq!(actual.capacity(), 64);
             }
 
@@ -3587,14 +3601,17 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.shrink_back(None).is_ok());
+                _ = actual.shrink_back(None).expect("does no allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
 
-                assert!(actual.shrink_back(None).is_ok());
+                let mut actual =
+                    Dynamic::<()>::with_capacity(capacity).expect("successful allocation");
+
+                _ = actual.shrink_back(None).expect("ZSTs do not occupy memory");
             }
         }
 
@@ -3610,7 +3627,7 @@ mod test {
                     let front_capacity = actual.front_capacity;
                     let back_capacity = actual.back_capacity;
 
-                    assert!(actual.shift(-1).is_ok());
+                    _ = actual.shift(-1).expect("front capacity to shift into");
 
                     assert_eq!(actual.front_capacity, front_capacity - 1);
                     assert_eq!(actual.back_capacity, back_capacity + 1);
@@ -3624,7 +3641,7 @@ mod test {
                 _ = actual.reserve_front(256).expect("successful allocation");
 
                 for _ in 0..256 {
-                    assert!(actual.shift(-1).is_ok());
+                    _ = actual.shift(-1).expect("front capacity to shift into");
 
                     assert!(actual.iter().eq(expected.iter()));
                 }
@@ -3639,7 +3656,7 @@ mod test {
                     let front_capacity = actual.front_capacity;
                     let back_capacity = actual.back_capacity;
 
-                    assert!(actual.shift(1).is_ok());
+                    _ = actual.shift(1).expect("back capacity to shift into");
 
                     assert_eq!(actual.front_capacity, front_capacity + 1);
                     assert_eq!(actual.back_capacity, back_capacity - 1);
@@ -3653,7 +3670,7 @@ mod test {
                 _ = actual.reserve_back(256).expect("successful allocation");
 
                 for _ in 0..256 {
-                    assert!(actual.shift(1).is_ok());
+                    _ = actual.shift(1).expect("right capacity to shift into");
 
                     assert!(actual.iter().eq(expected.iter()));
                 }
@@ -3663,22 +3680,22 @@ mod test {
             fn zero_cannot_fail() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert!(actual.shift(0).is_ok());
+                _ = actual.shift(0).expect("does not alter allocation");
             }
 
             #[test]
             fn errors_when_out_of_bounds() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert!(actual.shift(-1).is_err());
-                assert!(actual.shift(1).is_err());
+                _ = actual.shift(-1).expect_err("no front capacity");
+                _ = actual.shift(1).expect_err("no back capacity");
             }
 
             #[test]
             fn when_empty() {
                 let mut actual = Dynamic::<()>::default();
 
-                assert!(actual.shift(0).is_ok());
+                _ = actual.shift(0).expect("does not alter allocation");
             }
         }
 
@@ -3887,9 +3904,10 @@ mod test {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 for elements in 1..=actual.initialized {
-                    let elements = isize::try_from(elements).unwrap();
+                    let elements =
+                        isize::try_from(elements).expect("there are less than isize::MAX elements");
 
-                    assert!(actual.resize(-elements).is_err());
+                    _ = actual.resize(-elements).expect_err("not enough capacity");
                 }
             }
 
@@ -3938,15 +3956,19 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.resize(0).is_ok());
+                _ = actual.resize(0).expect("does not alter allocation");
             }
 
             #[test]
             fn zero_size_types_cannot_fail() {
-                let mut actual = Dynamic::<()>::with_capacity(256).expect("successful allocation");
+                let mut actual = Dynamic::<()>::default();
 
-                assert!(actual.resize(128).is_ok());
-                assert!(actual.resize(-128).is_ok());
+                _ = actual
+                    .resize(isize::MAX)
+                    .expect("ZSTs do not occupy memory");
+                _ = actual
+                    .resize(-isize::MAX)
+                    .expect("ZSTs do not occupy memory");
             }
         }
     }
@@ -5033,7 +5055,7 @@ mod test {
             fn will_allocate_when_empty() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.insert(0, 12345).is_ok());
+                _ = actual.insert(0, 12345).expect("successful allocation");
             }
 
             #[test]
@@ -5042,7 +5064,7 @@ mod test {
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
                 _ = actual.shrink(None).expect("no capacity");
 
-                assert!(actual.insert(2, 12345).is_ok());
+                _ = actual.insert(2, 12345).expect("successful allocation");
             }
 
             #[test]
@@ -5074,10 +5096,10 @@ mod test {
             }
 
             #[test]
-            fn can_prepend() {
+            fn prepending_reallocates_when_no_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert!(actual.insert(0, 12345).is_ok());
+                _ = actual.insert(0, 12345).expect("successful allocation");
             }
 
             #[test]
@@ -5101,10 +5123,10 @@ mod test {
             }
 
             #[test]
-            fn can_append() {
+            fn appending_reallocates_when_no_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                assert!(actual.insert(6, 12345).is_ok());
+                _ = actual.insert(6, 12345).expect("successful allocation");
             }
 
             #[test]
@@ -5714,7 +5736,8 @@ mod test {
             fn when_empty() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.push(0).is_ok());
+                _ = actual.push(0).expect("successful allocation");
+
                 assert!(actual.eq([0]));
             }
         }
@@ -5843,7 +5866,8 @@ mod test {
             fn when_empty() {
                 let mut actual = Dynamic::<usize>::default();
 
-                assert!(actual.push(0).is_ok());
+                _ = actual.push(0).expect("successful allocation");
+
                 assert!(actual.eq([0]));
             }
         }

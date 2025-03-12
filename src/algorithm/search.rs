@@ -87,13 +87,6 @@ pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<u
 }
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::assertions_on_result_states,
-    clippy::indexing_slicing
-)]
 mod test {
     use super::*;
 

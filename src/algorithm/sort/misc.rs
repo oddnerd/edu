@@ -65,13 +65,6 @@ pub fn cycle<T: Ord>(elements: &mut [T]) {
 }
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::assertions_on_result_states,
-    clippy::indexing_slicing
-)]
 mod test {
     use super::*;
 

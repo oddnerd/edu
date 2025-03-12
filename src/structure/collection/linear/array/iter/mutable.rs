@@ -115,11 +115,6 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for IterMut<'a, T> {
 }
 
 #[cfg(test)]
-#[allow(
-    clippy::undocumented_unsafe_blocks,
-    clippy::unwrap_used,
-    clippy::expect_used
-)]
 mod test {
     use super::*;
 
