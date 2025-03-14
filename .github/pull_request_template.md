@@ -34,5 +34,5 @@ Closes #
 #### Chores
 
 - [ ] Bumped version?
-- [ ] Added link to readme?
+- [ ] Link to new features in readme?
 - [ ] Rebased branch for clean commit history?
