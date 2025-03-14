@@ -2,7 +2,7 @@
 
 [package]
 name = "rust"
-version = "0.14.6"
+version = "0.14.7"
 edition = "2021"
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
