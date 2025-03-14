@@ -24,7 +24,7 @@
 #[allow(clippy::indexing_slicing)]
 pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
-        panic!("output slice cannot be big enough to store inputs");
+        panic!("output must be larger than usize::MAX which is impossible");
     };
 
     assert_eq!(
@@ -95,7 +95,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 #[allow(clippy::arithmetic_side_effects)]
 pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
-        panic!("output slice cannot be big enough to store inputs");
+        panic!("output must be larger than usize::MAX which is impossible");
     };
 
     assert_eq!(
@@ -177,7 +177,7 @@ mod test {
         fn first_empty() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -188,7 +188,7 @@ mod test {
         fn second_empty() {
             let mut first = [0, 1, 2, 3, 4, 5];
             let mut second = [];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -199,7 +199,7 @@ mod test {
         fn both_empty() {
             let mut first = [];
             let mut second = [];
-            let mut output = [0; 0];
+            let mut output: [usize; 0] = [];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -210,7 +210,7 @@ mod test {
         fn first_longer() {
             let mut first = [0, 1, 3, 5];
             let mut second = [2, 4];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -221,7 +221,7 @@ mod test {
         fn second_longer() {
             let mut first = [2, 4];
             let mut second = [0, 1, 3, 5];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -232,7 +232,7 @@ mod test {
         fn first_greater() {
             let mut first = [1];
             let mut second = [0];
-            let mut output = [0; 2];
+            let mut output = [usize::default(); 2];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -243,7 +243,7 @@ mod test {
         fn second_greater() {
             let mut first = [0];
             let mut second = [1];
-            let mut output = [0; 2];
+            let mut output = [usize::default(); 2];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -254,7 +254,7 @@ mod test {
         fn back_and_forth() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -262,7 +262,7 @@ mod test {
         }
 
         #[test]
-        #[should_panic(expected = "output length must be sum of input lengths")]
+        #[should_panic = "output length must be sum of input lengths"]
         fn output_cannot_be_smaller() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
@@ -272,11 +272,11 @@ mod test {
         }
 
         #[test]
-        #[should_panic(expected = "output length must be sum of input lengths")]
+        #[should_panic = "output length must be sum of input lengths"]
         fn output_cannot_be_larger() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
-            let mut output = [0; 256];
+            let mut output = [usize::default(); 256];
 
             iterative(&mut first, &mut second, &mut output);
         }
@@ -289,7 +289,7 @@ mod test {
         fn first_empty() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -300,7 +300,7 @@ mod test {
         fn second_empty() {
             let mut first = [0, 1, 2, 3, 4, 5];
             let mut second = [];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -311,7 +311,7 @@ mod test {
         fn both_empty() {
             let mut first = [];
             let mut second = [];
-            let mut output = [0; 0];
+            let mut output: [usize; 0] = [];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -322,7 +322,7 @@ mod test {
         fn first_longer() {
             let mut first = [0, 1, 3, 5];
             let mut second = [2, 4];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -333,7 +333,7 @@ mod test {
         fn second_longer() {
             let mut first = [2, 4];
             let mut second = [0, 1, 3, 5];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -344,7 +344,7 @@ mod test {
         fn first_greater() {
             let mut first = [1];
             let mut second = [0];
-            let mut output = [0; 2];
+            let mut output = [usize::default(); 2];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -355,7 +355,7 @@ mod test {
         fn second_greater() {
             let mut first = [0];
             let mut second = [1];
-            let mut output = [0; 2];
+            let mut output = [usize::default(); 2];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -366,7 +366,7 @@ mod test {
         fn back_and_forth() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
-            let mut output = [0; 6];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -374,7 +374,7 @@ mod test {
         }
 
         #[test]
-        #[should_panic(expected = "output length must be sum of input lengths")]
+        #[should_panic = "output length must be sum of input lengths"]
         fn output_cannot_be_smaller() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
@@ -384,11 +384,11 @@ mod test {
         }
 
         #[test]
-        #[should_panic(expected = "output length must be sum of input lengths")]
+        #[should_panic = "output length must be sum of input lengths"]
         fn output_cannot_be_larger() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
-            let mut output = [0; 256];
+            let mut output = [usize::default(); 256];
 
             parallel(&mut first, &mut second, &mut output);
         }
@@ -417,7 +417,7 @@ mod test {
 
         #[test]
         fn both_empty() {
-            let mut elements = [0; 0];
+            let mut elements: [usize; 0] = [];
 
             in_place(&mut elements, 0);
 

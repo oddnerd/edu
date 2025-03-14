@@ -209,7 +209,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 
         // Ignoring the first element offsets the pairs by one.
         let Some((_, elements)) = elements.split_first_mut() else {
-            debug_assert!(elements.len() < 2, "only condition its none");
+            debug_assert!(elements.is_empty(), "only condition it is none");
             return;
         };
 

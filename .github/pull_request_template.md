@@ -22,6 +22,7 @@ Closes #
 - [ ] Organized into a module hierarchy?
 - [ ] `cargo test --tests` passes?
 - [ ] `MIRIFLAGS="-Zmiri-disable-stacked-borrows" cargo +nightly miri test` passes?
+- [ ] Reviewed coverage report via `cargo tarpaulin --fail-immediately --ignored --offline --line --out lcov --engine ptrace`?
 
 #### Style
 

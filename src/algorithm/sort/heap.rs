@@ -172,7 +172,7 @@ fn parent(child: usize) -> Option<usize> {
 /// This method takes O(log N) time and consumes O(1) memory.
 fn sift_up<T: Ord>(max_heap: &mut [T]) {
     let Some(mut current_index) = max_heap.len().checked_sub(1) else {
-        debug_assert_eq!(max_heap.len(), 0, "only condition its none");
+        debug_assert!(max_heap.is_empty(), "only condition it is none");
         return;
     };
 
