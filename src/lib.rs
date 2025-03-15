@@ -107,29 +107,45 @@ mod test {
             mod drop_counter {
                 use super::*;
 
-                #[test]
-                fn new_counter_is_zero() {
-                    let actual = DropCounter::new_counter();
+                mod method {
+                    use super::*;
 
-                    assert_eq!(actual.take(), 0);
+                    mod new_counter {
+                        use super::*;
+
+                        #[test]
+                        fn is_zero() {
+                            let actual = DropCounter::new_counter();
+
+                            assert_eq!(actual.take(), 0);
+                        }
+                    }
+
+                    mod new {
+                        use super::*;
+
+                        #[test]
+                        fn clones_counter() {
+                            let counter = DropCounter::new_counter();
+
+                            let actual = DropCounter::new(&counter);
+
+                            assert!(alloc::rc::Rc::ptr_eq(&actual.counter, &counter));
+                        }
+                    }
                 }
 
-                #[test]
-                fn new_clones_counter() {
-                    let counter = DropCounter::new_counter();
+                mod drop {
+                    use super::*;
 
-                    let actual = DropCounter::new(&counter);
+                    #[test]
+                    fn increments_counter() {
+                        let counter = DropCounter::new_counter();
 
-                    assert!(alloc::rc::Rc::ptr_eq(&actual.counter, &counter));
-                }
+                        drop(DropCounter::new(&counter));
 
-                #[test]
-                fn increments_counter_when_dropped() {
-                    let counter = DropCounter::new_counter();
-
-                    drop(DropCounter::new(&counter));
-
-                    assert_eq!(counter.take(), 1);
+                        assert_eq!(counter.take(), 1);
+                    }
                 }
             }
         }
