@@ -1687,22 +1687,6 @@ impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {
 mod test {
     use super::*;
 
-    extern crate alloc;
-
-    /// Mock element for drop tests.
-    #[derive(Debug, Clone)]
-    struct Droppable {
-        /// A shared counter for the number of elements dropped.
-        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
-    }
-
-    impl Drop for Droppable {
-        /// Increment the shared counter upon drop.
-        fn drop(&mut self) {
-            _ = self.counter.replace_with(|old| old.wrapping_add(1));
-        }
-    }
-
     mod drop {
         use super::*;
 
@@ -1722,18 +1706,16 @@ mod test {
 
         #[test]
         fn drops_elements() {
+            use crate::test::mock::DropCounter;
+
             const ELEMENTS: usize = 256;
 
-            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+            let dropped = DropCounter::new_counter();
 
-            let mut actual = Singly::<Droppable>::default();
+            let mut actual = Singly::<DropCounter>::default();
 
             for _ in 0..ELEMENTS {
-                _ = actual
-                    .prepend(Droppable {
-                        counter: alloc::rc::Rc::clone(&dropped),
-                    })
-                    .expect("uses capacity");
+                _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
             }
 
             drop(actual);
@@ -3086,23 +3068,21 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
+                    use crate::test::mock::DropCounter;
+
                     const ELEMENTS: usize = 256;
 
-                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+                    let dropped = DropCounter::new_counter();
 
-                    let mut actual = Singly::<Droppable>::default();
+                    let mut actual = Singly::<DropCounter>::default();
 
                     for _ in 0..ELEMENTS {
-                        _ = actual
-                            .prepend(Droppable {
-                                counter: alloc::rc::Rc::clone(&dropped),
-                            })
-                            .expect("uses capacity");
+                        _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
                     }
 
                     drop(actual.drain(..));
 
-                    assert_eq!(actual.len(), 0);
+                    assert!(actual.elements.is_none());
                     assert_eq!(dropped.take(), ELEMENTS);
                 }
 
@@ -3275,23 +3255,21 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
+                    use crate::test::mock::DropCounter;
+
                     const ELEMENTS: usize = 256;
 
-                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+                    let dropped = DropCounter::new_counter();
 
-                    let mut actual = Singly::<Droppable>::default();
+                    let mut actual = Singly::<DropCounter>::default();
 
                     for _ in 0..ELEMENTS {
-                        _ = actual
-                            .prepend(Droppable {
-                                counter: alloc::rc::Rc::clone(&dropped),
-                            })
-                            .expect("uses capacity");
+                        _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
                     }
 
                     drop(actual.withdraw(|_element| true));
 
-                    assert_eq!(actual.len(), 0);
+                    assert!(actual.elements.is_none());
                     assert_eq!(dropped.take(), ELEMENTS);
                 }
             }
