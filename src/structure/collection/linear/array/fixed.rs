@@ -425,21 +425,13 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
     /// core::mem::drop(iter); // Drops elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
-        for offset in self.next.clone() {
-            let ptr = self.data.as_mut_ptr();
+        for index in self.next.clone() {
+            let Some(element) = self.data.get_mut(index) else {
+                unreachable!("loop ensures index is within bounds");
+            };
 
-            // `T` has the same memory layout as [`ManuallyDrop<T>`].
-            let ptr = ptr.cast::<T>();
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(offset) };
-
-            // SAFETY:
-            // * owns underlying array => valid for reads and writes.
-            // * within `self.next` => pointing to initialized value.
-            unsafe {
-                ptr.drop_in_place();
-            }
+            // SAFETY: the element will not be accessed or dropped again.
+            unsafe { core::mem::ManuallyDrop::drop(element); }
         }
     }
 }
