@@ -3978,10 +3978,13 @@ mod test {
 
             let dropped = DropCounter::new_counter();
 
-            let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
+            let mut actual =
+                Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
+                _ = actual
+                    .append(DropCounter::new(&dropped))
+                    .expect("uses capacity");
             }
 
             drop(actual);
@@ -4015,10 +4018,13 @@ mod test {
 
             let dropped = DropCounter::new_counter();
 
-            let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
+            let mut actual =
+                Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
+                _ = actual
+                    .append(DropCounter::new(&dropped))
+                    .expect("uses capacity");
             }
 
             _ = actual.reserve_front(256).expect("successful allocation");
@@ -4321,7 +4327,8 @@ mod test {
                 let actual: Dynamic<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (usize::MAX, Some(usize::MAX)),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -4335,7 +4342,8 @@ mod test {
                 let actual: Dynamic<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (0, Some(0)),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -4349,7 +4357,8 @@ mod test {
                 let actual: Dynamic<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (usize::MAX, Some(0)),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -4363,7 +4372,8 @@ mod test {
                 let actual: Dynamic<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (0, None),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -5434,10 +5444,13 @@ mod test {
 
                     let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
+                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS)
+                        .expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
+                        _ = actual
+                            .append(DropCounter::new(&dropped))
+                            .expect("uses capacity");
                     }
 
                     drop(actual.drain(..));
@@ -5629,10 +5642,13 @@ mod test {
 
                     let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
+                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS)
+                        .expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
+                        _ = actual
+                            .append(DropCounter::new(&dropped))
+                            .expect("uses capacity");
                     }
 
                     drop(actual.withdraw(|_element| true));
@@ -5715,10 +5731,13 @@ mod test {
 
                 let dropped = DropCounter::new_counter();
 
-                let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
+                let mut actual =
+                    Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
                 for _ in 0..ELEMENTS {
-                    _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
+                    _ = actual
+                        .append(DropCounter::new(&dropped))
+                        .expect("uses capacity");
                 }
 
                 actual.clear();

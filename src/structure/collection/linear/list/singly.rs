@@ -1715,7 +1715,9 @@ mod test {
             let mut actual = Singly::<DropCounter>::default();
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
+                _ = actual
+                    .append(DropCounter::new(&dropped))
+                    .expect("successful allocation");
             }
 
             drop(actual);
@@ -2044,7 +2046,8 @@ mod test {
                 let actual: Singly<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (usize::MAX, Some(usize::MAX)),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -2058,7 +2061,8 @@ mod test {
                 let actual: Singly<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (0, Some(0)),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -2072,7 +2076,8 @@ mod test {
                 let actual: Singly<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (usize::MAX, Some(0)),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -2086,7 +2091,8 @@ mod test {
                 let actual: Singly<_> = SizeHint {
                     data: expected.iter().copied(),
                     size_hint: (0, None),
-                }.collect();
+                }
+                .collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -3154,7 +3160,9 @@ mod test {
                     let mut actual = Singly::<DropCounter>::default();
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
+                        _ = actual
+                            .append(DropCounter::new(&dropped))
+                            .expect("successful allocation");
                     }
 
                     drop(actual.drain(..));
@@ -3341,7 +3349,9 @@ mod test {
                     let mut actual = Singly::<DropCounter>::default();
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
+                        _ = actual
+                            .append(DropCounter::new(&dropped))
+                            .expect("successful allocation");
                     }
 
                     drop(actual.withdraw(|_element| true));

@@ -168,7 +168,9 @@ impl<T, const N: usize> IntoIterator for Fixed<T, N> {
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
-            data: self.data.map(|element| core::mem::ManuallyDrop::new(element)),
+            data: self
+                .data
+                .map(|element| core::mem::ManuallyDrop::new(element)),
             next: 0..N,
         }
     }
@@ -419,7 +421,9 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
             };
 
             // SAFETY: the element will not be accessed or dropped again.
-            unsafe { core::mem::ManuallyDrop::drop(element); }
+            unsafe {
+                core::mem::ManuallyDrop::drop(element);
+            }
         }
     }
 }
@@ -626,7 +630,9 @@ mod test {
 
                 let dropped = DropCounter::new_counter();
 
-                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| DropCounter::new(&dropped)));
+                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                    DropCounter::new(&dropped)
+                }));
 
                 drop(actual.into_iter());
 

@@ -57,7 +57,9 @@ mod test {
             /// # Performance
             /// This method takes O(1) time and consumes O(1) memory.
             pub(crate) fn new(counter: &alloc::rc::Rc<core::cell::RefCell<usize>>) -> Self {
-                Self { counter: alloc::rc::Rc::clone(counter), }
+                Self {
+                    counter: alloc::rc::Rc::clone(counter),
+                }
             }
         }
 
@@ -73,7 +75,7 @@ mod test {
 
         /// Mock iterator that provides an erroneously large size hint.
         #[derive(Debug)]
-        pub (crate) struct SizeHint<I> {
+        pub(crate) struct SizeHint<I> {
             /// Underlying supply of genuine elements.
             pub data: core::iter::Copied<I>,
 
