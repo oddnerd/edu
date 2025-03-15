@@ -2174,6 +2174,7 @@ mod test {
 
     mod index {
         use super::*;
+
         use core::ops::Index as _;
 
         #[test]
@@ -2197,6 +2198,7 @@ mod test {
 
     mod index_mut {
         use super::*;
+
         use core::ops::IndexMut as _;
 
         #[test]
@@ -3597,8 +3599,9 @@ mod test {
     }
 
     mod stack {
-        use super::super::super::super::Stack as _;
         use super::*;
+
+        use super::super::super::super::Stack as _;
 
         mod push {
             use super::*;
@@ -3728,8 +3731,9 @@ mod test {
     }
 
     mod queue {
-        use super::super::super::super::Queue as _;
         use super::*;
+
+        use super::super::super::super::Queue as _;
 
         mod push {
             use super::*;
