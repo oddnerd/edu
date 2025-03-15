@@ -35,7 +35,7 @@ pub mod structure;
 #[cfg(test)]
 mod test {
     pub(crate) mod mock {
-        /// Mock type that updates an external counter when dropped.
+        /// Mock element that updates an external counter when dropped.
         #[derive(Debug)]
         pub(crate) struct DropCounter {
             /// Access to the external counter.
