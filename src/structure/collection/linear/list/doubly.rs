@@ -2005,20 +2005,6 @@ mod test {
     mod drop {
         use super::*;
 
-        /// Mock element for drop tests.
-        #[derive(Debug, Clone)]
-        struct Droppable {
-            /// A shared counter for the number of elements dropped.
-            counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
-        }
-
-        impl Drop for Droppable {
-            /// Increment the shared counter upon drop.
-            fn drop(&mut self) {
-                _ = self.counter.replace_with(|old| old.wrapping_add(1));
-            }
-        }
-
         #[test]
         fn empty() {
             let instance = Doubly::<usize>::default();
@@ -2035,18 +2021,16 @@ mod test {
 
         #[test]
         fn drops_elements() {
+            use crate::test::mock::DropCounter;
+
             const ELEMENTS: usize = 256;
 
-            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+            let dropped = DropCounter::new_counter();
 
-            let mut actual = Doubly::<Droppable>::default();
+            let mut actual = Doubly::<DropCounter>::default();
 
             for _ in 0..ELEMENTS {
-                _ = actual
-                    .append(Droppable {
-                        counter: alloc::rc::Rc::clone(&dropped),
-                    })
-                    .expect("successful allocation");
+                _ = actual.append(DropCounter::new(&dropped)).expect("successful allocation");
             }
 
             drop(actual);
