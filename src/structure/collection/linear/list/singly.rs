@@ -1904,24 +1904,6 @@ mod test {
     mod iterator {
         use super::*;
 
-        struct FaultySizeHintIter<I> {
-            data: core::iter::Copied<I>,
-        }
-
-        impl<'a, T: 'a + Copy, I> Iterator for FaultySizeHintIter<I>
-        where
-            I: Iterator<Item = &'a T>,
-        {
-            type Item = T;
-            fn next(&mut self) -> Option<Self::Item> {
-                self.data.next()
-            }
-
-            fn size_hint(&self) -> (usize, Option<usize>) {
-                (usize::MAX, Some(usize::MAX))
-            }
-        }
-
         mod into {
             use super::*;
 
@@ -2054,14 +2036,57 @@ mod test {
             }
 
             #[test]
-            fn does_not_trust_size_hint() {
+            fn handles_oversized_size_hint() {
+                use crate::test::mock::SizeHint;
+
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                // Ideally, this will panic if it uses the invalid size.
-                let actual: Singly<_> = (FaultySizeHintIter {
+                let actual: Singly<_> = SizeHint {
                     data: expected.iter().copied(),
-                })
-                .collect();
+                    size_hint: (usize::MAX, Some(usize::MAX)),
+                }.collect();
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_undersized_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, Some(0)),
+                }.collect();
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_invalid_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(0)),
+                }.collect();
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_unbounded_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Singly<_> = SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, None),
+                }.collect();
 
                 assert_eq!(actual.len(), expected.len());
             }
@@ -2118,15 +2143,67 @@ mod test {
             }
 
             #[test]
-            fn does_not_trust_size_hint() {
-                let mut actual = Singly::<usize>::default();
+            fn handles_oversized_size_hint() {
+                use crate::test::mock::SizeHint;
 
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                // Ideally, this will panic if it uses the invalid size.
-                actual.extend(FaultySizeHintIter {
+                let mut actual = Singly::default();
+
+                actual.extend(SizeHint {
                     data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(usize::MAX)),
                 });
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_undersized_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Singly::default();
+
+                actual.extend(SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, Some(0)),
+                });
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_invalid_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Singly::default();
+
+                actual.extend(SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(0)),
+                });
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_unbounded_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Singly::default();
+
+                actual.extend(SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, None),
+                });
+
+                assert_eq!(actual.len(), expected.len());
             }
         }
     }

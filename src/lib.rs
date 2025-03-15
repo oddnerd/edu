@@ -75,10 +75,10 @@ mod test {
         #[derive(Debug)]
         pub (crate) struct SizeHint<I> {
             /// Underlying supply of genuine elements.
-            data: core::iter::Copied<I>,
+            pub data: core::iter::Copied<I>,
 
             /// The hint returned when queried for the number of elements.
-            size_hint: (usize, Option<usize>),
+            pub size_hint: (usize, Option<usize>),
         }
 
         impl<'a, T: 'a + Copy, I: Iterator<Item = &'a T>> Iterator for SizeHint<I> {
