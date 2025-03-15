@@ -3972,16 +3972,16 @@ mod test {
 
         #[test]
         fn all_initialized() {
-            use crate::test::drop::Mock;
+            use crate::test::mock::DropCounter;
 
             const ELEMENTS: usize = 256;
 
-            let dropped = Mock::new_counter();
+            let dropped = DropCounter::new_counter();
 
-            let mut actual = Dynamic::<Mock>::with_capacity(ELEMENTS).expect("successful allocation");
+            let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(Mock::new(&dropped)).expect("uses capacity");
+                _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
             }
 
             drop(actual);
@@ -4009,16 +4009,16 @@ mod test {
 
         #[test]
         fn front_capacity_and_initialized_elements_and_back_capacity() {
-            use crate::test::drop::Mock;
+            use crate::test::mock::DropCounter;
 
             const ELEMENTS: usize = 256;
 
-            let dropped = Mock::new_counter();
+            let dropped = DropCounter::new_counter();
 
-            let mut actual = Dynamic::<Mock>::with_capacity(ELEMENTS).expect("successful allocation");
+            let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
-                _ = actual.append(Mock::new(&dropped)).expect("uses capacity");
+                _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
             }
 
             _ = actual.reserve_front(256).expect("successful allocation");
@@ -4994,6 +4994,7 @@ mod test {
 
     mod list {
         use super::*;
+
         use crate::structure::collection::linear::list::List as _;
 
         mod insert {
@@ -5348,16 +5349,16 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
-                    use crate::test::drop::Mock;
+                    use crate::test::mock::DropCounter;
 
                     const ELEMENTS: usize = 256;
 
-                    let dropped = Mock::new_counter();
+                    let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<Mock>::with_capacity(ELEMENTS).expect("successful allocation");
+                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(Mock::new(&dropped)).expect("uses capacity");
+                        _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
                     }
 
                     drop(actual.drain(..));
@@ -5543,16 +5544,16 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
-                    use crate::test::drop::Mock;
+                    use crate::test::mock::DropCounter;
 
                     const ELEMENTS: usize = 256;
 
-                    let dropped = Mock::new_counter();
+                    let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<Mock>::with_capacity(ELEMENTS).expect("successful allocation");
+                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
-                        _ = actual.append(Mock::new(&dropped)).expect("uses capacity");
+                        _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
                     }
 
                     drop(actual.withdraw(|_element| true));
@@ -5629,16 +5630,16 @@ mod test {
 
             #[test]
             fn drops_all_elements() {
-                use crate::test::drop::Mock;
+                use crate::test::mock::DropCounter;
 
                 const ELEMENTS: usize = 256;
 
-                let dropped = Mock::new_counter();
+                let dropped = DropCounter::new_counter();
 
-                let mut actual = Dynamic::<Mock>::with_capacity(ELEMENTS).expect("successful allocation");
+                let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
                 for _ in 0..ELEMENTS {
-                    _ = actual.append(Mock::new(&dropped)).expect("uses capacity");
+                    _ = actual.append(DropCounter::new(&dropped)).expect("uses capacity");
                 }
 
                 actual.clear();

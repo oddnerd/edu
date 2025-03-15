@@ -618,13 +618,13 @@ mod test {
 
             #[test]
             fn drops_yet_to_be_yielded_elements() {
-                use crate::test::drop::Mock;
+                use crate::test::mock::DropCounter;
 
                 const ELEMENTS: usize = 256;
 
-                let dropped = Mock::new_counter();
+                let dropped = DropCounter::new_counter();
 
-                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| Mock::new(&dropped)));
+                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| DropCounter::new(&dropped)));
 
                 drop(actual.into_iter());
 

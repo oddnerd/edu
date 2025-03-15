@@ -34,16 +34,15 @@ pub mod structure;
 
 #[cfg(test)]
 mod test {
-    /// Utilities for testing dropping.
-    pub(crate) mod drop {
-        /// Mock type that tracks if it has been dropped.
+    pub(crate) mod mock {
+        /// Mock type that updates an external counter when dropped.
         #[derive(Debug)]
-        pub(crate) struct Mock {
-            /// An external counter that is updated when instances are dropped.
+        pub(crate) struct DropCounter {
+            /// Access to the external counter.
             counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
         }
 
-        impl Drop for Mock {
+        impl Drop for DropCounter {
             /// Externally track that this instance was dropped.
             ///
             /// # Performance
@@ -53,7 +52,7 @@ mod test {
             }
         }
 
-        impl Mock {
+        impl DropCounter {
             /// Construct a counter than can be shared across instances.
             ///
             /// # Performance
@@ -62,38 +61,46 @@ mod test {
                 alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()))
             }
 
-            /// Construct a `Mock` that refers to an existing counter.
+            /// Construct a [`Self`] that refers to an existing counter.
             ///
             /// # Performance
             /// This method takes O(1) time and consumes O(1) memory.
-            pub(crate) fn new(counter: &alloc::rc::Rc<core::cell::RefCell<usize>>) -> Mock {
-                Mock { counter: alloc::rc::Rc::clone(counter), }
+            pub(crate) fn new(counter: &alloc::rc::Rc<core::cell::RefCell<usize>>) -> Self {
+                Self { counter: alloc::rc::Rc::clone(counter), }
             }
         }
 
-        #[test]
-        fn new_counter_is_zero() {
-            let actual = Mock::new_counter();
+        mod test {
+            use super::*;
 
-            assert_eq!(*actual.borrow(), 0);
-        }
+            mod drop_counter {
+                use super::*;
 
-        #[test]
-        fn new_clones_counter() {
-            let counter = Mock::new_counter();
+                #[test]
+                fn new_counter_is_zero() {
+                    let actual = DropCounter::new_counter();
 
-            let actual = Mock::new(&counter);
+                    assert_eq!(actual.take(), 0);
+                }
 
-            assert!(alloc::rc::Rc::ptr_eq(&actual.counter, &counter));
-        }
+                #[test]
+                fn new_clones_counter() {
+                    let counter = DropCounter::new_counter();
 
-        #[test]
-        fn increments_counter_when_dropped() {
-            let counter = Mock::new_counter();
+                    let actual = DropCounter::new(&counter);
 
-            drop(Mock::new(&counter));
+                    assert!(alloc::rc::Rc::ptr_eq(&actual.counter, &counter));
+                }
 
-            assert_eq!(*counter.borrow(), 1);
+                #[test]
+                fn increments_counter_when_dropped() {
+                    let counter = DropCounter::new_counter();
+
+                    drop(DropCounter::new(&counter));
+
+                    assert_eq!(counter.take(), 1);
+                }
+            }
         }
     }
 }
