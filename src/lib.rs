@@ -148,6 +148,38 @@ mod test {
                     }
                 }
             }
+
+            mod size_hint {
+                use super::*;
+
+                mod iterator {
+                    use super::*;
+
+                    #[test]
+                    fn yields_elements() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+
+                        let actual = SizeHint {
+                            data: expected.iter().copied(),
+                            size_hint: (usize::default(), Some(usize::default())),
+                        };
+
+                        assert!(actual.eq(expected));
+                    }
+
+                    #[test]
+                    fn hint_is_custom_value() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+
+                        let actual = SizeHint {
+                            data: expected.iter().copied(),
+                            size_hint: (12345, None),
+                        };
+
+                        assert_eq!(actual.size_hint(), (12345, None));
+                    }
+                }
+            }
         }
     }
 }
