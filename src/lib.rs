@@ -71,6 +71,36 @@ mod test {
             }
         }
 
+        /// Mock iterator that provides an erroneously large size hint.
+        pub (crate) struct SizeHint<I> {
+            /// Underlying supply of genuine elements.
+            data: core::iter::Copied<I>,
+
+            /// The hint returned when queried for the number of elements.
+            size_hint: (usize, Option<usize>),
+        }
+
+        impl<'a, T: 'a + Copy, I: Iterator<Item = &'a T>> Iterator for SizeHint<I> {
+            /// The type being yielded when iterated.
+            type Item = T;
+
+            /// Obtain the next genuine element, if there is one.
+            ///
+            /// # Performance
+            /// This method has the characteristics of the underlying iterator.
+            fn next(&mut self) -> Option<Self::Item> {
+                self.data.next()
+            }
+
+            /// Obtain the faulty hint for the remaining number of elements.
+            ///
+            /// # Performance
+            /// This method takes O(1) time and consumes O(1) memory.
+            fn size_hint(&self) -> (usize, Option<usize>) {
+                self.size_hint
+            }
+        }
+
         mod test {
             use super::*;
 
