@@ -164,11 +164,11 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
         };
 
         let Some((minimum, unsorted)) = unsorted.split_first_mut() else {
-            unreachable!();
+            unreachable!("loop ensures there are at least two elements");
         };
 
         let Some((maximum, unsorted)) = unsorted.split_last_mut() else {
-            unreachable!();
+            unreachable!("loop ensures there are at least two elements");
         };
 
         if minimum > maximum {
