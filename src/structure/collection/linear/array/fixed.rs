@@ -168,19 +168,9 @@ impl<T, const N: usize> IntoIterator for Fixed<T, N> {
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
-            data: {
-                let ptr = self.data.as_ptr();
-
-                // `ManuallyDrop<T>` has same memory layout as `T`.
-                let ptr = ptr.cast::<[core::mem::ManuallyDrop<T>; N]>();
-
-                // SAFETY:
-                // * Pointer is not null.
-                // * Pointer is aligned.
-                // * Points to initialized object.
-                // * This takes ownership (move).
-                unsafe { ptr.read() }
-            },
+            data: self
+                .data
+                .map(|element| core::mem::ManuallyDrop::new(element)),
             next: 0..N,
         }
     }
@@ -425,20 +415,14 @@ impl<T, const N: usize> Drop for IntoIter<T, N> {
     /// core::mem::drop(iter); // Drops elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
-        for offset in self.next.clone() {
-            let ptr = self.data.as_mut_ptr();
+        for index in self.next.clone() {
+            let Some(element) = self.data.get_mut(index) else {
+                unreachable!("loop ensures index is within bounds");
+            };
 
-            // `T` has the same memory layout as [`ManuallyDrop<T>`].
-            let ptr = ptr.cast::<T>();
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(offset) };
-
-            // SAFETY:
-            // * owns underlying array => valid for reads and writes.
-            // * within `self.next` => pointing to initialized value.
+            // SAFETY: the element will not be accessed or dropped again.
             unsafe {
-                ptr.drop_in_place();
+                core::mem::ManuallyDrop::drop(element);
             }
         }
     }
@@ -468,15 +452,12 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.next.next().map(|index| {
-            let array = self.data.as_mut_ptr();
+            let Some(element) = self.data.get_mut(index) else {
+                unreachable!("`self.next` ensures index is within bounds");
+            };
 
-            // SAFETY: stays aligned within the allocated object.
-            let element = unsafe { array.add(index) };
-
-            // SAFETY: this takes ownership (move).
-            let owned = unsafe { element.read() };
-
-            core::mem::ManuallyDrop::into_inner(owned)
+            // SAFETY: the element will never be accessed or dropped again.
+            unsafe { core::mem::ManuallyDrop::take(element) }
         })
     }
 
@@ -542,22 +523,6 @@ impl<T, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 mod test {
     use super::*;
 
-    extern crate alloc;
-
-    /// Mock element for drop tests.
-    #[derive(Debug, Clone)]
-    struct Droppable {
-        /// A shared counter for the number of elements dropped.
-        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
-    }
-
-    impl Drop for Droppable {
-        /// Increment the shared counter upon drop.
-        fn drop(&mut self) {
-            _ = self.counter.replace_with(|old| old.wrapping_add(1));
-        }
-    }
-
     mod from {
         use super::*;
 
@@ -576,6 +541,7 @@ mod test {
 
     mod index {
         use super::*;
+
         use core::ops::Index as _;
 
         #[test]
@@ -599,6 +565,7 @@ mod test {
 
     mod index_mut {
         use super::*;
+
         use core::ops::IndexMut as _;
 
         #[test]
@@ -657,32 +624,15 @@ mod test {
 
             #[test]
             fn drops_yet_to_be_yielded_elements() {
+                use crate::test::mock::DropCounter;
+
                 const ELEMENTS: usize = 256;
 
-                let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+                let dropped = DropCounter::new_counter();
 
-                let actual = {
-                    let mut uninitialized: [core::mem::MaybeUninit<Droppable>; ELEMENTS] =
-                        unsafe { core::mem::MaybeUninit::uninit().assume_init() };
-
-                    for element in &mut uninitialized[..] {
-                        unsafe {
-                            core::ptr::write(
-                                element.as_mut_ptr(),
-                                Droppable {
-                                    counter: alloc::rc::Rc::clone(&dropped),
-                                },
-                            );
-                        }
-                    }
-
-                    unsafe {
-                        core::mem::transmute::<
-                            [core::mem::MaybeUninit<Droppable>; 256],
-                            [Droppable; 256],
-                        >(uninitialized)
-                    }
-                };
+                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                    DropCounter::new(&dropped)
+                }));
 
                 drop(actual.into_iter());
 
@@ -786,25 +736,14 @@ mod test {
     mod default {
         use super::*;
 
-        #[derive(Debug, PartialEq, Eq)]
-        struct Value {
-            underlying: usize,
-        }
-
-        impl Default for Value {
-            fn default() -> Self {
-                Value {
-                    underlying: 31_415_926,
-                }
-            }
-        }
-
         #[test]
         fn initializes_elements() {
-            let actual = Fixed::<Value, 256>::default();
+            use crate::test::mock::DefaultValue;
+
+            let actual = Fixed::<DefaultValue, 256>::default();
 
             for element in actual {
-                assert_eq!(element, Value::default());
+                assert_eq!(element, DefaultValue::default());
             }
         }
     }

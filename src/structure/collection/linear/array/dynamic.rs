@@ -1,7 +1,5 @@
 //! Implementation of [`Dynamic`].
 
-extern crate alloc;
-
 use super::super::List;
 use super::Array;
 use super::Collection;
@@ -2728,20 +2726,6 @@ impl core::error::Error for OutOfBounds {}
 mod test {
     use super::*;
 
-    /// Mock element for drop tests.
-    #[derive(Debug, Clone)]
-    struct Droppable {
-        /// A shared counter for the number of elements dropped.
-        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
-    }
-
-    impl Drop for Droppable {
-        /// Increment the shared counter upon drop.
-        fn drop(&mut self) {
-            _ = self.counter.replace_with(|old| old.wrapping_add(1));
-        }
-    }
-
     mod method {
         use super::*;
 
@@ -3988,18 +3972,18 @@ mod test {
 
         #[test]
         fn all_initialized() {
+            use crate::test::mock::DropCounter;
+
             const ELEMENTS: usize = 256;
 
-            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+            let dropped = DropCounter::new_counter();
 
             let mut actual =
-                Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+                Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
                 _ = actual
-                    .append(Droppable {
-                        counter: alloc::rc::Rc::clone(&dropped),
-                    })
+                    .append(DropCounter::new(&dropped))
                     .expect("uses capacity");
             }
 
@@ -4028,18 +4012,18 @@ mod test {
 
         #[test]
         fn front_capacity_and_initialized_elements_and_back_capacity() {
+            use crate::test::mock::DropCounter;
+
             const ELEMENTS: usize = 256;
 
-            let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+            let dropped = DropCounter::new_counter();
 
             let mut actual =
-                Dynamic::<Droppable>::with_capacity(ELEMENTS).expect("successful allocation");
+                Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
 
             for _ in 0..ELEMENTS {
                 _ = actual
-                    .append(Droppable {
-                        counter: alloc::rc::Rc::clone(&dropped),
-                    })
+                    .append(DropCounter::new(&dropped))
                     .expect("uses capacity");
             }
 
@@ -4106,6 +4090,7 @@ mod test {
 
     mod index {
         use super::*;
+
         use core::ops::Index as _;
 
         #[test]
@@ -4129,6 +4114,7 @@ mod test {
 
     mod index_mut {
         use super::*;
+
         use core::ops::IndexMut as _;
 
         #[test]
@@ -4165,24 +4151,6 @@ mod test {
 
     mod iterator {
         use super::*;
-
-        struct FaultySizeHintIter<I> {
-            data: core::iter::Copied<I>,
-        }
-
-        impl<'a, T: 'a + Copy, I> Iterator for FaultySizeHintIter<I>
-        where
-            I: Iterator<Item = &'a T>,
-        {
-            type Item = T;
-            fn next(&mut self) -> Option<Self::Item> {
-                self.data.next()
-            }
-
-            fn size_hint(&self) -> (usize, Option<usize>) {
-                (usize::MAX, Some(usize::MAX))
-            }
-        }
 
         mod into {
             use super::*;
@@ -4351,16 +4319,63 @@ mod test {
             }
 
             #[test]
-            fn does_not_trust_size_hint() {
+            fn handles_oversized_size_hint() {
+                use crate::test::mock::SizeHint;
+
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                // Ideally, this will panic if it uses the invalid size.
-                let actual: Dynamic<_> = FaultySizeHintIter {
+                let actual: Dynamic<_> = SizeHint {
                     data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(usize::MAX)),
                 }
                 .collect();
 
-                assert_eq!(actual.initialized, expected.len());
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_undersized_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Dynamic<_> = SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, Some(0)),
+                }
+                .collect();
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_invalid_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Dynamic<_> = SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(0)),
+                }
+                .collect();
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_unbounded_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let actual: Dynamic<_> = SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, None),
+                }
+                .collect();
+
+                assert_eq!(actual.len(), expected.len());
             }
         }
 
@@ -4507,15 +4522,67 @@ mod test {
             }
 
             #[test]
-            fn does_not_trust_size_hint() {
-                let mut actual = Dynamic::<usize>::default();
+            fn handles_oversized_size_hint() {
+                use crate::test::mock::SizeHint;
 
                 let expected = [0, 1, 2, 3, 4, 5];
 
-                // Ideally, this will panic if it uses the invalid size.
-                actual.extend(FaultySizeHintIter {
+                let mut actual = Dynamic::default();
+
+                actual.extend(SizeHint {
                     data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(usize::MAX)),
                 });
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_undersized_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Dynamic::default();
+
+                actual.extend(SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, Some(0)),
+                });
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_invalid_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Dynamic::default();
+
+                actual.extend(SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (usize::MAX, Some(0)),
+                });
+
+                assert_eq!(actual.len(), expected.len());
+            }
+
+            #[test]
+            fn handles_unbounded_size_hint() {
+                use crate::test::mock::SizeHint;
+
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = Dynamic::default();
+
+                actual.extend(SizeHint {
+                    data: expected.iter().copied(),
+                    size_hint: (0, None),
+                });
+
+                assert_eq!(actual.len(), expected.len());
             }
         }
     }
@@ -5016,6 +5083,7 @@ mod test {
 
     mod list {
         use super::*;
+
         use crate::structure::collection::linear::list::List as _;
 
         mod insert {
@@ -5370,24 +5438,24 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
+                    use crate::test::mock::DropCounter;
+
                     const ELEMENTS: usize = 256;
 
-                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+                    let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS)
+                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS)
                         .expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
                         _ = actual
-                            .append(Droppable {
-                                counter: alloc::rc::Rc::clone(&dropped),
-                            })
+                            .append(DropCounter::new(&dropped))
                             .expect("uses capacity");
                     }
 
                     drop(actual.drain(..));
 
-                    assert_eq!(actual.len(), 0);
+                    assert_eq!(actual.initialized, 0);
                     assert_eq!(dropped.take(), ELEMENTS);
                 }
 
@@ -5568,24 +5636,24 @@ mod test {
 
                 #[test]
                 fn drops_yet_to_be_yielded_elements() {
+                    use crate::test::mock::DropCounter;
+
                     const ELEMENTS: usize = 256;
 
-                    let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+                    let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<Droppable>::with_capacity(ELEMENTS)
+                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS)
                         .expect("successful allocation");
 
                     for _ in 0..ELEMENTS {
                         _ = actual
-                            .append(Droppable {
-                                counter: alloc::rc::Rc::clone(&dropped),
-                            })
+                            .append(DropCounter::new(&dropped))
                             .expect("uses capacity");
                     }
 
                     drop(actual.withdraw(|_element| true));
 
-                    assert_eq!(actual.len(), 0);
+                    assert_eq!(actual.initialized, 0);
                     assert_eq!(dropped.take(), ELEMENTS);
                 }
 
@@ -5656,12 +5724,26 @@ mod test {
             use super::*;
 
             #[test]
-            fn drop_all_elements() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+            fn drops_all_elements() {
+                use crate::test::mock::DropCounter;
+
+                const ELEMENTS: usize = 256;
+
+                let dropped = DropCounter::new_counter();
+
+                let mut actual =
+                    Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
+
+                for _ in 0..ELEMENTS {
+                    _ = actual
+                        .append(DropCounter::new(&dropped))
+                        .expect("uses capacity");
+                }
 
                 actual.clear();
 
                 assert_eq!(actual.initialized, 0);
+                assert_eq!(dropped.take(), ELEMENTS);
             }
 
             #[test]
@@ -5685,8 +5767,9 @@ mod test {
     }
 
     mod stack {
-        use super::super::super::super::Stack as _;
         use super::*;
+
+        use super::super::super::super::Stack as _;
 
         mod push {
             use super::*;
@@ -5815,8 +5898,9 @@ mod test {
     }
 
     mod queue {
-        use super::super::super::super::Queue as _;
         use super::*;
+
+        use super::super::super::super::Queue as _;
 
         mod push {
             use super::*;

@@ -427,6 +427,7 @@ mod test {
 
     mod index {
         use super::*;
+
         use core::ops::Index as _;
 
         #[test]
@@ -456,6 +457,7 @@ mod test {
 
     mod index_mut {
         use super::*;
+
         use core::ops::IndexMut as _;
 
         #[test]
