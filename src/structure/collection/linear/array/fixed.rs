@@ -168,19 +168,7 @@ impl<T, const N: usize> IntoIterator for Fixed<T, N> {
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
-            data: {
-                let ptr = self.data.as_ptr();
-
-                // `ManuallyDrop<T>` has same memory layout as `T`.
-                let ptr = ptr.cast::<[core::mem::ManuallyDrop<T>; N]>();
-
-                // SAFETY:
-                // * Pointer is not null.
-                // * Pointer is aligned.
-                // * Points to initialized object.
-                // * This takes ownership (move).
-                unsafe { ptr.read() }
-            },
+            data: self.data.map(|element| core::mem::ManuallyDrop::new(element)),
             next: 0..N,
         }
     }
