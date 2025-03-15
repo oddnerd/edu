@@ -72,6 +72,7 @@ mod test {
         }
 
         /// Mock iterator that provides an erroneously large size hint.
+        #[derive(Debug)]
         pub (crate) struct SizeHint<I> {
             /// Underlying supply of genuine elements.
             data: core::iter::Copied<I>,
