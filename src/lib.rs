@@ -43,16 +43,6 @@ mod test {
             counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
         }
 
-        impl Drop for DropCounter {
-            /// Externally track that this instance was dropped.
-            ///
-            /// # Performance
-            /// This method take O(1) time and consumes O(1) memory.
-            fn drop(&mut self) {
-                _ = self.counter.replace_with(|old| old.wrapping_add(1));
-            }
-        }
-
         impl DropCounter {
             /// Construct a counter than can be shared across instances.
             ///
@@ -68,6 +58,16 @@ mod test {
             /// This method takes O(1) time and consumes O(1) memory.
             pub(crate) fn new(counter: &alloc::rc::Rc<core::cell::RefCell<usize>>) -> Self {
                 Self { counter: alloc::rc::Rc::clone(counter), }
+            }
+        }
+
+        impl Drop for DropCounter {
+            /// Externally track that this instance was dropped.
+            ///
+            /// # Performance
+            /// This method take O(1) time and consumes O(1) memory.
+            fn drop(&mut self) {
+                _ = self.counter.replace_with(|old| old.wrapping_add(1));
             }
         }
 
