@@ -736,25 +736,14 @@ mod test {
     mod default {
         use super::*;
 
-        #[derive(Debug, PartialEq, Eq)]
-        struct Value {
-            underlying: usize,
-        }
-
-        impl Default for Value {
-            fn default() -> Self {
-                Value {
-                    underlying: 31_415_926,
-                }
-            }
-        }
-
         #[test]
         fn initializes_elements() {
-            let actual = Fixed::<Value, 256>::default();
+            use crate::test::mock::DefaultValue;
+
+            let actual = Fixed::<DefaultValue, 256>::default();
 
             for element in actual {
-                assert_eq!(element, Value::default());
+                assert_eq!(element, DefaultValue::default());
             }
         }
     }
