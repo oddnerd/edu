@@ -34,6 +34,7 @@ pub mod structure;
 
 #[cfg(test)]
 mod test {
+    /// Types which implement interfaces with behaviour for testing purposes.
     pub(crate) mod mock {
         /// Mock element that updates an external counter when dropped.
         #[derive(Debug)]
