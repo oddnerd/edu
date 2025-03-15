@@ -1,7 +1,5 @@
 //! Implementation of [`Dynamic`].
 
-extern crate alloc;
-
 use super::super::List;
 use super::Array;
 use super::Collection;
