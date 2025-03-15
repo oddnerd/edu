@@ -104,6 +104,29 @@ mod test {
             }
         }
 
+        /// Mock element that can be default constructed.
+        #[derive(Debug, PartialEq, Eq)]
+        pub(crate) struct DefaultValue {
+            /// The underlying value to be compared against.
+            value: usize,
+        }
+
+        impl Default for DefaultValue {
+            /// Construct a default instance with a mock value.
+            ///
+            /// # Performance
+            /// This method takes O(1) time and consumes O(1) memory.
+            fn default() -> Self {
+                DefaultValue {
+                    // Some clearly human-generated value is preferred over
+                    // default initializing because the purpose of this mock
+                    // is to prove they use this value so we don't want to
+                    // give false positives if they use something like zero.
+                    value: 31_415_926,
+                }
+            }
+        }
+
         mod test {
             use super::*;
 
@@ -180,6 +203,21 @@ mod test {
                         };
 
                         assert_eq!(actual.size_hint(), (12345, None));
+                    }
+                }
+            }
+
+            mod default_value {
+                use super::*;
+
+                mod default {
+                    use super::*;
+
+                    #[test]
+                    fn is_pi() {
+                        let actual = DefaultValue::default();
+
+                        assert_eq!(actual.value, 31_415_926);
                     }
                 }
             }
