@@ -73,7 +73,7 @@ mod test {
             }
         }
 
-        /// Mock iterator that provides an erroneously large size hint.
+        /// Mock iterator that provides an erroneous size hint.
         #[derive(Debug)]
         pub(crate) struct SizeHint<I> {
             /// Underlying supply of genuine elements.
