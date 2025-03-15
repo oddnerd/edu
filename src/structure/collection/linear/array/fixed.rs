@@ -647,7 +647,7 @@ mod test {
 
                 let dropped = Mock::new_counter();
 
-                let actual: Fixed<_, ELEMENTS> = Fixed::from(core::array::from_fn(|_| Mock::new(&dropped)));
+                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| Mock::new(&dropped)));
 
                 drop(actual.into_iter());
 
