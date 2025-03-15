@@ -542,22 +542,6 @@ impl<T, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 mod test {
     use super::*;
 
-    extern crate alloc;
-
-    /// Mock element for drop tests.
-    #[derive(Debug, Clone)]
-    struct Droppable {
-        /// A shared counter for the number of elements dropped.
-        counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
-    }
-
-    impl Drop for Droppable {
-        /// Increment the shared counter upon drop.
-        fn drop(&mut self) {
-            _ = self.counter.replace_with(|old| old.wrapping_add(1));
-        }
-    }
-
     mod from {
         use super::*;
 
@@ -657,32 +641,13 @@ mod test {
 
             #[test]
             fn drops_yet_to_be_yielded_elements() {
+                use crate::test::drop::Mock;
+
                 const ELEMENTS: usize = 256;
 
-                let dropped = alloc::rc::Rc::new(core::cell::RefCell::new(usize::default()));
+                let dropped = Mock::new_counter();
 
-                let actual = {
-                    let mut uninitialized: [core::mem::MaybeUninit<Droppable>; ELEMENTS] =
-                        unsafe { core::mem::MaybeUninit::uninit().assume_init() };
-
-                    for element in &mut uninitialized[..] {
-                        unsafe {
-                            core::ptr::write(
-                                element.as_mut_ptr(),
-                                Droppable {
-                                    counter: alloc::rc::Rc::clone(&dropped),
-                                },
-                            );
-                        }
-                    }
-
-                    unsafe {
-                        core::mem::transmute::<
-                            [core::mem::MaybeUninit<Droppable>; 256],
-                            [Droppable; 256],
-                        >(uninitialized)
-                    }
-                };
+                let actual: Fixed<_, ELEMENTS> = Fixed::from(core::array::from_fn(|_| Mock::new(&dropped)));
 
                 drop(actual.into_iter());
 
