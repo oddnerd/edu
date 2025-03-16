@@ -175,8 +175,10 @@ mem_forget                        = "deny" # Prevent leaking memory.
 ref_patterns                      = "deny" # Prevent using `ref` keyword.
 cfg_not_test                      = "deny" # Prevent configurations exluding test.
 infinite_loop                     = "deny" # Prevent infinite loops.
+allow_attributes                  = "deny" # Prefer `expect(lint, reason = "")`.
 wildcard_enum_match_arm           = "deny" # Prevent wildcard match branch.
 large_stack_frames                = "deny" # Prefer large heap allocations.
+
 
 # Miscellaneous/Style
 imprecise_flops                = "warn" # Prefer accurate floating point math.
