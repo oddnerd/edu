@@ -31,7 +31,7 @@ pub fn cycle<T: Ord>(elements: &mut [T]) {
     for current in 0..elements.len() {
         let (_sorted, unsorted) = elements.split_at_mut(current);
 
-        #[allow(clippy::shadow_unrelated)]
+        #[expect(clippy::shadow_unrelated, reason = "current is `elements[current]`")]
         let Some((current, rest)) = unsorted.split_first_mut() else {
             unreachable!("loop ensures at least one element contained");
         };
