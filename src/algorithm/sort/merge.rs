@@ -194,8 +194,8 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
-#[allow(clippy::arithmetic_side_effects)]
+// #[allow(clippy::indexing_slicing)]
+// #[allow(clippy::arithmetic_side_effects)]
 pub fn in_place<T: Ord>(elements: &mut [T]) {
     /// Merge two sub-slices into a potentially overlapping sub-slice.
     ///
@@ -213,7 +213,7 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
         for output_index in output..elements.len() {
             let input_index = match (first.peek(), second.peek()) {
                 (Some(first_index), Some(second_index)) => {
-                    if elements[*first_index] < elements[*second_index] {
+                    if elements.get(*first_index) < elements.get(*second_index) {
                         first.next()
                     } else {
                         second.next()
@@ -227,6 +227,7 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
             if let Some(input_index) = input_index {
                 elements.swap(output_index, input_index);
             } else {
+                // TODO: what error though?
                 unreachable!("caller logic error");
             }
         }
@@ -236,7 +237,12 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     fn sort_into<T: Ord>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
         if range.len() > 1 {
             let middle = range.len() / 2;
-            let (left, right) = elements[range.clone()].split_at_mut(middle);
+
+            let Some(sorting) = elements.get_mut(range.clone()) else {
+                unreachable!("caller ensures range is within bounds");
+            };
+
+            let (left, right) = sorting.split_at_mut(middle);
 
             in_place(left);
             in_place(right);
@@ -252,8 +258,8 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     }
 
     // Sort left half `..middle` into right half `middle..`.
-    let middle = elements.len() / 2;
-    let mut output = elements.len() - middle;
+    let middle = elements.len().div_euclid(2);
+    let mut output = elements.len().div_ceil(2);
     sort_into(elements, 0..middle, output);
 
     // Sort the right half of the unsorted section into the left half then
@@ -266,21 +272,34 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
         // Unsorted: [..output]
         // To be sorted [output..split]
         // Already sorted: [split..]
-        output = (split + 1) / 2;
+        output = split.div_ceil(2);
 
         // Sort [output..split] into [..output]
         sort_into(elements, output..split, 0);
 
         // Unsorted: [..output]
         // Sorted: [output..]
-        merge(elements, 0..(split - output), split..elements.len(), output);
+        merge(
+            elements,
+            0..split.div_euclid(2),
+            split..elements.len(),
+            output,
+        );
     }
 
     // Sort the remaining elements in [..output] via insertion sort.
     for remaining in (0..output).rev() {
-        for current in remaining..(elements.len() - 1) {
-            if elements[current] > elements[current + 1] {
-                elements.swap(current, current + 1);
+        let Some(final_index) = elements.len().checked_sub(1) else {
+            unreachable!("there is at least one element");
+        };
+
+        for current in remaining..final_index {
+            let Some(next) = current.checked_add(1) else {
+                unreachable!("`current` is at most `usize::MAX - 1`");
+            };
+
+            if elements.get(current) > elements.get(next) {
+                elements.swap(current, next);
             } else {
                 break;
             }

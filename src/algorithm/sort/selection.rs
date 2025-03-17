@@ -176,7 +176,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
         }
 
         for element in unsorted {
-            #[allow(clippy::else_if_without_else)]
+            #[expect(clippy::else_if_without_else, reason = "nothing to update")]
             if element < minimum {
                 core::mem::swap(element, minimum);
             } else if element > maximum {

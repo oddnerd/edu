@@ -1555,12 +1555,14 @@ impl<T> Array for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
-    #[allow(clippy::arithmetic_side_effects)]
     fn as_ptr(&self) -> *const Self::Element {
-        assert!(
-            self.front_capacity + self.initialized + self.back_capacity > 0,
-            "no allocation to point to"
-        );
+        #[expect(
+            clippy::arithmetic_side_effects,
+            reason = "we cannot allocate more than `usize::MAX`"
+        )]
+        let allocated = self.front_capacity + self.initialized + self.back_capacity;
+
+        assert!(allocated > 0, "no allocation to point to");
 
         // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = self.buffer.cast::<T>().as_ptr().cast_const();
@@ -1597,12 +1599,14 @@ impl<T> Array for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
-    #[allow(clippy::arithmetic_side_effects)]
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
-        assert!(
-            self.front_capacity + self.initialized + self.back_capacity > 0,
-            "no allocation to point to"
-        );
+        #[expect(
+            clippy::arithmetic_side_effects,
+            reason = "we cannot allocate more than `usize::MAX`"
+        )]
+        let allocated = self.front_capacity + self.initialized + self.back_capacity;
+
+        assert!(allocated > 0, "no allocation to point to");
 
         // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = self.buffer.cast::<T>().as_ptr();
@@ -4474,7 +4478,6 @@ mod test {
             }
 
             #[test]
-            #[allow(clippy::shadow_unrelated)]
             fn appends_elements() {
                 let preexisting = [0, 1, 2];
                 let mut actual: Dynamic<_> = preexisting.into_iter().collect();
@@ -4482,6 +4485,7 @@ mod test {
                 let expected = [3, 4, 5];
                 actual.extend(expected.iter().copied());
 
+                #[expect(clippy::shadow_unrelated, reason = "elements from them")]
                 for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
                     assert_eq!(actual, expected);
                 }

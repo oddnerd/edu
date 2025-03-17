@@ -160,25 +160,34 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::arithmetic_side_effects)]
-#[allow(clippy::indexing_slicing)]
 pub fn gnome<T: Ord>(elements: &mut [T]) {
     let mut index: usize = 1;
 
     while index < elements.len() {
-        // Short-circuiting ensures indexing only occurs when index > 0.
-        if index == 0 || elements[index] >= elements[index - 1] {
+        #[expect(
+            clippy::arithmetic_side_effects,
+            reason = "short-circuiting ensures `index > 0`"
+        )]
+        if index == 0 || elements.get(index - 1) <= elements.get(index) {
             if let Some(incremented) = index.checked_add(1) {
                 index = incremented;
             } else {
-                // if length of elements is `usize::MAX` then index cannot be
-                // incremented greater, but this implies all elements have
-                // been sorted so exit the loop anyway.
+                debug_assert_eq!(
+                    elements.len(),
+                    usize::MAX,
+                    "only condition branch is invoked"
+                );
+
+                // This implies all elements have been sorted.
                 break;
             }
         } else {
-            elements.swap(index, index - 1);
-            index -= 1;
+            let Some(decremented) = index.checked_sub(1) else {
+                unreachable!("enclosing if ensures `index > 0`");
+            };
+
+            elements.swap(index, decremented);
+            index = decremented;
         }
     }
 }

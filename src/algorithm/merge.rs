@@ -21,7 +21,6 @@
 ///
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
 pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
         panic!("output must be larger than usize::MAX which is impossible");
@@ -91,8 +90,6 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 ///
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
-#[allow(clippy::arithmetic_side_effects)]
 pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let Some(elements) = usize::checked_add(first.len(), second.len()) else {
         panic!("output must be larger than usize::MAX which is impossible");
@@ -108,24 +105,45 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
         return parallel(second, first, output);
     }
 
-    if first.is_empty() {
-        return;
-    }
-
     let middle = first.len() / 2;
 
-    // NOTE: binary search is O(log N).
-    let intersect = match second.binary_search(&first[middle]) {
+    let Some(middle_element) = first.get(middle) else {
+        debug_assert!(first.is_empty(), "only condition it is none");
+
+        return;
+    };
+
+    // Find the position in `second` where the middle element would go.
+    // This means `second[intersect..] > first[middle..]`. for every element.
+    // Note that binary search is O(log N) significantly contributing to time.
+    let intersect = match second.binary_search(middle_element) {
+        // If `Ok`, then an equivalent element was found. However, if `Err`,
+        // then the index is where a matching element could be inserted while
+        // maintaining sorted order, so either way the index we want.
         Err(index) | Ok(index) => index,
     };
 
     let (first_left, first_right) = first.split_at_mut(middle);
     let (second_left, second_right) = second.split_at_mut(intersect);
-    let (output_left, output_right) = output.split_at_mut(middle + intersect);
 
-    core::mem::swap(&mut output_right[0], &mut first_right[0]);
-    let output_right = &mut output_right[1..];
-    let first_right = &mut first_right[1..];
+    let Some(partition_point) = usize::checked_add(middle, intersect) else {
+        unreachable!("`output.len() < usize::MAX` therefore this is too");
+    };
+
+    let (output_left, output_right) = output.split_at_mut(partition_point);
+
+    // Alongside partitioning the slices, this also determines the specific
+    // sorted position for that middle element since we know how many elements
+    // are less than it, so place it in the output and discard it from inputs.
+    let Some((sorted_position, output_right)) = output_right.split_first_mut() else {
+        unreachable!("binary search yields and index within bounds");
+    };
+
+    let Some((sorted_element, first_right)) = first_right.split_first_mut() else {
+        unreachable!("contains at least the middle element");
+    };
+
+    core::mem::swap(sorted_position, sorted_element);
 
     // The following calls could be executed concurrently.
     parallel(first_left, second_left, output_left);
@@ -133,6 +151,9 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 }
 
 /// Merge independently sorted `[..middle]` and `[middle..]` together in-place.
+///
+/// # Panics
+/// This panics if the provided `middle` is out of bounds.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -147,21 +168,39 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 ///
 /// assert_eq!(slice, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
-#[allow(clippy::arithmetic_side_effects)]
-#[allow(clippy::range_plus_one)]
 pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
     let mut left = 0..middle;
     let mut right = middle..elements.len();
 
     while !left.is_empty() && !right.is_empty() {
-        if elements[left.start] < elements[right.start] {
+        if elements.get(left.start) <= elements.get(right.start) {
+            // Already in sorted position, advance to next element.
             _ = left.next();
         } else {
-            elements[left.start..=right.start].rotate_right(1);
+            let Some(rest_of_left_and_first_of_right) = elements.get_mut(left.start..=right.start)
+            else {
+                unreachable!("provided `middle` is in bounds, this is too");
+            };
 
-            left = (left.start + 1)..(left.end + 1);
+            // This places the first element of the right in front of the rest
+            // of the left since it must be less than them. Note that this
+            // is O(N) significantly contributing to time.
+            rest_of_left_and_first_of_right.rotate_right(1);
             _ = right.next();
+
+            let (Some(updated_left_start), Some(updated_left_end)) =
+                (left.start.checked_add(1), left.end.checked_add(1))
+            else {
+                debug_assert!(
+                    left.start == usize::MAX || left.end == usize::MAX,
+                    "only condition this branch is invoked"
+                );
+
+                // This implies the remaining left elements are sorted order.
+                return;
+            };
+
+            left = updated_left_start..updated_left_end;
         }
     }
 }

@@ -79,14 +79,12 @@ pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element
 
     /// Obtain an immutable reference to them `index` element, bounds checked.
     #[must_use]
-    #[allow(clippy::indexing_slicing)]
     fn at(&self, index: usize) -> Option<&Self::Element> {
         (index < self.count()).then(|| &self[index])
     }
 
     /// Obtain a mutable reference to the `index` element, bounds checked.
     #[must_use]
-    #[allow(clippy::indexing_slicing)]
     fn at_mut(&mut self, index: usize) -> Option<&mut Self::Element> {
         (index < self.count()).then(|| &mut self[index])
     }

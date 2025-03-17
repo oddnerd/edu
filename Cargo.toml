@@ -2,7 +2,7 @@
 
 [package]
 name = "rust"
-version = "0.14.8"
+version = "0.14.9"
 edition = "2021"
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
@@ -175,8 +175,10 @@ mem_forget                        = "deny" # Prevent leaking memory.
 ref_patterns                      = "deny" # Prevent using `ref` keyword.
 cfg_not_test                      = "deny" # Prevent configurations exluding test.
 infinite_loop                     = "deny" # Prevent infinite loops.
-wildcard_enum_match_arm           = "deny" # Prevent wildcard match branch.
+allow_attributes                  = "deny" # Prefer `expect(lint, reason = "")`.
 large_stack_frames                = "deny" # Prefer large heap allocations.
+wildcard_enum_match_arm           = "deny" # Prevent wildcard match branch.
+allow_attributes_without_reason   = "deny" # Explain why lints are ignored.
 
 # Miscellaneous/Style
 imprecise_flops                = "warn" # Prefer accurate floating point math.

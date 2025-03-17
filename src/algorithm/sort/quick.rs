@@ -104,7 +104,10 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
             .unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
 
         loop {
-            #[allow(clippy::shadow_unrelated)]
+            #[expect(
+                clippy::shadow_unrelated,
+                reason = "pivot element was swapped to front"
+            )]
             let Some(pivot) = partition.first() else {
                 unreachable!("caller ensures there is at least one element");
             };
@@ -148,7 +151,7 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
         // Place pivot element into sorted position.
         partition.swap(0, right);
 
-        #[allow(clippy::shadow_unrelated)]
+        #[expect(clippy::shadow_unrelated, reason = "derived from left/right indexes")]
         let (left, right) = partition.split_at_mut(right);
 
         // Ignore pivot in recursive calls since it is already sorted.
@@ -204,7 +207,10 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop ensures index is within bounds");
             };
 
-            #[allow(clippy::shadow_unrelated)]
+            #[expect(
+                clippy::shadow_unrelated,
+                reason = "pivot element was swapped to front"
+            )]
             let Some(pivot) = partition.first() else {
                 unreachable!("caller ensures there is at least one element");
             };
@@ -279,7 +285,7 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
             match partition.get(current).cmp(&partition.get(pivot)) {
                 core::cmp::Ordering::Less => {
                     // Swap might move the pivot element.
-                    #[allow(clippy::else_if_without_else)]
+                    #[expect(clippy::else_if_without_else, reason = "pivot is not swapped")]
                     if pivot == current {
                         pivot = equal.start;
                     } else if pivot == equal.start {
@@ -300,7 +306,7 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
                     _ = equal.next_back();
 
                     // Swap might move the pivot element.
-                    #[allow(clippy::else_if_without_else)]
+                    #[expect(clippy::else_if_without_else, reason = "pivot is not swapped")]
                     if pivot == current {
                         pivot = equal.end;
                     } else if pivot == equal.end {
