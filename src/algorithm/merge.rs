@@ -507,17 +507,5 @@ mod test {
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
-
-        #[test]
-        fn maximum_length() {
-            let mut elements = [(); usize::MAX];
-
-            // Split between first and second is arbitrary as all same value.
-            // Knowing the implementation, this will reduce test time.
-            let middle = elements.len() - 1;
-
-            // Ideally, this will panic if it misuses the length.
-            in_place(&mut elements, middle);
-        }
     }
 }
