@@ -500,8 +500,7 @@ mod test {
         }
     }
 
-    #[allow(clippy::clone_on_copy)]
-    mod clone {
+    mod copy {
         use super::*;
 
         #[test]
@@ -509,7 +508,7 @@ mod test {
             let mut underlying = [0, 1, 2, 3, 4, 5];
             let expected = Dope::from(underlying.as_mut_slice());
 
-            let actual = expected.clone();
+            let actual = expected;
 
             assert_eq!(actual.count, expected.count);
         }
@@ -519,7 +518,7 @@ mod test {
             let mut underlying = [0, 1, 2, 3, 4, 5];
             let expected = Dope::from(underlying.as_mut_slice());
 
-            let actual = expected.clone();
+            let actual = expected;
 
             assert_eq!(actual, expected);
         }
