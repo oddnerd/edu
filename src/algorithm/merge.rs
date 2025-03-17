@@ -173,7 +173,7 @@ pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
     let mut right = middle..elements.len();
 
     while !left.is_empty() && !right.is_empty() {
-        if elements.get(left.start) < elements.get(right.start) {
+        if elements.get(left.start) <= elements.get(right.start) {
             // Already in sorted position, advance to next element.
             _ = left.next();
         } else {
