@@ -26,7 +26,8 @@
     )
 )]
 
-// Explicitly link against the `alloc` crate.
+// Explicitly link against the `alloc` crate so it may be referred to
+// explicitly instead of via re-exports from the `std` crate.
 extern crate alloc;
 
 pub mod algorithm;
