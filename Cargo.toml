@@ -2,8 +2,8 @@
 
 [package]
 name = "rust"
-version = "0.14.10"
-edition = "2021"
+version = "0.15.0"
+edition = "2024"
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
 description = "Hand-written implementations in Rust for personal reference"
@@ -28,9 +28,6 @@ codegen-units = 1 # Single threaded compilation for more optimization.
 
 [lints.rust]
 # https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
-
-# TODO: remove once updated to 2024 edition
-rust_2024_compatibility = { level = "warn", priority = -1 }
 
 missing_abi                    = "warn" # Prefer explicit ABI linkage.
 missing_docs                   = "warn" # Require documenting public items.
