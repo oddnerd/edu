@@ -1505,8 +1505,8 @@ impl<T> Linear for Dynamic<T> {
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
-           + ExactSizeIterator
-           + core::iter::FusedIterator {
+    + ExactSizeIterator
+    + core::iter::FusedIterator {
         let ptr = if self.initialized > 0 {
             let ptr = self.as_mut_ptr();
 

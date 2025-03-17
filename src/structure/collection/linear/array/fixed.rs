@@ -276,8 +276,8 @@ impl<T, const N: usize> Linear for Fixed<T, N> {
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
-           + ExactSizeIterator
-           + core::iter::FusedIterator {
+    + ExactSizeIterator
+    + core::iter::FusedIterator {
         let ptr = {
             // This pointer will _never_ be written to.
             let ptr = self.data.as_ptr().cast_mut();

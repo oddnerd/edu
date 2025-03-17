@@ -302,8 +302,8 @@ impl<'a, T: 'a> Linear for Dope<'a, T> {
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
-           + ExactSizeIterator
-           + core::iter::FusedIterator {
+    + ExactSizeIterator
+    + core::iter::FusedIterator {
         // SAFETY:
         // * Pointer is aligned.
         // * Points to one allocated object.
