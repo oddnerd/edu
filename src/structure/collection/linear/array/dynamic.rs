@@ -1555,12 +1555,11 @@ impl<T> Array for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
-    #[allow(clippy::arithmetic_side_effects)]
     fn as_ptr(&self) -> *const Self::Element {
-        assert!(
-            self.front_capacity + self.initialized + self.back_capacity > 0,
-            "no allocation to point to"
-        );
+        #[expect(clippy::arithmetic_side_effects, reason = "we cannot allocate more than `usize::MAX`")]
+        let allocated = self.front_capacity + self.initialized + self.back_capacity;
+
+        assert!(allocated > 0, "no allocation to point to");
 
         // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = self.buffer.cast::<T>().as_ptr().cast_const();
@@ -1597,12 +1596,11 @@ impl<T> Array for Dynamic<T> {
     ///
     /// assert_eq!(actual, expected);
     /// ```
-    #[allow(clippy::arithmetic_side_effects)]
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
-        assert!(
-            self.front_capacity + self.initialized + self.back_capacity > 0,
-            "no allocation to point to"
-        );
+        #[expect(clippy::arithmetic_side_effects, reason = "we cannot allocate more than `usize::MAX`")]
+        let allocated = self.front_capacity + self.initialized + self.back_capacity;
+
+        assert!(allocated > 0, "no allocation to point to");
 
         // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = self.buffer.cast::<T>().as_ptr();
