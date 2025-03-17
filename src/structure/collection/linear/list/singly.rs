@@ -2102,7 +2102,6 @@ mod test {
             use super::*;
 
             #[test]
-            #[allow(clippy::shadow_unrelated)]
             fn appends_elements() {
                 let preexisting = [0, 1, 2];
                 let mut actual: Singly<_> = preexisting.into_iter().collect();
@@ -2110,6 +2109,7 @@ mod test {
                 let expected = [3, 4, 5];
                 actual.extend(expected.iter().copied());
 
+                #[expect(clippy::shadow_unrelated, reason = "elements from them")]
                 for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
                     assert_eq!(actual, expected);
                 }
