@@ -152,6 +152,9 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 
 /// Merge independently sorted `[..middle]` and `[middle..]` together in-place.
 ///
+/// # Panics
+/// This panics if the provided `middle` is out of bounds.
+///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
 ///
@@ -165,21 +168,33 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 ///
 /// assert_eq!(slice, [0, 1, 2, 3, 4, 5]);
 /// ```
-#[allow(clippy::indexing_slicing)]
-#[allow(clippy::arithmetic_side_effects)]
-#[allow(clippy::range_plus_one)]
 pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
     let mut left = 0..middle;
     let mut right = middle..elements.len();
 
     while !left.is_empty() && !right.is_empty() {
-        if elements[left.start] < elements[right.start] {
+        if elements.get(left.start) < elements.get(right.start) {
+            // Already in sorted position, advance to next element.
             _ = left.next();
         } else {
-            elements[left.start..=right.start].rotate_right(1);
+            let Some(rest_of_left_and_first_of_right) = elements.get_mut(left.start..=right.start) else {
+                unreachable!("provided `middle` is in bounds, this is too");
+            };
 
-            left = (left.start + 1)..(left.end + 1);
+            // This places the first element of the right in front of the rest
+            // of the left since it must be less than them. Note that this
+            // is O(N) significantly contributing to time.
+            rest_of_left_and_first_of_right.rotate_right(1);
             _ = right.next();
+
+            let (Some(updated_left_start), Some(updated_left_end)) = (left.start.checked_add(1), left.end.checked_add(1)) else {
+                debug_assert!(left.start == usize::MAX || left.end == usize::MAX, "only condition this branch is invoked");
+
+                // This implies the remaining left elements are sorted order.
+                return;
+            };
+
+            left = updated_left_start..updated_left_end;
         }
     }
 }
