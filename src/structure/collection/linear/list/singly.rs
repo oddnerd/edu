@@ -462,8 +462,8 @@ impl<T> Linear for Singly<T> {
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
-           + ExactSizeIterator
-           + core::iter::FusedIterator {
+    + ExactSizeIterator
+    + core::iter::FusedIterator {
         IterMut {
             next: self.elements.as_deref_mut(),
             previous_back: core::ptr::null(),

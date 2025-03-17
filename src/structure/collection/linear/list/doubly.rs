@@ -510,8 +510,8 @@ impl<T> Linear for Doubly<T> {
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
-           + ExactSizeIterator
-           + core::iter::FusedIterator {
+    + ExactSizeIterator
+    + core::iter::FusedIterator {
         IterMut {
             front: self.head,
             back: self.tail,

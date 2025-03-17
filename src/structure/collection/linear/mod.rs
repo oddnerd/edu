@@ -74,8 +74,8 @@ pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element
     fn iter_mut(
         &mut self,
     ) -> impl DoubleEndedIterator<Item = &mut Self::Element>
-           + ExactSizeIterator
-           + core::iter::FusedIterator;
+    + ExactSizeIterator
+    + core::iter::FusedIterator;
 
     /// Obtain an immutable reference to them `index` element, bounds checked.
     #[must_use]
