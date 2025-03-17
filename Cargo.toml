@@ -29,6 +29,9 @@ codegen-units = 1 # Single threaded compilation for more optimization.
 [lints.rust]
 # https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html
 
+# TODO: remove once updated to 2024 edition
+rust_2024_compatibility = { level = "warn", priority = -1 }
+
 missing_abi                    = "warn" # Prefer explicit ABI linkage.
 missing_docs                   = "warn" # Require documenting public items.
 trivial_casts                  = "warn" # Prefer coercion over explicit cast.
