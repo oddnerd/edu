@@ -4,25 +4,16 @@
 #![cfg_attr(
     test,
     allow(
-        // Unsafe code inside tests ought to be so obviously safe such that
-        // requiring an explanation would be unnecessarily verbose. To the
-        // extent that safety may be genuinely violated without sufficient
-        // explanation, it either does not matter within the context of testing
-        // since that code will never be ran in production, and/or the testing
-        // itself (most likely dynamic analysis via Miri) will catch it.
         clippy::undocumented_unsafe_blocks,
-
-        // A wrapper failing to contain a value that is expected to exist
-        // implies the failure of that test which panicking invokes. Since
-        // use of this feature is allowed only within tests, the potential
-        // unrecoverable error is the explicit purpose of using it.
+        reason = "Unsafe code inside tests ought to be so obviously safe such that requiring an explanation would be unnecessarily verbose. To the extent that safety may be genuinely violated without sufficient explanation, it either does not matter within the context of testing since that code will never be ran in production, and/or the testing itself (most likely via dynamic analysis via Miri) will catch it."
+    ),
+    allow(
         clippy::expect_used,
-
-        // An index being out of expected bounds implies the failure of that
-        // test which panicking invokes. Since use of this feature is allowed
-        // only within tests, the potential unrecoverable error is the explicit
-        // purpose of using it.
-        clippy::indexing_slicing
+        reason = "A wrapper failing to contain a value that is expected to exist implies the failure of that test which panicking invokes. Since use of this feature is allowed only within tests, the potential unrecoverable error is the explicit purpose of using it."
+    ),
+    allow(
+        clippy::indexing_slicing,
+        reason = "An index being out of expected bounds implies the failure of that test which panicking invokes. Since use of this feature is allowed only within tests, the potential unrecoverable error is the explicit purpose of using it."
     )
 )]
 
