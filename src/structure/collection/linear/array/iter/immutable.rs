@@ -316,4 +316,22 @@ mod test {
             }
         }
     }
+
+    mod debug {
+        use super::*;
+
+        #[test]
+        fn is_elements() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let actual = {
+                let ptr = expected.as_mut_ptr();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+
+                unsafe { Iter::new(ptr, expected.len()) }
+            };
+
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+    }
 }
