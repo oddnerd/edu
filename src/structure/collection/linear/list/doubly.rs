@@ -2426,7 +2426,7 @@ mod test {
                 let expected = [3, 4, 5];
                 actual.extend(expected.iter().copied());
 
-                #[expect(clippy::shadow_unrelated, reason = "elements from the arrays")]
+                #[expect(clippy::shadow_unrelated, reason = "elements from them")]
                 for (actual, expected) in actual.skip(preexisting.len()).zip(expected) {
                     assert_eq!(actual, expected);
                 }
