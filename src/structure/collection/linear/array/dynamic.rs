@@ -1556,7 +1556,10 @@ impl<T> Array for Dynamic<T> {
     /// assert_eq!(actual, expected);
     /// ```
     fn as_ptr(&self) -> *const Self::Element {
-        #[expect(clippy::arithmetic_side_effects, reason = "we cannot allocate more than `usize::MAX`")]
+        #[expect(
+            clippy::arithmetic_side_effects,
+            reason = "we cannot allocate more than `usize::MAX`"
+        )]
         let allocated = self.front_capacity + self.initialized + self.back_capacity;
 
         assert!(allocated > 0, "no allocation to point to");
@@ -1597,7 +1600,10 @@ impl<T> Array for Dynamic<T> {
     /// assert_eq!(actual, expected);
     /// ```
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
-        #[expect(clippy::arithmetic_side_effects, reason = "we cannot allocate more than `usize::MAX`")]
+        #[expect(
+            clippy::arithmetic_side_effects,
+            reason = "we cannot allocate more than `usize::MAX`"
+        )]
         let allocated = self.front_capacity + self.initialized + self.back_capacity;
 
         assert!(allocated > 0, "no allocation to point to");

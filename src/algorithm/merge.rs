@@ -177,7 +177,8 @@ pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
             // Already in sorted position, advance to next element.
             _ = left.next();
         } else {
-            let Some(rest_of_left_and_first_of_right) = elements.get_mut(left.start..=right.start) else {
+            let Some(rest_of_left_and_first_of_right) = elements.get_mut(left.start..=right.start)
+            else {
                 unreachable!("provided `middle` is in bounds, this is too");
             };
 
@@ -187,8 +188,13 @@ pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
             rest_of_left_and_first_of_right.rotate_right(1);
             _ = right.next();
 
-            let (Some(updated_left_start), Some(updated_left_end)) = (left.start.checked_add(1), left.end.checked_add(1)) else {
-                debug_assert!(left.start == usize::MAX || left.end == usize::MAX, "only condition this branch is invoked");
+            let (Some(updated_left_start), Some(updated_left_end)) =
+                (left.start.checked_add(1), left.end.checked_add(1))
+            else {
+                debug_assert!(
+                    left.start == usize::MAX || left.end == usize::MAX,
+                    "only condition this branch is invoked"
+                );
 
                 // This implies the remaining left elements are sorted order.
                 return;

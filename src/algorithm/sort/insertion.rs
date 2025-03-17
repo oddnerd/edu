@@ -164,12 +164,19 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
     let mut index: usize = 1;
 
     while index < elements.len() {
-        #[expect(clippy::arithmetic_side_effects, reason = "short-circuiting ensures `index > 0`")]
+        #[expect(
+            clippy::arithmetic_side_effects,
+            reason = "short-circuiting ensures `index > 0`"
+        )]
         if index == 0 || elements.get(index - 1) <= elements.get(index) {
             if let Some(incremented) = index.checked_add(1) {
                 index = incremented;
             } else {
-                debug_assert_eq!(elements.len(), usize::MAX, "only condition branch is invoked");
+                debug_assert_eq!(
+                    elements.len(),
+                    usize::MAX,
+                    "only condition branch is invoked"
+                );
 
                 // This implies all elements have been sorted.
                 break;

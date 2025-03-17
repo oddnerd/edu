@@ -279,7 +279,12 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
 
         // Unsorted: [..output]
         // Sorted: [output..]
-        merge(elements, 0..split.div_euclid(2), split..elements.len(), output);
+        merge(
+            elements,
+            0..split.div_euclid(2),
+            split..elements.len(),
+            output,
+        );
     }
 
     // Sort the remaining elements in [..output] via insertion sort.

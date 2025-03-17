@@ -104,7 +104,10 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
             .unwrap_or_else(|| unreachable!("caller ensures there is at least one element"));
 
         loop {
-            #[expect(clippy::shadow_unrelated, reason = "pivot element was swapped to front")]
+            #[expect(
+                clippy::shadow_unrelated,
+                reason = "pivot element was swapped to front"
+            )]
             let Some(pivot) = partition.first() else {
                 unreachable!("caller ensures there is at least one element");
             };
@@ -204,7 +207,10 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop ensures index is within bounds");
             };
 
-            #[expect(clippy::shadow_unrelated, reason = "pivot element was swapped to front")]
+            #[expect(
+                clippy::shadow_unrelated,
+                reason = "pivot element was swapped to front"
+            )]
             let Some(pivot) = partition.first() else {
                 unreachable!("caller ensures there is at least one element");
             };
