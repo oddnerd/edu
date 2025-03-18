@@ -674,6 +674,36 @@ mod test {
 
                     assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
                 }
+
+                #[test]
+                fn drops_yet_to_be_yielded_elements() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 256;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        })).into_iter();
+
+                        for _ in 0..yielded {
+                            // Yield element so lifetime is caller responsibility.
+                            drop(actual.next_back());
+                        }
+
+                        // Reset the counter so we do not count elements that were
+                        // yielded and then manually dropped in the above loop.
+                        _ = dropped.replace(0);
+
+                        // Now we drop the iterator which should implicitly drop
+                        // all the elements that were not yielded.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
             }
 
             mod exact_size {
