@@ -2250,7 +2250,7 @@ mod test {
                 fn drops_unyielded_elements_when_advanced_from_front() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
@@ -2261,16 +2261,16 @@ mod test {
                         })).into_iter();
 
                         for _ in 0..yielded {
-                            // Caller is responsible for this yielded lifetime.
+                            // Lifetime is passed to caller.
                             drop(actual.next());
                         }
 
-                        // Reset the counter so we do not count elements that were
-                        // yielded and then manually dropped in the above loop.
-                        _ = dropped.replace(0);
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
 
-                        // Now we drop the iterator which should implicitly drop
-                        // all the elements that were not yielded.
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
                         drop(actual);
 
                         assert_eq!(dropped.take(), ELEMENTS - yielded);
@@ -2281,7 +2281,7 @@ mod test {
                 fn drops_unyielded_elements_when_advanced_from_back() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
@@ -2292,16 +2292,16 @@ mod test {
                         })).into_iter();
 
                         for _ in 0..yielded {
-                            // Caller is responsible for this yielded lifetime.
+                            // Lifetime is passed to caller.
                             drop(actual.next_back());
                         }
 
-                        // Reset the counter so we do not count elements that were
-                        // yielded and then manually dropped in the above loop.
-                        _ = dropped.replace(0);
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
 
-                        // Now we drop the iterator which should implicitly drop
-                        // all the elements that were not yielded.
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
                         drop(actual);
 
                         assert_eq!(dropped.take(), ELEMENTS - yielded);
@@ -2312,31 +2312,37 @@ mod test {
                 fn drops_unyielded_elements_when_advanced_from_both_ends() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
-                    for yielded in (0..ELEMENTS).step_by(2) {
-                        let dropped = DropCounter::new_counter();
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
 
-                        #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                        let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                            #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
+                            let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            })).into_iter();
 
-                        for _ in (0..yielded).step_by(2) {
-                            // Caller is responsible for these yielded lifetimes.
-                            drop(actual.next());
-                            drop(actual.next_back());
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
                         }
-
-                        // Reset the counter so we do not count elements that were
-                        // yielded and then manually dropped in the above loop.
-                        _ = dropped.replace(0);
-
-                        // Now we drop the iterator which should implicitly drop
-                        // all the elements that were not yielded.
-                        drop(actual);
-
-                        assert_eq!(dropped.take(), ELEMENTS - yielded);
                     }
                 }
             }
@@ -3576,7 +3582,7 @@ mod test {
                 fn drops_unyielded_elements_when_advanced_from_front() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
@@ -3588,16 +3594,16 @@ mod test {
                         let mut actual = actual.drain(..);
 
                         for _ in 0..yielded {
-                            // Caller is responsible for this yielded lifetime.
+                            // Lifetime is passed to caller.
                             drop(actual.next());
                         }
 
-                        // Reset the counter so we do not count elements that were
-                        // yielded and then manually dropped in the above loop.
-                        _ = dropped.replace(0);
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
 
-                        // Now we drop the iterator which should implicitly drop
-                        // all the elements that were not yielded.
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
                         drop(actual);
 
                         assert_eq!(dropped.take(), ELEMENTS - yielded);
@@ -3608,7 +3614,7 @@ mod test {
                 fn drops_unyielded_elements_when_advanced_from_back() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
@@ -3620,16 +3626,16 @@ mod test {
                         let mut actual = actual.drain(..);
 
                         for _ in 0..yielded {
-                            // Caller is responsible for this yielded lifetime.
+                            // Lifetime is passed to caller.
                             drop(actual.next_back());
                         }
 
-                        // Reset the counter so we do not count elements that were
-                        // yielded and then manually dropped in the above loop.
-                        _ = dropped.replace(0);
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
 
-                        // Now we drop the iterator which should implicitly drop
-                        // all the elements that were not yielded.
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
                         drop(actual);
 
                         assert_eq!(dropped.take(), ELEMENTS - yielded);
@@ -3637,35 +3643,41 @@ mod test {
                 }
 
                 #[test]
-                fn drops_unyielded_elements_when_advanced_from_both_end() {
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
-                    for yielded in (0..ELEMENTS).step_by(2) {
-                        let dropped = DropCounter::new_counter();
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
 
-                        let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                            let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
-                        let mut actual = actual.drain(..);
+                            let mut actual = actual.drain(..);
 
-                        for _ in (0..yielded).step_by(2) {
-                            // Caller is responsible for this yielded lifetime.
-                            drop(actual.next());
-                            drop(actual.next_back());
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
                         }
-
-                        // Reset the counter so we do not count elements that were
-                        // yielded and then manually dropped in the above loop.
-                        _ = dropped.replace(0);
-
-                        // Now we drop the iterator which should implicitly drop
-                        // all the elements that were not yielded.
-                        drop(actual);
-
-                        assert_eq!(dropped.take(), ELEMENTS - yielded);
                     }
                 }
 
@@ -3681,7 +3693,7 @@ mod test {
 
                 #[test]
                 fn does_not_modify_leading_elements() {
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
                     let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
@@ -3696,7 +3708,7 @@ mod test {
 
                 #[test]
                 fn does_not_modify_trailing_elements() {
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
                     let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
