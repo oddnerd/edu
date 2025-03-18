@@ -4162,6 +4162,7 @@ mod test {
             #[test]
             fn element_count() {
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
                 assert_eq!(actual.into_iter().count(), expected.len());
@@ -4170,6 +4171,7 @@ mod test {
             #[test]
             fn in_order() {
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
                 assert!(actual.into_iter().eq(expected.into_iter()));
