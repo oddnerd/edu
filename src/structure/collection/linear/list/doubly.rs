@@ -3711,11 +3711,22 @@ mod test {
 
                 #[test]
                 fn combines_leading_and_trailing_elements() {
-                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 8;
 
-                    drop(actual.drain(1..=4));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.eq([0, 5]));
+                    for start in 0..ELEMENTS {
+                        for end in start..ELEMENTS {
+                            let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                            drop(actual.drain(start..end));
+
+                            let expected_leading = expected[..start].iter();
+                            let expected_trailing = expected[end..].iter();
+
+                            assert!(actual.iter().eq(expected_leading.chain(expected_trailing)));
+                        }
+                    }
                 }
             }
         }
