@@ -3670,6 +3670,16 @@ mod test {
                 }
 
                 #[test]
+                fn can_drain_all_elements() {
+                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.drain(..));
+
+                    assert!(actual.head.is_none());
+                    assert!(actual.tail.is_none());
+                }
+
+                #[test]
                 fn does_not_modify_leading_elements() {
                     let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
