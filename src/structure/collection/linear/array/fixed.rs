@@ -625,7 +625,7 @@ mod test {
             }
 
             #[test]
-            fn drops_yet_to_be_yielded_elements() {
+            fn drops_back_elements_yet_to_be_yielded() {
                 use crate::test::mock::DropCounter;
 
                 const ELEMENTS: usize = 256;
@@ -676,7 +676,7 @@ mod test {
                 }
 
                 #[test]
-                fn drops_yet_to_be_yielded_elements() {
+                fn drops_front_elements_yet_to_be_yielded() {
                     use crate::test::mock::DropCounter;
 
                     const ELEMENTS: usize = 256;
@@ -690,6 +690,37 @@ mod test {
 
                         for _ in 0..yielded {
                             // Caller is responsible for this yielded lifetime.
+                            drop(actual.next_back());
+                        }
+
+                        // Reset the counter so we do not count elements that were
+                        // yielded and then manually dropped in the above loop.
+                        _ = dropped.replace(0);
+
+                        // Now we drop the iterator which should implicitly drop
+                        // all the elements that were not yielded.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_middle_elements_yet_to_be_yielded() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 256;
+
+                    for yielded in (0..ELEMENTS).step_by(2) {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        })).into_iter();
+
+                        for _ in (0..yielded).step_by(2) {
+                            // Caller is responsible for these yielded lifetimes.
+                            drop(actual.next());
                             drop(actual.next_back());
                         }
 
