@@ -638,7 +638,7 @@ mod test {
                     })).into_iter();
 
                     for _ in 0..yielded {
-                        // Yield element so lifetime is caller responsibility.
+                        // Caller is responsible for this yielded lifetime.
                         drop(actual.next());
                     }
 
@@ -689,7 +689,7 @@ mod test {
                         })).into_iter();
 
                         for _ in 0..yielded {
-                            // Yield element so lifetime is caller responsibility.
+                            // Caller is responsible for this yielded lifetime.
                             drop(actual.next_back());
                         }
 
