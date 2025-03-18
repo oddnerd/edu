@@ -2243,6 +2243,37 @@ mod test {
                 assert!(actual.into_iter().eq(expected));
             }
 
+            #[test]
+            fn drops_back_elements_yet_to_be_yielded() {
+                use crate::test::mock::DropCounter;
+
+                const ELEMENTS: usize = 256;
+
+                for yielded in 0..ELEMENTS {
+                    let dropped = DropCounter::new_counter();
+
+                    #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
+                    let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                        DropCounter::new(&dropped)
+                    })).into_iter();
+
+                    for _ in 0..yielded {
+                        // Caller is responsible for this yielded lifetime.
+                        drop(actual.next());
+                    }
+
+                    // Reset the counter so we do not count elements that were
+                    // yielded and then manually dropped in the above loop.
+                    _ = dropped.replace(0);
+
+                    // Now we drop the iterator which should implicitly drop
+                    // all the elements that were not yielded.
+                    drop(actual);
+
+                    assert_eq!(dropped.take(), ELEMENTS - yielded);
+                }
+            }
+
             mod double_ended {
                 use super::*;
 
