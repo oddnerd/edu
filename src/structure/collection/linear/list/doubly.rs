@@ -3681,20 +3681,32 @@ mod test {
 
                 #[test]
                 fn does_not_modify_leading_elements() {
-                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 256;
 
-                    drop(actual.drain(3..));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.eq([0, 1, 2]));
+                    for start in 0..ELEMENTS {
+                        let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                        drop(actual.drain(start..));
+
+                        assert!(actual.iter().eq(expected[..start].iter()));
+                    }
                 }
 
                 #[test]
                 fn does_not_modify_trailing_elements() {
-                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 256;
 
-                    drop(actual.drain(..3));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.eq([3, 4, 5]));
+                    for end in 0..ELEMENTS {
+                        let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                        drop(actual.drain(..end));
+
+                        assert!(actual.iter().eq(expected[end..].iter()));
+                    }
                 }
 
                 #[test]
