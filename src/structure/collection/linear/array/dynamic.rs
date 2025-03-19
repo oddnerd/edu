@@ -5406,7 +5406,7 @@ mod test {
             use super::*;
 
             #[test]
-            fn none_out_of_bounds_range() {
+            fn none_when_out_of_bounds_range() {
                 let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 let mut actual = instance.drain(256..);
