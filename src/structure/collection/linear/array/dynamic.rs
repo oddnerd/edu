@@ -5457,6 +5457,20 @@ mod test {
 
                         assert!(actual.drain(1..4).rev().eq(expected.drain(1..4).rev()));
                     }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 0]);
+
+                        let mut actual = underlying.drain(1..=2);
+
+                        // make head and tail meet.
+                        _ = actual.next().expect("the element with value '1'");
+                        _ = actual.next_back().expect("the element with value '2'");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
                 }
 
                 mod exact_size {
