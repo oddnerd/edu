@@ -5514,7 +5514,7 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn empty() {
+                    fn when_empty() {
                         let mut actual = Dynamic::<()>::default();
                         let mut actual = actual.drain(..);
 
@@ -5528,7 +5528,7 @@ mod test {
                     }
 
                     #[test]
-                    fn exhausted() {
+                    fn when_exhausted() {
                         let mut actual: Dynamic<_> = [()].into_iter().collect();
                         let mut actual = actual.drain(..);
 

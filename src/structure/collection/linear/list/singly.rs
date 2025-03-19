@@ -3244,7 +3244,7 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn empty() {
+                    fn when_empty() {
                         let mut actual = Singly::<()>::default();
                         let mut actual = actual.drain(..);
 
@@ -3258,7 +3258,7 @@ mod test {
                     }
 
                     #[test]
-                    fn exhausted() {
+                    fn when_exhausted() {
                         let mut actual: Singly<_> = [()].into_iter().collect();
                         let mut actual = actual.drain(..);
 
