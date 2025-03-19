@@ -3602,25 +3602,124 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn drops_yet_to_be_yielded_elements() {
+                fn drops_unyielded_elements_when_advanced_from_front() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
-                    let dropped = DropCounter::new_counter();
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
 
-                    let mut actual = Singly::<DropCounter>::default();
+                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        }));
 
-                    for _ in 0..ELEMENTS {
-                        _ = actual
-                            .append(DropCounter::new(&dropped))
-                            .expect("successful allocation");
+                        let mut actual = actual.withdraw(|_| true);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
                     }
+                }
 
-                    drop(actual.withdraw(|_element| true));
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_back() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        }));
+
+                        let mut actual = actual.withdraw(|_| true);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next_back());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
+
+                            let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
+
+                            let mut actual = actual.withdraw(|_| true);
+
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
+                        }
+                    }
+                }
+
+                #[test]
+                fn can_withdraw_all_elements() {
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|_| true));
 
                     assert!(actual.elements.is_none());
-                    assert_eq!(dropped.take(), ELEMENTS);
+                }
+
+                #[test]
+                fn does_not_modify_retained_elements() {
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|element| element % 2 == 0));
+
+                    assert!(actual.eq([1, 3, 5]));
                 }
             }
         }

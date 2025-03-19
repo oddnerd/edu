@@ -3812,16 +3812,6 @@ mod test {
 
                     assert!(actual.eq([0, 2, 4]));
                 }
-
-                #[test]
-                fn combines_retained_elements() {
-                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element == &1));
-
-                    assert!(actual.eq([0, 2, 3, 4, 5]));
-                }
-
                 #[test]
                 fn size_hint() {
                     let mut underlying = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
@@ -3862,15 +3852,6 @@ mod test {
                         let actual = underlying.withdraw(|element| element % 2 == 0).rev();
 
                         assert!(actual.eq([4, 2, 0]));
-                    }
-
-                    #[test]
-                    fn combines_retained_elements() {
-                        let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
-
-                        drop(actual.withdraw(|element| element == &1).rev());
-
-                        assert!(actual.eq([0, 2, 3, 4, 5]));
                     }
 
                     #[test]
@@ -3928,7 +3909,120 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn drops_yet_to_be_yielded_elements() {
+                fn drops_unyielded_elements_when_advanced_from_front() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        }));
+
+                        let mut actual = actual.withdraw(|_| true);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_back() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        }));
+
+                        let mut actual = actual.withdraw(|_| true);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next_back());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
+
+                            let mut actual = Doubly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
+
+                            let mut actual = actual.withdraw(|_| true);
+
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
+                        }
+                    }
+                }
+
+                #[test]
+                fn can_withdraw_all_elements() {
+                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|_| true));
+
+                    assert!(actual.head.is_none());
+                    assert!(actual.tail.is_none());
+                }
+
+                #[test]
+                fn does_not_modify_retained_elements() {
                     let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
                     drop(actual.withdraw(|element| element % 2 == 0));
