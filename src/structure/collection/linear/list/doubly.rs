@@ -3559,7 +3559,7 @@ mod test {
                     #[test]
                     fn empty() {
                         let mut actual = Doubly::<()>::default();
-                        let mut actual = actual.drain(0..=0);
+                        let mut actual = actual.drain(..);
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
@@ -3573,7 +3573,7 @@ mod test {
                     #[test]
                     fn exhausted() {
                         let mut actual: Doubly<_> = [()].into_iter().collect();
-                        let mut actual = actual.drain(0..=0);
+                        let mut actual = actual.drain(..);
 
                         // Exhaust the elements.
                         let _: () = actual.next().expect("the one element");
