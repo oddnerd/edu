@@ -3135,32 +3135,30 @@ mod test {
         mod drain {
             use super::*;
 
-            #[test]
-            fn none_when_out_of_bounds_range() {
-                let mut instance = Singly::from_iter([0, 1, 2, 3, 4, 5]);
-
-                let mut actual = instance.drain(6..);
-
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
-
-                drop(actual);
-            }
-
-            #[test]
-            fn none_when_empty() {
-                let mut instance = Singly::<()>::default();
-
-                let mut actual = instance.drain(..);
-
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
-
-                drop(actual);
-            }
-
             mod iterator {
                 use super::*;
+
+                #[test]
+                fn yields_no_elements_when_empty() {
+                    let mut actual = Singly::<()>::default();
+
+                    let mut actual = actual.drain(..);
+
+                    assert_eq!(actual.next(), None);
+
+                    drop(actual);
+                }
+
+                #[test]
+                fn yields_no_elements_when_range_is_out_of_bounds() {
+                    let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let mut actual = actual.drain(6..);
+
+                    assert_eq!(actual.next(), None);
+
+                    drop(actual);
+                }
 
                 #[test]
                 fn element_count() {
@@ -3180,6 +3178,28 @@ mod test {
 
                 mod double_ended {
                     use super::*;
+
+                    #[test]
+                    fn yields_no_elements_when_empty() {
+                        let mut actual = Singly::<()>::default();
+
+                        let mut actual = actual.drain(..);
+
+                        assert_eq!(actual.next_back(), None);
+
+                        drop(actual);
+                    }
+
+                    #[test]
+                    fn yields_no_elements_when_range_is_out_of_bounds() {
+                        let mut actual = Singly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let mut actual = actual.drain(6..);
+
+                        assert_eq!(actual.next_back(), None);
+
+                        drop(actual);
+                    }
 
                     #[test]
                     fn element_count() {
