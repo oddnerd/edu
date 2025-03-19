@@ -5254,6 +5254,18 @@ mod test {
             }
 
             #[test]
+            fn returned_reference_is_mutable() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                let actual = actual.insert(2, 12345).expect("successful allocation");
+
+                *actual = 54321;
+
+                assert_eq!(actual, &mut 54321);
+            }
+
+            #[test]
             fn will_allocate_when_empty() {
                 let mut actual = Dynamic::<usize>::default();
 

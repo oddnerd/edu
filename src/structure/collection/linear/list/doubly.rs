@@ -3149,6 +3149,18 @@ mod test {
             }
 
             #[test]
+            fn returned_reference_is_mutable() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                let mut actual: Doubly<_> = expected.iter().copied().collect();
+
+                let actual = actual.insert(2, 12345).expect("successful allocation");
+
+                *actual = 54321;
+
+                assert_eq!(actual, &mut 54321);
+            }
+
+            #[test]
             fn does_not_modify_leading_elements() {
                 const INDEX: usize = 2;
 
