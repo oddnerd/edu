@@ -2170,28 +2170,30 @@ impl<T> Drop for Drain<'_, T> {
             let only_back_capacity =
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
-            if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                let Some(offset) = offset.checked_neg() else {
-                    unreachable!("negative amount of elements");
-                };
-
-                let Some(end) = self.range.end.checked_add(trailing) else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
-                };
-
-                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
-                unsafe {
-                    self.underlying.shift_range(self.range.end..end, offset);
-                }
-
-                self.underlying.back_capacity = self.range.len();
-            } else {
+            if only_front_capacity || (!only_back_capacity && leading > trailing) {
                 // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
                 unsafe {
                     self.underlying.shift_range(0..self.range.start, offset);
                 }
 
-                self.underlying.front_capacity = self.range.len();
+                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
+
+                self.underlying.front_capacity = capacity;
+            } else {
+                let Some(offset) = offset.checked_neg() else {
+                    unreachable!("offset was a positive number of elements");
+                };
+
+                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
+                unsafe { self.underlying.shift_range(self.range.end..self.underlying.initialized, offset); }
+
+                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
+
+                self.underlying.back_capacity = capacity;
             }
         }
 
