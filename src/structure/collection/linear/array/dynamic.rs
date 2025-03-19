@@ -2170,7 +2170,7 @@ impl<T> Drop for Drain<'_, T> {
             let only_back_capacity =
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
-            if only_front_capacity || (!only_back_capacity && leading > trailing) {
+            if only_front_capacity || (!only_back_capacity && trailing > leading) {
                 // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
                 unsafe {
                     self.underlying.shift_range(0..self.range.start, offset);
