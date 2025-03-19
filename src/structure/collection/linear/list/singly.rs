@@ -2990,6 +2990,18 @@ mod test {
             }
 
             #[test]
+            fn returned_reference_is_mutable() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.prepend(0).expect("successful allocation");
+
+                *actual = 12345;
+
+                assert_eq!(actual, &mut 12345);
+            }
+
+            #[test]
             fn does_not_modify_trailing_elements() {
                 let expected = [1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
@@ -3041,6 +3053,18 @@ mod test {
                 let actual = actual.append(5).expect("successful allocation");
 
                 assert_eq!(actual, &mut 5);
+            }
+
+            #[test]
+            fn returned_reference_is_mutable() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.append(5).expect("successful allocation");
+
+                *actual = 12345;
+
+                assert_eq!(actual, &mut 12345);
             }
 
             #[test]
@@ -3811,6 +3835,18 @@ mod test {
             }
 
             #[test]
+            fn returned_reference_is_mutable() {
+                let expected = [1, 2, 3, 4, 5];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.push(0).expect("successful allocation");
+
+                *actual = 12345;
+
+                assert_eq!(actual, &mut 12345);
+            }
+
+            #[test]
             fn does_not_modify_trailing_elements() {
                 let expected = [1, 2, 3, 4, 5];
                 let mut actual: Singly<_> = expected.iter().copied().collect();
@@ -3939,6 +3975,18 @@ mod test {
                 let actual = actual.push(5).expect("successful allocation");
 
                 assert_eq!(actual, &mut 5);
+            }
+
+            #[test]
+            fn returned_reference_is_mutable() {
+                let expected = [0, 1, 2, 3, 4];
+                let mut actual: Singly<_> = expected.iter().copied().collect();
+
+                let actual = actual.push(5).expect("successful allocation");
+
+                *actual = 12345;
+
+                assert_eq!(actual, &mut 12345);
             }
 
             #[test]
