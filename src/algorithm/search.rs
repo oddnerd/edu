@@ -1,6 +1,6 @@
 //! Implementations of [search](https://en.wikipedia.org/wiki/Search_algorithm).
 
-/// Find the index of `needle` within `haystack` using linear search.
+/// Find the index of `desired` within `elements` using linear search.
 ///
 /// # Performance
 /// This method takes O(N) time and consumes O(1) memory.
@@ -18,9 +18,9 @@
 ///
 /// assert_eq!(index, Some(3));
 /// ```
-pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
-    for (index, element) in haystack.iter().enumerate() {
-        if element == needle {
+pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
+    for (index, element) in elements.iter().enumerate() {
+        if element == desired {
             return Some(index);
         }
     }
@@ -28,7 +28,7 @@ pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
     None
 }
 
-/// Find the index of `needle` within `haystack` using binary search.
+/// Find the index of `desired` within `elements` using binary search.
 ///
 /// # Performance
 /// This method takes O(log N) time and consumes O(1) memory.
@@ -46,10 +46,10 @@ pub fn linear<T: PartialEq>(haystack: &[T], needle: &T) -> Option<usize> {
 ///
 /// assert_eq!(index, Some(3));
 /// ```
-pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<usize> {
+pub fn binary<T: Ord + core::fmt::Debug>(elements: &[T], desired: &T) -> Option<usize> {
     let mut left = 0;
 
-    let mut right = haystack.len().checked_sub(1)?;
+    let mut right = elements.len().checked_sub(1)?;
 
     while left <= right {
         let offset = left.abs_diff(right) / 2;
@@ -58,15 +58,15 @@ pub fn binary<T: Ord + core::fmt::Debug>(haystack: &[T], needle: &T) -> Option<u
             unreachable!("at most equal to right, hence cannot overflow");
         };
 
-        let Some(current) = haystack.get(middle) else {
+        let Some(current) = elements.get(middle) else {
             unreachable!("loop ensures index is within bounds");
         };
 
-        if current == needle {
+        if current == desired {
             return Some(middle);
         }
 
-        if current < needle {
+        if current < desired {
             let Some(middle_incremented) = middle.checked_add(1) else {
                 // This implies the last element does not match, so not found.
                 break;
