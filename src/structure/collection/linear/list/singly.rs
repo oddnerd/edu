@@ -3147,6 +3147,18 @@ mod test {
                 drop(actual);
             }
 
+            #[test]
+            fn none_when_empty() {
+                let mut instance = Singly::<()>::default();
+
+                let mut actual = instance.drain(..);
+
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                drop(actual);
+            }
+
             mod iterator {
                 use super::*;
 
