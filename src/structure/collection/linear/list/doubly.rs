@@ -3490,14 +3490,21 @@ mod test {
                 }
 
                 #[test]
-                fn yields_no_elements_when_range_is_out_of_bounds() {
+                fn yields_no_elements_when_start_of_range_is_out_of_bounds() {
                     let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
                     let mut actual = actual.drain(6..);
 
                     assert_eq!(actual.next(), None);
+                }
 
-                    drop(actual);
+                #[test]
+                fn yields_elements_when_end_of_range_is_out_of_bounds() {
+                    let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = actual.drain(..usize::MAX);
+
+                    assert!(actual.eq([0, 1, 2, 3, 4, 5]));
                 }
 
                 #[test]
@@ -3531,14 +3538,21 @@ mod test {
                     }
 
                     #[test]
-                    fn yields_no_elements_when_range_is_out_of_bounds() {
+                    fn yields_no_elements_when_start_of_range_is_out_of_bounds() {
                         let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
 
                         let mut actual = actual.drain(6..);
 
                         assert_eq!(actual.next_back(), None);
+                    }
 
-                        drop(actual);
+                    #[test]
+                    fn yields_elements_when_end_of_range_is_out_of_bounds() {
+                        let mut actual = Doubly::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = actual.drain(..usize::MAX).rev();
+
+                        assert!(actual.eq([5, 4, 3, 2, 1, 0]));
                     }
 
                     #[test]
