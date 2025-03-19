@@ -636,9 +636,11 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
                         for _ in 0..yielded {
                             // Lifetime is passed to caller.
@@ -666,9 +668,11 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
                         for _ in 0..yielded {
                             // Lifetime is passed to caller.
@@ -697,9 +701,11 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            })).into_iter();
+                            let mut actual =
+                                Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }))
+                                .into_iter();
 
                             for _ in 0..front {
                                 // Lifetime is passed to caller.

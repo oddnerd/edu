@@ -1939,10 +1939,15 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                        #[expect(
+                            clippy::useless_conversion,
+                            reason = "explicitly testing into iterator"
+                        )]
+                        let mut actual =
+                            Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
                         for _ in 0..yielded {
                             // Lifetime is passed to caller.
@@ -1970,10 +1975,15 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                        #[expect(
+                            clippy::useless_conversion,
+                            reason = "explicitly testing into iterator"
+                        )]
+                        let mut actual =
+                            Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
                         for _ in 0..yielded {
                             // Lifetime is passed to caller.
@@ -2002,10 +2012,15 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                            let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            })).into_iter();
+                            #[expect(
+                                clippy::useless_conversion,
+                                reason = "explicitly testing into iterator"
+                            )]
+                            let mut actual =
+                                Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }))
+                                .into_iter();
 
                             for _ in 0..front {
                                 // Lifetime is passed to caller.
@@ -3308,9 +3323,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.drain(..);
 
@@ -3340,9 +3356,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.drain(..);
 
@@ -3373,9 +3390,10 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            }));
+                            let mut actual =
+                                Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }));
 
                             let mut actual = actual.drain(..);
 
@@ -3610,9 +3628,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.withdraw(|_| true);
 
@@ -3642,9 +3661,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.withdraw(|_| true);
 
@@ -3675,9 +3695,10 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            let mut actual = Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            }));
+                            let mut actual =
+                                Singly::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }));
 
                             let mut actual = actual.withdraw(|_| true);
 

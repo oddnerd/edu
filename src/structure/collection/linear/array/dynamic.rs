@@ -2176,7 +2176,8 @@ impl<T> Drop for Drain<'_, T> {
                     self.underlying.shift_range(0..self.range.start, offset);
                 }
 
-                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) else {
+                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len())
+                else {
                     unreachable!("allocated more than `isize::MAX` bytes");
                 };
 
@@ -2187,9 +2188,13 @@ impl<T> Drop for Drain<'_, T> {
                 };
 
                 // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
-                unsafe { self.underlying.shift_range(self.range.end..self.underlying.initialized, offset); }
+                unsafe {
+                    self.underlying
+                        .shift_range(self.range.end..self.underlying.initialized, offset);
+                }
 
-                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) else {
+                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len())
+                else {
                     unreachable!("allocated more than `isize::MAX` bytes");
                 };
 
@@ -4191,10 +4196,15 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                        #[expect(
+                            clippy::useless_conversion,
+                            reason = "explicitly testing into iterator"
+                        )]
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
                         for _ in 0..yielded {
                             // Lifetime is passed to caller.
@@ -4222,10 +4232,15 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        })).into_iter();
+                        #[expect(
+                            clippy::useless_conversion,
+                            reason = "explicitly testing into iterator"
+                        )]
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
                         for _ in 0..yielded {
                             // Lifetime is passed to caller.
@@ -4254,10 +4269,15 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            #[expect(clippy::useless_conversion, reason = "explicitly testing into iterator")]
-                            let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            })).into_iter();
+                            #[expect(
+                                clippy::useless_conversion,
+                                reason = "explicitly testing into iterator"
+                            )]
+                            let mut actual =
+                                Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }))
+                                .into_iter();
 
                             for _ in 0..front {
                                 // Lifetime is passed to caller.
@@ -5578,9 +5598,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.drain(..);
 
@@ -5610,9 +5631,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.drain(..);
 
@@ -5643,9 +5665,10 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            }));
+                            let mut actual =
+                                Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }));
 
                             let mut actual = actual.drain(..);
 
@@ -5773,7 +5796,9 @@ mod test {
                         let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
                         // Add front capacity.
-                        _ = actual.reserve_front(ELEMENTS).expect("successful allocation");
+                        _ = actual
+                            .reserve_front(ELEMENTS)
+                            .expect("successful allocation");
                         debug_assert_eq!(actual.back_capacity, 0);
 
                         let removed = start..(ELEMENTS - 1);
@@ -5794,7 +5819,9 @@ mod test {
                         let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
                         // Add front capacity.
-                        _ = actual.reserve_back(ELEMENTS).expect("successful allocation");
+                        _ = actual
+                            .reserve_back(ELEMENTS)
+                            .expect("successful allocation");
                         debug_assert_eq!(actual.front_capacity, 0);
 
                         let removed = start..(ELEMENTS - 1);
@@ -5806,7 +5833,8 @@ mod test {
                 }
 
                 #[test]
-                fn increases_front_capacity_when_front_and_back_capacity_but_more_trailing_elements() {
+                fn increases_front_capacity_when_front_and_back_capacity_but_more_trailing_elements()
+                 {
                     const ELEMENTS: usize = 8;
 
                     let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
@@ -5814,8 +5842,12 @@ mod test {
                     for start in 1..(ELEMENTS / 2) {
                         let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
-                        _ = actual.reserve_front(ELEMENTS).expect("successful allocation");
-                        _ = actual.reserve_back(ELEMENTS).expect("successful allocation");
+                        _ = actual
+                            .reserve_front(ELEMENTS)
+                            .expect("successful allocation");
+                        _ = actual
+                            .reserve_back(ELEMENTS)
+                            .expect("successful allocation");
 
                         let removed = start..(ELEMENTS / 2);
 
@@ -5826,7 +5858,8 @@ mod test {
                 }
 
                 #[test]
-                fn increases_back_capacity_when_front_and_back_capacity_but_more_leading_elements() {
+                fn increases_back_capacity_when_front_and_back_capacity_but_more_leading_elements()
+                {
                     const ELEMENTS: usize = 8;
 
                     let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
@@ -5834,8 +5867,12 @@ mod test {
                     for start in (ELEMENTS / 2)..ELEMENTS {
                         let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
-                        _ = actual.reserve_front(ELEMENTS).expect("successful allocation");
-                        _ = actual.reserve_back(ELEMENTS).expect("successful allocation");
+                        _ = actual
+                            .reserve_front(ELEMENTS)
+                            .expect("successful allocation");
+                        _ = actual
+                            .reserve_back(ELEMENTS)
+                            .expect("successful allocation");
 
                         let removed = start..(ELEMENTS / 2);
 
@@ -5993,9 +6030,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.withdraw(|_| true);
 
@@ -6025,9 +6063,10 @@ mod test {
                     for yielded in 0..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }));
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
                         let mut actual = actual.withdraw(|_| true);
 
@@ -6058,9 +6097,10 @@ mod test {
                         for back in front..ELEMENTS {
                             let dropped = DropCounter::new_counter();
 
-                            let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            }));
+                            let mut actual =
+                                Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }));
 
                             let mut actual = actual.withdraw(|_| true);
 
@@ -6110,7 +6150,10 @@ mod test {
                     const ELEMENTS: usize = 8;
 
                     for count in 0..=ELEMENTS {
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|index| {
+                                index
+                            }));
                         debug_assert_eq!(actual.capacity(), 0);
 
                         drop(actual.withdraw(|element| element < &count));
@@ -6124,7 +6167,10 @@ mod test {
                     const ELEMENTS: usize = 8;
 
                     for retained in 0..ELEMENTS {
-                        let mut actual = Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|index| {
+                                index
+                            }));
                         debug_assert_eq!(actual.front_capacity, 0);
                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -6156,7 +6202,7 @@ mod test {
                     // the underlying buffer for future use.
                     drop(iter);
 
-                    assert!(actual.eq([0 ,1 ,2, 5, 6, 7]));
+                    assert!(actual.eq([0, 1, 2, 5, 6, 7]));
                 }
             }
         }
