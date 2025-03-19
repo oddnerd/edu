@@ -14,9 +14,13 @@
 ///
 /// let mut slice = [0, 1, 2, 3, 4, 5];
 ///
+/// // Returns `Some` index when found.
 /// let index = linear(&slice, &3);
-///
 /// assert_eq!(index, Some(3));
+///
+/// // Returns `None` when not found.
+/// let index = linear(&slice, &6);
+/// assert_eq!(index, None);
 /// ```
 pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
     for (index, element) in elements.iter().enumerate() {
@@ -42,9 +46,13 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 ///
 /// let mut slice = [0, 1, 2, 3, 4, 5];
 ///
+/// // Returns `Some` index when found.
 /// let index = binary(&slice, &3);
-///
 /// assert_eq!(index, Some(3));
+///
+/// // Returns `None` when not found.
+/// let index = binary(&slice, &6);
+/// assert_eq!(index, None);
 /// ```
 pub fn binary<T: Ord + core::fmt::Debug>(elements: &[T], desired: &T) -> Option<usize> {
     let mut left = 0;
