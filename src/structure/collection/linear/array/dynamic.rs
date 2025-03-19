@@ -2171,27 +2171,34 @@ impl<T> Drop for Drain<'_, T> {
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
             if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                let Some(offset) = offset.checked_neg() else {
-                    unreachable!("negative amount of elements");
-                };
-
-                let Some(end) = self.range.end.checked_add(trailing) else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
-                };
-
-                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
-                unsafe {
-                    self.underlying.shift_range(self.range.end..end, offset);
-                }
-
-                self.underlying.back_capacity = self.range.len();
-            } else {
                 // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
                 unsafe {
                     self.underlying.shift_range(0..self.range.start, offset);
                 }
 
-                self.underlying.front_capacity = self.range.len();
+                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len())
+                else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
+
+                self.underlying.front_capacity = capacity;
+            } else {
+                let Some(offset) = offset.checked_neg() else {
+                    unreachable!("offset was a positive number of elements");
+                };
+
+                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
+                unsafe {
+                    self.underlying
+                        .shift_range(self.range.end..self.underlying.initialized, offset);
+                }
+
+                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len())
+                else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
+
+                self.underlying.back_capacity = capacity;
             }
         }
 
@@ -4162,6 +4169,7 @@ mod test {
             #[test]
             fn element_count() {
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
                 assert_eq!(actual.into_iter().count(), expected.len());
@@ -4170,9 +4178,129 @@ mod test {
             #[test]
             fn in_order() {
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 let actual: Dynamic<_> = expected.iter().copied().collect();
 
                 assert!(actual.into_iter().eq(expected.into_iter()));
+            }
+
+            mod drop {
+                use super::*;
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_front() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        #[expect(
+                            clippy::useless_conversion,
+                            reason = "explicitly testing into iterator"
+                        )]
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_back() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        #[expect(
+                            clippy::useless_conversion,
+                            reason = "explicitly testing into iterator"
+                        )]
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next_back());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
+
+                            #[expect(
+                                clippy::useless_conversion,
+                                reason = "explicitly testing into iterator"
+                            )]
+                            let mut actual =
+                                Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }))
+                                .into_iter();
+
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
+                        }
+                    }
+                }
             }
 
             mod double_ended {
@@ -4181,6 +4309,7 @@ mod test {
                 #[test]
                 fn element_count() {
                     let expected = [0, 1, 2, 3, 4, 5];
+
                     let actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert_eq!(actual.into_iter().rev().count(), expected.len());
@@ -4189,6 +4318,7 @@ mod test {
                 #[test]
                 fn in_order() {
                     let expected = [0, 1, 2, 3, 4, 5];
+
                     let actual: Dynamic<_> = expected.iter().copied().collect();
 
                     assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
@@ -5295,20 +5425,38 @@ mod test {
         mod drain {
             use super::*;
 
-            #[test]
-            fn none_out_of_bounds_range() {
-                let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                let mut actual = instance.drain(256..);
-
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
-
-                drop(actual);
-            }
-
             mod iterator {
                 use super::*;
+
+                #[test]
+                fn yields_no_elements_when_empty() {
+                    let mut actual = Dynamic::<()>::default();
+
+                    let mut actual = actual.drain(..);
+
+                    assert_eq!(actual.next(), None);
+
+                    drop(actual);
+                }
+
+                #[test]
+                fn yields_no_elements_when_start_of_range_is_out_of_bounds() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let mut actual = actual.drain(6..);
+
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+
+                #[test]
+                fn yields_elements_when_end_of_range_is_out_of_bounds() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    let actual = actual.drain(..usize::MAX);
+
+                    assert!(actual.eq([0, 1, 2, 3, 4, 5]));
+                }
 
                 #[test]
                 fn element_count() {
@@ -5330,6 +5478,35 @@ mod test {
                     use super::*;
 
                     #[test]
+                    fn yields_no_elements_when_empty() {
+                        let mut actual = Dynamic::<()>::default();
+
+                        let mut actual = actual.drain(..);
+
+                        assert_eq!(actual.next_back(), None);
+
+                        drop(actual);
+                    }
+
+                    #[test]
+                    fn yields_no_elements_when_start_of_range_is_out_of_bounds() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let mut actual = actual.drain(6..);
+
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn yields_elements_when_end_of_range_is_out_of_bounds() {
+                        let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                        let actual = actual.drain(..usize::MAX).rev();
+
+                        assert!(actual.eq([5, 4, 3, 2, 1, 0]));
+                    }
+
+                    #[test]
                     fn element_count() {
                         let mut expected = vec![0, 1, 2, 3, 4, 5];
                         let mut actual: Dynamic<_> = expected.iter().copied().collect();
@@ -5346,6 +5523,20 @@ mod test {
                         let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
                         assert!(actual.drain(1..4).rev().eq(expected.drain(1..4).rev()));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once() {
+                        let mut underlying = Dynamic::from_iter([0, 1, 2, 0]);
+
+                        let mut actual = underlying.drain(1..=2);
+
+                        // make head and tail meet.
+                        _ = actual.next().expect("the element with value '1'");
+                        _ = actual.next_back().expect("the element with value '2'");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
                     }
                 }
 
@@ -5378,9 +5569,9 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn empty() {
+                    fn when_empty() {
                         let mut actual = Dynamic::<()>::default();
-                        let mut actual = actual.drain(0..=0);
+                        let mut actual = actual.drain(..);
 
                         // Yields `None` at least once.
                         assert_eq!(actual.next(), None);
@@ -5392,9 +5583,9 @@ mod test {
                     }
 
                     #[test]
-                    fn exhausted() {
+                    fn when_exhausted() {
                         let mut actual: Dynamic<_> = [()].into_iter().collect();
-                        let mut actual = actual.drain(0..=0);
+                        let mut actual = actual.drain(..);
 
                         // Exhaust the elements.
                         let _: () = actual.next().expect("the one element");
@@ -5414,89 +5605,296 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn increases_front_capacity_when_front() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(..3));
-
-                    assert_eq!(actual.capacity_front(), 3);
-                }
-
-                #[test]
-                fn increases_back_capacity_when_back() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(3..));
-
-                    assert_eq!(actual.capacity_back(), 3);
-                }
-
-                #[test]
-                fn increases_capacity_when_middle() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.drain(2..=3));
-
-                    assert_eq!(actual.capacity(), 2);
-                }
-
-                #[test]
-                fn drops_yet_to_be_yielded_elements() {
+                fn drops_unyielded_elements_when_advanced_from_front() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
-                    let dropped = DropCounter::new_counter();
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS)
-                        .expect("successful allocation");
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
-                    for _ in 0..ELEMENTS {
-                        _ = actual
-                            .append(DropCounter::new(&dropped))
-                            .expect("uses capacity");
+                        let mut actual = actual.drain(..);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
                     }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_back() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
+
+                        let mut actual = actual.drain(..);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next_back());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
+
+                            let mut actual =
+                                Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }));
+
+                            let mut actual = actual.drain(..);
+
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
+                        }
+                    }
+                }
+
+                #[test]
+                fn can_drain_all_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                     drop(actual.drain(..));
 
                     assert_eq!(actual.initialized, 0);
-                    assert_eq!(dropped.take(), ELEMENTS);
                 }
 
                 #[test]
                 fn does_not_modify_leading_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 8;
 
-                    drop(actual.drain(3..));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.iter().eq([0, 1, 2].iter()));
+                    for start in 0..ELEMENTS {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                        drop(actual.drain(start..));
+
+                        assert!(actual.iter().eq(expected[..start].iter()));
+                    }
                 }
 
                 #[test]
                 fn does_not_modify_trailing_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 8;
 
-                    drop(actual.drain(..3));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.iter().eq([3, 4, 5].iter()));
+                    for end in 0..ELEMENTS {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                        drop(actual.drain(..end));
+
+                        assert!(actual.iter().eq(expected[end..].iter()));
+                    }
                 }
 
                 #[test]
-                fn shifts_trailing_elements_after_leading_when_mostly_front() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                fn combines_leading_and_trailing_elements() {
+                    const ELEMENTS: usize = 8;
 
-                    drop(actual.drain(1..=2));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.iter().eq([0, 3, 4, 5].iter()));
+                    for start in 0..ELEMENTS {
+                        for end in start..ELEMENTS {
+                            let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                            drop(actual.drain(start..end));
+
+                            let expected_leading = expected[..start].iter();
+                            let expected_trailing = expected[end..].iter();
+
+                            assert!(actual.iter().eq(expected_leading.chain(expected_trailing)));
+                        }
+                    }
                 }
 
                 #[test]
-                fn shifts_leading_elements_before_trailing_when_mostly_back() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                fn increases_front_capacity_when_range_starts_at_front_but_ends_before_back() {
+                    const ELEMENTS: usize = 8;
 
-                    drop(actual.drain(3..=4));
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-                    assert!(actual.iter().eq([0, 1, 2, 5].iter()));
+                    for end in 0..ELEMENTS {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+                        debug_assert_eq!(actual.front_capacity, 0);
+
+                        drop(actual.drain(..end));
+
+                        assert_eq!(actual.front_capacity, end);
+                    }
+                }
+
+                #[test]
+                fn increases_back_capacity_when_range_ends_at_back_but_starts_before_front() {
+                    const ELEMENTS: usize = 8;
+
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                    for start in 0..ELEMENTS {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+                        debug_assert_eq!(actual.back_capacity, 0);
+
+                        drop(actual.drain(start..));
+
+                        assert_eq!(actual.back_capacity, ELEMENTS - start);
+                    }
+                }
+
+                #[test]
+                fn increases_front_capacity_if_that_is_only_capacity() {
+                    const ELEMENTS: usize = 8;
+
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                    for start in 1..(ELEMENTS - 1) {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                        // Add front capacity.
+                        _ = actual
+                            .reserve_front(ELEMENTS)
+                            .expect("successful allocation");
+                        debug_assert_eq!(actual.back_capacity, 0);
+
+                        let removed = start..(ELEMENTS - 1);
+
+                        drop(actual.drain(removed.clone()));
+
+                        assert_eq!(actual.front_capacity, ELEMENTS + removed.len());
+                    }
+                }
+
+                #[test]
+                fn increases_back_capacity_if_that_is_only_capacity() {
+                    const ELEMENTS: usize = 8;
+
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                    for start in 1..(ELEMENTS - 1) {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                        // Add front capacity.
+                        _ = actual
+                            .reserve_back(ELEMENTS)
+                            .expect("successful allocation");
+                        debug_assert_eq!(actual.front_capacity, 0);
+
+                        let removed = start..(ELEMENTS - 1);
+
+                        drop(actual.drain(removed.clone()));
+
+                        assert_eq!(actual.back_capacity, ELEMENTS + removed.len());
+                    }
+                }
+
+                #[test]
+                fn increases_front_capacity_when_front_and_back_capacity_but_more_trailing_elements()
+                 {
+                    const ELEMENTS: usize = 8;
+
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                    for start in 1..(ELEMENTS / 2) {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                        _ = actual
+                            .reserve_front(ELEMENTS)
+                            .expect("successful allocation");
+                        _ = actual
+                            .reserve_back(ELEMENTS)
+                            .expect("successful allocation");
+
+                        let removed = start..(ELEMENTS / 2);
+
+                        drop(actual.drain(removed.clone()));
+
+                        assert_eq!(actual.front_capacity, ELEMENTS + removed.len());
+                    }
+                }
+
+                #[test]
+                fn increases_back_capacity_when_front_and_back_capacity_but_more_leading_elements()
+                {
+                    const ELEMENTS: usize = 8;
+
+                    let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                    for start in (ELEMENTS / 2)..ELEMENTS {
+                        let mut actual: Dynamic<_> = expected.iter().copied().collect();
+
+                        _ = actual
+                            .reserve_front(ELEMENTS)
+                            .expect("successful allocation");
+                        _ = actual
+                            .reserve_back(ELEMENTS)
+                            .expect("successful allocation");
+
+                        let removed = start..(ELEMENTS / 2);
+
+                        drop(actual.drain(removed.clone()));
+
+                        assert_eq!(actual.back_capacity, ELEMENTS + removed.len());
+                    }
                 }
             }
         }
@@ -5639,80 +6037,178 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn drops_yet_to_be_yielded_elements() {
+                fn drops_unyielded_elements_when_advanced_from_front() {
                     use crate::test::mock::DropCounter;
 
-                    const ELEMENTS: usize = 256;
+                    const ELEMENTS: usize = 8;
 
-                    let dropped = DropCounter::new_counter();
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
 
-                    let mut actual = Dynamic::<DropCounter>::with_capacity(ELEMENTS)
-                        .expect("successful allocation");
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
 
-                    for _ in 0..ELEMENTS {
-                        _ = actual
-                            .append(DropCounter::new(&dropped))
-                            .expect("uses capacity");
+                        let mut actual = actual.withdraw(|_| true);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
                     }
+                }
 
-                    drop(actual.withdraw(|_element| true));
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_back() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }));
+
+                        let mut actual = actual.withdraw(|_| true);
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next_back());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
+
+                            let mut actual =
+                                Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }));
+
+                            let mut actual = actual.withdraw(|_| true);
+
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
+                        }
+                    }
+                }
+
+                #[test]
+                fn can_withdraw_all_elements() {
+                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                    drop(actual.withdraw(|_| true));
 
                     assert_eq!(actual.initialized, 0);
-                    assert_eq!(dropped.take(), ELEMENTS);
                 }
 
                 #[test]
-                fn increases_front_capacity_when_withdrawing_first_element() {
+                fn does_not_modify_retained_elements() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                    drop(actual.withdraw(|element| element != &5));
+                    drop(actual.withdraw(|element| element % 2 == 0));
 
-                    assert_eq!(actual.capacity_front(), 5);
-                    assert_eq!(actual.capacity_back(), 0);
+                    assert!(actual.eq([1, 3, 5]));
                 }
 
                 #[test]
-                fn increases_back_capacity_when_retained_are_combined() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                fn increases_capacity_by_amount_of_removed_elements() {
+                    const ELEMENTS: usize = 8;
 
-                    drop(actual.withdraw(|element| element % 2 == 1));
+                    for count in 0..=ELEMENTS {
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|index| {
+                                index
+                            }));
+                        debug_assert_eq!(actual.capacity(), 0);
 
-                    assert_eq!(actual.capacity_front(), 0);
-                    assert_eq!(actual.capacity_back(), 3);
-                }
+                        drop(actual.withdraw(|element| element < &count));
 
-                #[test]
-                fn combines_retained_elements() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                    drop(actual.withdraw(|element| element == &1));
-
-                    assert!(actual.eq([0, 2, 3, 4, 5]));
+                        assert_eq!(actual.capacity(), count);
+                    }
                 }
 
                 #[test]
                 fn first_retained_element_is_not_repositioned() {
-                    let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                    const ELEMENTS: usize = 8;
 
-                    let first_odd_number = unsafe { actual.as_mut_ptr().add(1) };
+                    for retained in 0..ELEMENTS {
+                        let mut actual =
+                            Dynamic::from_iter(core::array::from_fn::<_, ELEMENTS, _>(|index| {
+                                index
+                            }));
+                        debug_assert_eq!(actual.front_capacity, 0);
+                        debug_assert_eq!(actual.back_capacity, 0);
 
-                    drop(actual.withdraw(|element| element % 2 == 0));
+                        drop(actual.withdraw(|element| element != &retained));
 
-                    assert_eq!(actual.as_mut_ptr(), first_odd_number);
+                        assert_eq!(actual.front_capacity, retained);
+                        assert_eq!(actual.back_capacity, ELEMENTS - retained - 1);
+                    }
                 }
 
                 #[test]
-                fn combines_trailing_retained_with_beginning_retained() {
+                fn combines_disjointed_retained_elements_after_exhaustion() {
                     let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
 
                     let mut iter = actual.withdraw(|element| element == &3 || element == &4);
 
-                    // Create two regions of retained elements: the first
-                    // region contains [0, 1, 2]; the element with value '3'
-                    // has been dropped and is not initialized; the second
-                    // region contains [5, 6, 7]. Both ends of the iterator
-                    // have been exhausted, yet the underlying buffer contains
-                    // a gap between two groups of retained elements.
+                    // Create two disjointed regions of retained elements.
+                    // The first region contains `[0, 1, 2`.
+                    // The second regions contains `[5, 6, 7]`.
+                    // The following calls will remove elements 3 and 4,
+                    // alongside exhausting both sides of the iterator.
+                    // However, we know from the implementation that neither
+                    // call will move any retained elements keeping the gap.
                     _ = iter.next_back().expect("the element with value '4'");
                     _ = iter.next().expect("the element with value '3'");
 
@@ -5720,6 +6216,8 @@ mod test {
                     // to combine these two regions thereby fixing the state of
                     // the underlying buffer for future use.
                     drop(iter);
+
+                    assert!(actual.eq([0, 1, 2, 5, 6, 7]));
                 }
             }
         }

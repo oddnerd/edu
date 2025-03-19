@@ -609,6 +609,7 @@ mod test {
             #[test]
             fn element_count() {
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Fixed::from(expected);
 
                 assert_eq!(actual.into_iter().count(), expected.len());
@@ -617,26 +618,117 @@ mod test {
             #[test]
             fn in_order() {
                 let expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Fixed::from(expected);
 
                 assert!(actual.into_iter().eq(expected.into_iter()));
             }
 
-            #[test]
-            fn drops_yet_to_be_yielded_elements() {
-                use crate::test::mock::DropCounter;
+            mod drop {
+                use super::*;
 
-                const ELEMENTS: usize = 256;
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_front() {
+                    use crate::test::mock::DropCounter;
 
-                let dropped = DropCounter::new_counter();
+                    const ELEMENTS: usize = 8;
 
-                let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                    DropCounter::new(&dropped)
-                }));
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
 
-                drop(actual.into_iter());
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
 
-                assert_eq!(dropped.take(), ELEMENTS);
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_back() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for yielded in 0..ELEMENTS {
+                        let dropped = DropCounter::new_counter();
+
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                DropCounter::new(&dropped)
+                            }))
+                            .into_iter();
+
+                        for _ in 0..yielded {
+                            // Lifetime is passed to caller.
+                            drop(actual.next_back());
+                        }
+
+                        // The above drops in caller scope, not the
+                        // destructor being tested, so reset counter.
+                        debug_assert_eq!(dropped.replace(0), yielded);
+
+                        // Now we drop the iterator, so we expect all
+                        // remaining elements to be dropped.
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    }
+                }
+
+                #[test]
+                fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                    use crate::test::mock::DropCounter;
+
+                    const ELEMENTS: usize = 8;
+
+                    for front in 0..ELEMENTS {
+                        for back in front..ELEMENTS {
+                            let dropped = DropCounter::new_counter();
+
+                            let mut actual =
+                                Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                                    DropCounter::new(&dropped)
+                                }))
+                                .into_iter();
+
+                            for _ in 0..front {
+                                // Lifetime is passed to caller.
+                                drop(actual.next());
+                            }
+
+                            for _ in front..back {
+                                // Lifetime is passed to caller.
+                                drop(actual.next_back());
+                            }
+
+                            // The above drops in caller scope, not the
+                            // destructor being tested, so reset counter.
+                            let expected = ELEMENTS - dropped.replace(0);
+
+                            // Now we drop the iterator, so we expect all
+                            // remaining elements to be dropped.
+                            drop(actual);
+
+                            assert_eq!(dropped.take(), expected);
+                        }
+                    }
+                }
             }
 
             mod double_ended {
@@ -645,6 +737,7 @@ mod test {
                 #[test]
                 fn element_count() {
                     let expected = [0, 1, 2, 3, 4, 5];
+
                     let actual = Fixed::from(expected);
 
                     assert_eq!(actual.into_iter().rev().count(), expected.len());
@@ -653,6 +746,7 @@ mod test {
                 #[test]
                 fn in_order() {
                     let expected = [0, 1, 2, 3, 4, 5];
+
                     let actual = Fixed::from(expected);
 
                     assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
