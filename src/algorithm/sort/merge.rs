@@ -349,7 +349,17 @@ mod test {
         use super::*;
 
         #[test]
-        fn empty() {
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "auxiliary must be clone of elements"]
+        fn panics_if_auxiliary_is_not_clone_of_elements() {
+            let mut elements = [5, 4, 3, 2, 1];
+            let mut auxiliary = [0, 0, 0, 0, 0];
+
+            top_down(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        fn handles_when_input_is_empty() {
             let mut elements: [usize; 0] = [];
             let mut auxiliary = elements;
 
@@ -359,7 +369,7 @@ mod test {
         }
 
         #[test]
-        fn single_element() {
+        fn handles_when_input_is_single_element() {
             let mut elements = [0];
             let mut auxiliary = elements;
 
@@ -369,9 +379,10 @@ mod test {
         }
 
         #[test]
-        fn already_sorted() {
+        fn does_not_modify_input_when_already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
             let mut auxiliary = elements;
+            debug_assert!(elements.is_sorted());
 
             top_down(&mut elements, &mut auxiliary);
 
@@ -379,7 +390,7 @@ mod test {
         }
 
         #[test]
-        fn must_swap() {
+        fn will_swap_elements_if_in_decreasing_order() {
             let mut elements = [1, 0];
             let mut auxiliary = elements;
 
@@ -389,7 +400,7 @@ mod test {
         }
 
         #[test]
-        fn odd_length() {
+        fn correctly_orders_elements_when_input_has_odd_length() {
             let mut elements = [2, 1, 0];
             let mut auxiliary = elements;
 
@@ -399,31 +410,13 @@ mod test {
         }
 
         #[test]
-        fn multiple_swaps() {
+        fn correctly_orders_elements_when_input_has_even_length() {
             let mut elements = [2, 0, 3, 1];
             let mut auxiliary = elements;
 
             top_down(&mut elements, &mut auxiliary);
 
             assert_eq!(elements, [0, 1, 2, 3]);
-        }
-
-        #[test]
-        #[should_panic(expected = "auxiliary must be clone of elements")]
-        fn panics_if_auxiliary_is_different_size() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-            top_down(&mut elements, &mut auxiliary);
-        }
-
-        #[test]
-        #[should_panic(expected = "auxiliary must be clone of elements")]
-        fn panics_if_auxiliary_has_different_elements() {
-            let mut elements = [0, 1, 2, 3, 4];
-            let mut auxiliary = [5, 6, 7, 8, 9];
-
-            top_down(&mut elements, &mut auxiliary);
         }
     }
 
@@ -431,7 +424,17 @@ mod test {
         use super::*;
 
         #[test]
-        fn empty() {
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "auxiliary must be clone of elements"]
+        fn panics_if_auxiliary_is_not_clone_of_elements() {
+            let mut elements = [5, 4, 3, 2, 1];
+            let mut auxiliary = [0, 0, 0, 0, 0];
+
+            natural(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        fn handles_when_input_is_empty() {
             let mut elements: [usize; 0] = [];
             let mut auxiliary = elements;
 
@@ -441,7 +444,7 @@ mod test {
         }
 
         #[test]
-        fn single_element() {
+        fn handles_when_input_is_single_element() {
             let mut elements = [0];
             let mut auxiliary = elements;
 
@@ -451,9 +454,10 @@ mod test {
         }
 
         #[test]
-        fn already_sorted() {
+        fn does_not_modify_input_when_already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
             let mut auxiliary = elements;
+            debug_assert!(elements.is_sorted());
 
             natural(&mut elements, &mut auxiliary);
 
@@ -461,7 +465,7 @@ mod test {
         }
 
         #[test]
-        fn must_swap() {
+        fn will_swap_elements_if_in_decreasing_order() {
             let mut elements = [1, 0];
             let mut auxiliary = elements;
 
@@ -471,7 +475,7 @@ mod test {
         }
 
         #[test]
-        fn odd_length() {
+        fn correctly_orders_elements_when_input_has_odd_length() {
             let mut elements = [2, 1, 0];
             let mut auxiliary = elements;
 
@@ -481,31 +485,13 @@ mod test {
         }
 
         #[test]
-        fn multiple_swaps() {
+        fn correctly_orders_elements_when_input_has_even_length() {
             let mut elements = [2, 0, 3, 1];
             let mut auxiliary = elements;
 
             natural(&mut elements, &mut auxiliary);
 
             assert_eq!(elements, [0, 1, 2, 3]);
-        }
-
-        #[test]
-        #[should_panic(expected = "auxiliary must be clone of elements")]
-        fn panics_if_auxiliary_is_different_size() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-            natural(&mut elements, &mut auxiliary);
-        }
-
-        #[test]
-        #[should_panic(expected = "auxiliary must be clone of elements")]
-        fn panics_if_auxiliary_has_different_elements() {
-            let mut elements = [0, 1, 2, 3, 4];
-            let mut auxiliary = [5, 6, 7, 8, 9];
-
-            natural(&mut elements, &mut auxiliary);
         }
     }
 
@@ -513,7 +499,17 @@ mod test {
         use super::*;
 
         #[test]
-        fn empty() {
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "auxiliary must be clone of elements"]
+        fn panics_if_auxiliary_is_not_clone_of_elements() {
+            let mut elements = [5, 4, 3, 2, 1];
+            let mut auxiliary = [0, 0, 0, 0, 0];
+
+            bottom_up(&mut elements, &mut auxiliary);
+        }
+
+        #[test]
+        fn handles_when_input_is_empty() {
             let mut elements: [usize; 0] = [];
             let mut auxiliary = elements;
 
@@ -523,7 +519,7 @@ mod test {
         }
 
         #[test]
-        fn single_element() {
+        fn handles_when_input_is_single_element() {
             let mut elements = [0];
             let mut auxiliary = elements;
 
@@ -533,9 +529,10 @@ mod test {
         }
 
         #[test]
-        fn already_sorted() {
+        fn does_not_modify_input_when_already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
             let mut auxiliary = elements;
+            debug_assert!(elements.is_sorted());
 
             bottom_up(&mut elements, &mut auxiliary);
 
@@ -543,7 +540,7 @@ mod test {
         }
 
         #[test]
-        fn must_swap() {
+        fn will_swap_elements_if_in_decreasing_order() {
             let mut elements = [1, 0];
             let mut auxiliary = elements;
 
@@ -553,7 +550,7 @@ mod test {
         }
 
         #[test]
-        fn odd_length() {
+        fn correctly_orders_elements_when_input_has_odd_length() {
             let mut elements = [2, 1, 0];
             let mut auxiliary = elements;
 
@@ -563,7 +560,7 @@ mod test {
         }
 
         #[test]
-        fn multiple_swaps() {
+        fn correctly_orders_elements_when_input_has_even_length() {
             let mut elements = [2, 0, 3, 1];
             let mut auxiliary = elements;
 
@@ -571,31 +568,13 @@ mod test {
 
             assert_eq!(elements, [0, 1, 2, 3]);
         }
-
-        #[test]
-        #[should_panic(expected = "auxiliary must be clone of elements")]
-        fn panics_if_auxiliary_is_different_size() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            let mut auxiliary = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-            bottom_up(&mut elements, &mut auxiliary);
-        }
-
-        #[test]
-        #[should_panic(expected = "auxiliary must be clone of elements")]
-        fn panics_if_auxiliary_has_different_elements() {
-            let mut elements = [0, 1, 2, 3, 4];
-            let mut auxiliary = [5, 6, 7, 8, 9];
-
-            bottom_up(&mut elements, &mut auxiliary);
-        }
     }
 
     mod in_place {
         use super::*;
 
         #[test]
-        fn empty() {
+        fn handles_when_input_is_empty() {
             let mut elements: [usize; 0] = [];
 
             in_place(&mut elements);
@@ -604,7 +583,7 @@ mod test {
         }
 
         #[test]
-        fn single_element() {
+        fn handles_when_input_is_single_element() {
             let mut elements = [0];
 
             in_place(&mut elements);
@@ -613,8 +592,9 @@ mod test {
         }
 
         #[test]
-        fn already_sorted() {
+        fn does_not_modify_input_when_already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
+            debug_assert!(elements.is_sorted());
 
             in_place(&mut elements);
 
@@ -622,7 +602,7 @@ mod test {
         }
 
         #[test]
-        fn must_swap() {
+        fn will_swap_elements_if_in_decreasing_order() {
             let mut elements = [1, 0];
 
             in_place(&mut elements);
@@ -631,7 +611,7 @@ mod test {
         }
 
         #[test]
-        fn odd_length() {
+        fn correctly_orders_elements_when_input_has_odd_length() {
             let mut elements = [2, 1, 0];
 
             in_place(&mut elements);
@@ -640,7 +620,7 @@ mod test {
         }
 
         #[test]
-        fn multiple_swaps() {
+        fn correctly_orders_elements_when_input_has_even_length() {
             let mut elements = [2, 0, 3, 1];
 
             in_place(&mut elements);
