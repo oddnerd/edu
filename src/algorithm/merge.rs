@@ -306,6 +306,39 @@ mod test {
         }
 
         #[test]
+        fn consumes_element_from_first_when_it_is_less_than_second() {
+            let mut first = [0];
+            let mut second = [1];
+            let mut output = [usize::default(); 2];
+
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
+        }
+
+        #[test]
+        fn consumes_element_from_second_when_it_is_less_than_first() {
+            let mut first = [1];
+            let mut second = [0];
+            let mut output = [usize::default(); 2];
+
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
+        }
+
+        #[test]
+        fn alternates_between_first_and_second_so_output_is_in_increasing_order() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [usize::default(); 6];
+
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
         fn appends_elements_of_first_when_longer_than_second() {
             let mut first = [2, 3, 4, 5];
             let mut second = [0, 1];
@@ -320,39 +353,6 @@ mod test {
         fn appends_elements_of_second_when_longer_than_first() {
             let mut first = [0, 1];
             let mut second = [2, 3, 4, 5];
-            let mut output = [usize::default(); 6];
-
-            iterative(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn first_greater() {
-            let mut first = [1];
-            let mut second = [0];
-            let mut output = [usize::default(); 2];
-
-            iterative(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, [0, 1]);
-        }
-
-        #[test]
-        fn second_greater() {
-            let mut first = [0];
-            let mut second = [1];
-            let mut output = [usize::default(); 2];
-
-            iterative(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, [0, 1]);
-        }
-
-        #[test]
-        fn back_and_forth() {
-            let mut first = [0, 2, 4];
-            let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
