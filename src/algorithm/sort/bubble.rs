@@ -231,6 +231,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via comb bubble sort.
 ///
+/// # Methodology
 /// Fundamentally the same as [`naive`], except instead of comparing directly
 /// adjacent elements, this variation compares elements separated by some
 /// decreasing gap thereby allowing elements to move large distances with only
