@@ -321,6 +321,7 @@ mod test {
         #[test]
         fn already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
+            debug_assert!(elements.is_sorted());
 
             naive(&mut elements);
 
