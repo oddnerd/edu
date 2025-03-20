@@ -174,7 +174,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let (second_left, second_right) = second.split_at_mut(intersect);
 
     let Some(partition_point) = usize::checked_add(middle, intersect) else {
-        unreachable!("`output.len() < usize::MAX` therefore this is too");
+        unreachable!("output can contain all elements from both inputs");
     };
 
     let (output_left, output_right) = output.split_at_mut(partition_point);
