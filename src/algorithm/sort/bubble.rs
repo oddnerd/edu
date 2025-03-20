@@ -200,14 +200,20 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn parallel<T: Ord>(elements: &mut [T]) {
-    let mut sorted = false;
+    // The entire input is sorted only if consecutive loops invoke no swaps.
+    let mut even_pairs_sorted = false;
+    let mut odd_pairs_sorted = false;
 
     // Flag to signify if pairs should be offset.
     let mut offset = false;
 
-    while !sorted {
-        // Assume no swaps are necessary.
-        sorted = true;
+    while !(even_pairs_sorted && odd_pairs_sorted) {
+        // Only on the second  Assume no swaps are necessary.
+        if offset {
+            odd_pairs_sorted = true;
+        } else {
+            even_pairs_sorted = true;
+        }
 
         let Some(elements) = elements.get_mut(usize::from(offset)..) else {
             debug_assert_eq!(elements.len(), 0, "only condition it is none");
@@ -221,7 +227,11 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
                 pair.swap(0, 1);
 
                 // A swap was necessary, so more might be too.
-                sorted = false;
+                if offset {
+                    odd_pairs_sorted = false;
+                } else {
+                    even_pairs_sorted = false;
+                }
             }
         }
 
