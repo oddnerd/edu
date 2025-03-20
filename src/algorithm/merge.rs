@@ -19,12 +19,12 @@
 /// #### Time Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(N) | O(N) | O(N) |
+/// | O(N) | 𝛀(N) | 𝚯(N) |
 ///
 /// #### Memory Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(1) | O(1) | O(1) |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -106,17 +106,17 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// ##### Executed Synchronously
 /// | Worst | Best | Average |
 /// | :-: |  :-: | :-: |
-/// | O(N ⋅ log N) | O(N ⋅ log N)| O(N ⋅ log N) |
+/// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
 ///
 /// ##### Executed Asynchronously
 /// | Worst | Best | Average |
 /// | :-: |  :-: | :-: |
-/// | O(log<sup>2</sup> N) | O(log<sup>2</sup> N) | O(log<sup>2</sup> N) |
+/// | O(log<sup>2</sup> N) | 𝛀(log<sup>2</sup> N) | 𝚯(log<sup>2</sup> N) |
 ///
 /// #### Memory Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(log N) | O(log N) | O(log N) |
+/// | O(log N) | 𝛀(log N) | 𝚯(log N) |
 ///
 /// # Examples
 /// ```

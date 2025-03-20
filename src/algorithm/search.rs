@@ -11,12 +11,12 @@
 /// #### Time Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(N) | O(1) | O(N) |
+/// | O(N) | 𝛀(1) | 𝚯(N) |
 ///
 /// #### Memory Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(1) | O(1) | O(1) |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Linear_search).
@@ -64,13 +64,13 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 /// # Performance
 /// #### Time Complexity
 /// | Worst | Best | Average |
-/// | :-: |  :-: | :-: |
-/// | O(log N) | O(1) | O(log N) |
+/// | :-: | :-: | :-: |
+/// | O(log N) | 𝛀(1) | 𝚯(log N) |
 ///
 /// #### Memory Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(1) | O(1) | O(1) |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Binary_search).
