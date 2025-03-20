@@ -2,9 +2,11 @@
 
 /// Sort `elements` via naive bubble sort.
 ///
-/// Iteratively 'bubble up' the largest yet to be sorted element by iterating
-/// adjacent pairs from the start of the list and swapping the largest element
-/// to the end until in sorted position.
+/// # Methodology
+/// Iterate through overlapping pairs of elements swapping the largest so it is
+/// closer to the end until the largest element has 'bubbled up' to the end
+/// of the unsorted elements. The element is now in sorted position so it can
+/// be discarded and the process repeated until all elements are sorted.
 ///
 /// # Performance
 /// #### Time Complexity
