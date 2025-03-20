@@ -24,7 +24,15 @@ impl<'a, T: 'a> IterMut<'a, T> {
     /// * `ptr` must point to `count` consecutive initialized instances of `T`.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     #[must_use]
     pub(in super::super) unsafe fn new(ptr: NonNull<T>, count: usize) -> Self {
         Self {
