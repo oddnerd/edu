@@ -102,9 +102,21 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// left halves can then be merged asynchronously of merging the right halves.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(log N) memory.
+/// #### Time Complexity
+/// ##### Executed Synchronously
+/// | Worst | Best | Average |
+/// | :-: |  :-: | :-: |
+/// | O(N * log N) | O(N * log N)| O(N * log N) |
 ///
-/// If ran asynchronously, this method takes O(log<sup>2</sup> N) time instead.
+/// ##### Executed Asynchronously
+/// | Worst | Best | Average |
+/// | :-: |  :-: | :-: |
+/// | O(log<sup>2</sup> N) | O(log<sup>2</sup> N) | O(log<sup>2</sup> N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(log N) | O(log N) | O(log N) |
 ///
 /// # Examples
 /// ```
