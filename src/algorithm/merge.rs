@@ -306,9 +306,9 @@ mod test {
         }
 
         #[test]
-        fn first_longer() {
-            let mut first = [0, 1, 3, 5];
-            let mut second = [2, 4];
+        fn appends_elements_of_first_when_longer_than_second() {
+            let mut first = [2, 3, 4, 5];
+            let mut second = [0, 1];
             let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
@@ -317,9 +317,9 @@ mod test {
         }
 
         #[test]
-        fn second_longer() {
-            let mut first = [2, 4];
-            let mut second = [0, 1, 3, 5];
+        fn appends_elements_of_second_when_longer_than_first() {
+            let mut first = [0, 1];
+            let mut second = [2, 3, 4, 5];
             let mut output = [usize::default(); 6];
 
             iterative(&mut first, &mut second, &mut output);
