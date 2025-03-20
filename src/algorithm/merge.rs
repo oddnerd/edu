@@ -192,7 +192,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 
     core::mem::swap(sorted_position, sorted_element);
 
-    // The following calls could be executed concurrently.
+    // The following calls could be executed in parallel.
     parallel(first_left, second_left, output_left);
     parallel(first_right, second_right, output_right);
 }
