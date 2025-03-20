@@ -252,6 +252,28 @@ mod test {
         }
 
         #[test]
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn first_slice_must_be_sorted_in_increasing_order() {
+            let mut first = [4, 2, 0];
+            let mut second = [1, 3, 5];
+            let mut output = [usize::default(); 6];
+
+            iterative(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn second_slice_must_be_sorted_in_increasing_order() {
+            let mut first = [0, 2, 4];
+            let mut second = [5, 3, 1];
+            let mut output = [usize::default(); 6];
+
+            iterative(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
         fn first_empty() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
