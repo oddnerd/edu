@@ -96,14 +96,12 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via bidirectional (cocktail shaker) bubble sort.
 ///
-/// The [`optimized`] solution moves larger elements to the end of the list
-/// faster than it can move smaller elements to the front because larger
-/// elements are successively swapped per each iteration of the inner loop
-/// whereas smaller elements can only move down per each iteration of the outer
-/// loop. In contrast, this implementation merely repeats the inner loop in the
-/// opposite direction thereby efficiently moving the largest element to the
-/// end of the list and the smallest to the beginning for each iteration of the
-/// outer loop.
+/// # Methodology
+/// Observe that because the [`optimized`] implementation iterates from the
+/// left of the input to the right, larger elements can move multiple positions
+/// towards their sorted position whereas smaller elements can only ever move
+/// one position towards theirs. In contrast, this implementation alternates
+/// iteration direction thereby having different performance characteristics.
 ///
 /// # Performance
 /// #### Time Complexity
