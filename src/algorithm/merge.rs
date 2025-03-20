@@ -301,9 +301,8 @@ mod test {
             let mut second = [];
             let mut output: [usize; 0] = [];
 
+            // Ideally, this will panic if it accesses invalid memory.
             iterative(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, []);
         }
 
         #[test]
