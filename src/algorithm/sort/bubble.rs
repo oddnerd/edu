@@ -134,11 +134,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     let mut rightward = true;
 
     while !unsorted.is_empty() {
-        let mut last_swap = if rightward {
-            0
-        } else {
-            elements.len()
-        };
+        let mut last_swap = if rightward { 0 } else { elements.len() };
 
         let bubble = |current: usize| {
             let Some(previous) = current.checked_sub(1) else {
@@ -156,7 +152,6 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
             unsorted.clone().for_each(bubble);
 
             unsorted = unsorted.start..last_swap;
-
         } else {
             unsorted.clone().rev().for_each(bubble);
 
@@ -548,7 +543,7 @@ mod test {
 
             parallel(&mut elements);
 
-            assert_eq!(elements, [0 ,1, 2, 3, 4, 5]);
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
     }
 

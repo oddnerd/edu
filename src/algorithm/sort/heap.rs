@@ -279,8 +279,7 @@ mod sift_down {
         let mut root = 0;
 
         loop {
-            let (Some(left_child), Some(right_child)) =
-                (left_child(root), right_child(root))
+            let (Some(left_child), Some(right_child)) = (left_child(root), right_child(root))
             else {
                 unreachable!("loop prevents a root without children");
             };
