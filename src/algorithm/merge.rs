@@ -42,13 +42,9 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     debug_assert!(first.is_sorted(), "elements must be sorted in increasing order");
     debug_assert!(second.is_sorted(), "elements must be sorted in increasing order");
 
-    let Some(elements) = usize::checked_add(first.len(), second.len()) else {
-        panic!("output must be larger than usize::MAX which is impossible");
-    };
-
     assert_eq!(
-        output.len(),
-        elements,
+        Some(output.len()),
+        usize::checked_add(first.len(), second.len()),
         "output length must be sum of input lengths"
     );
 
