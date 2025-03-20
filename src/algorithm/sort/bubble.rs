@@ -362,7 +362,7 @@ mod test {
         use super::*;
 
         #[test]
-        fn empty() {
+        fn handles_when_input_is_empty() {
             let mut elements: [usize; 0] = [];
 
             optimized(&mut elements);
@@ -371,7 +371,7 @@ mod test {
         }
 
         #[test]
-        fn single_element() {
+        fn handles_when_input_is_single_element() {
             let mut elements = [0];
 
             optimized(&mut elements);
@@ -380,8 +380,9 @@ mod test {
         }
 
         #[test]
-        fn already_sorted() {
+        fn does_not_modify_input_when_already_sorted() {
             let mut elements = [0, 1, 2, 3, 4, 5];
+            debug_assert!(elements.is_sorted());
 
             optimized(&mut elements);
 
@@ -389,7 +390,7 @@ mod test {
         }
 
         #[test]
-        fn must_swap() {
+        fn will_swap_elements_if_in_decreasing_order() {
             let mut elements = [1, 0];
 
             optimized(&mut elements);
@@ -398,7 +399,7 @@ mod test {
         }
 
         #[test]
-        fn odd_length() {
+        fn correctly_orders_elements_when_input_has_odd_length() {
             let mut elements = [2, 1, 0];
 
             optimized(&mut elements);
@@ -407,7 +408,7 @@ mod test {
         }
 
         #[test]
-        fn multiple_swaps() {
+        fn correctly_orders_elements_when_input_has_even_length() {
             let mut elements = [2, 0, 3, 1];
 
             optimized(&mut elements);
