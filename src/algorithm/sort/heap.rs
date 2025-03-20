@@ -386,7 +386,15 @@ mod construct_heap {
     /// Arrange `element` into max-heap (children less than parent) order.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N)| 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
         // All leaves will be ordered when their parent is sifted down.
         let last_parent = elements.len() / 2;
@@ -404,7 +412,15 @@ mod construct_heap {
     /// Arrange `element` into max-heap (children less than parent) order.
     ///
     /// # Performance
-    /// This method takes O(N * log N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     pub(super) fn top_down<T: Ord>(elements: &mut [T]) {
         for leaf in 1..=elements.len() {
             let Some(heap) = elements.get_mut(..leaf) else {
