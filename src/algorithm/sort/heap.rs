@@ -248,7 +248,7 @@ mod sift_down {
             let (Some(left_child), Some(right_child)) =
                 (left_child(root_index), right_child(root_index))
             else {
-                unreachable!("loop prevents a root without children big enough to overflow");
+                unreachable!("loop prevents a root without children");
             };
 
             let child_index = match (max_heap.get(left_child), max_heap.get(right_child)) {
