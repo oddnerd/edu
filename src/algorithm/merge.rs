@@ -210,7 +210,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// #### Time Complexity
 /// | Worst | Best | Average |
 /// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | |
+/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
 ///
 /// #### Memory Complexity
 /// | Worst | Best | Average |
@@ -228,6 +228,8 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// assert_eq!(slice, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
+    // TODO: determine average time complexity.
+
     assert!(middle <= elements.len(), "middle must be in bounds");
 
     let mut left = 0..middle;
