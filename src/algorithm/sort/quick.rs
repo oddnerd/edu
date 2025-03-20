@@ -60,8 +60,9 @@ fn recurse<T: Ord>(
 
 /// Sort `elements` via quick sort with Hoare's partition scheme.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// Place an element (the pivot) into sorted position by partitioning the
 /// elements on it, i.e., placing smaller elements before it and larger
@@ -165,8 +166,9 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via quick sort with Lomuto's partition scheme.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// Place an element into sorted position by partitioning the elements on it,
 /// i.e., placing smaller elements before it and larger elements after. This is
@@ -243,8 +245,9 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via quick sort with a three-way partition scheme.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// Place an element (the pivot) and all elements equivalent to it into sorted
 /// position by partitioning the elements on it, i.e., placing smaller elements
