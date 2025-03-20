@@ -268,7 +268,8 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 /// ```
 pub fn shell<T: Ord>(elements: &mut [T]) {
     let Some(log) = elements.len().checked_ilog2() else {
-        debug_assert_eq!(elements.len(), 0, "only condition it is none");
+        debug_assert!(elements.is_empty(), "only condition it is none");
+
         return;
     };
 
