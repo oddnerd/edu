@@ -183,7 +183,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     // sorted position for that middle element since we know how many elements
     // are less than it, so place it in the output and discard it from inputs.
     let Some((sorted_position, output_right)) = output_right.split_first_mut() else {
-        unreachable!("binary search yields and index within bounds");
+        unreachable!("binary search yields an index within bounds");
     };
 
     let Some((sorted_element, first_right)) = first_right.split_first_mut() else {
