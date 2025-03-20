@@ -87,19 +87,13 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
     recursive(remaining);
 
     // Move the last element down the list until sorted.
-    for unsorted_index in (1..elements.len()).rev() {
-        let Some(before_index) = unsorted_index.checked_sub(1) else {
+    for current in (1..elements.len()).rev() {
+        let Some(previous) = current.checked_sub(1) else {
             unreachable!("loop stops at index 1, so never zero");
         };
 
-        let (Some(current_element), Some(before_element)) =
-            (elements.get(unsorted_index), elements.get(before_index))
-        else {
-            unreachable!("loops ensure both indexes are in bounds");
-        };
-
-        if current_element < before_element {
-            elements.swap(unsorted_index, before_index);
+        if elements.get(previous) > elements.get(current) {
+            elements.swap(current, previous);
         } else {
             break;
         }
