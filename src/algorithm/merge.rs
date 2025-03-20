@@ -274,7 +274,7 @@ mod test {
         }
 
         #[test]
-        fn first_empty() {
+        fn is_elements_of_second_when_first_is_empty() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
             let mut output = [usize::default(); 6];
@@ -285,7 +285,7 @@ mod test {
         }
 
         #[test]
-        fn second_empty() {
+        fn is_elements_of_first_when_second_is_empty() {
             let mut first = [0, 1, 2, 3, 4, 5];
             let mut second = [];
             let mut output = [usize::default(); 6];
@@ -296,7 +296,7 @@ mod test {
         }
 
         #[test]
-        fn both_empty() {
+        fn handles_when_both_inputs_are_empty() {
             let mut first = [];
             let mut second = [];
             let mut output: [usize; 0] = [];
