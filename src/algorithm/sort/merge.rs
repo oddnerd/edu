@@ -261,12 +261,11 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
                 (None, None) => None,
             };
 
-            if let Some(input_index) = input_index {
-                elements.swap(output_index, input_index);
-            } else {
-                // TODO: what error though?
-                unreachable!("caller logic error");
-            }
+            let Some(input_index) = input_index else {
+                unreachable!("caller provided invalid ranges");
+            };
+
+            elements.swap(output_index, input_index);
         }
     }
 
