@@ -228,8 +228,16 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// assert_eq!(slice, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
+    assert!(middle < elements.len(), "middle must be in bounds");
+
     let mut left = 0..middle;
     let mut right = middle..elements.len();
+
+    debug_assert!(
+        elements.get(left.clone()).is_some_and(<[T]>::is_sorted)
+            && elements.get(right.clone()).is_some_and(<[T]>::is_sorted),
+        "elements must be sorted in increasing order"
+    );
 
     while !left.is_empty() && !right.is_empty() {
         if elements.get(left.start) <= elements.get(right.start) {
