@@ -77,21 +77,15 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
     while remaining > 1 {
         let mut last_swap = 0;
 
-        for current_index in 1..remaining {
-            let Some(previous_index) = current_index.checked_sub(1) else {
+        for current in 1..remaining {
+            let Some(previous) = current.checked_sub(1) else {
                 unreachable!("inner loop ensures current_index >= 1");
             };
 
-            let (Some(current_element), Some(previous_element)) =
-                (elements.get(current_index), elements.get(previous_index))
-            else {
-                unreachable!("outer loop ensures both indexes are in bounds");
-            };
+            if elements.get(previous) > elements.get(current) {
+                elements.swap(previous, current);
 
-            if previous_element > current_element {
-                elements.swap(previous_index, current_index);
-
-                last_swap = current_index;
+                last_swap = current;
             }
         }
 
