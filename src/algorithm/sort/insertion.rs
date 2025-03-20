@@ -78,7 +78,7 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 /// ```
 pub fn recursive<T: Ord>(elements: &mut [T]) {
     let Some((_last, remaining)) = elements.split_last_mut() else {
-        debug_assert_eq!(elements.len(), 0, "only condition it is none");
+        debug_assert!(elements.is_empty(), "only condition it is none");
 
         return;
     };
