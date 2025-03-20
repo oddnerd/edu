@@ -81,6 +81,10 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// Merge the `first` and `second` input into the `output` slice.
 ///
 /// <div class="warning">
+/// If either input is not sorted increasingly, the result is meaningless.
+/// </div>
+///
+/// <div class="warning">
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
