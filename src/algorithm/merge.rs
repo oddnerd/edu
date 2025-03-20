@@ -9,7 +9,7 @@
 /// # Panics
 /// If the length of `output` is not exactly the sum of input lengths.
 ///
-/// # Methodology
+/// # Algorithm
 /// Each input is independently iterated. While there is still an un-merged
 /// element from both, they are compared and the smaller value is pushed to the
 /// output. If/when only one of the inputs has un-merged elements, all those
@@ -91,7 +91,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// # Panics
 /// If the length of `output` is not exactly the sum of input lengths.
 ///
-/// # Methodology
+/// # Algorithm
 /// Find the index within the second input such that it would maintain sorted
 /// order if the middle element of the first input was inserted there. Notice
 /// that all elements of second input before that index occur before the middle

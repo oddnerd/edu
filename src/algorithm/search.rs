@@ -2,7 +2,7 @@
 
 /// Find the index of `desired` within `elements` using linear search.
 ///
-/// # Methodology
+/// # Algorithm
 /// The input elements are iterated through and compared against the desired
 /// value returning the index of the element if it is equivalent, or none if
 /// iteration finishes without finding a match.
@@ -51,7 +51,7 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 /// If `elements` is not sorted increasingly, the result is meaningless.
 /// </div>
 ///
-/// # Methodology
+/// # Algorithm
 /// An index range is kept whose elements could contain the desired value. The
 /// middle element of that range is compared against the desired value: if it
 /// is equivalent, then the index is returned; if the desired value is less

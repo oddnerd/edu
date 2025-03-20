@@ -2,7 +2,7 @@
 
 /// Sort `elements` via naive bubble sort.
 ///
-/// # Methodology
+/// # Algorithm
 /// Iterate through overlapping pairs of elements swapping the largest so it is
 /// closer to the end until the largest element has 'bubbled up' to the end
 /// of the unsorted elements. The element is now in sorted position so it can
@@ -45,7 +45,7 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via optimized bubble sort.
 ///
-/// # Methodology
+/// # Algorithm
 /// Fundamentally the same as the [`naive`] implementation, however the index
 /// of the most recent swap is saved. For each iteration, the elements after
 /// that index must be in sorted order so they can be discarded from the input.
@@ -96,7 +96,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via bidirectional (cocktail shaker) bubble sort.
 ///
-/// # Methodology
+/// # Algorithm
 /// Observe that because the [`optimized`] implementation iterates from the
 /// left of the input to the right, larger elements can move multiple positions
 /// towards their sorted position whereas smaller elements can only ever move
@@ -169,7 +169,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via parallel (odd-even) bubble sort.
 ///
-/// # Methodology
+/// # Algorithm
 /// Iterate through non-overlapping pairs of elements swapping the largest so
 /// it is closest to the end. Note that because each pair is independent, they
 /// can be compared in parallel. Repeat whilst alternating if elements are
@@ -231,7 +231,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via comb bubble sort.
 ///
-/// # Methodology
+/// # Algorithm
 /// Fundamentally the same as [`parallel`], except instead of comparing
 /// directly adjacent elements, this variation compares elements separated by
 /// some decreasing gap thereby allowing elements to move large distances with
