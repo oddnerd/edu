@@ -206,47 +206,26 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
     let mut offset = false;
 
     while !sorted {
+        // Assume no swaps are necessary.
         sorted = true;
 
-        // Sort pairs of elements starting from an even index.
-        // Each iteration of this loop can be executed in parallel.
-        for pair in elements.chunks_exact_mut(2) {
-            let Some((first, remaining)) = pair.split_first_mut() else {
-                unreachable!("chunks exact => pair has exactly two elements");
-            };
+        let Some(elements) = elements.get_mut(usize::from(offset)..) else {
+            debug_assert_eq!(elements.len(), 0, "only condition it is none");
 
-            let Some((last, _)) = remaining.split_last_mut() else {
-                unreachable!("chunks exact => pair has exactly two elements");
-            };
-
-            if first > last {
-                core::mem::swap(first, last);
-                sorted = false;
-            }
-        }
-
-        // Ignoring the first element offsets the pairs by one.
-        let Some((_, elements)) = elements.split_first_mut() else {
-            debug_assert!(elements.is_empty(), "only condition it is none");
             return;
         };
 
-        // Sort pairs of elements starting from an odd index.
         // Each iteration of this loop can be executed in parallel.
         for pair in elements.chunks_exact_mut(2) {
-            let Some((first, remaining)) = pair.split_first_mut() else {
-                unreachable!("chunks exact => pair has exactly two elements");
-            };
+            if pair.first() > pair.last() {
+                pair.swap(0, 1);
 
-            let Some((last, _)) = remaining.split_last_mut() else {
-                unreachable!("chunks exact => pair has exactly two elements");
-            };
-
-            if first > last {
-                core::mem::swap(first, last);
+                // A swap was necessary, so more might be too.
                 sorted = false;
             }
         }
+
+        offset = !offset;
     }
 }
 
