@@ -9,7 +9,15 @@
 /// until all elements have been moved into that sorted section.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -54,7 +62,15 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 /// to the left into sorted position within the sorted section.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N) | 𝛀(N) | 𝚯(N) |
 ///
 /// # Examples
 /// ```
@@ -108,7 +124,15 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 /// thereby making fewer comparisons.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -151,7 +175,15 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 /// of utilizing for loops.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Gnome_sort).
@@ -220,7 +252,17 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 /// constructing a complex gap sequence.
 ///
 /// # Performance
-/// This method takes O(N<sup>3/2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>3/2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N<sup>5/4</sup>)[^1] |
+///
+/// [^1]: Generally accepted conjecture based on experiment.
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Shellsort).
