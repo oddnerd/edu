@@ -4,6 +4,7 @@ use super::super::merge;
 
 /// Sort `elements` via top-down merge sort.
 ///
+/// # Algorithm
 /// Recursively divide `elements` into two halves until each contains only
 /// a single element and is therefore in sorted order. Then merge both
 /// independently sorted halves together thereby sorting them into one
@@ -46,6 +47,7 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 
 /// Sort `elements` via natural merge sort.
 ///
+/// # Algorithm
 /// Unlike traditional [`top_down`] merge sort, this algorithm takes advantage
 /// of natural runs of sorted elements. In effect, this variation first splits
 /// `elements` into naturally sorted sub-slices and then merges them thereby
@@ -104,10 +106,12 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 
 /// Sort `elements` via bottom-up merge sort.
 ///
-/// Consider the input to be adjacent subsections each containing only a single
-/// element, therefore each being independently sorted. For each pair of
-/// chunks, merge them together into a combined sorted subsection. Repeat
-/// until there exists only one sorted section containing all elements.
+/// # Algorithm
+/// In contrast to [`top_down`] which recurses down to sub-slices of a single
+/// element, this implementation iterates over a length starting at one element
+/// and dividing the input into chunks of that length which can then be merged
+/// to create a sorted sub-slice of double length effectively ascending the
+/// recursive stack without needing to first descend down.
 ///
 /// # Panics
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
@@ -154,9 +158,11 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 
 /// Sort `elements` via in-place merge sort.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
+/// # Algorithm
 /// Sort the left half of the slice into the right half so the right half is
 /// sorted and the left half is unsorted. Thenceforth sort the right half of
 /// the unsorted fraction into the left half, merge the sorted fraction into
