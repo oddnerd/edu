@@ -16,7 +16,7 @@ pub(in super::super) struct IterMut<'a, T> {
 }
 
 impl<'a, T: 'a> IterMut<'a, T> {
-    /// Construct from a `ptr` to `count` contigious initialized elements.
+    /// Construct from a pointer to an array and the number of elements.
     ///
     /// # Safety
     /// * `ptr` must have an address aligned for access to `T`.

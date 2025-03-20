@@ -16,7 +16,7 @@ pub(in super::super) struct Iter<'a, T> {
 }
 
 impl<'a, T: 'a> Iter<'a, T> {
-    /// Construct from a `ptr` to `count` contigious initialized elements.
+    /// Construct from a pointer to an array and the number of elements.
     ///
     /// # Safety
     /// * `ptr` must have an address aligned for access to `T`.
