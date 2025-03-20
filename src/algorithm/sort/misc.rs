@@ -2,14 +2,17 @@
 
 /// Sort `elements` via cycle sort.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
-/// From left to right, find the sorted position of the current element by
-/// counting how many elements to the right are less-than it. Iteratively swap
-/// it into sorted position (at the end of any run of equivalent elements
-/// already in sorted position) until the element whose sorted position is at
-/// the current position is swapped into the current position.
+/// # Algorithm
+/// Iterating from left to right, find the sorted position of the current
+/// element by counting how many elements to the right are less than it.
+/// Iteratively swap it into sorted position (at the end of any run of
+/// equivalent elements already in sorted position) until the element whose
+/// sorted position is at the current position is swapped into the current
+/// position.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
