@@ -275,30 +275,24 @@ pub fn shell<T: Ord>(elements: &mut [T]) {
 
     for exponent in (1..=log).rev() {
         let Some(gap) = usize::checked_pow(2, exponent) else {
-            unreachable!("length of elements fits in usize so this will too");
+            unreachable!("length of elements fits in `usize` so this will too");
         };
 
         let Some(gap) = gap.checked_sub(1) else {
-            unreachable!("loop ensures gap >= 2");
+            unreachable!("loop ensures `gap >= 2`");
         };
 
         for end in gap..elements.len() {
-            for current_index in (gap..=end).rev().step_by(gap) {
-                let Some(previous_index) = current_index.checked_sub(gap) else {
-                    unreachable!("inner loop ensures j >= gap => j >= 1");
+            for current in (gap..=end).rev().step_by(gap) {
+                let Some(previous) = current.checked_sub(gap) else {
+                    unreachable!("inner loop ensures `j >= gap` => `j >= 1`");
                 };
 
-                let (Some(current_element), Some(previous_element)) =
-                    (elements.get(current_index), elements.get(previous_index))
-                else {
-                    unreachable!("loops ensure indexes are within bounds");
-                };
-
-                if current_element >= previous_element {
+                if elements.get(current) >= elements.get(previous) {
                     break;
                 }
 
-                elements.swap(current_index, previous_index);
+                elements.swap(current, previous);
             }
         }
     }
