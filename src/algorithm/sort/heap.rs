@@ -264,13 +264,7 @@ mod sift_down {
                 (None, None) => break,
             };
 
-            let (Some(root_element), Some(child_element)) =
-                (max_heap.get(root_index), max_heap.get(child_index))
-            else {
-                unreachable!("in the loop => child exists => root exists");
-            };
-
-            if root_element < child_element {
+            if max_heap.get(root_index) < max_heap.get(child_index) {
                 max_heap.swap(root_index, child_index);
                 root_index = child_index;
             } else {
