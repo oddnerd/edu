@@ -334,7 +334,7 @@ mod sift_down {
         loop {
             let (Some(left_child), Some(right_child)) = (left_child(current), right_child(current))
             else {
-                unreachable!("loop prevents a root without children big enough to overflow");
+                unreachable!("loop ensures current is internal node with children");
             };
 
             current = match (max_heap.get(left_child), max_heap.get(right_child)) {
