@@ -88,13 +88,18 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
-/// For the convenience of implementation to not depend on a particular
-/// executor, this method executes synchronously within the single calling
-/// thread. However, the implementation is of a parallel algorithm that could
-/// be trivially modified to execute asynchronously.
-///
 /// # Panics
 /// If the length of `output` is not exactly the sum of input lengths.
+///
+/// # Methodology
+/// Find the index within the second input such that it would maintain sorted
+/// order if the middle element of the first input was inserted there. Notice
+/// that all elements of second input before that index occur before the middle
+/// element of the first input, and the sum of elements before the middle of
+/// the first input and the found index of the second input is the sorted
+/// position of that middle element. The first input can be split at that
+/// middle element, and the second input can be split at that found index. The
+/// left halves can then be merged asynchronously of merging the right halves.
 ///
 /// # Performance
 /// This method takes O(N * log N) time and consumes O(log N) memory.
