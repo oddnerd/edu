@@ -2,6 +2,12 @@
 
 /// Find the index of `desired` within `elements` using linear search.
 ///
+/// # Methodology
+///
+/// The input elements are iterated through and compared against the desired
+/// value returning the index of the element if it is equivalent, or none if
+/// iteration finishes without finding a match.
+///
 /// # Performance
 /// This method takes O(N) time and consumes O(1) memory.
 ///
@@ -36,6 +42,17 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 ///
 /// This method has the precondition that `elements` is sorted, otherwise
 /// the result is unspecified and meaningless.
+///
+/// # Methodology
+///
+/// An index range is kept whose elements could contain the desired value. The
+/// middle element of that range is compared against the desired value: if it
+/// is equivalent, then the index is returned; if the desired value is less
+/// than the middle element, then the upper bound of the range is updated to be
+/// the index; if the desired value is greater than the middle element, then
+/// the lower bound of the range is updated to be the index. The range is
+/// searched until either a matching element is found, or the lower and upper
+/// bounds become equivalent implying the desired element is not contained.
 ///
 /// # Performance
 /// This method takes O(log N) time and consumes O(1) memory.
