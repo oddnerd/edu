@@ -2,10 +2,11 @@
 
 /// Sort `elements` via iterative insertion sort.
 ///
+/// # Algorithm
 /// Starting from the first element of the slice which in isolation is a sorted
 /// subsection, iteratively move the element to the right of the sorted
 /// section to the left into sorted position within the sorted section
-/// until all elements have been moved into the sorted section.
+/// until all elements have been moved into that sorted section.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -48,6 +49,7 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via recursive insertion sort.
 ///
+/// # Algorithm
 /// Recursively sort all but the last element, then move the last element
 /// to the left into sorted position within the sorted section.
 ///
@@ -95,9 +97,12 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via binary insertion sort.
 ///
+/// <div class="warning">
 /// Note that this is non-stable meaning the order of equivalent elements is
 /// not preserved.
+/// </div>
 ///
+/// # Algorithm
 /// Similar to [`iterative`] except binary search is used to locate the index
 /// within the already sorted section the next unsorted element should go,
 /// thereby making fewer comparisons.
@@ -141,6 +146,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via gnome insertion sort.
 ///
+/// # Algorithm
 /// Similar to [`iterative`] except the index is manually manipulated instead
 /// of utilizing for loops.
 ///
@@ -194,8 +200,9 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via shell insertion sort.
 ///
+/// # Algorithm
 /// This variation sorts elements separated by some gap such that starting from
-/// some index, every element at an index offset by a multiple of gap is in
+/// some index, every element at an index offset by a multiple of the gap is in
 /// sorted order. This results in the entire list being gap many interleaved
 /// sorted sublists. The benefit of this variation is out-of-order elements are
 /// only compared to and swapped with elements within the gap sublist thereby
