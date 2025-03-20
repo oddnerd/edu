@@ -31,19 +31,13 @@
 /// ```
 pub fn naive<T: Ord>(elements: &mut [T]) {
     for sorted_position in (0..elements.len()).rev() {
-        for current_index in 0..sorted_position {
-            let Some(next_index) = current_index.checked_add(1) else {
+        for current in 0..sorted_position {
+            let Some(next) = current.checked_add(1) else {
                 unreachable!("loops ensure `current index <= usize::MAX - 1`");
             };
 
-            let (Some(current_element), Some(next_element)) =
-                (elements.get(current_index), elements.get(next_index))
-            else {
-                unreachable!("loops ensure both indexes are within bounds");
-            };
-
-            if current_element > next_element {
-                elements.swap(current_index, next_index);
+            if elements.get(current) > elements.get(next) {
+                elements.swap(current, next);
             }
         }
     }
