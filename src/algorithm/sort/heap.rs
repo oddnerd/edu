@@ -223,7 +223,15 @@ fn parent(child: usize) -> Option<usize> {
 /// Swap the leaf with its parent until the parent is greater.
 ///
 /// # Performance
-/// This method takes O(log N) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(log N) | 𝛀(log N)| 𝚯(log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 fn sift_up<T: Ord>(max_heap: &mut [T]) {
     let Some(mut current_index) = max_heap.len().checked_sub(1) else {
         debug_assert!(max_heap.is_empty(), "only condition it is none");
