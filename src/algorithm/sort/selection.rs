@@ -2,8 +2,9 @@
 
 /// Sort `elements` via naive selection sort.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// Assume the first unsorted element is the minimum, noting this is the sorted
 /// position for the minimum value. Iterate through the remaining unsorted
@@ -42,8 +43,9 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via optimized selection sort.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// In contrast to [`naive`], this implementation iterates through the unsorted
 /// elements and stores the index of the minimum element rather than swapping
@@ -131,8 +133,9 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via bidirectional selection sort.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// Unlike the [`naive`] implementation which only determines the minimum
 /// value whilst iterating through the unsorted elements, this implementation
@@ -188,8 +191,9 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via bingo selection sort.
 ///
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// Unlike [`optimized`] which sorts only a single _element_ with the minimum
 /// value, this implementation sorts all elements with the minimum _value_ into
