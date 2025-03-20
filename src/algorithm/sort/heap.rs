@@ -242,16 +242,16 @@ mod sift_down {
     /// # Performance
     /// This method takes O(log N) time and consumes O(1) memory.
     pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
-        let mut root_index = 0;
+        let mut root = 0;
 
         loop {
             let (Some(left_child), Some(right_child)) =
-                (left_child(root_index), right_child(root_index))
+                (left_child(root), right_child(root))
             else {
                 unreachable!("loop prevents a root without children");
             };
 
-            let child_index = match (max_heap.get(left_child), max_heap.get(right_child)) {
+            let child = match (max_heap.get(left_child), max_heap.get(right_child)) {
                 (Some(left), Some(right)) => {
                     if left < right {
                         right_child
@@ -264,9 +264,9 @@ mod sift_down {
                 (None, None) => break,
             };
 
-            if max_heap.get(root_index) < max_heap.get(child_index) {
-                max_heap.swap(root_index, child_index);
-                root_index = child_index;
+            if max_heap.get(root) < max_heap.get(child) {
+                max_heap.swap(root, child);
+                root = child;
             } else {
                 break;
             }
