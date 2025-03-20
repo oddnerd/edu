@@ -75,7 +75,7 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 /// assert_eq!(index, None);
 /// ```
 pub fn binary<T: Ord + core::fmt::Debug>(elements: &[T], desired: &T) -> Option<usize> {
-    debug_assert!(elements.is_sorted(), "required precondition");
+    debug_assert!(elements.is_sorted(), "elements must be sorted");
 
     let mut range = 0..elements.len();
 
