@@ -35,13 +35,13 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
         let (sorted, _) = elements.split_at_mut(sorted_length);
 
         // Move the last element down the list until sorted.
-        for unsorted_index in (1..sorted.len()).rev() {
-            let Some(before_index) = unsorted_index.checked_sub(1) else {
+        for current in (1..sorted.len()).rev() {
+            let Some(previous) = current.checked_sub(1) else {
                 unreachable!("loop stops at index 1, so never zero");
             };
 
-            if sorted.get(unsorted_index) < sorted.get(before_index) {
-                sorted.swap(unsorted_index, before_index);
+            if sorted.get(previous) > sorted.get(current) {
+                sorted.swap(current, previous);
             } else {
                 break;
             }
