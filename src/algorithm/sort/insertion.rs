@@ -40,13 +40,7 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
                 unreachable!("loop stops at index 1, so never zero");
             };
 
-            let (Some(current_element), Some(before_element)) =
-                (sorted.get(unsorted_index), sorted.get(before_index))
-            else {
-                unreachable!("loops ensure both indexes are in bounds");
-            };
-
-            if current_element < before_element {
+            if sorted.get(unsorted_index) < sorted.get(before_index) {
                 sorted.swap(unsorted_index, before_index);
             } else {
                 break;
