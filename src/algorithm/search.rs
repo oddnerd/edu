@@ -39,7 +39,9 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 
 /// Find the index of `desired` within `elements` using binary search.
 ///
+/// <div class="warning">
 /// If `elements` is not sorted increasingly, the result is meaningless.
+/// </div>
 ///
 /// # Methodology
 /// An index range is kept whose elements could contain the desired value. The
