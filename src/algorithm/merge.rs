@@ -544,7 +544,25 @@ mod test {
         use super::*;
 
         #[test]
-        fn first_empty() {
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn first_slice_must_be_sorted_in_increasing_order() {
+            let mut elements = [4, 2, 0, 1, 3, 5];
+
+            in_place(&mut elements, 3);
+        }
+
+        #[test]
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn second_slice_must_be_sorted_in_increasing_order() {
+            let mut elements = [0, 2, 4, 5, 3, 1];
+
+            in_place(&mut elements, 3);
+        }
+
+        #[test]
+        fn is_elements_of_second_when_first_is_empty() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
             in_place(&mut elements, 0);
@@ -553,7 +571,7 @@ mod test {
         }
 
         #[test]
-        fn second_empty() {
+        fn is_elements_of_first_when_second_is_empty() {
             let mut elements = [0, 1, 2, 3, 4, 5];
 
             in_place(&mut elements, 6);
@@ -562,43 +580,15 @@ mod test {
         }
 
         #[test]
-        fn both_empty() {
+        fn handles_when_both_inputs_are_empty() {
             let mut elements: [usize; 0] = [];
 
+            // Ideally, this will panic if it accesses invalid memory.
             in_place(&mut elements, 0);
-
-            assert_eq!(elements, []);
         }
 
         #[test]
-        fn first_longer() {
-            let mut elements = [0, 1, 3, 5, 2, 4];
-
-            in_place(&mut elements, 4);
-
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn second_longer() {
-            let mut elements = [2, 4, 0, 1, 3, 5];
-
-            in_place(&mut elements, 2);
-
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn first_greater() {
-            let mut elements = [1, 0];
-
-            in_place(&mut elements, 1);
-
-            assert_eq!(elements, [0, 1]);
-        }
-
-        #[test]
-        fn second_greater() {
+        fn consumes_element_from_first_when_it_is_less_than_second() {
             let mut elements = [0, 1];
 
             in_place(&mut elements, 1);
@@ -607,10 +597,37 @@ mod test {
         }
 
         #[test]
-        fn back_and_forth() {
+        fn consumes_element_from_second_when_it_is_less_than_first() {
+            let mut elements = [1, 0];
+
+            in_place(&mut elements, 1);
+
+            assert_eq!(elements, [0, 1]);
+        }
+
+        #[test]
+        fn alternates_between_first_and_second_so_output_is_in_increasing_order() {
             let mut elements = [0, 2, 4, 1, 3, 5];
 
             in_place(&mut elements, 3);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn appends_elements_of_first_when_longer_than_second() {
+            let mut elements = [2, 3, 4, 5, 0, 1];
+
+            in_place(&mut elements, 4);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn appends_elements_of_second_when_longer_than_first() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+
+            in_place(&mut elements, 2);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
