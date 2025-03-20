@@ -2,9 +2,10 @@
 
 /// Merge the `first` and `second` slice into the `output` slice.
 ///
+/// If either input is not sorted increasingly, the result is meaningless.
+///
 /// # Panics
-/// This method has the precondition that `output` has the _exact_ same length
-/// as the sum of the input lengths.
+/// If the length of `output` is not exactly the sum of input lengths.
 ///
 /// # Methodology
 /// Each input is independently iterated. While there is still an un-merged
