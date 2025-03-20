@@ -272,6 +272,8 @@ pub fn comb<T: Ord>(elements: &mut [T]) {
 
         if gap <= 1 {
             gap = 1;
+
+            // This is the base case, so assume no swaps are necessary.
             sorted = true;
         }
 
@@ -283,6 +285,7 @@ pub fn comb<T: Ord>(elements: &mut [T]) {
             if elements.get(other) > elements.get(current) {
                 elements.swap(other, current);
 
+                // A swap was necessary, so more might be too.
                 sorted = false;
             }
         }
