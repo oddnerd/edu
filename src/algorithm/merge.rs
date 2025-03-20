@@ -199,6 +199,10 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 
 /// Merge independently sorted `[..middle]` and `[middle..]` together in-place.
 ///
+/// <div class="warning">
+/// If either input is not sorted increasingly, the result is meaningless.
+/// </div>
+///
 /// # Panics
 /// This panics if the provided `middle` is out of bounds.
 ///
