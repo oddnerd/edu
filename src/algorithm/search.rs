@@ -93,38 +93,34 @@ mod test {
         use super::*;
 
         #[test]
-        fn empty() {
+        fn is_none_when_input_contains_no_elements() {
             let elements: [usize; 0] = [];
 
-            assert_eq!(linear(&elements, &0), None);
+            let actual = linear(&elements, &12345);
+
+            assert_eq!(actual, None);
         }
 
         #[test]
         fn yields_correct_index_when_contained() {
-            let elements = [0, 1, 2, 3, 4, 5];
+            const ELEMENTS: usize = 8;
 
-            assert_eq!(linear(&elements, &2), Some(2));
-        }
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-        #[test]
-        fn can_find_first_element() {
-            let elements = [0, 1, 2, 3, 4, 5];
+            for desired in 0..ELEMENTS {
+                let actual = linear(&elements, &desired);
 
-            assert_eq!(linear(&elements, &0), Some(0));
-        }
-
-        #[test]
-        fn can_find_last_element() {
-            let elements = [0, 1, 2, 3, 4, 5];
-
-            assert_eq!(linear(&elements, &5), Some(5));
+                assert_eq!(actual, Some(desired));
+            }
         }
 
         #[test]
         fn yields_none_when_not_contained() {
             let elements = [0, 1, 2, 3, 4, 5];
 
-            assert_eq!(linear(&elements, &6), None);
+            let actual = linear(&elements, &12345);
+
+            assert_eq!(actual, None);
         }
     }
 
@@ -132,38 +128,52 @@ mod test {
         use super::*;
 
         #[test]
-        fn empty() {
+        fn is_none_when_input_contains_no_elements() {
             let elements: [usize; 0] = [];
 
-            assert_eq!(binary(&elements, &0), None);
+            let actual = binary(&elements, &12345);
+
+            assert_eq!(actual, None);
         }
 
         #[test]
         fn yields_correct_index_when_contained() {
-            let elements = [0, 1, 2, 3, 4, 5];
+            const ELEMENTS: usize = 8;
 
-            assert_eq!(binary(&elements, &2), Some(2));
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            for desired in 0..ELEMENTS {
+                let actual = binary(&elements, &desired);
+
+                assert_eq!(actual, Some(desired));
+            }
         }
 
         #[test]
-        fn can_find_first_element() {
-            let elements = [0, 1, 2, 3, 4, 5];
+        fn yields_none_when_not_contained_and_would_be_first_element() {
+            let elements = [1, 2, 3, 4, 5];
 
-            assert_eq!(binary(&elements, &0), Some(0));
+            let actual = binary(&elements, &0);
+
+            assert_eq!(actual, None);
         }
 
         #[test]
-        fn can_find_last_element() {
-            let elements = [0, 1, 2, 3, 4, 5];
+        fn yields_none_when_not_contained_and_would_be_last_element() {
+            let elements = [0, 1, 2, 3, 4];
 
-            assert_eq!(binary(&elements, &5), Some(5));
+            let actual = binary(&elements, &5);
+
+            assert_eq!(actual, None);
         }
 
         #[test]
-        fn yields_none_when_not_contained() {
-            let elements = [0, 1, 2, 3, 4, 5];
+        fn yields_none_when_not_contained_and_would_be_middle_element() {
+            let elements = [0, 1, 2, 4, 5];
 
-            assert_eq!(binary(&elements, &6), None);
+            let actual = binary(&elements, &3);
+
+            assert_eq!(actual, None);
         }
     }
 }
