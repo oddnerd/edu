@@ -542,7 +542,7 @@ mod test {
         }
 
         #[test]
-        fn does_not_exit_early_when_first_pairs_are_internally_sorted() {
+        fn does_not_exit_early_when_even_pairs_are_internally_sorted() {
             // Note that (0, 5), (2, 3), (1, 4) are all internally sorted.
             let mut elements = [0, 5, 2, 3, 1, 4];
 
