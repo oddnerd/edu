@@ -60,39 +60,25 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 pub fn binary<T: Ord + core::fmt::Debug>(elements: &[T], desired: &T) -> Option<usize> {
     debug_assert!(elements.is_sorted(), "required precondition");
 
-    let mut left = 0;
+    let mut range = 0..elements.len();
 
-    let mut right = elements.len().checked_sub(1)?;
+    while !range.is_empty() {
+        let middle = usize::midpoint(range.start, range.end);
 
-    while left <= right {
-        let offset = left.abs_diff(right) / 2;
-
-        let Some(middle) = left.checked_add(offset) else {
-            unreachable!("at most equal to right, hence cannot overflow");
+        let Some(element) = elements.get(middle) else {
+            unreachable!("range is not empty so index is in bounds");
         };
 
-        let Some(current) = elements.get(middle) else {
-            unreachable!("loop ensures index is within bounds");
-        };
+        range = match element.cmp(desired) {
+            core::cmp::Ordering::Equal => return Some(middle),
 
-        if current == desired {
-            return Some(middle);
-        }
+            core::cmp::Ordering::Greater => range.start..middle,
 
-        if current < desired {
-            let Some(middle_incremented) = middle.checked_add(1) else {
-                // This implies the last element does not match, so not found.
-                break;
-            };
-
-            left = middle_incremented;
-        } else {
-            let Some(middle_decremented) = middle.checked_sub(1) else {
-                // This implies the first element does not match, so not found.
-                break;
-            };
-
-            right = middle_decremented;
+            #[expect(
+                clippy::arithmetic_side_effects,
+                reason = "loop ensures middle is at most `usize::MAX - 1` so incremented cannot fail"
+            )]
+            core::cmp::Ordering::Less => middle + 1..range.end,
         }
     }
 
