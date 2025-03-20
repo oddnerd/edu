@@ -88,24 +88,25 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
     let mut unsorted = elements.len();
 
     while unsorted > 1 {
+        // The heap has yet to be constructed, and this iteration will
+        // sift down the new root at index `heap` into the existing heap.
         if root > 0 {
-            // The heap has yet to be constructed, and this iteration will
-            // sift down the new root at index `heap` into the existing heap.
             if let Some(decremented) = root.checked_sub(1) {
                 root = decremented;
             } else {
                 unreachable!("outer if ensures `root > 0`");
             }
-        } else {
+        }
+        // The heap has been constructed, hence `elements[0]` is the max
+        // element which can therefore be swapped into sorted order, and
+        // this iteration will sift down the leaf swapped with the root.
+        else {
             if let Some(decremented) = unsorted.checked_sub(1) {
                 unsorted = decremented;
             } else {
                 unreachable!("the loop exits when the variable becomes zero");
             }
 
-            // The heap has been constructed, hence `elements[0]` is the max
-            // element which can therefore be swapped into sorted order, and
-            // this iteration will sift down the leaf swapped with the root.
             elements.swap(unsorted, 0);
         }
 
