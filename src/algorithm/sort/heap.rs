@@ -49,6 +49,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via bottom-up heap sort with inline sift-down optimization.
 ///
+/// # Algorithm
 /// The implementation of [`bottom_up`] first creates a max-heap, and then
 /// separately uses that structure to obtain elements in sorted order thereby
 /// having two independent execution paths which ultimately invoke
