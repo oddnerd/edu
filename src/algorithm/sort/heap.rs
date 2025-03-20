@@ -170,7 +170,15 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 /// Index of the left child of the node at `root` in a binary heap.
 ///
 /// # Performance
-/// This method takes O(1) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1)| 𝚯(1) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 #[inline]
 fn left_child(root: usize) -> Option<usize> {
     root.checked_mul(2).and_then(|index| index.checked_add(1))
@@ -179,7 +187,15 @@ fn left_child(root: usize) -> Option<usize> {
 /// Index of the right child of the node at `root` in a binary heap.
 ///
 /// # Performance
-/// This method takes O(1) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1)| 𝚯(1) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 #[inline]
 fn right_child(root: usize) -> Option<usize> {
     root.checked_mul(2).and_then(|index| index.checked_add(2))
@@ -188,7 +204,15 @@ fn right_child(root: usize) -> Option<usize> {
 /// Index of the parent of the node at `child` in a binary heap.
 ///
 /// # Performance
-/// This method takes O(1) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1)| 𝚯(1) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 #[inline]
 fn parent(child: usize) -> Option<usize> {
     child.checked_sub(1).map(|index| index / 2)
