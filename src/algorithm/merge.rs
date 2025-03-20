@@ -16,7 +16,15 @@
 /// elements are pushed in order to the output.
 ///
 /// # Performance
-/// This method takes O(N) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N) | O(N) | O(N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | O(1) | O(1) |
 ///
 /// # Examples
 /// ```
