@@ -6,11 +6,12 @@
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
-/// Assume the first unsorted element is the minimum, noting this is the sorted
-/// position for the minimum value. Iterate through the remaining unsorted
-/// elements comparing it with that first, and swapping whenever smaller. This
-/// results in the overall minimum unsorted value being swapped into sorted
-/// position. Repeat until all elements are sorted.
+/// # Algorithm
+/// Iterate through the elements from left to right. Note that the current
+/// position is the sorted position for the overall smallest rightward element.
+/// Iterate through those rightward elements comparing it with the current and
+/// swapping if it is smaller thereby placing the smallest element into sorted
+/// position.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
@@ -47,6 +48,7 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
+/// # Algorithm
 /// In contrast to [`naive`], this implementation iterates through the unsorted
 /// elements and stores the index of the minimum element rather than swapping
 /// the current smallest into sorted position. This means the one and only swap
@@ -87,6 +89,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via stable selection sort.
 ///
+/// # Algorithm
 /// This implementation selects the minimum element the same as the
 /// [`optimized`] variant, but instead of swapping it into position, it rotates
 /// the elements in-between the sorted position and overall minimum unsorted
@@ -137,6 +140,7 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
+/// # Algorithm
 /// Unlike the [`naive`] implementation which only determines the minimum
 /// value whilst iterating through the unsorted elements, this implementation
 /// also determines the maximum placing the minimum at the leftmost position
@@ -195,6 +199,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
+/// # Algorithm
 /// Unlike [`optimized`] which sorts only a single _element_ with the minimum
 /// value, this implementation sorts all elements with the minimum _value_ into
 /// sorted position thereby being more efficient for inputs with duplicates.
