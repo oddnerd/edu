@@ -1,6 +1,6 @@
 //! Implementations of [Merge](https://en.wikipedia.org/wiki/Merge_algorithm).
 
-/// Merge two sorted slices into one `output` slice.
+/// Merge the `first` and `second` slice into the `output` slice.
 ///
 /// # Panics
 /// This method has the precondition that `output` has the _exact_ same length
@@ -59,7 +59,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     }
 }
 
-/// Merge two sorted slices into one `output` slice.
+/// Merge the `first` and `second` slice into the `output` slice.
 ///
 /// This algorithm is _NOT_ stable meaning the order of equal elements
 /// is _NOT_ guaranteed.
