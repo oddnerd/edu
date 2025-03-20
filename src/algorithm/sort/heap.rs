@@ -110,7 +110,7 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
         }
 
         let Some(heap) = elements.get_mut(root..unsorted) else {
-            unreachable!("both bounds are less than the number of elements");
+            unreachable!("loop ensures both are within bounds");
         };
 
         sift_down::top_down(heap);
