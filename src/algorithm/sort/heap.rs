@@ -356,7 +356,7 @@ mod sift_down {
         loop {
             if max_heap.first() > max_heap.get(current) {
                 let Some(parent) = parent(current) else {
-                    unreachable!("loop exits before `root == 0`");
+                    unreachable!("`root != 0` => not overall root => has children");
                 };
 
                 current = parent;
@@ -370,7 +370,7 @@ mod sift_down {
             max_heap.swap(0, current);
 
             let Some(parent) = parent(current) else {
-                unreachable!("loop exits upon `root == 0`");
+                unreachable!("`root != 0` => not overall root => has children");
             };
 
             current = parent;
