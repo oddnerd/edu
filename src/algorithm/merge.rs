@@ -6,6 +6,12 @@
 /// This method has the precondition that `output` has the _exact_ same length
 /// as the sum of the input lengths.
 ///
+/// # Methodology
+/// Each input is independently iterated. While there is still an un-merged
+/// element from both, they are compared and the smaller value is pushed to the
+/// output. If/when only one of the inputs has un-merged elements, all those
+/// elements are pushed in order to the output.
+///
 /// # Performance
 /// This method takes O(N) time and consumes O(1) memory.
 ///
