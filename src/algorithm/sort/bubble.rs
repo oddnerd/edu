@@ -232,10 +232,10 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 /// Sort `elements` via comb bubble sort.
 ///
 /// # Methodology
-/// Fundamentally the same as [`naive`], except instead of comparing directly
-/// adjacent elements, this variation compares elements separated by some
-/// decreasing gap thereby allowing elements to move large distances with only
-/// a single swap. This effectively does to bubble sort what the
+/// Fundamentally the same as [`parallel`], except instead of comparing
+/// directly adjacent elements, this variation compares elements separated by
+/// some decreasing gap thereby allowing elements to move large distances with
+/// only a single swap. This effectively does to bubble sort what the
 /// [`super::insertion::shell`] variation does to insertion sort.
 ///
 /// # Performance
@@ -275,19 +275,13 @@ pub fn comb<T: Ord>(elements: &mut [T]) {
             sorted = true;
         }
 
-        for current_index in gap..elements.len() {
-            let Some(gap_index) = current_index.checked_sub(gap) else {
+        for current in gap..elements.len() {
+            let Some(other) = current.checked_sub(gap) else {
                 unreachable!("loop ensures `current_index >= gap`");
             };
 
-            let (Some(current_element), Some(gap_element)) =
-                (elements.get(current_index), elements.get(gap_index))
-            else {
-                unreachable!("loop ensures both indexes are within bounds");
-            };
-
-            if gap_element > current_element {
-                elements.swap(gap_index, current_index);
+            if elements.get(other) > elements.get(current) {
+                elements.swap(other, current);
 
                 sorted = false;
             }
