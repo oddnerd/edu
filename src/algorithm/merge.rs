@@ -393,7 +393,49 @@ mod test {
         use super::*;
 
         #[test]
-        fn first_empty() {
+        #[should_panic = "output length must be sum of input lengths"]
+        fn length_of_output_cannot_be_smaller_than_sum_of_input_lengths() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [];
+
+            parallel(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[should_panic = "output length must be sum of input lengths"]
+        fn length_of_output_cannot_be_larger_than_sum_of_input_lengths() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [usize::default(); 7];
+
+            parallel(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn first_slice_must_be_sorted_in_increasing_order() {
+            let mut first = [4, 2, 0];
+            let mut second = [1, 3, 5];
+            let mut output = [usize::default(); 6];
+
+            parallel(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn second_slice_must_be_sorted_in_increasing_order() {
+            let mut first = [0, 2, 4];
+            let mut second = [5, 3, 1];
+            let mut output = [usize::default(); 6];
+
+            parallel(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        fn is_elements_of_second_when_first_is_empty() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
             let mut output = [usize::default(); 6];
@@ -404,7 +446,7 @@ mod test {
         }
 
         #[test]
-        fn second_empty() {
+        fn is_elements_of_first_when_second_is_empty() {
             let mut first = [0, 1, 2, 3, 4, 5];
             let mut second = [];
             let mut output = [usize::default(); 6];
@@ -415,51 +457,17 @@ mod test {
         }
 
         #[test]
-        fn both_empty() {
+        fn handles_when_both_inputs_are_empty() {
             let mut first = [];
             let mut second = [];
             let mut output: [usize; 0] = [];
 
+            // Ideally, this will panic if it accesses invalid memory.
             parallel(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, []);
         }
 
         #[test]
-        fn first_longer() {
-            let mut first = [0, 1, 3, 5];
-            let mut second = [2, 4];
-            let mut output = [usize::default(); 6];
-
-            parallel(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn second_longer() {
-            let mut first = [2, 4];
-            let mut second = [0, 1, 3, 5];
-            let mut output = [usize::default(); 6];
-
-            parallel(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn first_greater() {
-            let mut first = [1];
-            let mut second = [0];
-            let mut output = [usize::default(); 2];
-
-            parallel(&mut first, &mut second, &mut output);
-
-            assert_eq!(output, [0, 1]);
-        }
-
-        #[test]
-        fn second_greater() {
+        fn consumes_element_from_first_when_it_is_less_than_second() {
             let mut first = [0];
             let mut second = [1];
             let mut output = [usize::default(); 2];
@@ -470,7 +478,18 @@ mod test {
         }
 
         #[test]
-        fn back_and_forth() {
+        fn consumes_element_from_second_when_it_is_less_than_first() {
+            let mut first = [1];
+            let mut second = [0];
+            let mut output = [usize::default(); 2];
+
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1]);
+        }
+
+        #[test]
+        fn alternates_between_first_and_second_so_output_is_in_increasing_order() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
@@ -481,23 +500,25 @@ mod test {
         }
 
         #[test]
-        #[should_panic = "output length must be sum of input lengths"]
-        fn output_cannot_be_smaller() {
-            let mut first = [0, 2, 4];
-            let mut second = [1, 3, 5];
-            let mut output = [];
+        fn appends_elements_of_first_when_longer_than_second() {
+            let mut first = [2, 3, 4, 5];
+            let mut second = [0, 1];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        #[should_panic = "output length must be sum of input lengths"]
-        fn output_cannot_be_larger() {
-            let mut first = [0, 2, 4];
-            let mut second = [1, 3, 5];
-            let mut output = [usize::default(); 256];
+        fn appends_elements_of_second_when_longer_than_first() {
+            let mut first = [0, 1];
+            let mut second = [2, 3, 4, 5];
+            let mut output = [usize::default(); 6];
 
             parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
     }
 
