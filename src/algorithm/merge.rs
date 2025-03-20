@@ -254,8 +254,7 @@ pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
             unsorted.rotate_right(1);
             _ = right.next();
 
-            let (Some(updated_left_start), Some(updated_left_end)) =
-                (left.start.checked_add(1), left.end.checked_add(1))
+            let (Some(start), Some(end)) = (left.start.checked_add(1), left.end.checked_add(1))
             else {
                 debug_assert!(
                     left.start == usize::MAX || left.end == usize::MAX,
@@ -266,7 +265,7 @@ pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
                 return;
             };
 
-            left = updated_left_start..updated_left_end;
+            left = start..end;
         }
     }
 }
