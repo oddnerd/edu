@@ -95,14 +95,11 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
         return;
     }
 
+    // Determine the number of front elements in sorted order.
     let mut length: usize = 1;
 
     for pair in elements.windows(2) {
-        let (Some(before), Some(after)) = (pair.first(), pair.last()) else {
-            unreachable!("windows yields exactly two elements");
-        };
-
-        if before > after {
+        if pair.first() > pair.last() {
             break;
         }
 
@@ -113,6 +110,7 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
         }
     }
 
+    // Split that run of naturally sorted elements and sort the rest.
     let (_sorted_input, unsorted_input) = elements.split_at_mut(length);
     let (sorted_auxiliary, unsorted_auxiliary) = auxiliary.split_at_mut(length);
 
