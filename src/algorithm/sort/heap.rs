@@ -2,6 +2,7 @@
 
 /// Sort `elements` via bottom-up heap sort.
 ///
+/// # Algorithm
 /// Starting from lone elements which are themselves max-heap ordered,
 /// iteratively join these subtrees by sifting down the element corresponding
 /// to their parent until all elements are ordered. The max element (the root)
