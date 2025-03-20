@@ -134,8 +134,8 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn binary<T: Ord>(elements: &mut [T]) {
-    for next in 1..elements.len() {
-        let (sorted, unsorted) = elements.split_at(next);
+    for current in 1..elements.len() {
+        let (sorted, unsorted) = elements.split_at(current);
 
         // The next element to be sorted.
         let Some(unsorted) = unsorted.first() else {
@@ -148,7 +148,7 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
         };
 
         // The elements between that index and the element being sorted.
-        let Some(to_rotate) = elements.get_mut(sorted..=next) else {
+        let Some(to_rotate) = elements.get_mut(sorted..=current) else {
             unreachable!("both indexes in bound hence the range is in bound");
         };
 
