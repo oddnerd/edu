@@ -45,10 +45,10 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via optimized bubble sort.
 ///
-/// Fundamentally the same as the [`naive`] implementation, but takes advantage
-/// of the fact that if no swap occurs past some index, then the elements
-/// after that index were proven to be sorted by that iteration hence they do
-/// not need to be compared against in future iteration.
+/// # Methodology
+/// Fundamentally the same as the [`naive`] implementation, however the index
+/// of the most recent swap is saved. For each iteration, the elements after
+/// that index must be in sorted order so they can be discarded from the input.
 ///
 /// # Performance
 /// #### Time Complexity
