@@ -244,15 +244,14 @@ pub fn in_place<T: Ord>(elements: &mut [T], middle: usize) {
             // Already in sorted position, advance to next element.
             _ = left.next();
         } else {
-            let Some(rest_of_left_and_first_of_right) = elements.get_mut(left.start..=right.start)
-            else {
-                unreachable!("provided `middle` is in bounds, this is too");
+            let Some(unsorted) = elements.get_mut(left.start..=right.start) else {
+                unreachable!("inside loop => ranges are in bounds");
             };
 
             // This places the first element of the right in front of the rest
             // of the left since it must be less than them. Note that this
             // is O(N) significantly contributing to time.
-            rest_of_left_and_first_of_right.rotate_right(1);
+            unsorted.rotate_right(1);
             _ = right.next();
 
             let (Some(updated_left_start), Some(updated_left_end)) =
