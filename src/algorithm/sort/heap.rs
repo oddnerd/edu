@@ -266,7 +266,15 @@ mod sift_down {
     /// are less than it, thereby repairing the max-heap.
     ///
     /// # Performance
-    /// This method takes O(log N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(log N) | 𝛀(log N)| 𝚯(log N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
         let mut root = 0;
 
@@ -310,7 +318,15 @@ mod sift_down {
     /// worse performance for cheap comparisons.
     ///
     /// # Performance
-    /// This method takes O(log N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(log N) | 𝛀(log N)| 𝚯(log N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     pub(super) fn bottom_up<T: Ord>(max_heap: &mut [T]) {
         let mut current = 0;
 
