@@ -84,10 +84,10 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
     let mut root = elements.len() / 2;
 
     // This is how many elements remain in the heap and have yet to be moved
-    // into sorted order. This implies `remaining_unsorted..` are sorted.
-    let mut remaining_unsorted = elements.len();
+    // into sorted order. This implies `unsorted..` are sorted.
+    let mut unsorted = elements.len();
 
-    while remaining_unsorted > 1 {
+    while unsorted > 1 {
         if root > 0 {
             // The heap has yet to be constructed, and this iteration will
             // sift down the new root at index `heap` into the existing heap.
@@ -97,8 +97,8 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
                 unreachable!("this branch is not executed when the variable becomes zero");
             }
         } else {
-            if let Some(decremented) = remaining_unsorted.checked_sub(1) {
-                remaining_unsorted = decremented;
+            if let Some(decremented) = unsorted.checked_sub(1) {
+                unsorted = decremented;
             } else {
                 unreachable!("the loop exits when the variable becomes zero");
             }
@@ -106,10 +106,10 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
             // The heap has been constructed, hence `elements[0]` is the max
             // element which can therefore be swapped into sorted order, and
             // this iteration will sift down the leaf swapped with the root.
-            elements.swap(remaining_unsorted, 0);
+            elements.swap(unsorted, 0);
         }
 
-        let Some(heap) = elements.get_mut(root..remaining_unsorted) else {
+        let Some(heap) = elements.get_mut(root..unsorted) else {
             unreachable!("both bounds are less than the number of elements");
         };
 
