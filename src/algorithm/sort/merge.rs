@@ -238,9 +238,6 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 // #[allow(clippy::arithmetic_side_effects)]
 pub fn in_place<T: Ord>(elements: &mut [T]) {
     /// Merge two sub-slices into a potentially overlapping sub-slice.
-    ///
-    /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
     fn merge<T: Ord>(
         elements: &mut [T],
         first: core::ops::Range<usize>,
