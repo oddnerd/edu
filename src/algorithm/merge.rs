@@ -160,7 +160,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let intersect = match second.binary_search(middle_element) {
         // If `Ok`, then an equivalent element was found. However, if `Err`,
         // then the index is where a matching element could be inserted while
-        // maintaining sorted order, so either way the index we want.
+        // maintaining sorted order, so either way the desired index.
         Err(index) | Ok(index) => index,
     };
 
