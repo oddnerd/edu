@@ -234,8 +234,6 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
-// #[allow(clippy::indexing_slicing)]
-// #[allow(clippy::arithmetic_side_effects)]
 pub fn in_place<T: Ord>(elements: &mut [T]) {
     /// Merge two sub-slices into a potentially overlapping sub-slice.
     fn merge<T: Ord>(
