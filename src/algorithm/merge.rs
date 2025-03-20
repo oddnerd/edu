@@ -80,8 +80,9 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 
 /// Merge the `first` and `second` slice into the `output` slice.
 ///
-/// This algorithm is _NOT_ stable meaning the order of equal elements
-/// is _NOT_ guaranteed.
+/// <div class="warning">
+/// This is unstable so the order of equivalent elements is not guaranteed.
+/// </div>
 ///
 /// For the convenience of implementation to not depend on a particular
 /// executor, this method executes synchronously within the single calling
