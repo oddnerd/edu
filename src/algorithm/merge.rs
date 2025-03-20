@@ -39,8 +39,10 @@
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
-    debug_assert!(first.is_sorted(), "elements must be sorted in increasing order");
-    debug_assert!(second.is_sorted(), "elements must be sorted in increasing order");
+    debug_assert!(
+        first.is_sorted() && second.is_sorted(),
+        "elements must be sorted in increasing order"
+    );
 
     assert_eq!(
         Some(output.len()),
