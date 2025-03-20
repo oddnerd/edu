@@ -127,7 +127,15 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 /// leaf to maintain ordering of the heap.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
