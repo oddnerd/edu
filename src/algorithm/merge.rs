@@ -204,7 +204,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// </div>
 ///
 /// # Panics
-/// This panics if the provided `middle` is out of bounds.
+/// If the provided `middle` is out of bounds.
 ///
 /// # Performance
 /// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
