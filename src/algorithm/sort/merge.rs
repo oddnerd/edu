@@ -15,7 +15,15 @@ use super::super::merge;
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(log N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N ⋅ log N) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(log N) | 𝛀(log N) | 𝚯(log N) |
 ///
 /// # Examples
 /// ```
@@ -57,7 +65,15 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N ⋅ log N) | 𝛀(N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N) | 𝛀(1) | 𝚯(N) |
 ///
 /// # Examples
 /// ```
@@ -117,7 +133,15 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// This method has the precondition that `auxiliary` is a clone of `elements`.
 ///
 /// # Performance
-/// This method takes (N * log N) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N ⋅ log N) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -170,7 +194,15 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// right and unsorted on the left, repeating until all elements are sorted.
 ///
 /// # Performance
-/// This method takes O(N * log N) time and consumes O(log N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N ⋅ log N) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Citation
 /// This algorithm is from the following citation:
