@@ -310,9 +310,10 @@ mod sift_down {
     /// Sift the root of a binary `max_heap` down to the correct position.
     ///
     /// # Algorithm
-    /// Traverse the heap down to the leaves (this is presumably where the
-    /// current root value came from), and then traverse upwards until a node
-    /// is found which is greater than the value being sifted down.
+    /// Traverse the heap down to the lead with the overall smallest value
+    /// (this is presumably where the current root value came from), and then
+    /// traverse upwards until a node is found which is greater than the value
+    /// being sifted down.
     ///
     /// This uses fewer comparison than [`top_down`], but will likely have
     /// worse performance for cheap comparisons.
@@ -353,15 +354,7 @@ mod sift_down {
 
         // Traverse upwards from that leaf to find where root should go.
         loop {
-            let Some(root) = max_heap.first() else {
-                return;
-            };
-
-            let Some(element) = max_heap.get(current) else {
-                unreachable!("above loop will ensure within bounds");
-            };
-
-            if root > element {
+            if max_heap.first() > max_heap.get(current) {
                 let Some(parent) = parent(current) else {
                     unreachable!("loop exits before `root == 0`");
                 };
