@@ -14,7 +14,15 @@
 /// position.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -55,7 +63,15 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 /// it does is the overall minimum unsorted element into sorted position.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -96,7 +112,15 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// element thereby maintaining the order of the remaining elements.
 ///
 /// # Performance
-/// This method takes O(N<sup>3</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>3</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>3</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -148,7 +172,15 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 /// unsorted elements in-between.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
@@ -205,7 +237,15 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// sorted position thereby being more efficient for inputs with duplicates.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | 𝛀(1) | 𝚯(1) |
 ///
 /// # Examples
 /// ```
