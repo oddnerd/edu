@@ -169,10 +169,10 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via parallel (odd-even) bubble sort.
 ///
-/// Fundamentally the same as [`naive`], except this variation is trivially
-/// modified to execute asynchronously. Instead of the inner loop iterating
-/// over overlapping windows of two elements, this variation iterates over
-/// non-overlapping chunks of two elements
+/// # Methodology
+/// Iterate through non-overlapping pairs of elements swapping the largest so
+/// it is closest to the end. Repeat whilst alternating if elements are paired
+/// with their right or left neighbour until no swaps are necessary.
 ///
 /// # Performance
 /// #### Time Complexity
