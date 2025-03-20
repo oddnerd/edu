@@ -3,7 +3,7 @@
 /// Merge the `first` and `second` input into the `output` slice.
 ///
 /// <div class="warning">
-/// If either input is not sorted increasingly, the result is meaningless.
+/// If either input is not sorted increasingly, the result is unspecified.
 /// </div>
 ///
 /// # Panics
@@ -81,7 +81,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// Merge the `first` and `second` input into the `output` slice.
 ///
 /// <div class="warning">
-/// If either input is not sorted increasingly, the result is meaningless.
+/// If either input is not sorted increasingly, the result is unspecified.
 /// </div>
 ///
 /// <div class="warning">
@@ -200,7 +200,7 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// Merge independently sorted `[..middle]` and `[middle..]` together in-place.
 ///
 /// <div class="warning">
-/// If either input is not sorted increasingly, the result is meaningless.
+/// If either input is not sorted increasingly, the result is unspecified.
 /// </div>
 ///
 /// # Panics

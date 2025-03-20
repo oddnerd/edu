@@ -5,7 +5,7 @@ use super::super::merge;
 /// Sort `elements` via top-down merge sort.
 ///
 /// <div class="warning">
-/// If `auxiliary` is not a clone of `elements`, the result is meaningless.
+/// If `auxiliary` is not a clone of `elements`, the result is unspecified.
 /// </div>
 ///
 /// # Algorithm
@@ -57,7 +57,7 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// Sort `elements` via natural merge sort.
 ///
 /// <div class="warning">
-/// If `auxiliary` is not a clone of `elements`, the result is meaningless.
+/// If `auxiliary` is not a clone of `elements`, the result is unspecified.
 /// </div>
 ///
 /// # Algorithm
@@ -125,7 +125,7 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// Sort `elements` via bottom-up merge sort.
 ///
 /// <div class="warning">
-/// If `auxiliary` is not a clone of `elements`, the result is meaningless.
+/// If `auxiliary` is not a clone of `elements`, the result is unspecified.
 /// </div>
 ///
 /// # Algorithm
