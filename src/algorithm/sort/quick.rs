@@ -64,6 +64,7 @@ fn recurse<T: Ord>(
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
+/// # Algorithm
 /// Place an element (the pivot) into sorted position by partitioning the
 /// elements on it, i.e., placing smaller elements before it and larger
 /// elements after. This is accomplished by iteratively swapping the leftmost
@@ -73,8 +74,8 @@ fn recurse<T: Ord>(
 /// recursively sorted since all elements of the left partition are less-than
 /// or equal to all elements within the right partition.
 ///
-/// Compared to [`lomuto`], this implementation makes fewer swap and evenly
-/// partitions strings of equivalent elements. However, unlike [`three_way`],
+/// Compared to [`lomuto`], this implementation makes fewer swaps and evenly
+/// partitions runs of equivalent elements. However, unlike [`three_way`],
 /// elements equivalent to the pivot (which were sorted by partition) are still
 /// included in the partitions recursively sorted.
 ///
@@ -170,6 +171,7 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
+/// # Algorithm
 /// Place an element into sorted position by partitioning the elements on it,
 /// i.e., placing smaller elements before it and larger elements after. This is
 /// accomplished by placing the selected element at the front and then
@@ -249,6 +251,7 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 /// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
+/// # Algorithm
 /// Place an element (the pivot) and all elements equivalent to it into sorted
 /// position by partitioning the elements on it, i.e., placing smaller elements
 /// before it and larger elements after it. This implementation is
