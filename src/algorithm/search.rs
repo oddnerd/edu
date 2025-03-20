@@ -8,7 +8,15 @@
 /// iteration finishes without finding a match.
 ///
 /// # Performance
-/// This method takes O(N) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N) | O(1) | O(N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | O(1) | O(1) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Linear_search).
@@ -54,7 +62,15 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 /// bounds become equivalent implying the desired element is not contained.
 ///
 /// # Performance
-/// This method takes O(log N) time and consumes O(1) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: |  :-: | :-: |
+/// | O(log N) | O(1) | O(log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(1) | O(1) | O(1) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Binary_search).
