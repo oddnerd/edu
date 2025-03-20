@@ -106,7 +106,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// ##### Executed Synchronously
 /// | Worst | Best | Average |
 /// | :-: |  :-: | :-: |
-/// | O(N * log N) | O(N * log N)| O(N * log N) |
+/// | O(N ⋅ log N) | O(N ⋅ log N)| O(N ⋅ log N) |
 ///
 /// ##### Executed Asynchronously
 /// | Worst | Best | Average |
@@ -131,13 +131,14 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// assert_eq!(output, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
-    let Some(elements) = usize::checked_add(first.len(), second.len()) else {
-        panic!("output must be larger than usize::MAX which is impossible");
-    };
+    debug_assert!(
+        first.is_sorted() && second.is_sorted(),
+        "elements must be sorted in increasing order"
+    );
 
     assert_eq!(
-        output.len(),
-        elements,
+        Some(output.len()),
+        usize::checked_add(first.len(), second.len()),
         "output length must be sum of input lengths"
     );
 
