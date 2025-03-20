@@ -159,7 +159,8 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
     debug_assert!(elements == auxiliary, "auxiliary must be clone of elements");
 
     let Some(bound) = elements.len().checked_ilog2() else {
-        debug_assert_eq!(elements.len(), 0, "only condition ilog2 is none");
+        debug_assert!(elements.is_empty(), "only condition ilog2 is none");
+
         return;
     };
 
