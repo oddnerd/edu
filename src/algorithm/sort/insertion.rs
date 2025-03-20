@@ -103,8 +103,7 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 /// Sort `elements` via binary insertion sort.
 ///
 /// <div class="warning">
-/// Note that this is non-stable meaning the order of equivalent elements is
-/// not preserved.
+/// This is unstable so the order of equivalent elements is not guaranteed.
 /// </div>
 ///
 /// # Algorithm
