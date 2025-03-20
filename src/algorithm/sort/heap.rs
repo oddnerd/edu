@@ -94,7 +94,7 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
             if let Some(decremented) = root.checked_sub(1) {
                 root = decremented;
             } else {
-                unreachable!("this branch is not executed when the variable becomes zero");
+                unreachable!("outer if ensures `root > 0`");
             }
         } else {
             if let Some(decremented) = unsorted.checked_sub(1) {
