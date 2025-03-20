@@ -53,23 +53,24 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
     let mut first = first.iter_mut().peekable();
     let mut second = second.iter_mut().peekable();
 
-    for element in output {
+    #[expect(clippy::shadow_unrelated, reason = "element from the slice")]
+    for output in output {
         match (first.peek_mut(), second.peek_mut()) {
             (Some(left), Some(right)) => {
                 if left <= right {
-                    core::mem::swap(element, *left);
+                    core::mem::swap(output, *left);
                     _ = first.next();
                 } else {
-                    core::mem::swap(element, *right);
+                    core::mem::swap(output, *right);
                     _ = second.next();
                 }
             }
             (Some(left), None) => {
-                core::mem::swap(element, *left);
+                core::mem::swap(output, *left);
                 _ = first.next();
             }
             (None, Some(right)) => {
-                core::mem::swap(element, *right);
+                core::mem::swap(output, *right);
                 _ = second.next();
             }
             (None, None) => unreachable!("more output elements than input"),
