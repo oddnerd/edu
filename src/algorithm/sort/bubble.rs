@@ -132,41 +132,29 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 
     while !remaining.is_empty() {
         let mut last_swap = 0;
-        for current_index in remaining.clone() {
-            let Some(previous_index) = current_index.checked_sub(1) else {
+        for current in remaining.clone() {
+            let Some(previous) = current.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
 
-            let (Some(current_element), Some(previous_element)) =
-                (elements.get(current_index), elements.get(previous_index))
-            else {
-                unreachable!("loop ensures both indexes are within bounds");
-            };
+            if elements.get(previous) > elements.get(current) {
+                elements.swap(previous, current);
 
-            if previous_element > current_element {
-                elements.swap(previous_index, current_index);
-
-                last_swap = current_index;
+                last_swap = current;
             }
         }
         remaining = remaining.start..last_swap;
 
         last_swap = elements.len();
-        for current_index in remaining.clone().rev() {
-            let Some(previous_index) = current_index.checked_sub(1) else {
+        for current in remaining.clone().rev() {
+            let Some(previous) = current.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
 
-            let (Some(current_element), Some(previous_element)) =
-                (elements.get(current_index), elements.get(previous_index))
-            else {
-                unreachable!("loop ensures both indexes are within bounds");
-            };
+            if elements.get(previous) > elements.get(current) {
+                elements.swap(previous, current);
 
-            if previous_element > current_element {
-                elements.swap(previous_index, current_index);
-
-                last_swap = current_index;
+                last_swap = current;
             }
         }
         remaining = last_swap..remaining.end;
