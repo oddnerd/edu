@@ -171,8 +171,9 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 ///
 /// # Methodology
 /// Iterate through non-overlapping pairs of elements swapping the largest so
-/// it is closest to the end. Repeat whilst alternating if elements are paired
-/// with their right or left neighbour until no swaps are necessary.
+/// it is closest to the end. Note that because each pair is independent, they
+/// can be compared in parallel. Repeat whilst alternating if elements are
+/// paired with their right or left neighbour until no swaps are necessary.
 ///
 /// # Performance
 /// #### Time Complexity
@@ -200,6 +201,9 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// ```
 pub fn parallel<T: Ord>(elements: &mut [T]) {
     let mut sorted = false;
+
+    // Flag to signify if pairs should be offset.
+    let mut offset = false;
 
     while !sorted {
         sorted = true;
