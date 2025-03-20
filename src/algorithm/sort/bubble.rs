@@ -128,11 +128,11 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
 /// ```
 pub fn bidirectional<T: Ord>(elements: &mut [T]) {
-    let mut remaining = 1..elements.len();
+    let mut unsorted = 1..elements.len();
 
-    while !remaining.is_empty() {
+    while !unsorted.is_empty() {
         let mut last_swap = 0;
-        for current in remaining.clone() {
+        for current in unsorted.clone() {
             let Some(previous) = current.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
@@ -143,10 +143,10 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
                 last_swap = current;
             }
         }
-        remaining = remaining.start..last_swap;
+        unsorted = unsorted.start..last_swap;
 
         last_swap = elements.len();
-        for current in remaining.clone().rev() {
+        for current in unsorted.clone().rev() {
             let Some(previous) = current.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
@@ -157,7 +157,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
                 last_swap = current;
             }
         }
-        remaining = last_swap..remaining.end;
+        unsorted = last_swap..unsorted.end;
     }
 }
 
