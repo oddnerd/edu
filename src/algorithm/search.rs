@@ -75,7 +75,10 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 /// assert_eq!(index, None);
 /// ```
 pub fn binary<T: Ord + core::fmt::Debug>(elements: &[T], desired: &T) -> Option<usize> {
-    debug_assert!(elements.is_sorted(), "elements must be sorted");
+    debug_assert!(
+        elements.is_sorted(),
+        "elements must be sorted in increasing order"
+    );
 
     let mut range = 0..elements.len();
 
@@ -143,6 +146,15 @@ mod test {
 
     mod binary {
         use super::*;
+
+        #[test]
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn panics_if_elements_are_not_sorted_in_increasing_order() {
+            let elements = [5, 4, 3, 2, 1];
+
+            _ = binary(&elements, &12345);
+        }
 
         #[test]
         fn is_none_when_input_contains_no_elements() {
