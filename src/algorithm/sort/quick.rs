@@ -80,7 +80,15 @@ fn recurse<T: Ord>(
 /// included in the partitions recursively sorted.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(log N) | 𝛀(log N) | 𝚯(log N) |
 ///
 /// # Examples
 /// ```
@@ -184,7 +192,15 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 /// evenly partition strings of equivalent elements.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N) | 𝛀(N) | 𝚯(N) |
 ///
 /// # Examples
 /// ```
@@ -262,7 +278,15 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 /// partition are less-than all elements within the right partition.
 ///
 /// # Performance
-/// This method takes O(N<sup>2</sup>) time and consumes O(N) memory.
+/// #### Time Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N ⋅ log N) |
+///
+/// #### Memory Complexity
+/// | Worst | Best | Average |
+/// | :-: | :-: | :-: |
+/// | O(N) | 𝛀(N) | 𝚯(N) |
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Dutch_national_flag_problem).
