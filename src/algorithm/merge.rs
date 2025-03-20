@@ -90,8 +90,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// be trivially modified to execute asynchronously.
 ///
 /// # Panics
-/// This method has the precondition that `output` has the _exact_ same length
-/// as the sum of the input lengths.
+/// If the length of `output` is not exactly the sum of input lengths.
 ///
 /// # Performance
 /// This method takes O(N * log N) time and consumes O(log N) memory.
