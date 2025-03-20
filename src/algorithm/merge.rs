@@ -2,7 +2,9 @@
 
 /// Merge the `first` and `second` slice into the `output` slice.
 ///
+/// <div class="warning">
 /// If either input is not sorted increasingly, the result is meaningless.
+/// </div>
 ///
 /// # Panics
 /// If the length of `output` is not exactly the sum of input lengths.
