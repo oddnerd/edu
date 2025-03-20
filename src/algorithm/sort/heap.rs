@@ -220,6 +220,7 @@ fn parent(child: usize) -> Option<usize> {
 
 /// Sift the last leaf of a `max_heap` up to the correct position.
 ///
+/// # Algorithm
 /// Swap the leaf with its parent until the parent is greater.
 ///
 /// # Performance
@@ -260,8 +261,9 @@ mod sift_down {
 
     /// Sift the root of a binary `max_heap` down to the correct position.
     ///
-    /// Swap the current root with the greatest child until both children are
-    /// less than that root, thereby repairing a max-heap with invalid root.
+    /// # Algorithm
+    /// Swap the current root with its greatest child until both its children
+    /// are less than it, thereby repairing the max-heap.
     ///
     /// # Performance
     /// This method takes O(log N) time and consumes O(1) memory.
@@ -299,9 +301,10 @@ mod sift_down {
 
     /// Sift the root of a binary `max_heap` down to the correct position.
     ///
+    /// # Algorithm
     /// Traverse the heap down to the leaves (this is presumably where the
-    /// current root value came from), and then traverse upward a node is found
-    /// which is greater than the value being sifted down.
+    /// current root value came from), and then traverse upwards until a node
+    /// is found which is greater than the value being sifted down.
     ///
     /// This uses fewer comparison than [`top_down`], but will likely have
     /// worse performance for cheap comparisons.
