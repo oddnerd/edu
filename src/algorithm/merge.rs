@@ -232,6 +232,26 @@ mod test {
         use super::*;
 
         #[test]
+        #[should_panic = "output length must be sum of input lengths"]
+        fn length_of_output_cannot_be_smaller_than_sum_of_input_lengths() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [];
+
+            iterative(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        #[should_panic = "output length must be sum of input lengths"]
+        fn length_of_output_cannot_be_larger_than_sum_of_input_lengths() {
+            let mut first = [0, 2, 4];
+            let mut second = [1, 3, 5];
+            let mut output = [usize::default(); 7];
+
+            iterative(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
         fn first_empty() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
@@ -317,26 +337,6 @@ mod test {
             iterative(&mut first, &mut second, &mut output);
 
             assert_eq!(output, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        #[should_panic = "output length must be sum of input lengths"]
-        fn output_cannot_be_smaller() {
-            let mut first = [0, 2, 4];
-            let mut second = [1, 3, 5];
-            let mut output = [];
-
-            iterative(&mut first, &mut second, &mut output);
-        }
-
-        #[test]
-        #[should_panic = "output length must be sum of input lengths"]
-        fn output_cannot_be_larger() {
-            let mut first = [0, 2, 4];
-            let mut second = [1, 3, 5];
-            let mut output = [usize::default(); 256];
-
-            iterative(&mut first, &mut second, &mut output);
         }
     }
 
