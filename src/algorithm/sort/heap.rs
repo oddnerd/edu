@@ -120,9 +120,12 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 
 /// Sort `elements` via top-down heap sort.
 ///
-/// Create one max-heap containing the first element, add the next element as a
-/// leaf to that heap sifting it up as necessary, repeating until all elements
-/// are ordered. The max element (the root) can then be swapped with the leaf
+/// # Algorithm
+/// In contrast to [`bottom_up`] which creates many small max-heaps from the
+/// leaves and then joins them together via sift-down, this creates only one
+/// max-heap containing the first element then iteratively adding the adjacent
+/// element as a leaf and sifting it up. Once all elements are in max-heap
+/// order, the overall max element (the root) can then be swapped with the leaf
 /// with the highest index thereby placing it in sorted order, sifting down the
 /// leaf to maintain ordering of the heap.
 ///
