@@ -130,9 +130,17 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 pub fn bidirectional<T: Ord>(elements: &mut [T]) {
     let mut unsorted = 1..elements.len();
 
+    // Flag to signify left versus right direction of iteration.
+    let mut rightward = true;
+
     while !unsorted.is_empty() {
-        let mut last_swap = 0;
-        for current in unsorted.clone() {
+        let mut last_swap = if rightward {
+            0
+        } else {
+            elements.len()
+        };
+
+        let bubble = |current: usize| {
             let Some(previous) = current.checked_sub(1) else {
                 unreachable!("loop ensures `current_index >= 1`");
             };
@@ -142,22 +150,20 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 
                 last_swap = current;
             }
-        }
-        unsorted = unsorted.start..last_swap;
+        };
 
-        last_swap = elements.len();
-        for current in unsorted.clone().rev() {
-            let Some(previous) = current.checked_sub(1) else {
-                unreachable!("loop ensures `current_index >= 1`");
-            };
+        if rightward {
+            unsorted.clone().for_each(bubble);
 
-            if elements.get(previous) > elements.get(current) {
-                elements.swap(previous, current);
+            unsorted = unsorted.start..last_swap;
 
-                last_swap = current;
-            }
-        }
-        unsorted = last_swap..unsorted.end;
+        } else {
+            unsorted.clone().rev().for_each(bubble);
+
+            unsorted = last_swap..unsorted.end;
+        };
+
+        rightward = !rightward;
     }
 }
 
