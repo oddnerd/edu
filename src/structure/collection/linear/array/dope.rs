@@ -136,6 +136,7 @@ impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
     /// let mut left = [0, 1, 2, 3, 4, 5];
     /// let mut right = left.clone();
     ///
+    /// // Note that these point to different memory, but same values.
     /// let left = unsafe { Dope::from(left.as_mut_slice()) };
     /// let right = unsafe { Dope::from(right.as_mut_slice()) };
     ///
