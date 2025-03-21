@@ -105,6 +105,7 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
+    #[must_use]
     fn from(slice: &'a mut [T]) -> Self {
         Self {
             ptr: {
