@@ -80,10 +80,6 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     }
 }
 
-impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
-
-impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
-
 impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// Obtain the next element from the back.
     ///
@@ -105,6 +101,10 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
         })
     }
 }
+
+impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
+
+impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for IterMut<'a, T> {
     /// Obtain the next element from the back.
