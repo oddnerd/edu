@@ -83,7 +83,15 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     /// Construct from an existing mutable [`slice`].
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
