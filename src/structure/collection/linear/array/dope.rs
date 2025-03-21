@@ -401,29 +401,29 @@ mod test {
             use super::*;
 
             #[test]
-            fn correct_size() {
+            fn sets_pointer() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
                 let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                    unsafe { Dope::new(ptr, expected.len()) }
-                };
+                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
 
-                assert_eq!(actual.count, expected.len());
-            }
-
-            #[test]
-            fn correct_pointer() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
-
-                let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
                     unsafe { Dope::new(ptr, expected.len()) }
                 };
 
                 assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+            }
+
+            #[test]
+            fn sets_element_count() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+
+                    unsafe { Dope::new(ptr, expected.len()) }
+                };
+
+                assert_eq!(actual.count, expected.len());
             }
         }
     }
