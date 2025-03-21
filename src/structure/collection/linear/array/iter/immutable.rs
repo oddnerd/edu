@@ -101,7 +101,15 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// Obtain the next element from the back.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             self.count = self.count.saturating_sub(1);
