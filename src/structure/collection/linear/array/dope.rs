@@ -462,107 +462,148 @@ mod test {
         }
     }
 
-    mod equality {
+    mod partial_equality {
         use super::*;
 
         #[test]
-        fn eq_when_same_elements() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-
-            let first = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
-
-            let second = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
-
-            assert_eq!(first, second);
-        }
-
-        #[test]
-        fn ne_when_different_elements() {
-            let mut zero = [0];
-            let zero = {
-                let ptr = zero.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, zero.len()) }
-            };
-
-            let mut one = [1];
-            let one = {
-                let ptr = one.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, one.len()) }
-            };
-
-            assert_ne!(zero, one);
-        }
-
-        #[test]
         fn is_symmetric() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+            // a == b <=> b == a
 
-            let first = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let elements = [0, 1, 2, 3, 4, 5];
 
-            let second = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let mut a = elements;
+            let a = Dope::from(a.as_mut_slice());
 
-            // `first == second` <=> `second == first`
-            assert_eq!(first, second);
-            assert_eq!(second, first);
+            let mut b = elements;
+            let b = Dope::from(b.as_mut_slice());
+
+            assert_eq!(a, b);
+            assert_eq!(b, a);
         }
 
         #[test]
         fn is_transitive() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+            // a == b && b == c <=> a == c
 
-            let first = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let elements = [0, 1, 2, 3, 4, 5];
 
-            let second = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let mut a = elements;
+            let a = Dope::from(a.as_mut_slice());
 
-            let third = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let mut b = elements;
+            let b = Dope::from(b.as_mut_slice());
 
-            // `first == second && second == third` => `first == third`
-            assert_eq!(first, second);
-            assert_eq!(second, third);
-            assert_eq!(third, first);
+            let mut c = elements;
+            let c = Dope::from(c.as_mut_slice());
+
+            assert_eq!(a, b);
+            assert_eq!(b, c);
+            assert_eq!(a, c);
         }
 
         #[test]
+        fn is_equal_when_same_elements_in_same_order() {
+            const ELEMENTS: usize = 8;
+
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            for end in 1..ELEMENTS {
+                let mut a = elements;
+                let a = Dope::from(&mut a[..end]);
+
+                let mut b = elements;
+                let b = Dope::from(&mut b[..end]);
+
+                assert_eq!(a, b);
+            }
+        }
+
+        #[test]
+        fn is_equal_when_both_underlyings_are_empty() {
+            let elements: [usize; 0] = [];
+            debug_assert!(elements.is_empty());
+
+            let mut a = elements;
+            let a = Dope::from(a.as_mut_slice());
+
+            let mut b = elements;
+            let b = Dope::from(b.as_mut_slice());
+
+            assert_eq!(a, b);
+        }
+
+        #[test]
+        fn is_not_equal_when_same_elements_in_different_order() {
+            const ELEMENTS: usize = 8;
+
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let mut a = elements;
+            let a = Dope::from(a.as_mut_slice());
+
+            for offset in 1..ELEMENTS {
+                let mut b = elements;
+                b.rotate_right(offset);
+                let b = Dope::from(b.as_mut_slice());
+
+                assert_ne!(a, b);
+            }
+        }
+
+        #[test]
+        fn is_not_equal_when_an_element_has_a_different_value() {
+            const ELEMENTS: usize = 8;
+
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let mut a = elements;
+            let a = Dope::from(a.as_mut_slice());
+
+            for index in 0..ELEMENTS {
+                let mut b = elements;
+
+                b[index] = 12345; // Some arbitrary distinct value.
+
+                let b = Dope::from(b.as_mut_slice());
+
+                assert_ne!(a, b);
+            }
+        }
+
+        #[test]
+        fn is_not_equal_when_different_lengths_but_equal_subset() {
+            const ELEMENTS: usize = 8;
+
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let mut a = elements;
+            let a = Dope::from(a.as_mut_slice());
+
+            for end in 1..ELEMENTS {
+                let mut b = elements;
+                let b = &mut b[..end];
+
+                debug_assert_eq!(&elements[..end], b);
+
+                let b = Dope::from(b);
+
+                assert_ne!(a, b);
+            }
+        }
+    }
+
+    mod equality {
+        use super::*;
+
+        #[test]
         fn is_reflexive() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+            // a == a
 
-            let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let mut elements = [0, 1, 2, 3, 4, 5];
 
-            assert_eq!(actual, actual);
+            let a = Dope::from(elements.as_mut_slice());
+
+            assert_eq!(a, a);
         }
     }
 
