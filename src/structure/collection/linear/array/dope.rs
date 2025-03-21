@@ -733,24 +733,27 @@ mod test {
             use super::*;
 
             #[test]
-            fn initialized_elements() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn is_zero_when_underlying_is_empty() {
+                let mut underlying: [usize; 0] = [];
+                debug_assert!(underlying.is_empty());
 
-                let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                    unsafe { Dope::new(ptr, expected.len()) }
-                };
+                let actual = Dope::from(underlying.as_mut_slice());
 
-                assert_eq!(Collection::count(&actual), expected.len());
+                assert_eq!(actual.count(), 0);
             }
 
             #[test]
-            fn zero_when_empty() {
-                let mut expected: [(); 0] = [];
-                let actual = Dope::from(expected.as_mut_slice());
+            fn is_number_of_elements_when_underlying_is_not_empty() {
+                const ELEMENTS: usize = 8;
 
-                assert_eq!(Collection::count(&actual), 0);
+                let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                debug_assert!(!underlying.is_empty());
+
+                for count in 1..=ELEMENTS {
+                    let actual = Dope::from(&mut underlying[..count]);
+
+                    assert_eq!(actual.count(), count);
+                }
             }
         }
     }
