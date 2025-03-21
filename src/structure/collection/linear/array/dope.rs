@@ -431,25 +431,25 @@ mod test {
     mod from {
         use super::*;
 
-        mod primitive_slice {
+        mod slice {
             use super::*;
 
             #[test]
-            fn correct_size() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
-
-                let actual = Dope::from(expected.as_mut_slice());
-
-                assert_eq!(actual.count, expected.len());
-            }
-
-            #[test]
-            fn correct_pointer() {
+            fn sets_pointer() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
                 let actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+            }
+
+            #[test]
+            fn sets_element_count() {
+                let mut expected = [0, 1, 2, 3, 4, 5];
+
+                let actual = Dope::from(expected.as_mut_slice());
+
+                assert_eq!(actual.count, expected.len());
             }
         }
     }
