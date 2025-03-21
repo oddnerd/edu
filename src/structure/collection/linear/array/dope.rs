@@ -119,7 +119,15 @@ impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
     /// Query if the elements referenced to/contained are the same as `other`.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
