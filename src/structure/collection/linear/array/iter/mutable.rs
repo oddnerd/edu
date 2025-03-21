@@ -184,7 +184,7 @@ mod test {
             }
 
             #[test]
-            fn sets_elements_count() {
+            fn sets_element_count() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
 
                 let actual = {
