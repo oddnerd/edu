@@ -49,7 +49,15 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// Obtain the next element from the front.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn next(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             // SAFETY:
@@ -74,7 +82,15 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     /// Query how many elements have yet to be yielded.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.count, Some(self.count))
     }
@@ -84,7 +100,15 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// Obtain the next element from the back.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             self.count = self.count.saturating_sub(1);
@@ -107,10 +131,18 @@ impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
 impl<'a, T: 'a> core::iter::FusedIterator for IterMut<'a, T> {}
 
 impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for IterMut<'a, T> {
-    /// Obtain the next element from the back.
+    /// List the elements yet to be yielded.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let data = self.ptr.as_ptr();
         let len = self.count;
