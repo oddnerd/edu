@@ -116,7 +116,7 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
 }
 
 impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
-    /// Query if the elements referenced to/contained are the same as `other`.
+    /// Query if the elements have the same values and order as `other`.
     ///
     /// # Performance
     /// #### Time Complexity
