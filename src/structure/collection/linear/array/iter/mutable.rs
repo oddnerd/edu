@@ -61,19 +61,20 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             // SAFETY:
-            // * points to initialized element.
-            // * lifetime bound to underlying input.
+            // * Points to initialized element.
+            // * Lifetime bound to underlying input.
             let result = unsafe { self.ptr.as_mut() };
 
-            self.ptr = {
-                // SAFETY: either within the allocated object or one byte past.
-                let ptr = unsafe { self.ptr.as_ptr().add(1) };
+            // SAFETY:
+            // * The offset in bytes does not exceed `isize::MAX`.
+            // * Stays within the allocated object, or one byte past.
+            self.ptr = unsafe { self.ptr.add(1) };
 
-                // SAFETY: `add` maintains the non-null requirement.
-                unsafe { NonNull::new_unchecked(ptr) }
+            let Some(decremented) = self.count.checked_sub(1) else {
+                unreachable!("executed only if `self.count > 0`");
             };
 
-            self.count = self.count.saturating_sub(1);
+            self.count = decremented;
 
             result
         })
@@ -111,17 +112,21 @@ impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
     /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
-            self.count = self.count.saturating_sub(1);
+            let Some(decremented) = self.count.checked_sub(1) else {
+                unreachable!("executed only if `self.count > 0`");
+            };
 
-            let ptr = self.ptr.as_ptr();
-
-            // SAFETY: points to final element within the allocated object.
-            let ptr = unsafe { ptr.add(self.count) };
+            self.count = decremented;
 
             // SAFETY:
-            // * points to initialized element.
-            // * lifetime bound to underlying input.
-            unsafe { &mut *ptr }
+            // * The offset in bytes does not exceed `isize::MAX`.
+            // * Stays within the allocated object, or one byte past.
+            let mut ptr = unsafe { self.ptr.add(self.count) };
+
+            // SAFETY:
+            // * Points to initialized element.
+            // * Lifetime bound to underlying input.
+            unsafe { ptr.as_mut() }
         })
     }
 }
