@@ -143,8 +143,9 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     ///
     /// let actual = Dope::from(expected.as_mut_slice());
     ///
-    /// for index in 0..=5{
+    /// for index in 0..=5 {
     ///     use core::ops::Index;
+    ///
     ///     assert_eq!(actual.index(index), &index);
     /// }
     /// ```
