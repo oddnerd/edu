@@ -61,12 +61,12 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             // SAFETY:
-            // * points to initialized element.
-            // * lifetime bound to underlying input.
+            // * Points to initialized element.
+            // * Lifetime bound to underlying input.
             let result = unsafe { self.ptr.as_ref() };
 
             // SAFETY:
-            // * The offset is the size of `T` which is less than `isize::MAX`.
+            // * The offset in bytes does not exceed `isize::MAX`.
             // * Stays within the allocated object, or one byte past.
             self.ptr = unsafe{ self.ptr.add(1) };
 
@@ -112,17 +112,21 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
-            self.count = self.count.saturating_sub(1);
+            let Some(decremented) = self.count.checked_sub(1) else {
+                unreachable!("executed only if `self.count > 0`");
+            };
 
-            let ptr = self.ptr.as_ptr();
-
-            // SAFETY: points to final element within the allocated object.
-            let ptr = unsafe { ptr.add(self.count) };
+            self.count = decremented;
 
             // SAFETY:
-            // * points to initialized element.
-            // * lifetime bound to underlying input.
-            unsafe { &*ptr }
+            // * The offset in bytes does not exceed `isize::MAX`.
+            // * Stays within the allocated object, or one byte past.
+            let ptr = unsafe { self.ptr.add(self.count) };
+
+            // SAFETY:
+            // * Points to initialized element.
+            // * Lifetime bound to underlying input.
+            unsafe { ptr.as_ref() }
         })
     }
 }
