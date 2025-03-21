@@ -152,17 +152,15 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     fn index(&self, index: usize) -> &Self::Output {
         assert!(index < self.count, "index out of bounds");
 
-        let ptr = {
-            let ptr = self.ptr.as_ptr();
-
-            // SAFETY: `index` in bounds => aligned within allocated object.
-            unsafe { ptr.add(index) }
-        };
+        // SAFETY:
+        // * The offset in bytes does not exceed `isize::MAX`.
+        // * Stays within the allocated object, or one byte past.
+        let ptr = unsafe { self.ptr.add(index) };
 
         // SAFETY:
-        // * `index` in bounds => pointed to `T` is initialized.
-        // * lifetime bound to input object => valid lifetime to return.
-        unsafe { &*ptr }
+        // * Points to initialized element.
+        // * Lifetime bound to underlying input.
+        unsafe { ptr.as_ref() }
     }
 }
 
