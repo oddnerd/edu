@@ -60,8 +60,11 @@ impl<'a, T: 'a> Dope<'a, T> {
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
     ///
-    /// let ptr = expected.as_mut_ptr();
-    /// let ptr = unsafe { core::ptr::NonNull::new_unchecked(ptr) };
+    /// let Some(ptr) = core::ptr::NonNull::new(expected.as_mut_ptr()) else {
+    ///     unreachable!("points to the array");
+    /// };
+    ///
+    /// // SAFETY: points to that many consecutive initialized integers.
     /// let actual = unsafe { Dope::new(ptr, expected.len()) };
     ///
     /// assert!(actual.iter().eq(expected.iter()));
