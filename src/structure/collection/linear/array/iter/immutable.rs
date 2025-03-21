@@ -80,10 +80,6 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     }
 }
 
-impl<'a, T: 'a> core::iter::FusedIterator for Iter<'a, T> {}
-
-impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
-
 impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// Obtain the next element from the back.
     ///
@@ -105,6 +101,10 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
         })
     }
 }
+
+impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
+
+impl<'a, T: 'a> core::iter::FusedIterator for Iter<'a, T> {}
 
 impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Iter<'a, T> {
     /// Obtain the next element from the back.
