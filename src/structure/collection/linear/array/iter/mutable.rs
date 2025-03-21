@@ -213,6 +213,25 @@ mod test {
 
                 assert!(actual.eq(expected.iter()));
             }
+
+            #[test]
+            fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
+                let mut actual = [0, 1, 2, 3, 4, 5];
+
+                let mut iter = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                for value in (0..actual.len()).rev() {
+                    let element = iter.next().expect("an element");
+
+                    *element = value;
+                }
+
+                assert_eq!(actual, [5, 4, 3, 2, 1, 0]);
+            }
         }
 
         mod size_hint {
@@ -313,7 +332,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, expected.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert_eq!(actual.next(), None);
             }
@@ -329,7 +349,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert_eq!(actual.count(), expected.len());
             }
@@ -345,7 +366,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert!(actual.eq(expected.iter().rev()));
             }
@@ -369,6 +391,25 @@ mod test {
                 assert_eq!(actual.next(), None);
                 assert_eq!(actual.next_back(), None);
             }
+
+            #[test]
+            fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
+                let mut actual = [0, 1, 2, 3, 4, 5];
+
+                let mut iter = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                for value in 0..actual.len() {
+                    let element = iter.next_back().expect("an element");
+
+                    *element = value;
+                }
+
+                assert_eq!(actual, [5, 4, 3, 2, 1, 0]);
+            }
         }
 
         mod size_hint {
@@ -384,7 +425,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
@@ -406,7 +448,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
