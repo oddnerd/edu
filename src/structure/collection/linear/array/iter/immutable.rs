@@ -65,15 +65,16 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
             // * lifetime bound to underlying input.
             let result = unsafe { self.ptr.as_ref() };
 
-            self.ptr = {
-                // SAFETY: either within the allocated object or one byte past.
-                let ptr = unsafe { self.ptr.as_ptr().add(1) };
+            // SAFETY:
+            // * The offset is the size of `T` which is less than `isize::MAX`.
+            // * Stays within the allocated object, or one byte past.
+            self.ptr = unsafe{ self.ptr.add(1) };
 
-                // SAFETY: `add` maintains the non-null requirement.
-                unsafe { NonNull::new_unchecked(ptr) }
+            let Some(decremented) = self.count.checked_sub(1) else {
+                unreachable!("executed only if `self.count > 0`");
             };
 
-            self.count = self.count.saturating_sub(1);
+            self.count = decremented;
 
             result
         })
