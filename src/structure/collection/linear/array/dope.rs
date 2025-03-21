@@ -22,7 +22,6 @@ use core::ptr::NonNull;
 ///
 /// [span]: https://en.cppreference.com/w/cpp/container/span
 /// [string_view]: https://en.cppreference.com/w/cpp/string/basic_string_view
-#[derive(Clone, Copy)]
 pub struct Dope<'a, T> {
     /// Pointer to the start of the array.
     ptr: NonNull<T>,
@@ -425,30 +424,6 @@ mod test {
 
                 assert_eq!(actual.count, expected.len());
             }
-        }
-    }
-
-    mod copy {
-        use super::*;
-
-        #[test]
-        fn has_elements() {
-            let mut underlying = [0, 1, 2, 3, 4, 5];
-            let expected = Dope::from(underlying.as_mut_slice());
-
-            let actual = expected;
-
-            assert_eq!(actual.count, expected.count);
-        }
-
-        #[test]
-        fn is_equivalent() {
-            let mut underlying = [0, 1, 2, 3, 4, 5];
-            let expected = Dope::from(underlying.as_mut_slice());
-
-            let actual = expected;
-
-            assert_eq!(actual, expected);
         }
     }
 
