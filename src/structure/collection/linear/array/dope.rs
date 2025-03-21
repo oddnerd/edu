@@ -116,6 +116,31 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     }
 }
 
+impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
+    /// Query if the elements referenced to/contained are the same as `other`.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dope;
+    ///
+    /// let mut left = [0, 1, 2, 3, 4, 5];
+    /// let mut right = left.clone();
+    ///
+    /// let left = unsafe { Dope::from(left.as_mut_slice()) };
+    /// let right = unsafe { Dope::from(right.as_mut_slice()) };
+    ///
+    /// assert_eq!(left, right);
+    /// ```
+    fn eq(&self, other: &Self) -> bool {
+        self.iter().eq(other.iter())
+    }
+}
+
+impl<'a, T: 'a + Eq> Eq for Dope<'a, T> {}
+
 impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
@@ -209,31 +234,6 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
         unsafe { ptr.as_mut() }
     }
 }
-
-impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
-    /// Query if the elements referenced to/contained are the same as `other`.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dope;
-    ///
-    /// let mut left = [0, 1, 2, 3, 4, 5];
-    /// let mut right = left.clone();
-    ///
-    /// let left = unsafe { Dope::from(left.as_mut_slice()) };
-    /// let right = unsafe { Dope::from(right.as_mut_slice()) };
-    ///
-    /// assert_eq!(left, right);
-    /// ```
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().eq(other.iter())
-    }
-}
-
-impl<'a, T: 'a + Eq> Eq for Dope<'a, T> {}
 
 impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Dope<'a, T> {
     /// List the elements referenced to/contained.
@@ -428,6 +428,30 @@ mod test {
         }
     }
 
+    mod copy {
+        use super::*;
+
+        #[test]
+        fn has_elements() {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let expected = Dope::from(underlying.as_mut_slice());
+
+            let actual = expected;
+
+            assert_eq!(actual.count, expected.count);
+        }
+
+        #[test]
+        fn is_equivalent() {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+            let expected = Dope::from(underlying.as_mut_slice());
+
+            let actual = expected;
+
+            assert_eq!(actual, expected);
+        }
+    }
+
     mod from {
         use super::*;
 
@@ -451,105 +475,6 @@ mod test {
 
                 assert_eq!(actual.count, expected.len());
             }
-        }
-    }
-
-    mod index {
-        use super::*;
-
-        use core::ops::Index as _;
-
-        #[test]
-        fn correct_element() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-
-            let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
-
-            for (index, value) in expected.iter().enumerate() {
-                assert_eq!(actual.index(index), value);
-            }
-        }
-
-        #[test]
-        #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut underlying: [(); 0] = [];
-            let instance = Dope::from(underlying.as_mut_slice());
-
-            let _: &() = instance.index(0);
-        }
-    }
-
-    mod index_mut {
-        use super::*;
-
-        use core::ops::IndexMut as _;
-
-        #[test]
-        fn correct_element() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-
-            let mut actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
-
-            for (index, value) in expected.iter_mut().enumerate() {
-                assert_eq!(actual.index_mut(index), value);
-            }
-        }
-
-        #[test]
-        #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut underlying: [(); 0] = [];
-            let mut instance = Dope::from(underlying.as_mut_slice());
-
-            let _: &() = instance.index_mut(0);
-        }
-
-        #[test]
-        fn is_mutable() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-
-            let mut actual = Dope::from(expected.as_mut_slice());
-
-            for index in 0..actual.count() {
-                *actual.index_mut(index) = 0;
-            }
-
-            for element in expected {
-                assert_eq!(element, 0);
-            }
-        }
-    }
-
-    mod copy {
-        use super::*;
-
-        #[test]
-        fn has_elements() {
-            let mut underlying = [0, 1, 2, 3, 4, 5];
-            let expected = Dope::from(underlying.as_mut_slice());
-
-            let actual = expected;
-
-            assert_eq!(actual.count, expected.count);
-        }
-
-        #[test]
-        fn is_equivalent() {
-            let mut underlying = [0, 1, 2, 3, 4, 5];
-            let expected = Dope::from(underlying.as_mut_slice());
-
-            let actual = expected;
-
-            assert_eq!(actual, expected);
         }
     }
 
@@ -657,24 +582,95 @@ mod test {
         }
     }
 
-    mod fmt {
+    mod index {
         use super::*;
 
-        mod debug {
-            use super::*;
+        use core::ops::Index as _;
 
-            #[test]
-            fn is_elements() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+        #[test]
+        fn correct_element() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
 
-                let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                    unsafe { Dope::new(ptr, expected.len()) }
-                };
+            let actual = {
+                let ptr = expected.as_mut_ptr();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
 
-                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            for (index, value) in expected.iter().enumerate() {
+                assert_eq!(actual.index(index), value);
             }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let mut underlying: [(); 0] = [];
+            let instance = Dope::from(underlying.as_mut_slice());
+
+            let _: &() = instance.index(0);
+        }
+    }
+
+    mod index_mut {
+        use super::*;
+
+        use core::ops::IndexMut as _;
+
+        #[test]
+        fn correct_element() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let mut actual = {
+                let ptr = expected.as_mut_ptr();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            for (index, value) in expected.iter_mut().enumerate() {
+                assert_eq!(actual.index_mut(index), value);
+            }
+        }
+
+        #[test]
+        #[should_panic = "index out of bounds"]
+        fn panics_when_out_of_bounds() {
+            let mut underlying: [(); 0] = [];
+            let mut instance = Dope::from(underlying.as_mut_slice());
+
+            let _: &() = instance.index_mut(0);
+        }
+
+        #[test]
+        fn is_mutable() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let mut actual = Dope::from(expected.as_mut_slice());
+
+            for index in 0..actual.count() {
+                *actual.index_mut(index) = 0;
+            }
+
+            for element in expected {
+                assert_eq!(element, 0);
+            }
+        }
+    }
+
+    mod debug {
+        use super::*;
+
+        #[test]
+        fn is_elements() {
+            let mut expected = [0, 1, 2, 3, 4, 5];
+
+            let actual = {
+                let ptr = expected.as_mut_ptr();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                unsafe { Dope::new(ptr, expected.len()) }
+            };
+
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
         }
     }
 
