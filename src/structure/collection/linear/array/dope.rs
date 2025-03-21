@@ -119,7 +119,7 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
 impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     type Output = T;
 
-    /// Query the element `index` positions from the start.
+    /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
     /// If provided `index` is out of bounds.
