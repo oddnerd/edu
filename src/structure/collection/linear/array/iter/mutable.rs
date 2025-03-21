@@ -12,7 +12,7 @@ pub(in super::super) struct IterMut<'a, T> {
     count: usize,
 
     /// Constrain to lifetime of the underlying object.
-    lifetime: core::marker::PhantomData<&'a T>,
+    lifetime: core::marker::PhantomData<&'a mut T>,
 }
 
 impl<'a, T: 'a> IterMut<'a, T> {
