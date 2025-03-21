@@ -183,6 +183,7 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     ///
     /// for mut index in 0..=5 {
     ///     use core::ops::IndexMut;
+    ///
     ///     assert_eq!(actual.index_mut(index), &mut index);
     /// }
     /// ```
