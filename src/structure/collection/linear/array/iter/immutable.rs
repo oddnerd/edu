@@ -136,10 +136,18 @@ impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
 impl<'a, T: 'a> core::iter::FusedIterator for Iter<'a, T> {}
 
 impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Iter<'a, T> {
-    /// Obtain the next element from the back.
+    /// List the elements yet to be yielded.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let data = self.ptr.as_ptr();
         let len = self.count;
