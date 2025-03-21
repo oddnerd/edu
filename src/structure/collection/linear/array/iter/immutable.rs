@@ -278,7 +278,7 @@ mod test {
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
-                    _ = actual.next();
+                    _ = actual.next().expect("an element");
 
                     let (lower, _upper) = actual.size_hint();
 
@@ -317,7 +317,7 @@ mod test {
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
-                    _ = actual.next();
+                    _ = actual.next().expect("an element");
 
                     let (_lower, upper) = actual.size_hint();
 
@@ -392,8 +392,8 @@ mod test {
                     unsafe { Iter::new(ptr, actual.len()) }
                 };
 
-                _ = actual.next();      // Consumes element '0'.
-                _ = actual.next_back(); // Consumes element '1'.
+                _ = actual.next().expect("consumes element with value 0");
+                _ = actual.next_back().expect("consumes element with value 1");
 
                 assert_eq!(actual.next(), None);
                 assert_eq!(actual.next_back(), None);
@@ -417,7 +417,7 @@ mod test {
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
-                    _ = actual.next();
+                    _ = actual.next().expect("an element");
 
                     let (lower, _upper) = actual.size_hint();
 
@@ -439,7 +439,7 @@ mod test {
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
-                    _ = actual.next();
+                    _ = actual.next().expect("an element");
 
                     let (_lower, upper) = actual.size_hint();
 
