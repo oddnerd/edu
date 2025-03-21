@@ -108,12 +108,8 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     #[must_use]
     fn from(slice: &'a mut [T]) -> Self {
         Self {
-            ptr: {
-                let ptr = slice.as_mut_ptr();
-
-                // SAFETY: `slice` exists => pointer is non-null.
-                unsafe { NonNull::new_unchecked(ptr) }
-            },
+            ptr: NonNull::new(slice.as_mut_ptr())
+                .unwrap_or_else(|| unreachable!("slice will not yield null pointer")),
             count: slice.len(),
             lifetime: core::marker::PhantomData,
         }
