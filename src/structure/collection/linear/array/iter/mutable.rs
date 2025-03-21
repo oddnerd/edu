@@ -165,163 +165,304 @@ mod test {
     mod iterator {
         use super::*;
 
-        #[test]
-        fn element_count() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-
-            let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-
-                unsafe { IterMut::new(ptr, expected.len()) }
-            };
-
-            assert_eq!(actual.count(), expected.len());
-        }
-
-        #[test]
-        fn in_order() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-
-            let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-
-                unsafe { IterMut::new(ptr, expected.len()) }
-            };
-
-            assert!(actual.eq(expected.iter()));
-        }
-
-        mod double_ended {
+        mod next {
             use super::*;
 
             #[test]
-            fn element_count() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn yields_none_when_underlying_is_empty() {
+                let mut expected: [usize; 0] = [];
+                debug_assert!(expected.is_empty());
 
-                let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                let mut actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, expected.len()) }
-                }
-                .rev();
+                };
+
+                assert_eq!(actual.next(), None);
+            }
+
+            #[test]
+            fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(!expected.is_empty());
+
+                let mut actual = expected;
+
+                let actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
 
                 assert_eq!(actual.count(), expected.len());
             }
 
             #[test]
-            fn in_order() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(!expected.is_empty());
+
+                let mut actual = expected;
 
                 let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                assert!(actual.eq(expected.iter()));
+            }
+        }
+
+        mod size_hint {
+            use super::*;
+
+            #[test]
+            fn lower_bound_is_number_of_elements_when_constructed() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = expected;
+
+                let actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                let (lower, _upper) = actual.size_hint();
+
+                assert_eq!(lower, expected.len());
+            }
+
+            #[test]
+            fn lower_bound_updates_when_advanced() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = expected;
+
+                let mut actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                for expected in (0..expected.len()).rev() {
+                    _ = actual.next().expect("an element");
+
+                    let (lower, _upper) = actual.size_hint();
+
+                    assert_eq!(lower, expected);
+                }
+            }
+
+            #[test]
+            fn upper_bound_is_number_of_elements_when_constructed() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = expected;
+
+                let actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                let (_lower, upper) = actual.size_hint();
+
+                assert_eq!(upper, Some(expected.len()));
+            }
+
+            #[test]
+            fn upper_bound_updates_when_advanced() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = expected;
+
+                let mut actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                };
+
+                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                for expected in (0..expected.len()).rev() {
+                    _ = actual.next().expect("an element");
+
+                    let (_lower, upper) = actual.size_hint();
+
+                    assert_eq!(upper, Some(expected));
+                }
+            }
+        }
+    }
+
+    mod double_ended_iterator {
+        use super::*;
+
+        mod next_back {
+            use super::*;
+
+            #[test]
+            fn yields_none_when_underlying_is_empty() {
+                let mut expected: [usize; 0] = [];
+                debug_assert!(expected.is_empty());
+
+                let mut actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, expected.len()) }
-                }
-                .rev();
+                }.rev();
+
+                assert_eq!(actual.next(), None);
+            }
+
+            #[test]
+            fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(!expected.is_empty());
+
+                let mut actual = expected;
+
+                let actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                }.rev();
+
+                assert_eq!(actual.count(), expected.len());
+            }
+
+            #[test]
+            fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(!expected.is_empty());
+
+                let mut actual = expected;
+
+                let actual = {
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                }.rev();
 
                 assert!(actual.eq(expected.iter().rev()));
             }
-        }
-
-        mod exact_size {
-            use super::*;
 
             #[test]
-            fn hint() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                let expected = [0, 1];
+                debug_assert!(!expected.is_empty());
 
-                let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
-
-                    unsafe { IterMut::new(ptr, expected.len()) }
-                };
-
-                assert_eq!(actual.size_hint(), (expected.len(), Some(expected.len())));
-            }
-
-            #[test]
-            fn len() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
-
-                let actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
-
-                    unsafe { IterMut::new(ptr, expected.len()) }
-                };
-
-                assert_eq!(actual.len(), expected.len());
-            }
-
-            #[test]
-            fn updates() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut actual = expected;
 
                 let mut actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
-                    unsafe { IterMut::new(ptr, expected.len()) }
+                    unsafe { IterMut::new(ptr, actual.len()) }
                 };
 
-                (0..expected.len()).rev().for_each(|len| {
-                    _ = actual.next();
+                _ = actual.next().expect("consumes element with value 0");
+                _ = actual.next_back().expect("consumes element with value 1");
 
-                    assert_eq!(actual.size_hint(), (len, Some(len)));
-                });
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
             }
         }
 
-        mod fused {
+        mod size_hint {
             use super::*;
 
             #[test]
-            fn empty() {
-                let mut expected: [(); 0] = [];
+            fn lower_bound_updates_when_advanced() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = expected;
 
                 let mut actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
-                    unsafe { IterMut::new(ptr, expected.len()) }
-                };
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                }.rev();
 
-                // Yields `None` at least once.
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
+                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                for expected in (0..expected.len()).rev() {
+                    _ = actual.next().expect("an element");
 
-                // Continues to yield `None`.
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
+                    let (lower, _upper) = actual.size_hint();
+
+                    assert_eq!(lower, expected);
+                }
             }
 
             #[test]
-            fn exhausted() {
-                let mut expected = [0];
+            fn upper_bound_updates_when_advanced() {
+                let expected = [0, 1, 2, 3, 4, 5];
+
+                let mut actual = expected;
 
                 let mut actual = {
-                    let ptr = expected.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
-                    unsafe { IterMut::new(ptr, expected.len()) }
-                };
+                    unsafe { IterMut::new(ptr, actual.len()) }
+                }.rev();
 
-                // Exhaust the elements.
-                _ = actual.next().expect("the one element");
+                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                for expected in (0..expected.len()).rev() {
+                    _ = actual.next().expect("an element");
 
-                // Yields `None` at least once.
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
+                    let (_lower, upper) = actual.size_hint();
 
-                // Continues to yield `None`.
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
+                    assert_eq!(upper, Some(expected));
+                }
             }
+        }
+    }
+
+    mod fused_iterator {
+        use super::*;
+
+        #[test]
+        fn continues_to_yield_none_when_underlying_is_empty() {
+            let mut expected: [usize; 0] = [];
+
+            let mut actual = {
+                let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+
+                unsafe { IterMut::new(ptr, expected.len()) }
+            };
+
+            // Yields `None` at least once.
+            assert_eq!(actual.next(), None);
+            assert_eq!(actual.next_back(), None);
+
+            // Continues to yield `None`.
+            assert_eq!(actual.next(), None);
+            assert_eq!(actual.next_back(), None);
+        }
+
+        #[test]
+        fn continues_to_yield_none_when_underlying_is_exhausted() {
+            let mut expected = [0];
+
+            let mut actual = {
+                let ptr = expected.as_mut_ptr();
+                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+
+                unsafe { IterMut::new(ptr, expected.len()) }
+            };
+
+            // Exhaust the elements.
+            _ = actual.next().expect("the one element");
+
+            // Yields `None` at least once.
+            assert_eq!(actual.next(), None);
+            assert_eq!(actual.next_back(), None);
+
+            // Continues to yield `None`.
+            assert_eq!(actual.next(), None);
+            assert_eq!(actual.next_back(), None);
         }
     }
 
@@ -329,17 +470,79 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_elements() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+        fn is_an_empty_list_when_underlying_is_empty() {
+            let expected: [usize; 0] = [];
+            debug_assert!(expected.is_empty());
+
+            let mut actual = expected;
 
             let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
-                unsafe { IterMut::new(ptr, expected.len()) }
+                unsafe { IterMut::new(ptr, actual.len()) }
             };
 
             assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+
+        #[test]
+        fn is_a_list_of_the_correct_elements_in_the_correct_order_when_underlying_is_not_empty() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!expected.is_empty());
+
+            let mut actual = expected;
+
+            let actual = {
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                unsafe { IterMut::new(ptr, actual.len()) }
+            };
+
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+
+        #[test]
+        fn does_not_contain_elements_yielded_from_the_front() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!expected.is_empty());
+
+            let mut actual = expected;
+
+            let mut actual = {
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                unsafe { IterMut::new(ptr, actual.len()) }
+            };
+
+            for start in 1..=expected.len() {
+                _ = actual.next().expect("an element");
+
+                let expected = &expected[start..];
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+        }
+
+        #[test]
+        fn does_not_contain_elements_yielded_from_the_back() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!expected.is_empty());
+
+            let mut actual = expected;
+
+            let mut actual = {
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                unsafe { IterMut::new(ptr, actual.len()) }
+            };
+
+            for end in (1..expected.len()).rev() {
+                _ = actual.next_back().expect("an element");
+
+                let expected = &expected[..end];
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
         }
     }
 }
