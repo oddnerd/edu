@@ -99,9 +99,9 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     /// use rust::structure::collection::linear::array::Dope;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let mut clone = expected.clone();
     ///
-    /// let actual = Dope::from(clone.as_mut_slice());
+    /// let mut actual = expected.clone();
+    /// let actual = Dope::from(actual.as_mut_slice());
     ///
     /// assert!(actual.iter().eq(expected.iter()));
     /// ```
