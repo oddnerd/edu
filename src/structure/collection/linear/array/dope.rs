@@ -705,14 +705,22 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_elements() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+        fn is_an_empty_list_when_underlying_is_empty() {
+            let expected: [usize; 0] = [];
+            debug_assert!(expected.is_empty());
 
-            let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let mut underlying = expected;
+            let actual = Dope::from(underlying.as_mut_slice());
+
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+
+        #[test]
+        fn is_a_list_of_the_correct_elements_in_the_correct_order_when_underlying_is_not_empty() {
+            let expected = [0, 1, 2, 3, 4, 5];
+
+            let mut underlying = expected;
+            let actual = Dope::from(underlying.as_mut_slice());
 
             assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
         }
