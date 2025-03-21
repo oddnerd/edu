@@ -384,7 +384,7 @@ mod test {
                     unsafe { Iter::new(ptr, actual.len()) }
                 }.rev();
 
-                assert!(actual.eq(expected.iter()));
+                assert!(actual.eq(expected.iter().rev()));
             }
 
             #[test]
