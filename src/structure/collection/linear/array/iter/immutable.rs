@@ -499,17 +499,79 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_elements() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+        fn is_an_empty_list_when_underlying_is_empty() {
+            let expected: [usize; 0] = [];
+            debug_assert!(expected.is_empty());
+
+            let mut actual = expected;
 
             let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
-                unsafe { Iter::new(ptr, expected.len()) }
+                unsafe { Iter::new(ptr, actual.len()) }
             };
 
             assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+
+        #[test]
+        fn is_a_list_of_the_correct_elements_in_the_correct_order_when_underlying_is_not_empty() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!expected.is_empty());
+
+            let mut actual = expected;
+
+            let actual = {
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                unsafe { Iter::new(ptr, actual.len()) }
+            };
+
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+
+        #[test]
+        fn does_not_contain_elements_yielded_from_the_front() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!expected.is_empty());
+
+            let mut actual = expected;
+
+            let mut actual = {
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                unsafe { Iter::new(ptr, actual.len()) }
+            };
+
+            for start in 1..=expected.len() {
+                _ = actual.next().expect("an element");
+
+                let expected = &expected[start..];
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+        }
+
+        #[test]
+        fn does_not_contain_elements_yielded_from_the_back() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!expected.is_empty());
+
+            let mut actual = expected;
+
+            let mut actual = {
+                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+
+                unsafe { Iter::new(ptr, actual.len()) }
+            };
+
+            for start in 1..=expected.len() {
+                _ = actual.next_back().expect("an element");
+
+                let expected = &expected[start..];
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
         }
     }
 }
