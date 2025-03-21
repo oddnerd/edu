@@ -3,7 +3,6 @@
 use core::ptr::NonNull;
 
 /// Mutable reference [`Iterator`] over an [`Array`](`super::super::Array`).
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(in super::super) struct IterMut<'a, T> {
     /// Pointer to the hypothetical next element.
     ptr: NonNull<T>,
