@@ -68,7 +68,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
             // SAFETY:
             // * The offset in bytes does not exceed `isize::MAX`.
             // * Stays within the allocated object, or one byte past.
-            self.ptr = unsafe{ self.ptr.add(1) };
+            self.ptr = unsafe { self.ptr.add(1) };
 
             let Some(decremented) = self.count.checked_sub(1) else {
                 unreachable!("executed only if `self.count > 0`");
@@ -350,7 +350,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
 
                     unsafe { Iter::new(ptr, expected.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert_eq!(actual.next(), None);
             }
@@ -366,7 +367,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { Iter::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert_eq!(actual.count(), expected.len());
             }
@@ -382,7 +384,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { Iter::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 assert!(actual.eq(expected.iter().rev()));
             }
@@ -421,7 +424,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { Iter::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
@@ -443,7 +447,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { Iter::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 #[expect(clippy::shadow_unrelated, reason = "derived from length")]
                 for expected in (0..expected.len()).rev() {
