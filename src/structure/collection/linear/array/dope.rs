@@ -613,27 +613,35 @@ mod test {
         use core::ops::Index as _;
 
         #[test]
-        fn correct_element() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+        #[should_panic = "index out of bounds"]
+        fn panics_when_indexing_into_empty_underlying() {
+            let mut underlying: [usize; 0] = [];
 
-            let actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let instance = Dope::from(underlying.as_mut_slice());
 
-            for (index, value) in expected.iter().enumerate() {
-                assert_eq!(actual.index(index), value);
-            }
+            _ = instance.index(0);
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut underlying: [(); 0] = [];
+        fn panics_when_index_is_out_of_bounds() {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+
             let instance = Dope::from(underlying.as_mut_slice());
 
-            let _: &() = instance.index(0);
+            _ = instance.index(6);
+        }
+
+        #[test]
+        fn yields_correct_element_when_index_is_inside_bounds() {
+            const ELEMENTS: usize = 8;
+
+            let underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            #[expect(clippy::needless_range_loop, reason = "explicitly testing index")]
+            for index in 0..ELEMENTS {
+                assert_eq!(underlying.index(index), &index);
+            }
         }
     }
 
@@ -643,42 +651,53 @@ mod test {
         use core::ops::IndexMut as _;
 
         #[test]
-        fn correct_element() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+        #[should_panic = "index out of bounds"]
+        fn panics_when_indexing_into_empty_underlying() {
+            let mut underlying: [usize; 0] = [];
 
-            let mut actual = {
-                let ptr = expected.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
-                unsafe { Dope::new(ptr, expected.len()) }
-            };
+            let mut instance = Dope::from(underlying.as_mut_slice());
 
-            for (index, value) in expected.iter_mut().enumerate() {
-                assert_eq!(actual.index_mut(index), value);
-            }
+            _ = instance.index_mut(0);
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut underlying: [(); 0] = [];
+        fn panics_when_index_is_out_of_bounds() {
+            let mut underlying = [0, 1, 2, 3, 4, 5];
+
             let mut instance = Dope::from(underlying.as_mut_slice());
 
-            let _: &() = instance.index_mut(0);
+            _ = instance.index_mut(6);
         }
 
         #[test]
-        fn is_mutable() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
+        fn yields_correct_element_when_index_is_inside_bounds() {
+            const ELEMENTS: usize = 8;
 
-            let mut actual = Dope::from(expected.as_mut_slice());
+            let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
-            for index in 0..actual.count() {
-                *actual.index_mut(index) = 0;
+            #[expect(clippy::needless_range_loop, reason = "explicitly testing index")]
+            for index in 0..ELEMENTS {
+                assert_eq!(underlying.index_mut(index), &index);
+            }
+        }
+
+        #[test]
+        fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
+            const ELEMENTS: usize = 8;
+
+            let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let mut actual = expected;
+            let mut instance = Dope::from(actual.as_mut_slice());
+
+            for (index, value) in (0..ELEMENTS).rev().enumerate() {
+                *instance.index_mut(index) = value;
             }
 
-            for element in expected {
-                assert_eq!(element, 0);
-            }
+            expected.reverse();
+
+            assert_eq!(actual, expected);
         }
     }
 
