@@ -386,7 +386,6 @@ impl<'a, T: 'a> Array for Dope<'a, T> {
     ///
     /// # Safety
     /// * `self` must outlive the resultant pointer.
-    /// * Cannot write to resultant pointer or any pointer derived from it.
     ///
     /// # Performance
     /// #### Time Complexity
