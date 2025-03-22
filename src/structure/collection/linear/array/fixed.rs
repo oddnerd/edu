@@ -611,6 +611,108 @@ mod test {
         }
     }
 
+    mod partial_equality {
+        use super::*;
+
+        #[test]
+        fn is_symmetric() {
+            // a == b <=> b == a
+
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let a = Fixed::from(elements);
+            let b = Fixed::from(elements);
+
+            assert_eq!(a, b);
+            assert_eq!(b, a);
+        }
+
+        #[test]
+        fn is_transitive() {
+            // a == b && b == c <=> a == c
+
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let a = Fixed::from(elements);
+            let b = Fixed::from(elements);
+            let c = Fixed::from(elements);
+
+            assert_eq!(a, b);
+            assert_eq!(b, c);
+            assert_eq!(a, c);
+        }
+
+        #[test]
+        fn is_equal_when_same_elements_in_same_order() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let a = Fixed::from(elements);
+            let b = Fixed::from(elements);
+
+            assert_eq!(a, b);
+        }
+
+        #[test]
+        fn is_equal_when_both_underlyings_are_empty() {
+            let elements: [usize; 0] = [];
+            debug_assert!(elements.is_empty());
+
+            let a = Fixed::from(elements);
+            let b = Fixed::from(elements);
+
+            assert_eq!(a, b);
+        }
+
+        #[test]
+        fn is_not_equal_when_same_elements_in_different_order() {
+            const ELEMENTS: usize = 8;
+
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let a = Fixed::from(elements);
+
+            for offset in 1..ELEMENTS {
+                let mut b = elements;
+                b.rotate_right(offset);
+                let b = Fixed::from(b);
+
+                assert_ne!(a, b);
+            }
+        }
+
+        #[test]
+        fn is_not_equal_when_an_element_has_a_different_value() {
+            const ELEMENTS: usize = 8;
+
+            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let a = Fixed::from(elements);
+
+            for index in 0..ELEMENTS {
+                let mut b = elements;
+
+                b[index] = 12345; // Some arbitrary distinct value.
+
+                let b = Fixed::from(b);
+
+                assert_ne!(a, b);
+            }
+        }
+    }
+
+    mod equality {
+        use super::*;
+
+        #[test]
+        fn is_reflexive() {
+            // a == a
+
+            let a = Fixed::from([0, 1, 2, 3, 4, 5]);
+
+            assert_eq!(a, a);
+        }
+    }
+
     mod index {
         use super::*;
 
@@ -962,61 +1064,6 @@ mod test {
             for (actual, expected) in actual.iter().zip(expected.iter()) {
                 assert!(!core::ptr::addr_eq(actual, expected));
             }
-        }
-    }
-
-    mod equality {
-        use super::*;
-
-        #[test]
-        fn eq_when_same_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
-
-            let first = Fixed::from(expected);
-            let second = Fixed::from(expected);
-
-            assert_eq!(first, second);
-        }
-
-        #[test]
-        fn ne_when_different_elements() {
-            let first = Fixed::from([0]);
-            let second = Fixed::from([1]);
-
-            assert_ne!(first, second);
-        }
-
-        #[test]
-        fn is_symmetric() {
-            let expected = [0, 1, 2, 3, 4, 5];
-
-            let first = Fixed::from(expected);
-            let second = Fixed::from(expected);
-
-            // `first == second` <=> `second == first`
-            assert_eq!(first, second);
-            assert_eq!(second, first);
-        }
-
-        #[test]
-        fn is_transitive() {
-            let expected = [0, 1, 2, 3, 4, 5];
-
-            let first = Fixed::from(expected);
-            let second = Fixed::from(expected);
-            let third = Fixed::from(expected);
-
-            // `first == second && second == third` => `first == third`
-            assert_eq!(first, second);
-            assert_eq!(second, third);
-            assert_eq!(third, first);
-        }
-
-        #[test]
-        fn is_reflexive() {
-            let actual = Fixed::<(), 0>::default();
-
-            assert_eq!(actual, actual);
         }
     }
 
