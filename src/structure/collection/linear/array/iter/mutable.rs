@@ -505,6 +505,7 @@ mod test {
         #[test]
         fn continues_to_yield_none_when_underlying_is_empty() {
             let mut expected: [usize; 0] = [];
+            debug_assert!(expected.is_empty());
 
             let mut actual = {
                 let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
