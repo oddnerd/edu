@@ -395,10 +395,10 @@ mod test {
 
             #[test]
             fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
-                let expected = [0, 1];
-                debug_assert!(!expected.is_empty());
+                let underlying = [0, 1];
+                debug_assert!(!underlying.is_empty());
 
-                let mut actual = expected;
+                let mut actual = underlying;
 
                 let mut actual = {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
@@ -470,13 +470,13 @@ mod test {
 
         #[test]
         fn continues_to_yield_none_when_underlying_is_empty() {
-            let mut expected: [usize; 0] = [];
-            debug_assert!(expected.is_empty());
+            let mut underlying: [usize; 0] = [];
+            debug_assert!(underlying.is_empty());
 
             let mut actual = {
-                let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+                let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                unsafe { Iter::new(ptr, expected.len()) }
+                unsafe { Iter::new(ptr, underlying.len()) }
             };
 
             // Yields `None` at least once.
@@ -490,13 +490,13 @@ mod test {
 
         #[test]
         fn continues_to_yield_none_when_underlying_is_exhausted() {
-            let mut expected = [0];
+            let mut underlying = [0];
 
             let mut actual = {
-                let ptr = expected.as_mut_ptr();
+                let ptr = underlying.as_mut_ptr();
                 let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                unsafe { Iter::new(ptr, expected.len()) }
+                unsafe { Iter::new(ptr, underlying.len()) }
             };
 
             // Exhaust the elements.
