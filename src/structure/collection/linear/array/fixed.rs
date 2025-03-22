@@ -173,7 +173,15 @@ impl<T, const N: usize> IntoIterator for Fixed<T, N> {
     /// Obtain an iterator that yields ownership of elements by value.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
