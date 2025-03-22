@@ -170,30 +170,34 @@ mod test {
 
             #[test]
             fn sets_pointer() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut underlying = [0, 1, 2, 3, 4, 5];
+
+                let expected = underlying.as_mut_ptr();
 
                 let actual = {
-                    let ptr = expected.as_mut_ptr();
+                    let ptr = underlying.as_mut_ptr();
                     let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    unsafe { Iter::new(ptr, expected.len()) }
+                    unsafe { Iter::new(ptr, underlying.len()) }
                 };
 
-                assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+                assert_eq!(actual.ptr.as_ptr(), expected);
             }
 
             #[test]
             fn sets_element_count() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+                let mut underlying = [0, 1, 2, 3, 4, 5];
+
+                let expected = underlying.len();
 
                 let actual = {
-                    let ptr = expected.as_mut_ptr();
+                    let ptr = underlying.as_mut_ptr();
                     let ptr = unsafe { NonNull::new_unchecked(ptr) };
 
-                    unsafe { Iter::new(ptr, expected.len()) }
+                    unsafe { Iter::new(ptr, underlying.len()) }
                 };
 
-                assert_eq!(actual.count, expected.len());
+                assert_eq!(actual.count, expected);
             }
         }
     }
@@ -206,13 +210,13 @@ mod test {
 
             #[test]
             fn yields_none_when_underlying_is_empty() {
-                let mut expected: [usize; 0] = [];
-                debug_assert!(expected.is_empty());
+                let mut underlying: [usize; 0] = [];
+                debug_assert!(underlying.is_empty());
 
                 let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                    unsafe { Iter::new(ptr, expected.len()) }
+                    unsafe { Iter::new(ptr, underlying.len()) }
                 };
 
                 assert_eq!(actual.next(), None);
