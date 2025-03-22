@@ -81,7 +81,7 @@ impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     /// Query the element `index` positions from the start.
     ///
     /// # Panics
-    /// This method has the precondition that the `index` is within bounds.
+    /// If provided `index` is out of bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -117,7 +117,7 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// This method has the precondition that the `index` is within bounds.
+    /// If provided `index` is out of bounds.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
