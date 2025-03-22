@@ -42,20 +42,7 @@ impl<T: Default, const N: usize> Default for Fixed<T, N> {
     /// }
     /// ```
     fn default() -> Self {
-        // SAFETY: the [`MaybeUninit<T>`] is initialized even if the `T` isn't.
-        let mut uninitialized: [core::mem::MaybeUninit<T>; N] =
-            unsafe { core::mem::MaybeUninit::uninit().assume_init() };
-
-        for element in &mut uninitialized {
-            _ = element.write(Default::default());
-        }
-
-        // SAFETY:
-        // * [`MaybeUninit<T>`] has same size as `T` => arrays have same size.
-        // * [`MaybeUninit<T>`] has same alignment as `T` => elements aligned.
-        let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
-
-        Self::from(initialized)
+        Self::from(core::array::from_fn::<_, N, _>(|_| T::default()))
     }
 }
 
