@@ -50,7 +50,15 @@ impl<T, const N: usize> From<[T; N]> for Fixed<T, N> {
     /// Construct from an existing [`array`].
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
