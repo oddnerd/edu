@@ -11,7 +11,7 @@ use super::Linear;
 /// ([`std::array`](https://en.cppreference.com/w/cpp/container/array))
 /// which interprets the underlying array as being 'dumb' that eagerly decays
 /// to a pointer and wraps it in a object.
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Fixed<T, const N: usize> {
     /// Underlying memory buffer.
     data: [T; N],
