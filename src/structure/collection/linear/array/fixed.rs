@@ -522,7 +522,15 @@ mod test {
         use super::*;
 
         #[test]
-        fn initializes_elements() {
+        fn handles_zero_length() {
+            use crate::test::mock::DefaultValue;
+
+            // Ideally, this will panic if it misuses the length.
+            _ = Fixed::<DefaultValue, 0>::default();
+        }
+
+        #[test]
+        fn initializes_elements_to_correct_value_when_non_zero_length() {
             use crate::test::mock::DefaultValue;
 
             let actual = Fixed::<DefaultValue, 256>::default();
