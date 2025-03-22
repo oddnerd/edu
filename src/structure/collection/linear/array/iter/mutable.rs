@@ -256,7 +256,12 @@ mod test {
 
             #[test]
             fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
-                let mut actual = [0, 1, 2, 3, 4, 5];
+                const ELEMENTS: usize = 8;
+
+                let mut actual = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                let mut expected = actual;
+                expected.reverse();
 
                 let mut iter = {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
@@ -264,13 +269,13 @@ mod test {
                     unsafe { IterMut::new(ptr, actual.len()) }
                 };
 
-                for value in (0..actual.len()).rev() {
+                for value in (0..ELEMENTS).rev() {
                     let element = iter.next().expect("an element");
 
                     *element = value;
                 }
 
-                assert_eq!(actual, [5, 4, 3, 2, 1, 0]);
+                assert_eq!(actual, expected);
             }
         }
 
@@ -434,21 +439,26 @@ mod test {
 
             #[test]
             fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
-                let mut actual = [0, 1, 2, 3, 4, 5];
+                const ELEMENTS: usize = 8;
+
+                let mut actual = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                let mut expected = actual;
+                expected.reverse();
 
                 let mut iter = {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, actual.len()) }
-                };
+                }.rev();
 
-                for value in 0..actual.len() {
-                    let element = iter.next_back().expect("an element");
+                for value in 0..ELEMENTS {
+                    let element = iter.next().expect("an element");
 
                     *element = value;
                 }
 
-                assert_eq!(actual, [5, 4, 3, 2, 1, 0]);
+                assert_eq!(actual, expected);
             }
         }
 
