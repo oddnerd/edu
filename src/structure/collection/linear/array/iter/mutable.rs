@@ -457,19 +457,18 @@ mod test {
 
             #[test]
             fn lower_bound_updates_when_advanced() {
-                let expected = [0, 1, 2, 3, 4, 5];
+                const ELEMENTS: usize = 8;
 
-                let mut actual = expected;
+                let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
                 let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                    unsafe { IterMut::new(ptr, actual.len()) }
+                    unsafe { IterMut::new(ptr, underlying.len()) }
                 }
                 .rev();
 
-                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
-                for expected in (0..expected.len()).rev() {
+                for expected in (0..ELEMENTS).rev() {
                     _ = actual.next().expect("an element");
 
                     let (lower, _upper) = actual.size_hint();
@@ -480,19 +479,18 @@ mod test {
 
             #[test]
             fn upper_bound_updates_when_advanced() {
-                let expected = [0, 1, 2, 3, 4, 5];
+                const ELEMENTS: usize = 8;
 
-                let mut actual = expected;
+                let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
                 let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                    unsafe { IterMut::new(ptr, actual.len()) }
+                    unsafe { IterMut::new(ptr, underlying.len()) }
                 }
                 .rev();
 
-                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
-                for expected in (0..expected.len()).rev() {
+                for expected in (0..ELEMENTS).rev() {
                     _ = actual.next().expect("an element");
 
                     let (_lower, upper) = actual.size_hint();
