@@ -107,7 +107,7 @@ impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
-        debug_assert!(index < N, "index out of bounds");
+        assert!(index < N, "index out of bounds");
 
         let ptr = self.data.as_ptr();
 
@@ -151,7 +151,7 @@ impl<T, const N: usize> core::ops::IndexMut<usize> for Fixed<T, N> {
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        debug_assert!(index < N, "index out of bounds");
+        assert!(index < N, "index out of bounds");
 
         let ptr = self.data.as_mut_ptr();
 
