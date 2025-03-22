@@ -617,21 +617,38 @@ mod test {
         use core::ops::Index as _;
 
         #[test]
-        fn correct_element() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Fixed::from(expected);
+        #[should_panic = "index out of bounds"]
+        fn panics_when_indexing_into_empty_underlying() {
+            let underlying: [usize; 0] = [];
+            debug_assert!(underlying.is_empty());
 
-            for (index, value) in expected.iter().enumerate() {
-                assert_eq!(actual.index(index), value);
-            }
+            let actual = Fixed::from(underlying);
+
+            _ = actual.index(0);
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let instance = Fixed::<(), 0>::default();
+        fn panics_when_index_is_out_of_bounds() {
+            let underlying = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!underlying.is_empty());
 
-            let _: &() = instance.index(0);
+            let actual = Fixed::from(underlying);
+
+            _ = actual.index(6);
+        }
+
+        #[test]
+        fn yields_correct_element_when_index_is_inside_bounds() {
+            const ELEMENTS: usize = 8;
+
+            let underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let actual = Fixed::from(underlying);
+
+            for index in 0..ELEMENTS {
+                assert_eq!(actual.index(index), &index);
+            }
         }
     }
 
@@ -641,34 +658,55 @@ mod test {
         use core::ops::IndexMut as _;
 
         #[test]
-        fn correct_element() {
-            let mut expected = [0, 1, 2, 3, 4, 5];
-            let mut actual = Fixed::from(expected);
+        #[should_panic = "index out of bounds"]
+        fn panics_when_indexing_into_empty_underlying() {
+            let underlying: [usize; 0] = [];
+            debug_assert!(underlying.is_empty());
 
-            for (index, value) in expected.iter_mut().enumerate() {
-                assert_eq!(actual.index_mut(index), value);
-            }
+            let mut actual = Fixed::from(underlying);
+
+            _ = actual.index_mut(0);
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_out_of_bounds() {
-            let mut instance = Fixed::<(), 0>::default();
+        fn panics_when_index_is_out_of_bounds() {
+            let underlying = [0, 1, 2, 3, 4, 5];
+            debug_assert!(!underlying.is_empty());
 
-            let _: &() = instance.index_mut(0);
+            let mut actual = Fixed::from(underlying);
+
+            _ = actual.index_mut(6);
         }
 
         #[test]
-        fn is_mutable() {
-            let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+        fn yields_correct_element_when_index_is_inside_bounds() {
+            const ELEMENTS: usize = 8;
 
-            for index in 0..actual.count() {
-                *actual.index_mut(index) = 0;
+            let underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let mut actual = Fixed::from(underlying);
+
+            for mut index in 0..ELEMENTS {
+                assert_eq!(actual.index_mut(index), &mut index);
+            }
+        }
+
+        #[test]
+        fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
+            const ELEMENTS: usize = 8;
+
+            let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+            let mut actual = Fixed::from(expected);
+
+            for (index, value) in (0..ELEMENTS).rev().enumerate() {
+                *actual.index_mut(index) = value;
             }
 
-            for element in actual {
-                assert_eq!(element, 0);
-            }
+            expected.reverse();
+
+            assert_eq!(actual.data, expected);
         }
     }
 
