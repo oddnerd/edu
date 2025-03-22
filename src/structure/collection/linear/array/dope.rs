@@ -385,7 +385,7 @@ impl<'a, T: 'a> Array for Dope<'a, T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Safety
-    /// * `self` must outlive the resultant pointer.
+    /// `self` must outlive the resultant pointer.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -416,7 +416,7 @@ impl<'a, T: 'a> Array for Dope<'a, T> {
     /// Obtain an immutable pointer to the underlying contigious memory buffer.
     ///
     /// # Safety
-    /// * `self` must outlive the resultant pointer.
+    /// `self` must outlive the resultant pointer.
     ///
     /// # Performance
     /// #### Time Complexity
