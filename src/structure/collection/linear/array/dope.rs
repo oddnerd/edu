@@ -1364,8 +1364,9 @@ mod test {
             use super::*;
 
             #[test]
-            fn correct_address() {
+            fn is_correct_address() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
+
                 let actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.as_ptr(), expected.as_ptr());
@@ -1376,8 +1377,9 @@ mod test {
             use super::*;
 
             #[test]
-            fn correct_address() {
+            fn is_correct_address() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
+
                 let mut actual = Dope::from(expected.as_mut_slice());
 
                 assert_eq!(actual.as_mut_ptr(), expected.as_mut_ptr());
