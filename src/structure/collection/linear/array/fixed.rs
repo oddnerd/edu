@@ -78,7 +78,7 @@ impl<T, const N: usize> From<[T; N]> for Fixed<T, N> {
 impl<T, const N: usize> core::ops::Index<usize> for Fixed<T, N> {
     type Output = T;
 
-    /// Query the element `index` positions from the start.
+    /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
     /// If provided `index` is out of bounds.
