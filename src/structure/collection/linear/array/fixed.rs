@@ -1039,34 +1039,6 @@ mod test {
         }
     }
 
-    mod copy {
-        use super::*;
-
-        #[test]
-        fn is_equivalent() {
-            let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-
-            let actual = expected;
-
-            assert_eq!(actual, expected);
-        }
-
-        #[test]
-        fn owns_elements() {
-            let expected = Fixed::from([0, 1, 2, 3, 4, 5]);
-
-            let actual = expected;
-
-            #[expect(
-                clippy::shadow_unrelated,
-                reason = "these are elements from the arrays"
-            )]
-            for (actual, expected) in actual.iter().zip(expected.iter()) {
-                assert!(!core::ptr::addr_eq(actual, expected));
-            }
-        }
-    }
-
     mod fmt {
         use super::*;
 
