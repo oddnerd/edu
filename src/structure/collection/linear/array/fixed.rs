@@ -544,15 +544,45 @@ mod test {
     mod from {
         use super::*;
 
-        mod primitive_array {
+        mod array {
             use super::*;
 
             #[test]
-            fn initializes_elements() {
+            fn handles_when_input_is_empty() {
+                let input: [usize; 0] = [];
+
+                let actual = Fixed::from(input);
+
+                assert!(actual.is_empty());
+            }
+
+            #[test]
+            fn has_same_elements_in_same_order_when_input_is_not_empty() {
                 let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected);
+
+                let actual = expected;
+                let actual = Fixed::from(actual);
 
                 assert_eq!(actual.data, expected);
+            }
+
+            #[test]
+            fn moves_elements_into_self() {
+                use crate::test::mock::DropCounter;
+
+                const ELEMENTS: usize = 8;
+
+                let dropped = DropCounter::new_counter();
+
+                let input = core::array::from_fn::<_, ELEMENTS, _>(|_| DropCounter::new(&dropped));
+
+                // The purpose of this test is to ensure elements are moved
+                // from the input into self. If this constructor erroneously
+                // duplicates elements in some way, then this will increment
+                // the counter more than one times the number of elements.
+                drop(Fixed::from(input));
+
+                assert_eq!(dropped.take(), ELEMENTS);
             }
         }
     }
