@@ -17,27 +17,6 @@ pub struct Fixed<T, const N: usize> {
     data: [T; N],
 }
 
-impl<T, const N: usize> From<[T; N]> for Fixed<T, N> {
-    /// Construct from an existing [`array`].
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::Linear;
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Fixed::from(expected.clone());
-    ///
-    /// assert!(actual.iter().eq(expected.iter()));
-    /// ```
-    fn from(array: [T; N]) -> Self {
-        Self { data: array }
-    }
-}
-
 impl<T: Default, const N: usize> Default for Fixed<T, N> {
     /// Construct with default initialized elements.
     ///
@@ -69,6 +48,27 @@ impl<T: Default, const N: usize> Default for Fixed<T, N> {
         let initialized = unsafe { uninitialized.as_mut_ptr().cast::<[T; N]>().read() };
 
         Self::from(initialized)
+    }
+}
+
+impl<T, const N: usize> From<[T; N]> for Fixed<T, N> {
+    /// Construct from an existing [`array`].
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::Linear;
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// let actual = Fixed::from(expected.clone());
+    ///
+    /// assert!(actual.iter().eq(expected.iter()));
+    /// ```
+    fn from(array: [T; N]) -> Self {
+        Self { data: array }
     }
 }
 
@@ -355,48 +355,6 @@ pub struct IntoIter<T, const N: usize> {
     next: core::ops::Range<usize>,
 }
 
-impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for IntoIter<T, N> {
-    /// Print out the element yet to be yielded.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let mut instance = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
-    ///
-    /// // Remove some elements.
-    /// instance.next();
-    /// instance.next_back();
-    ///
-    /// assert_eq!(format!("{instance:?}"), format!("[1, 2, 3, 4]"));
-    /// ```
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut list = &mut f.debug_list();
-
-        let ptr = {
-            // Will _never_ write to this pointer.
-            let ptr = self.data.as_ptr().cast_mut();
-
-            // `ManuallyDrop<T>` has the same memory layout at `T`.
-            ptr.cast::<T>()
-        };
-
-        for index in self.next.clone() {
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(index) };
-
-            // SAFETY:
-            // * Pointer is non-null.
-            // * Points to initialized instance of `T`.
-            let element = unsafe { &*ptr };
-
-            list = list.entry(element);
-        }
-
-        list.finish()
-    }
-}
-
 impl<T, const N: usize> Drop for IntoIter<T, N> {
     /// Drops the elements that have yet to be yielded.
     ///
@@ -519,9 +477,66 @@ impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 
 impl<T, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
 
+impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for IntoIter<T, N> {
+    /// Print out the element yet to be yielded.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let mut instance = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// // Remove some elements.
+    /// instance.next();
+    /// instance.next_back();
+    ///
+    /// assert_eq!(format!("{instance:?}"), format!("[1, 2, 3, 4]"));
+    /// ```
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut list = &mut f.debug_list();
+
+        let ptr = {
+            // Will _never_ write to this pointer.
+            let ptr = self.data.as_ptr().cast_mut();
+
+            // `ManuallyDrop<T>` has the same memory layout at `T`.
+            ptr.cast::<T>()
+        };
+
+        for index in self.next.clone() {
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY:
+            // * Pointer is non-null.
+            // * Points to initialized instance of `T`.
+            let element = unsafe { &*ptr };
+
+            list = list.entry(element);
+        }
+
+        list.finish()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
+
+    mod default {
+        use super::*;
+
+        #[test]
+        fn initializes_elements() {
+            use crate::test::mock::DefaultValue;
+
+            let actual = Fixed::<DefaultValue, 256>::default();
+
+            for element in actual {
+                assert_eq!(element, DefaultValue::default());
+            }
+        }
+    }
 
     mod from {
         use super::*;
@@ -823,21 +838,6 @@ mod test {
                     assert_eq!(actual.next(), None);
                     assert_eq!(actual.next_back(), None);
                 }
-            }
-        }
-    }
-
-    mod default {
-        use super::*;
-
-        #[test]
-        fn initializes_elements() {
-            use crate::test::mock::DefaultValue;
-
-            let actual = Fixed::<DefaultValue, 256>::default();
-
-            for element in actual {
-                assert_eq!(element, DefaultValue::default());
             }
         }
     }
