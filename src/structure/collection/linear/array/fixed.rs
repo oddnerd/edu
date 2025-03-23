@@ -819,72 +819,305 @@ mod test {
         }
     }
 
-    mod iterator {
+    mod into_iterator {
         use super::*;
 
-        mod into {
+        mod iterator {
             use super::*;
 
-            #[test]
-            fn element_count() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let actual = Fixed::from(expected);
-
-                assert_eq!(actual.into_iter().count(), expected.len());
-            }
-
-            #[test]
-            fn in_order() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let actual = Fixed::from(expected);
-
-                assert!(actual.into_iter().eq(expected.into_iter()));
-            }
-
-            mod drop {
+            mod next {
                 use super::*;
 
                 #[test]
-                fn drops_unyielded_elements_when_advanced_from_front() {
-                    use crate::test::mock::DropCounter;
+                fn yields_none_when_empty() {
+                    let elements: [usize; 0] = [];
+                    debug_assert!(elements.is_empty());
 
-                    const ELEMENTS: usize = 8;
+                    let mut actual = Fixed::from(elements).into_iter();
 
-                    for yielded in 0..ELEMENTS {
-                        let dropped = DropCounter::new_counter();
+                    assert_eq!(actual.next(), None);
+                }
 
-                        let mut actual =
-                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                DropCounter::new(&dropped)
-                            }))
-                            .into_iter();
+                #[test]
+                fn can_be_advanced_the_number_of_elements_when_not_empty() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    debug_assert!(!expected.is_empty());
 
-                        for _ in 0..yielded {
-                            // Lifetime is passed to caller.
-                            drop(actual.next());
-                        }
+                    let actual = Fixed::from(expected).into_iter();
 
-                        // The above drops in caller scope, not the
-                        // destructor being tested, so reset counter.
-                        debug_assert_eq!(dropped.replace(0), yielded);
+                    assert_eq!(actual.count(), expected.len());
+                }
 
-                        // Now we drop the iterator, so we expect all
-                        // remaining elements to be dropped.
-                        drop(actual);
+                #[test]
+                fn yields_correct_elements_in_correct_order_when_not_empty() {
+                    let expected = [0, 1, 2, 3, 4, 5];
 
-                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                    let actual = Fixed::from(expected).into_iter();
+
+                    assert!(actual.eq(expected));
+                }
+            }
+
+            mod size_hint {
+                use super::*;
+
+                #[test]
+                fn lower_bound_is_number_of_elements_when_constructed() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let actual = Fixed::from(expected).into_iter();
+
+                    let (lower, _upper) = actual.size_hint();
+
+                    assert_eq!(lower, expected.len());
+                }
+
+                #[test]
+                fn lower_bound_updates_when_advanced() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual = Fixed::from(expected).into_iter();
+
+                    #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                    for expected in (0..expected.len()).rev() {
+                        _ = actual.next().expect("an element");
+
+                        let (lower, _upper) = actual.size_hint();
+
+                        assert_eq!(lower, expected);
                     }
                 }
 
                 #[test]
-                fn drops_unyielded_elements_when_advanced_from_back() {
-                    use crate::test::mock::DropCounter;
+                fn upper_bound_is_number_of_elements_when_constructed() {
+                    let expected = [0, 1, 2, 3, 4, 5];
 
-                    const ELEMENTS: usize = 8;
+                    let actual = Fixed::from(expected).into_iter();
 
-                    for yielded in 0..ELEMENTS {
+                    let (_lower, upper) = actual.size_hint();
+
+                    assert_eq!(upper, Some(expected.len()));
+                }
+
+                #[test]
+                fn upper_bound_updates_when_advanced() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual = Fixed::from(expected).into_iter();
+
+                    #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                    for expected in (0..expected.len()).rev() {
+                        _ = actual.next().expect("an element");
+
+                        let (_lower, upper) = actual.size_hint();
+
+                        assert_eq!(upper, Some(expected));
+                    }
+                }
+            }
+        }
+
+        mod double_ended_iterator {
+            use super::*;
+
+            mod next_back {
+                use super::*;
+
+                #[test]
+                fn yields_none_when_empty() {
+                    let  expected: [usize; 0] = [];
+                    debug_assert!(expected.is_empty());
+
+                    let mut actual = Fixed::from(expected).into_iter().rev();
+
+                    assert_eq!(actual.next(), None);
+                }
+
+                #[test]
+                fn can_be_advanced_the_number_of_elements_when_not_empty() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    debug_assert!(!expected.is_empty());
+
+                    let actual = Fixed::from(expected).into_iter().rev();
+
+                    assert_eq!(actual.count(), expected.len());
+                }
+
+                #[test]
+                fn yields_correct_elements_in_correct_order_when_not_empty() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+                    debug_assert!(!expected.is_empty());
+
+                    let actual = Fixed::from(expected).into_iter().rev();
+
+                    assert!(actual.eq(expected));
+                }
+
+                #[test]
+                fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                    let underlying = [0, 1];
+                    debug_assert!(!underlying.is_empty());
+
+                    let mut actual = Fixed::from(underlying).into_iter().rev();
+
+                    _ = actual.next().expect("consumes element with value 0");
+                    _ = actual.next_back().expect("consumes element with value 1");
+
+                    assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next_back(), None);
+                }
+            }
+
+            mod size_hint {
+                use super::*;
+
+                #[test]
+                fn lower_bound_updates_when_advanced() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual = Fixed::from(expected).into_iter().rev();
+
+                    #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                    for expected in (0..expected.len()).rev() {
+                        _ = actual.next().expect("an element");
+
+                        let (lower, _upper) = actual.size_hint();
+
+                        assert_eq!(lower, expected);
+                    }
+                }
+
+                #[test]
+                fn upper_bound_updates_when_advanced() {
+                    let expected = [0, 1, 2, 3, 4, 5];
+
+                    let mut actual = Fixed::from(expected).into_iter().rev();
+
+                    #[expect(clippy::shadow_unrelated, reason = "derived from length")]
+                    for expected in (0..expected.len()).rev() {
+                        _ = actual.next().expect("an element");
+
+                        let (_lower, upper) = actual.size_hint();
+
+                        assert_eq!(upper, Some(expected));
+                    }
+                }
+            }
+        }
+
+        mod fuzed_iterator {
+            use super::*;
+
+            #[test]
+            fn continues_to_yield_none_when_empty() {
+                let underlying: [usize; 0] = [];
+                debug_assert!(underlying.is_empty());
+
+                let mut actual = Fixed::from(underlying).into_iter();
+
+                // Yields `None` at least once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+
+            #[test]
+            fn continues_to_yield_none_exhausted() {
+                let underlying = [0];
+
+                let mut actual = Fixed::from(underlying).into_iter();
+
+                // Exhaust the elements.
+                _ = actual.next().expect("the one element");
+
+                // Yields `None` at least once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+        }
+
+        mod drop {
+            use super::*;
+
+            #[test]
+            fn drops_unyielded_elements_when_advanced_from_front() {
+                use crate::test::mock::DropCounter;
+
+                const ELEMENTS: usize = 8;
+
+                for yielded in 0..ELEMENTS {
+                    let dropped = DropCounter::new_counter();
+
+                    let mut actual =
+                        Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        }))
+                        .into_iter();
+
+                    for _ in 0..yielded {
+                        // Lifetime is passed to caller.
+                        drop(actual.next());
+                    }
+
+                    // The above drops in caller scope, not the
+                    // destructor being tested, so reset counter.
+                    debug_assert_eq!(dropped.replace(0), yielded);
+
+                    // Now we drop the iterator, so we expect all
+                    // remaining elements to be dropped.
+                    drop(actual);
+
+                    assert_eq!(dropped.take(), ELEMENTS - yielded);
+                }
+            }
+
+            #[test]
+            fn drops_unyielded_elements_when_advanced_from_back() {
+                use crate::test::mock::DropCounter;
+
+                const ELEMENTS: usize = 8;
+
+                for yielded in 0..ELEMENTS {
+                    let dropped = DropCounter::new_counter();
+
+                    let mut actual =
+                        Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                            DropCounter::new(&dropped)
+                        }))
+                        .into_iter();
+
+                    for _ in 0..yielded {
+                        // Lifetime is passed to caller.
+                        drop(actual.next_back());
+                    }
+
+                    // The above drops in caller scope, not the
+                    // destructor being tested, so reset counter.
+                    debug_assert_eq!(dropped.replace(0), yielded);
+
+                    // Now we drop the iterator, so we expect all
+                    // remaining elements to be dropped.
+                    drop(actual);
+
+                    assert_eq!(dropped.take(), ELEMENTS - yielded);
+                }
+            }
+
+            #[test]
+            fn drops_unyielded_elements_when_advanced_from_both_ends() {
+                use crate::test::mock::DropCounter;
+
+                const ELEMENTS: usize = 8;
+
+                for front in 0..ELEMENTS {
+                    for back in front..ELEMENTS {
                         let dropped = DropCounter::new_counter();
 
                         let mut actual =
@@ -893,154 +1126,26 @@ mod test {
                             }))
                             .into_iter();
 
-                        for _ in 0..yielded {
+                        for _ in 0..front {
+                            // Lifetime is passed to caller.
+                            drop(actual.next());
+                        }
+
+                        for _ in front..back {
                             // Lifetime is passed to caller.
                             drop(actual.next_back());
                         }
 
                         // The above drops in caller scope, not the
                         // destructor being tested, so reset counter.
-                        debug_assert_eq!(dropped.replace(0), yielded);
+                        let expected = ELEMENTS - dropped.replace(0);
 
                         // Now we drop the iterator, so we expect all
                         // remaining elements to be dropped.
                         drop(actual);
 
-                        assert_eq!(dropped.take(), ELEMENTS - yielded);
+                        assert_eq!(dropped.take(), expected);
                     }
-                }
-
-                #[test]
-                fn drops_unyielded_elements_when_advanced_from_both_ends() {
-                    use crate::test::mock::DropCounter;
-
-                    const ELEMENTS: usize = 8;
-
-                    for front in 0..ELEMENTS {
-                        for back in front..ELEMENTS {
-                            let dropped = DropCounter::new_counter();
-
-                            let mut actual =
-                                Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                                    DropCounter::new(&dropped)
-                                }))
-                                .into_iter();
-
-                            for _ in 0..front {
-                                // Lifetime is passed to caller.
-                                drop(actual.next());
-                            }
-
-                            for _ in front..back {
-                                // Lifetime is passed to caller.
-                                drop(actual.next_back());
-                            }
-
-                            // The above drops in caller scope, not the
-                            // destructor being tested, so reset counter.
-                            let expected = ELEMENTS - dropped.replace(0);
-
-                            // Now we drop the iterator, so we expect all
-                            // remaining elements to be dropped.
-                            drop(actual);
-
-                            assert_eq!(dropped.take(), expected);
-                        }
-                    }
-                }
-            }
-
-            mod double_ended {
-                use super::*;
-
-                #[test]
-                fn element_count() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-
-                    let actual = Fixed::from(expected);
-
-                    assert_eq!(actual.into_iter().rev().count(), expected.len());
-                }
-
-                #[test]
-                fn in_order() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-
-                    let actual = Fixed::from(expected);
-
-                    assert!(actual.into_iter().rev().eq(expected.into_iter().rev()));
-                }
-            }
-
-            mod exact_size {
-                use super::*;
-
-                #[test]
-                fn hint() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
-
-                    assert_eq!(
-                        actual.into_iter().size_hint(),
-                        (expected.len(), Some(expected.len()))
-                    );
-                }
-
-                #[test]
-                fn len() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
-
-                    assert_eq!(actual.into_iter().len(), expected.len());
-                }
-
-                #[test]
-                fn updates() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
-
-                    let mut actual = actual.iter();
-
-                    for remaining in (0..expected.len()).rev() {
-                        _ = actual.next();
-
-                        assert_eq!(actual.len(), remaining);
-                    }
-                }
-            }
-
-            mod fused {
-                use super::*;
-
-                #[test]
-                fn empty() {
-                    let actual = Fixed::<(), 0>::default();
-                    let mut actual = actual.into_iter();
-
-                    // Yields `None` at least once.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
-
-                    // Continues to yield `None`.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
-                }
-
-                #[test]
-                fn exhausted() {
-                    let actual = Fixed::from([()]);
-                    let mut actual = actual.into_iter();
-
-                    // Exhaust the elements.
-                    let _: () = actual.next().expect("the one element");
-
-                    // Yields `None` at least once.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
-
-                    // Continues to yield `None`.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
                 }
             }
         }
