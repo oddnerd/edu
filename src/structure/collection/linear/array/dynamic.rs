@@ -977,7 +977,7 @@ impl<T> Dynamic<T> {
     /// The `range` must be within bounds, even when shifted by `offset`.
     ///
     /// # Panics
-    /// This method has the precondition the start bound is before the end.
+    /// If the start bound is not before the end bound of `range`.
     ///
     /// # Performance
     /// #### Time Complexity
