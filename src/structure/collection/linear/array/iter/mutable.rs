@@ -450,7 +450,8 @@ mod test {
                     let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
 
                     unsafe { IterMut::new(ptr, actual.len()) }
-                }.rev();
+                }
+                .rev();
 
                 for value in 0..ELEMENTS {
                     let element = iter.next().expect("an element");

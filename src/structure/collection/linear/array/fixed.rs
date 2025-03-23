@@ -199,7 +199,10 @@ impl<T, const N: usize> IntoIterator for Fixed<T, N> {
                 // TODO: `core::mem::transmute` is not smart enough to realize
                 // `T` and `ManuallyDrop<T>` have the same layout, so we must
                 // manually do it. Update this to use transmute once able.
-                let mut data = self.data.into_iter().map(|element| core::mem::ManuallyDrop::new(element));
+                let mut data = self
+                    .data
+                    .into_iter()
+                    .map(|element| core::mem::ManuallyDrop::new(element));
 
                 core::array::from_fn::<_, N, _>(|_| {
                     let Some(element) = data.next() else {
@@ -1013,7 +1016,7 @@ mod test {
 
                 #[test]
                 fn yields_none_when_empty() {
-                    let  expected: [usize; 0] = [];
+                    let expected: [usize; 0] = [];
                     debug_assert!(expected.is_empty());
 
                     let mut actual = Fixed::from(expected).into_iter().rev();
@@ -1042,7 +1045,8 @@ mod test {
                 }
 
                 #[test]
-                fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
+                 {
                     let mut actual = Fixed::from([0, 1]).into_iter().rev();
 
                     _ = actual.next().expect("consumes element with value 0");
@@ -1136,11 +1140,10 @@ mod test {
                 for yielded in 0..ELEMENTS {
                     let dropped = DropCounter::new_counter();
 
-                    let mut actual =
-                        Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }))
-                        .into_iter();
+                    let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                        DropCounter::new(&dropped)
+                    }))
+                    .into_iter();
 
                     for _ in 0..yielded {
                         // Lifetime is passed to caller.
@@ -1168,11 +1171,10 @@ mod test {
                 for yielded in 0..ELEMENTS {
                     let dropped = DropCounter::new_counter();
 
-                    let mut actual =
-                        Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
-                            DropCounter::new(&dropped)
-                        }))
-                        .into_iter();
+                    let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|_| {
+                        DropCounter::new(&dropped)
+                    }))
+                    .into_iter();
 
                     for _ in 0..yielded {
                         // Lifetime is passed to caller.
@@ -1406,7 +1408,8 @@ mod test {
                     fn lower_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1434,7 +1437,8 @@ mod test {
                     fn upper_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1487,7 +1491,8 @@ mod test {
                     }
 
                     #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
+                     {
                         let actual = Fixed::from([0, 1]);
                         let mut actual = actual.iter();
 
@@ -1506,7 +1511,8 @@ mod test {
                     fn lower_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1522,7 +1528,8 @@ mod test {
                     fn upper_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1657,7 +1664,8 @@ mod test {
                     fn lower_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter_mut();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1685,7 +1693,8 @@ mod test {
                     fn upper_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter_mut();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1738,7 +1747,8 @@ mod test {
                     }
 
                     #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
+                     {
                         let mut actual = Fixed::from([0, 1]);
                         let mut actual = actual.iter_mut();
 
@@ -1779,7 +1789,8 @@ mod test {
                     fn lower_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter_mut().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1795,7 +1806,8 @@ mod test {
                     fn upper_bound_updates_when_advanced() {
                         const ELEMENTS: usize = 8;
 
-                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual =
+                            Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
                         let mut actual = actual.iter_mut().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1905,7 +1917,9 @@ mod test {
                     let element = unsafe { ptr.add(index) };
 
                     // Ideally, this will panic if unowned memory.
-                    unsafe { element.write(value); }
+                    unsafe {
+                        element.write(value);
+                    }
                 }
 
                 expected.reverse();

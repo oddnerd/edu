@@ -962,7 +962,8 @@ mod test {
                     }
 
                     #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
+                     {
                         let mut underlying = [0, 1];
                         debug_assert!(!underlying.is_empty());
 
@@ -1236,7 +1237,8 @@ mod test {
                     }
 
                     #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
+                     {
                         let mut underlying = [0, 1];
                         debug_assert!(!underlying.is_empty());
 
@@ -1423,7 +1425,9 @@ mod test {
                     let element = unsafe { ptr.add(index) };
 
                     // Ideally, this will panic if unowned memory.
-                    unsafe { element.write(value); }
+                    unsafe {
+                        element.write(value);
+                    }
                 }
 
                 expected.reverse();
