@@ -1252,7 +1252,7 @@ mod test {
         #[test]
         fn is_a_list_of_the_correct_elements_in_the_correct_order_when_not_empty() {
             let expected = [0, 1, 2, 3, 4, 5];
-            debug_assert!(expected.is_empty());
+            debug_assert!(!expected.is_empty());
 
             let actual = Fixed::from(expected);
 
