@@ -1236,19 +1236,27 @@ mod test {
         }
     }
 
-    mod fmt {
+    mod debug {
         use super::*;
 
-        mod debug {
-            use super::*;
+        #[test]
+        fn is_an_empty_list_when_empty() {
+            let expected: [usize; 0] = [];
+            debug_assert!(expected.is_empty());
 
-            #[test]
-            fn is_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected);
+            let actual = Fixed::from(expected);
 
-                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
-            }
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+        }
+
+        #[test]
+        fn is_a_list_of_the_correct_elements_in_the_correct_order_when_not_empty() {
+            let expected = [0, 1, 2, 3, 4, 5];
+            debug_assert!(expected.is_empty());
+
+            let actual = Fixed::from(expected);
+
+            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
         }
     }
 
