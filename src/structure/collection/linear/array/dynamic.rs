@@ -848,13 +848,13 @@ impl<T> Dynamic<T> {
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
         } else {
-            unreachable!("no initialized element to remove");
+            unreachable!("there is at least the element being removed");
         }
 
         if let Some(incremented) = self.front_capacity.checked_add(1) {
             self.front_capacity = incremented;
         } else {
-            unreachable!("allocated more that `isize::MAX` bytes");
+            unreachable!("cannot allocate more that `isize::MAX` bytes");
         }
 
         Some(element)
