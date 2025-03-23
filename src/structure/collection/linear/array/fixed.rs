@@ -979,7 +979,7 @@ mod test {
 
                     let actual = Fixed::from(expected).into_iter().rev();
 
-                    assert!(actual.eq(expected));
+                    assert!(actual.eq(expected.into_iter().rev()));
                 }
 
                 #[test]
