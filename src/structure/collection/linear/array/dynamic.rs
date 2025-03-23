@@ -150,7 +150,7 @@ impl<T> Dynamic<T> {
         total
     }
 
-    /// How many elements can [`Self::prepend`] in without reallocation.
+    /// How many elements can be [`Self::prepend`] without reallocation.
     ///
     /// This many end-specific insertions will be constant time without
     /// possibility of error. Moreover, this maintains pointer validity
@@ -201,7 +201,7 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// How many elements can [`Self::append`] in without reallocation.
+    /// How many elements can be [`Self::append`] without reallocation.
     ///
     /// This many end-specific insertions will be constant time without
     /// possibility of error. Moreover, this maintains pointer validity
