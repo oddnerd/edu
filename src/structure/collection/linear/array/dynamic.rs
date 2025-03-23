@@ -742,7 +742,7 @@ impl<T> Dynamic<T> {
                 if let Some(capacity) = self.back_capacity.checked_add(offset.unsigned_abs()) {
                     self.back_capacity = capacity;
                 } else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
             }
             core::cmp::Ordering::Greater => {
@@ -760,7 +760,7 @@ impl<T> Dynamic<T> {
                 if let Some(capacity) = self.front_capacity.checked_add(offset.unsigned_abs()) {
                     self.front_capacity = capacity;
                 } else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
             }
             core::cmp::Ordering::Equal => return Ok(self),
