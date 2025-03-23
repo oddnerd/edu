@@ -760,7 +760,7 @@ mod test {
         }
 
         #[test]
-        fn is_equal_when_both_underlyings_are_empty() {
+        fn is_equal_when_both_are_empty() {
             let elements: [usize; 0] = [];
             debug_assert!(elements.is_empty());
 
@@ -827,11 +827,9 @@ mod test {
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_indexing_into_empty_underlying() {
-            let underlying: [usize; 0] = [];
-            debug_assert!(underlying.is_empty());
-
-            let actual = Fixed::from(underlying);
+        fn panics_when_indexing_but_empty() {
+            let actual = Fixed::<usize, 0>::from([]);
+            debug_assert!(actual.data.is_empty());
 
             _ = actual.index(0);
         }
@@ -839,10 +837,8 @@ mod test {
         #[test]
         #[should_panic = "index out of bounds"]
         fn panics_when_index_is_out_of_bounds() {
-            let underlying = [0, 1, 2, 3, 4, 5];
-            debug_assert!(!underlying.is_empty());
-
-            let actual = Fixed::from(underlying);
+            let actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+            debug_assert!(!actual.data.is_empty());
 
             _ = actual.index(6);
         }
@@ -851,9 +847,7 @@ mod test {
         fn yields_correct_element_when_index_is_inside_bounds() {
             const ELEMENTS: usize = 8;
 
-            let underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-
-            let actual = Fixed::from(underlying);
+            let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
 
             for index in 0..ELEMENTS {
                 assert_eq!(actual.index(index), &index);
@@ -868,11 +862,9 @@ mod test {
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_indexing_into_empty_underlying() {
-            let underlying: [usize; 0] = [];
-            debug_assert!(underlying.is_empty());
-
-            let mut actual = Fixed::from(underlying);
+        fn panics_when_indexing_but_empty() {
+            let mut actual = Fixed::<usize, 0>::from([]);
+            debug_assert!(actual.data.is_empty());
 
             _ = actual.index_mut(0);
         }
@@ -880,10 +872,8 @@ mod test {
         #[test]
         #[should_panic = "index out of bounds"]
         fn panics_when_index_is_out_of_bounds() {
-            let underlying = [0, 1, 2, 3, 4, 5];
-            debug_assert!(!underlying.is_empty());
-
-            let mut actual = Fixed::from(underlying);
+            let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+            debug_assert!(!actual.data.is_empty());
 
             _ = actual.index_mut(6);
         }
@@ -892,9 +882,7 @@ mod test {
         fn yields_correct_element_when_index_is_inside_bounds() {
             const ELEMENTS: usize = 8;
 
-            let underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-
-            let mut actual = Fixed::from(underlying);
+            let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
 
             for mut index in 0..ELEMENTS {
                 assert_eq!(actual.index_mut(index), &mut index);
@@ -1055,10 +1043,7 @@ mod test {
 
                 #[test]
                 fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
-                    let underlying = [0, 1];
-                    debug_assert!(!underlying.is_empty());
-
-                    let mut actual = Fixed::from(underlying).into_iter().rev();
+                    let mut actual = Fixed::from([0, 1]).into_iter().rev();
 
                     _ = actual.next().expect("consumes element with value 0");
                     _ = actual.next_back().expect("consumes element with value 1");
@@ -1110,10 +1095,8 @@ mod test {
 
             #[test]
             fn continues_to_yield_none_when_empty() {
-                let underlying: [usize; 0] = [];
-                debug_assert!(underlying.is_empty());
-
-                let mut actual = Fixed::from(underlying).into_iter();
+                let mut actual = Fixed::<usize, 0>::from([]).into_iter();
+                debug_assert!(actual.data.is_empty());
 
                 // Yields `None` at least once.
                 assert_eq!(actual.next(), None);
@@ -1126,9 +1109,7 @@ mod test {
 
             #[test]
             fn continues_to_yield_none_exhausted() {
-                let underlying = [0];
-
-                let mut actual = Fixed::from(underlying).into_iter();
+                let mut actual = Fixed::from([0]).into_iter();
 
                 // Exhaust the elements.
                 _ = actual.next().expect("the one element");
@@ -1338,7 +1319,7 @@ mod test {
             use super::*;
 
             #[test]
-            fn is_zero_when_underlying_is_empty() {
+            fn is_zero_when_empty() {
                 let expected: [usize; 0] = [];
                 debug_assert!(expected.is_empty());
 
@@ -1348,7 +1329,7 @@ mod test {
             }
 
             #[test]
-            fn is_number_of_elements_when_underlying_is_not_empty() {
+            fn is_number_of_elements_when_not_empty() {
                 const ELEMENTS: usize = 8;
 
                 let expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
