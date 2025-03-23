@@ -840,7 +840,7 @@ impl<T> Dynamic<T> {
 
         // SAFETY:
         // * Index in bounds => underlying `T` is initialized.
-        // * Value is prevented from being reused after move.
+        // * Element is prevented from being read after this move.
         let element = unsafe { element.assume_init_read() };
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
@@ -921,7 +921,7 @@ impl<T> Dynamic<T> {
 
         // SAFETY:
         // * Index in bounds => underlying `T` is initialized.
-        // * Value is prevented from being reused after move.
+        // * Element is prevented from being read after this move.
         let element = unsafe { element.assume_init_read() };
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
