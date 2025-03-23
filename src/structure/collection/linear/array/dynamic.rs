@@ -989,52 +989,28 @@ impl<T> Dynamic<T> {
     }
 }
 
-impl<T> Drop for Dynamic<T> {
-    /// Drops the elements that are initialized and deallocates memory.
+impl<T> Default for Dynamic<T> {
+    /// Construct an instance with no elements and no capacity/allocation.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(1) memory.
+    /// This methods takes O(1) time and consumes O(1) memory.
     ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let instance = Dynamic::<()>::default();
     ///
-    /// instance.next();      // Consumes the element with value `0`.
-    /// instance.next_back(); // Consumes the element with value `5`.
-    ///
-    /// core::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
+    /// assert_eq!(instance.len(), 0);
+    /// assert_eq!(instance.capacity(), 0);
     /// ```
-    fn drop(&mut self) {
-        for index in 0..self.initialized {
-            let ptr = self.buffer.as_ptr();
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(self.front_capacity) };
-
-            // SAFETY: index is within bounds, so within allocated object.
-            let ptr = unsafe { ptr.add(index) };
-
-            // SAFETY: the `MaybeUninit<T>` is initialized.
-            let element = unsafe { &mut *ptr };
-
-            // SAFETY: The `T` is initialized => safe drop.
-            unsafe {
-                element.assume_init_drop();
-            }
+    fn default() -> Self {
+        Self {
+            buffer: NonNull::dangling(),
+            front_capacity: 0,
+            initialized: 0,
+            back_capacity: 0,
         }
-
-        if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
-            self.back_capacity = capacity;
-            self.initialized = 0;
-        } else {
-            unreachable!("allocated more than `isize::MAX` bytes");
-        }
-
-        let Ok(_) = self.shrink(None) else {
-            unreachable!("deallocation failure");
-        };
     }
 }
 
@@ -1066,6 +1042,126 @@ impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
         Ok(instance)
     }
 }
+
+impl<T> FromIterator<T> for Dynamic<T> {
+    /// Construct by moving elements from an iterator.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    ///
+    /// let actual: Dynamic<_> = expected.clone().into_iter().collect();
+    ///
+    /// assert!(actual.eq(expected))
+    /// ```
+    fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
+        let iter = iter.into_iter();
+
+        let mut instance = Self::default();
+
+        instance.extend(iter);
+
+        instance
+    }
+}
+
+impl<T> Extend<T> for Dynamic<T> {
+    /// Append elements of an iterator in order.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = [0, 1, 2, 3, 4, 5];
+    ///
+    /// let mut instance = Dynamic::<i32>::default();
+    ///
+    /// instance.extend(expected.iter().cloned());
+    ///
+    /// assert!(instance.eq(expected))
+    /// ```
+    fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
+        let iter = iter.into_iter();
+
+        // `size_hint` can _NOT_ be trusted to exact size.
+        let count = {
+            let (min, max) = iter.size_hint();
+            max.unwrap_or(min)
+        };
+
+        // Append will allocate for each realized element reserve if fails.
+        drop(self.reserve_back(count));
+
+        for element in iter {
+            assert!(self.append(element).is_ok(), "allocation failed");
+        }
+    }
+}
+
+impl<T: Clone> Clone for Dynamic<T> {
+    /// Construct an instance with no elements and no capacity/allocation.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// assert_eq!(expected.clone(), expected)
+    /// ```
+    fn clone(&self) -> Self {
+        let mut clone = Self::default();
+
+        clone.extend(self.iter().cloned());
+
+        clone
+    }
+}
+
+impl<T: PartialEq> PartialEq for Dynamic<T> {
+    /// Query if the elements contained are the same as `other`.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let left = [0, 1, 2, 3, 4, 5];
+    /// let right = left.clone();
+    ///
+    /// let left = Dynamic::from_iter(left);
+    /// let right = Dynamic::from_iter(right);
+    ///
+    /// assert_eq!(left, right);
+    /// ```
+    fn eq(&self, other: &Self) -> bool {
+        self.iter().eq(other.iter())
+    }
+}
+
+impl<T: Eq> Eq for Dynamic<T> {}
 
 impl<T> core::ops::Index<usize> for Dynamic<T> {
     type Output = T;
@@ -1257,128 +1353,8 @@ impl<T> ExactSizeIterator for Dynamic<T> {}
 
 impl<T> core::iter::FusedIterator for Dynamic<T> {}
 
-impl<T> FromIterator<T> for Dynamic<T> {
-    /// Construct by moving elements from an iterator.
-    ///
-    /// # Panics
-    /// The Rust runtime might abort if allocation fails, panics otherwise.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    ///
-    /// let actual: Dynamic<_> = expected.clone().into_iter().collect();
-    ///
-    /// assert!(actual.eq(expected))
-    /// ```
-    fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
-        let iter = iter.into_iter();
-
-        let mut instance = Self::default();
-
-        instance.extend(iter);
-
-        instance
-    }
-}
-
-impl<T> Extend<T> for Dynamic<T> {
-    /// Append elements of an iterator in order.
-    ///
-    /// # Panics
-    /// The Rust runtime might abort if allocation fails, panics otherwise.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    ///
-    /// let mut instance = Dynamic::<i32>::default();
-    ///
-    /// instance.extend(expected.iter().cloned());
-    ///
-    /// assert!(instance.eq(expected))
-    /// ```
-    fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let iter = iter.into_iter();
-
-        // `size_hint` can _NOT_ be trusted to exact size.
-        let count = {
-            let (min, max) = iter.size_hint();
-            max.unwrap_or(min)
-        };
-
-        // Append will allocate for each realized element reserve if fails.
-        drop(self.reserve_back(count));
-
-        for element in iter {
-            assert!(self.append(element).is_ok(), "allocation failed");
-        }
-    }
-}
-
-impl<T> Default for Dynamic<T> {
-    /// Construct an instance with no elements and no capacity/allocation.
-    ///
-    /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let instance = Dynamic::<()>::default();
-    ///
-    /// assert_eq!(instance.len(), 0);
-    /// assert_eq!(instance.capacity(), 0);
-    /// ```
-    fn default() -> Self {
-        Self {
-            buffer: NonNull::dangling(),
-            front_capacity: 0,
-            initialized: 0,
-            back_capacity: 0,
-        }
-    }
-}
-
-impl<T: Clone> Clone for Dynamic<T> {
-    /// Construct an instance with no elements and no capacity/allocation.
-    ///
-    /// # Panics
-    /// The Rust runtime might abort if allocation fails, panics otherwise.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    ///
-    /// assert_eq!(expected.clone(), expected)
-    /// ```
-    fn clone(&self) -> Self {
-        let mut clone = Self::default();
-
-        clone.extend(self.iter().cloned());
-
-        clone
-    }
-}
-
-impl<T: PartialEq> PartialEq for Dynamic<T> {
-    /// Query if the elements contained are the same as `other`.
+impl<T> Drop for Dynamic<T> {
+    /// Drops the elements that are initialized and deallocates memory.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(1) memory.
@@ -1387,20 +1363,44 @@ impl<T: PartialEq> PartialEq for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let left = [0, 1, 2, 3, 4, 5];
-    /// let right = left.clone();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// let left = Dynamic::from_iter(left);
-    /// let right = Dynamic::from_iter(right);
+    /// instance.next();      // Consumes the element with value `0`.
+    /// instance.next_back(); // Consumes the element with value `5`.
     ///
-    /// assert_eq!(left, right);
+    /// core::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
     /// ```
-    fn eq(&self, other: &Self) -> bool {
-        self.iter().eq(other.iter())
+    fn drop(&mut self) {
+        for index in 0..self.initialized {
+            let ptr = self.buffer.as_ptr();
+
+            // SAFETY: stays aligned within the allocated object.
+            let ptr = unsafe { ptr.add(self.front_capacity) };
+
+            // SAFETY: index is within bounds, so within allocated object.
+            let ptr = unsafe { ptr.add(index) };
+
+            // SAFETY: the `MaybeUninit<T>` is initialized.
+            let element = unsafe { &mut *ptr };
+
+            // SAFETY: The `T` is initialized => safe drop.
+            unsafe {
+                element.assume_init_drop();
+            }
+        }
+
+        if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
+            self.back_capacity = capacity;
+            self.initialized = 0;
+        } else {
+            unreachable!("allocated more than `isize::MAX` bytes");
+        }
+
+        let Ok(_) = self.shrink(None) else {
+            unreachable!("deallocation failure");
+        };
     }
 }
-
-impl<T: Eq> Eq for Dynamic<T> {}
 
 impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     /// List the elements contained.
@@ -2112,102 +2112,6 @@ struct Drain<'a, T> {
     next: core::ops::Range<usize>,
 }
 
-impl<T> Drop for Drain<'_, T> {
-    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
-    ///
-    /// let mut drain = instance.drain(2..=4);
-    ///
-    /// drain.next();      // Consumes the element with value `2`.
-    /// drain.next_back(); // Consumes the element with value `4`.
-    ///
-    /// core::mem::drop(drain); // Drops the element with value '3'.
-    ///
-    /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
-    /// ```
-    fn drop(&mut self) {
-        if self.underlying.initialized == 0 {
-            debug_assert_eq!(self.range, 0..0, "drained uninitialized elements");
-            return;
-        }
-
-        self.for_each(drop);
-
-        if self.range.end == self.underlying.initialized {
-            if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
-                self.underlying.back_capacity = capacity;
-            } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
-            }
-        } else if self.range.start == 0 {
-            if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
-                self.underlying.front_capacity = capacity;
-            } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
-            }
-        } else {
-            let leading = self.range.start;
-
-            let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
-                unreachable!("not enough initialized elements to remove");
-            };
-
-            let Ok(offset) = isize::try_from(self.range.len()) else {
-                unreachable!("allocated more than `isize::MAX` bytes");
-            };
-
-            let only_front_capacity =
-                self.underlying.front_capacity != 0 && self.underlying.back_capacity == 0;
-            let only_back_capacity =
-                self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
-
-            if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
-                unsafe {
-                    self.underlying.shift_range(0..self.range.start, offset);
-                }
-
-                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len())
-                else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
-                };
-
-                self.underlying.front_capacity = capacity;
-            } else {
-                let Some(offset) = offset.checked_neg() else {
-                    unreachable!("offset was a positive number of elements");
-                };
-
-                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
-                unsafe {
-                    self.underlying
-                        .shift_range(self.range.end..self.underlying.initialized, offset);
-                }
-
-                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len())
-                else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
-                };
-
-                self.underlying.back_capacity = capacity;
-            }
-        }
-
-        if let Some(decreased) = self.underlying.initialized.checked_sub(self.range.len()) {
-            self.underlying.initialized = decreased;
-        }
-    }
-}
-
 impl<T> Iterator for Drain<'_, T> {
     type Item = T;
 
@@ -2322,6 +2226,102 @@ impl<T> ExactSizeIterator for Drain<'_, T> {}
 
 impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
+impl<T> Drop for Drain<'_, T> {
+    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(N) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
+    ///
+    /// let mut drain = instance.drain(2..=4);
+    ///
+    /// drain.next();      // Consumes the element with value `2`.
+    /// drain.next_back(); // Consumes the element with value `4`.
+    ///
+    /// core::mem::drop(drain); // Drops the element with value '3'.
+    ///
+    /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
+    /// ```
+    fn drop(&mut self) {
+        if self.underlying.initialized == 0 {
+            debug_assert_eq!(self.range, 0..0, "drained uninitialized elements");
+            return;
+        }
+
+        self.for_each(drop);
+
+        if self.range.end == self.underlying.initialized {
+            if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
+                self.underlying.back_capacity = capacity;
+            } else {
+                unreachable!("allocated more than `isize::MAX` bytes");
+            }
+        } else if self.range.start == 0 {
+            if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
+                self.underlying.front_capacity = capacity;
+            } else {
+                unreachable!("allocated more than `isize::MAX` bytes");
+            }
+        } else {
+            let leading = self.range.start;
+
+            let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
+                unreachable!("not enough initialized elements to remove");
+            };
+
+            let Ok(offset) = isize::try_from(self.range.len()) else {
+                unreachable!("allocated more than `isize::MAX` bytes");
+            };
+
+            let only_front_capacity =
+                self.underlying.front_capacity != 0 && self.underlying.back_capacity == 0;
+            let only_back_capacity =
+                self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
+
+            if only_front_capacity || (!only_back_capacity && trailing > leading) {
+                // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
+                unsafe {
+                    self.underlying.shift_range(0..self.range.start, offset);
+                }
+
+                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len())
+                else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
+
+                self.underlying.front_capacity = capacity;
+            } else {
+                let Some(offset) = offset.checked_neg() else {
+                    unreachable!("offset was a positive number of elements");
+                };
+
+                // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
+                unsafe {
+                    self.underlying
+                        .shift_range(self.range.end..self.underlying.initialized, offset);
+                }
+
+                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len())
+                else {
+                    unreachable!("allocated more than `isize::MAX` bytes");
+                };
+
+                self.underlying.back_capacity = capacity;
+            }
+        }
+
+        if let Some(decreased) = self.underlying.initialized.checked_sub(self.range.len()) {
+            self.underlying.initialized = decreased;
+        }
+    }
+}
+
 impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
     /// List the elements being drained.
     ///
@@ -2366,52 +2366,6 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 
     /// The number of retained elements at the end because of `next_back`.
     trailing: usize,
-}
-
-impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
-    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
-    ///
-    /// # Performance
-    /// This methods takes O(N) time and consumes O(1) memory.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    ///
-    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
-    ///
-    /// // Consumes the element with value `0`.
-    /// assert_eq!(withdraw.next(), Some(0));
-    ///
-    /// // Consumes the element with value `4`.
-    /// assert_eq!(withdraw.next_back(), Some(4));
-    ///
-    /// // Drops the element with value '2'.
-    /// drop(withdraw);
-    ///
-    /// // Retained elements.
-    /// assert!(instance.eq([1, 3, 5]));
-    /// ```
-    fn drop(&mut self) {
-        // Drop all remaining elements to withdraw.
-        self.for_each(drop);
-
-        if self.trailing > 0 {
-            // SAFETY: aligned within the allocated object, or one byte past.
-            let trailing = unsafe { self.next_back.as_ptr().add(1) };
-
-            // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
-            unsafe {
-                core::ptr::copy(trailing, self.retained.as_ptr(), self.trailing);
-            }
-        }
-    }
 }
 
 impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
@@ -2670,6 +2624,52 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 
 impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {}
 
+impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
+    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    ///
+    /// # Performance
+    /// This methods takes O(N) time and consumes O(1) memory.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    ///
+    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
+    ///
+    /// // Consumes the element with value `0`.
+    /// assert_eq!(withdraw.next(), Some(0));
+    ///
+    /// // Consumes the element with value `4`.
+    /// assert_eq!(withdraw.next_back(), Some(4));
+    ///
+    /// // Drops the element with value '2'.
+    /// drop(withdraw);
+    ///
+    /// // Retained elements.
+    /// assert!(instance.eq([1, 3, 5]));
+    /// ```
+    fn drop(&mut self) {
+        // Drop all remaining elements to withdraw.
+        self.for_each(drop);
+
+        if self.trailing > 0 {
+            // SAFETY: aligned within the allocated object, or one byte past.
+            let trailing = unsafe { self.next_back.as_ptr().add(1) };
+
+            // SAFETY:
+            // * owned memory => source/destination valid for read/writes.
+            // * no aliasing restrictions => source and destination can overlap.
+            // * underlying buffer is aligned => both pointers are aligned.
+            unsafe {
+                core::ptr::copy(trailing, self.retained.as_ptr(), self.trailing);
+            }
+        }
+    }
+}
+
 impl<T, F: FnMut(&T) -> bool> core::fmt::Debug for Withdraw<'_, T, F> {
     /// Output what indexes are being pointed to in the underlying buffer.
     ///
@@ -2705,6 +2705,8 @@ impl<T, F: FnMut(&T) -> bool> core::fmt::Debug for Withdraw<'_, T, F> {
 #[derive(Debug, Clone, Copy)]
 pub struct FailedAllocation;
 
+impl core::error::Error for FailedAllocation {}
+
 impl core::fmt::Display for FailedAllocation {
     /// Write a human-facing description of the error.
     ///
@@ -2715,11 +2717,11 @@ impl core::fmt::Display for FailedAllocation {
     }
 }
 
-impl core::error::Error for FailedAllocation {}
-
 /// Error type for invalid index parameters.
 #[derive(Debug, Clone, Copy)]
 pub struct OutOfBounds;
+
+impl core::error::Error for OutOfBounds {}
 
 impl core::fmt::Display for OutOfBounds {
     /// Write a human-facing description of the error.
@@ -2730,8 +2732,6 @@ impl core::fmt::Display for OutOfBounds {
         write!(f, "index is outside the bounds of initialized elements")
     }
 }
-
-impl core::error::Error for OutOfBounds {}
 
 #[cfg(test)]
 mod test {
