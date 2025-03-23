@@ -1809,8 +1809,17 @@ mod test {
             use super::*;
 
             #[test]
-            fn correct_address() {
+            fn is_correct_address_when_empty() {
+                let actual = Fixed::<usize, 0>::from([]);
+                debug_assert!(actual.data.is_empty());
+
+                assert_eq!(actual.as_ptr(), actual.data.as_ptr());
+            }
+
+            #[test]
+            fn is_correct_address_when_not_empty() {
                 let actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+                debug_assert!(!actual.data.is_empty());
 
                 assert_eq!(actual.as_ptr(), actual.data.as_ptr());
             }
@@ -1820,10 +1829,42 @@ mod test {
             use super::*;
 
             #[test]
-            fn correct_address() {
-                let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+            fn is_correct_address_when_empty() {
+                let mut actual = Fixed::<usize, 0>::from([]);
+                debug_assert!(actual.data.is_empty());
 
                 assert_eq!(actual.as_mut_ptr(), actual.data.as_mut_ptr());
+            }
+
+            #[test]
+            fn is_correct_address_when_not_empty() {
+                let mut actual = Fixed::from([0, 1, 2, 3, 4, 5]);
+                debug_assert!(!actual.data.is_empty());
+
+                assert_eq!(actual.as_mut_ptr(), actual.data.as_mut_ptr());
+            }
+
+            #[test]
+            fn underlying_element_is_updated_when_yielded_pointer_is_mutated() {
+                const ELEMENTS: usize = 8;
+
+                let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                let mut actual = Fixed::from(expected);
+
+                for (index, value) in (0..ELEMENTS).rev().enumerate() {
+                    let ptr = actual.as_mut_ptr();
+
+                    // We are testing that this is safe.
+                    let element = unsafe { ptr.add(index) };
+
+                    // Ideally, this will panic if unowned memory.
+                    unsafe { element.write(value); }
+                }
+
+                expected.reverse();
+
+                assert_eq!(actual.data, expected);
             }
         }
     }
