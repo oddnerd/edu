@@ -143,12 +143,11 @@ impl<T> Dynamic<T> {
     /// ```
     #[must_use]
     pub fn capacity(&self) -> usize {
-        self.front_capacity
-            .checked_add(self.back_capacity)
-            .map_or_else(
-                || unreachable!("allocated more than `isize::MAX` bytes"),
-                |capacity| capacity,
-            )
+        let Some(total) = usize::checked_add(self.front_capacity, self.back_capacity) else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        };
+
+        total
     }
 
     /// How many elements can [`Self::prepend`] in without reallocation.
