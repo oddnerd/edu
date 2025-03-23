@@ -68,7 +68,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -100,7 +108,15 @@ impl<T> Dynamic<T> {
     /// initialized element let alone the element they were assigned to.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -142,7 +158,15 @@ impl<T> Dynamic<T> {
     /// even to specific elements.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -185,7 +209,15 @@ impl<T> Dynamic<T> {
     /// even to specific elements.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -249,7 +281,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -325,7 +365,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -378,7 +426,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -429,7 +485,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -480,7 +544,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -542,7 +614,15 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -597,7 +677,15 @@ impl<T> Dynamic<T> {
     /// Yields [`OutOfBounds`] is there is not enough capacity to shift into.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -692,7 +780,15 @@ impl<T> Dynamic<T> {
     /// does _NOT_ preserve order.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -750,7 +846,15 @@ impl<T> Dynamic<T> {
     /// does _NOT_ preserve order.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -816,7 +920,15 @@ impl<T> Dynamic<T> {
     /// See also: [amortized analysis][amortized] and [dynamic array application][dynamic].
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// [amortized]: https://en.wikipedia.org/wiki/Amortized_analysis
     /// [dynamic]: https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost
@@ -844,7 +956,15 @@ impl<T> Dynamic<T> {
     /// This method has the precondition the start bound is before the end.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     #[inline]
     unsafe fn shift_range(&mut self, range: impl core::ops::RangeBounds<usize>, offset: isize) {
         let start = match range.start_bound() {
@@ -891,7 +1011,15 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     #[inline]
     fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
         let capacity = self
