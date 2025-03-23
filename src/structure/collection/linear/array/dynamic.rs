@@ -821,24 +821,24 @@ impl<T> Dynamic<T> {
         let buffer = self.buffer;
 
         // SAFETY: valid capacity => aligned within the allocated object.
-        let mut front = unsafe { buffer.add(self.front_capacity) };
+        let mut first = unsafe { buffer.add(self.front_capacity) };
 
         if index != 0 {
             // SAFETY: index in bounds => aligned within the allocated object.
-            let index = unsafe { front.add(index) };
+            let index = unsafe { first.add(index) };
 
             // SAFETY:
             // * Both pointers are valid for reads and write.
             // * Both pointers are aligned.
             // * No aliasing restrictions.
-            unsafe { NonNull::swap(front, index); }
+            unsafe { NonNull::swap(first, index); }
         }
 
         // SAFETY:
         // * Owned memory => valid for reads and writes.
         // * Underlying `MaybeUninit<T>` is initialized.
         // * Has mutable reference to self => no other reference exists.
-        let element = unsafe { front.as_mut() };
+        let element = unsafe { first.as_mut() };
 
         // SAFETY:
         // * Index in bounds => underlying `T` is initialized.
