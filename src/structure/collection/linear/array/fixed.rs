@@ -1304,10 +1304,9 @@ mod test {
 
                     #[test]
                     fn yields_none_when_empty() {
-                        let underlying: [usize; 0] = [];
-                        debug_assert!(underlying.is_empty());
+                        let actual = Fixed::<usize, 0>::from([]);
+                        debug_assert!(actual.data.is_empty());
 
-                        let actual = Fixed::from(underlying);
                         let mut actual = actual.iter();
 
                         assert_eq!(actual.next(), None);
@@ -1405,10 +1404,9 @@ mod test {
 
                     #[test]
                     fn yields_none_when_empty() {
-                        let underlying: [usize; 0] = [];
-                        debug_assert!(underlying.is_empty());
+                        let actual = Fixed::<usize, 0>::from([]);
+                        debug_assert!(actual.data.is_empty());
 
-                        let actual = Fixed::from(underlying);
                         let mut actual = actual.iter().rev();
 
                         assert_eq!(actual.next(), None);
@@ -1491,10 +1489,9 @@ mod test {
 
                 #[test]
                 fn continues_to_yield_none_when_empty() {
-                    let underlying: [usize; 0] = [];
-                    debug_assert!(underlying.is_empty());
+                    let actual = Fixed::<usize, 0>::from([]);
+                    debug_assert!(actual.data.is_empty());
 
-                    let actual = Fixed::from(underlying);
                     let mut actual = actual.iter();
 
                     // Yields `None` at least once.
@@ -1536,10 +1533,9 @@ mod test {
 
                     #[test]
                     fn yields_none_when_empty() {
-                        let underlying: [usize; 0] = [];
-                        debug_assert!(underlying.is_empty());
+                        let mut actual = Fixed::<usize, 0>::from([]);
+                        debug_assert!(actual.data.is_empty());
 
-                        let mut actual = Fixed::from(underlying);
                         let mut actual = actual.iter_mut();
 
                         assert_eq!(actual.next(), None);
@@ -1659,10 +1655,9 @@ mod test {
 
                     #[test]
                     fn yields_none_when_empty() {
-                        let underlying: [usize; 0] = [];
-                        debug_assert!(underlying.is_empty());
+                        let mut actual = Fixed::<usize, 0>::from([]);
+                        debug_assert!(actual.data.is_empty());
 
-                        let mut actual = Fixed::from(underlying);
                         let mut actual = actual.iter_mut().rev();
 
                         assert_eq!(actual.next(), None);
@@ -1767,10 +1762,9 @@ mod test {
 
                 #[test]
                 fn continues_to_yield_none_when_is_empty() {
-                    let underlying: [usize; 0] = [];
-                    debug_assert!(underlying.is_empty());
+                    let mut actual = Fixed::<usize, 0>::from([]);
+                    debug_assert!(actual.data.is_empty());
 
-                    let mut actual = Fixed::from(underlying);
                     let mut actual = actual.iter_mut();
 
                     // Yields `None` at least once.
