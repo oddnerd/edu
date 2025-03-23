@@ -998,7 +998,7 @@ impl<T> Dynamic<T> {
         };
 
         let end = match range.end_bound() {
-            core::ops::Bound::Unbounded => self.len(),
+            core::ops::Bound::Unbounded => self.initialized,
             core::ops::Bound::Included(end) => end.saturating_add(1),
             core::ops::Bound::Excluded(end) => *end,
         };
