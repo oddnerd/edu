@@ -533,15 +533,15 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
         let Ok(offset) = isize::try_from(self.front_capacity) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
 
         let Some(offset) = offset.checked_neg() else {
-            unreachable!("negative front capacity");
+            unreachable!("is a positive number => cannot be `isize::MIN`");
         };
 
         if self.shift(offset).is_err() {
-            unreachable!("not enough front capacity to shift into");
+            unreachable!("there is enough front capacity to shift into");
         }
 
         self.shrink_back(capacity)
