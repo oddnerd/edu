@@ -818,10 +818,8 @@ impl<T> Dynamic<T> {
             return None;
         }
 
-        let buffer = self.buffer;
-
         // SAFETY: valid capacity => aligned within the allocated object.
-        let mut first = unsafe { buffer.add(self.front_capacity) };
+        let mut first = unsafe { self.buffer.add(self.front_capacity) };
 
         if index != 0 {
             // SAFETY: index in bounds => aligned within the allocated object.
