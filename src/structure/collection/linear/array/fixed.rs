@@ -1225,10 +1225,10 @@ mod test {
 
                 let mut actual = Fixed::from(expected).into_iter();
 
-                for start in 1..=expected.len() {
+                for end in (0..expected.len()).rev() {
                     _ = actual.next_back().expect("an element");
 
-                    let expected = &expected[start..];
+                    let expected = &expected[..end];
 
                     assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
                 }
