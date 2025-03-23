@@ -381,45 +381,6 @@ pub struct IntoIter<T, const N: usize> {
     next: core::ops::Range<usize>,
 }
 
-impl<T, const N: usize> Drop for IntoIter<T, N> {
-    /// Drops the elements that have yet to be yielded.
-    ///
-    /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Fixed;
-    ///
-    /// let mut iter = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
-    ///
-    /// iter.next();      // Consumes the element with value `0`.
-    /// iter.next_back(); // Consumes the element with value `5`.
-    ///
-    /// core::mem::drop(iter); // Drops elements with values `[1, 2, 3, 4]`.
-    /// ```
-    fn drop(&mut self) {
-        for index in self.next.clone() {
-            let Some(element) = self.data.get_mut(index) else {
-                unreachable!("loop ensures index is within bounds");
-            };
-
-            // SAFETY: the element will not be accessed or dropped again.
-            unsafe {
-                core::mem::ManuallyDrop::drop(element);
-            }
-        }
-    }
-}
-
 impl<T, const N: usize> Iterator for IntoIter<T, N> {
     type Item = T;
 
@@ -531,6 +492,45 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
 impl<T, const N: usize> ExactSizeIterator for IntoIter<T, N> {}
 
 impl<T, const N: usize> core::iter::FusedIterator for IntoIter<T, N> {}
+
+impl<T, const N: usize> Drop for IntoIter<T, N> {
+    /// Drops the elements that have yet to be yielded.
+    ///
+    /// # Performance
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Fixed;
+    ///
+    /// let mut iter = Fixed::from([0, 1, 2, 3, 4, 5]).into_iter();
+    ///
+    /// iter.next();      // Consumes the element with value `0`.
+    /// iter.next_back(); // Consumes the element with value `5`.
+    ///
+    /// core::mem::drop(iter); // Drops elements with values `[1, 2, 3, 4]`.
+    /// ```
+    fn drop(&mut self) {
+        for index in self.next.clone() {
+            let Some(element) = self.data.get_mut(index) else {
+                unreachable!("loop ensures index is within bounds");
+            };
+
+            // SAFETY: the element will not be accessed or dropped again.
+            unsafe {
+                core::mem::ManuallyDrop::drop(element);
+            }
+        }
+    }
+}
 
 impl<T: core::fmt::Debug, const N: usize> core::fmt::Debug for IntoIter<T, N> {
     /// Print out the element yet to be yielded.
