@@ -669,11 +669,11 @@ impl<T> Dynamic<T> {
         };
 
         let Ok(extra) = isize::try_from(extra) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
 
         let Some(extra) = extra.checked_neg() else {
-            unreachable!("extra capacity is negative");
+            unreachable!("is positive => cannot be `isize::MIN`");
         };
 
         self.resize(extra)
