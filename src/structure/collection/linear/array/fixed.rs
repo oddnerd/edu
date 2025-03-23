@@ -518,15 +518,12 @@ impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         self.next.next_back().map(|index| {
-            let array = self.data.as_mut_ptr();
+            let Some(element) = self.data.get_mut(index) else {
+                unreachable!("`self.next` ensures index is within bounds");
+            };
 
-            // SAFETY: stays aligned within the allocated object.
-            let element = unsafe { array.add(index) };
-
-            // SAFETY: this takes ownership (move).
-            let owned = unsafe { element.read() };
-
-            core::mem::ManuallyDrop::into_inner(owned)
+            // SAFETY: the element will never be accessed or dropped again.
+            unsafe { core::mem::ManuallyDrop::take(element) }
         })
     }
 }
