@@ -890,44 +890,50 @@ impl<T> Dynamic<T> {
             return None;
         }
 
-        let ptr = self.as_mut_ptr();
+        // SAFETY: valid capacity => aligned within the allocated object.
+        let first = unsafe { self.buffer.add(self.front_capacity) };
 
-        let last = {
+        let mut last = {
             let Some(offset) = self.initialized.checked_sub(1) else {
-                unreachable!("no initialized element to remove");
+                unreachable!("at least one initialized element");
             };
 
-            // SAFETY: points to the final element contained.
-            unsafe { ptr.add(offset) }
+            // SAFETY: aligned within the allocated object.
+            unsafe { first.add(offset) }
         };
 
-        // SAFETY: index is in bounds => aligned within the allocated object.
-        let index = unsafe { ptr.add(index) };
+        if index != 0 {
+            // SAFETY: index in bounds => aligned within the allocated object.
+            let index = unsafe { first.add(index) };
 
-        // SAFETY:
-        // * both pointers are valid for reads and write.
-        // * both pointers are aligned.
-        // * no aliasing restrictions.
-        unsafe {
-            core::ptr::swap(last, index);
+            // SAFETY:
+            // * Both pointers are valid for reads and write.
+            // * Both pointers are aligned.
+            // * No aliasing restrictions.
+            unsafe { NonNull::swap(last, index); }
         }
 
         // SAFETY:
-        // * owned memory => pointer is valid for reads.
-        // * Underlying `T` is initialized.
-        // * This takes ownership (moved out of the buffer).
-        let element = unsafe { last.read() };
+        // * Owned memory => valid for reads and writes.
+        // * Underlying `MaybeUninit<T>` is initialized.
+        // * Has mutable reference to self => no other reference exists.
+        let element = unsafe { last.as_mut() };
+
+        // SAFETY:
+        // * Index in bounds => underlying `T` is initialized.
+        // * Value is prevented from being reused after move.
+        let element = unsafe { element.assume_init_read() };
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
         } else {
-            unreachable!("no initialized element to remove");
+            unreachable!("there is at least the element being removed");
         }
 
         if let Some(incremented) = self.back_capacity.checked_add(1) {
             self.back_capacity = incremented;
         } else {
-            unreachable!("allocated more that `isize::MAX` bytes");
+            unreachable!("cannot allocate more that `isize::MAX` bytes");
         }
 
         Some(element)
