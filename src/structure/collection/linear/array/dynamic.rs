@@ -322,22 +322,22 @@ impl<T> Dynamic<T> {
         // Reclaim any front capacity.
         if self.initialized > 0 {
             let Ok(offset) = isize::try_from(self.front_capacity) else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate than `isize::MAX` bytes");
             };
 
             let Some(offset) = offset.checked_neg() else {
-                unreachable!("negative amount of front capacity");
+                unreachable!("is a positive number => cannot be `isize::MIN`");
             };
 
             let Ok(_) = self.shift(offset) else {
-                unreachable!("not enough front capacity to shift into");
+                unreachable!("there is enough front capacity to shift into");
             };
 
-            if let Some(total) = self.back_capacity.checked_add(self.front_capacity) {
+            if let Some(total) = usize::checked_add(self.front_capacity, self.back_capacity) {
                 self.front_capacity = 0;
                 self.back_capacity = total;
             } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate than `isize::MAX` bytes");
             }
         }
 
@@ -346,6 +346,7 @@ impl<T> Dynamic<T> {
             return Ok(self);
         }
 
+        // Attempt to do amortized growth, but fall back to requested capacity.
         let amortized = self.amortized(capacity).unwrap_or(capacity);
 
         if self.reserve_back(amortized).is_ok() {
