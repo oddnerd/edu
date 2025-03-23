@@ -195,8 +195,20 @@ impl<T, const N: usize> IntoIterator for Fixed<T, N> {
     /// ```
     fn into_iter(self) -> Self::IntoIter {
         IntoIter {
-            // SAFETY: [`MaybeUninit<T>`] has same memory layout as `T`.
-            data: unsafe { core::mem::transmute_copy(&self.data) },
+            data: {
+                // TODO: `core::mem::transmute` is not smart enough to realize
+                // `T` and `ManuallyDrop<T>` have the same layout, so we must
+                // manually do it. Update this to use transmute once able.
+                let mut data = self.data.into_iter().map(|element| core::mem::ManuallyDrop::new(element));
+
+                core::array::from_fn::<_, N, _>(|_| {
+                    let Some(element) = data.next() else {
+                        unreachable!("same number of elements as before");
+                    };
+
+                    element
+                })
+            },
             next: 0..N,
         }
     }
