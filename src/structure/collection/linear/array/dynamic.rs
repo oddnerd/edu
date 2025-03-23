@@ -601,16 +601,16 @@ impl<T> Dynamic<T> {
         };
 
         let Ok(extra) = isize::try_from(extra) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
 
         let Some(extra) = extra.checked_neg() else {
-            unreachable!("negative extra capacity");
+            unreachable!("positive number => cannot be `isize::MIN`");
         };
 
         if self.initialized > 0 {
             let Ok(_) = self.shift(extra) else {
-                unreachable!("not enough front capacity to shift into");
+                unreachable!("enough front capacity to shift into");
             };
         }
 
