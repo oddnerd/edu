@@ -1296,85 +1296,205 @@ mod test {
         mod iter {
             use super::*;
 
-            #[test]
-            fn element_count() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected);
-
-                assert_eq!(actual.iter().count(), expected.len());
-            }
-
-            #[test]
-            fn in_order() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let actual = Fixed::from(expected);
-
-                assert!(actual.iter().eq(expected.iter()));
-            }
-
-            mod double_ended {
+            mod iterator {
                 use super::*;
 
-                #[test]
-                fn element_count() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
+                mod next {
+                    use super::*;
 
-                    assert_eq!(actual.iter().rev().count(), expected.len());
+                    #[test]
+                    fn yields_none_when_empty() {
+                        let underlying: [usize; 0] = [];
+                        debug_assert!(underlying.is_empty());
+
+                        let actual = Fixed::from(underlying);
+                        let mut actual = actual.iter();
+
+                        assert_eq!(actual.next(), None);
+                    }
+
+                    #[test]
+                    fn can_be_advanced_the_number_of_elements_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let actual = Fixed::from(expected);
+                        let actual = actual.iter();
+
+                        assert_eq!(actual.count(), expected.len());
+                    }
+
+                    #[test]
+                    fn yields_correct_elements_in_correct_order_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let actual = Fixed::from(expected);
+                        let actual = actual.iter();
+
+                        assert!(actual.eq(expected.iter()));
+                    }
                 }
 
-                #[test]
-                fn in_order() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
+                mod size_hint {
+                    use super::*;
 
-                    assert!(actual.iter().rev().eq(expected.iter().rev()));
-                }
-            }
+                    #[test]
+                    fn lower_bound_is_number_of_elements_when_constructed() {
+                        let expected = [0, 1, 2, 3, 4, 5];
 
-            mod exact_size {
-                use super::*;
+                        let actual = Fixed::from(expected);
+                        let actual = actual.iter();
 
-                #[test]
-                fn hint() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
+                        let (lower, _upper) = actual.size_hint();
 
-                    assert_eq!(
-                        actual.iter().size_hint(),
-                        (expected.len(), Some(expected.len()))
-                    );
-                }
+                        assert_eq!(lower, expected.len());
+                    }
 
-                #[test]
-                fn len() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
+                    #[test]
+                    fn lower_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
 
-                    assert_eq!(actual.iter().len(), expected.len());
-                }
+                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter();
 
-                #[test]
-                fn updates() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let actual = Fixed::from(expected);
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
 
-                    let mut actual = actual.iter();
+                            let (lower, _upper) = actual.size_hint();
 
-                    for remaining in (0..expected.len()).rev() {
-                        _ = actual.next();
+                            assert_eq!(lower, expected);
+                        }
+                    }
 
-                        assert_eq!(actual.len(), remaining);
+                    #[test]
+                    fn upper_bound_is_number_of_elements_when_constructed() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+
+                        let actual = Fixed::from(expected);
+                        let actual = actual.iter();
+
+                        let (_lower, upper) = actual.size_hint();
+
+                        assert_eq!(upper, Some(expected.len()));
+                    }
+
+                    #[test]
+                    fn upper_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
+
+                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter();
+
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
+
+                            let (_lower, upper) = actual.size_hint();
+
+                            assert_eq!(upper, Some(expected));
+                        }
                     }
                 }
             }
 
-            mod fused {
+            mod double_ended_iterator {
+                use super::*;
+
+                mod next_back {
+                    use super::*;
+
+                    #[test]
+                    fn yields_none_when_empty() {
+                        let underlying: [usize; 0] = [];
+                        debug_assert!(underlying.is_empty());
+
+                        let actual = Fixed::from(underlying);
+                        let mut actual = actual.iter().rev();
+
+                        assert_eq!(actual.next(), None);
+                    }
+
+                    #[test]
+                    fn can_be_advanced_the_number_of_elements_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let actual = Fixed::from(expected);
+                        let actual = actual.iter().rev();
+
+                        assert_eq!(actual.count(), expected.len());
+                    }
+
+                    #[test]
+                    fn yields_correct_elements_in_correct_order_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let actual = Fixed::from(expected);
+                        let actual = actual.iter().rev();
+
+                        assert!(actual.eq(expected.iter().rev()));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                        let actual = Fixed::from([0, 1]);
+                        let mut actual = actual.iter();
+
+                        _ = actual.next().expect("consumes element with value 0");
+                        _ = actual.next_back().expect("consumes element with value 1");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+                }
+
+                mod size_hint {
+                    use super::*;
+
+                    #[test]
+                    fn lower_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
+
+                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter().rev();
+
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
+
+                            let (lower, _upper) = actual.size_hint();
+
+                            assert_eq!(lower, expected);
+                        }
+                    }
+
+                    #[test]
+                    fn upper_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
+
+                        let actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter().rev();
+
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
+
+                            let (_lower, upper) = actual.size_hint();
+
+                            assert_eq!(upper, Some(expected));
+                        }
+                    }
+                }
+            }
+
+            mod fused_iterator {
                 use super::*;
 
                 #[test]
-                fn empty() {
-                    let actual = Fixed::<(), 0>::default();
+                fn continues_to_yield_none_when_empty() {
+                    let underlying: [usize; 0] = [];
+                    debug_assert!(underlying.is_empty());
+
+                    let actual = Fixed::from(underlying);
                     let mut actual = actual.iter();
 
                     // Yields `None` at least once.
@@ -1387,12 +1507,12 @@ mod test {
                 }
 
                 #[test]
-                fn exhausted() {
-                    let actual = Fixed::from([()]);
+                fn continues_to_yield_none_when_exhausted() {
+                    let actual = Fixed::from([0]);
                     let mut actual = actual.iter();
 
                     // Exhaust the elements.
-                    let _: &() = actual.next().expect("the one element");
+                    _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
@@ -1408,85 +1528,249 @@ mod test {
         mod iter_mut {
             use super::*;
 
-            #[test]
-            fn element_count() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Fixed::from(expected);
-
-                assert_eq!(actual.iter_mut().count(), expected.len());
-            }
-
-            #[test]
-            fn in_order() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Fixed::from(expected);
-
-                assert!(actual.iter_mut().eq(expected.iter_mut()));
-            }
-
-            mod double_ended {
+            mod iterator {
                 use super::*;
 
-                #[test]
-                fn element_count() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected);
+                mod next {
+                    use super::*;
 
-                    assert_eq!(actual.iter_mut().rev().count(), expected.len());
+                    #[test]
+                    fn yields_none_when_empty() {
+                        let underlying: [usize; 0] = [];
+                        debug_assert!(underlying.is_empty());
+
+                        let mut actual = Fixed::from(underlying);
+                        let mut actual = actual.iter_mut();
+
+                        assert_eq!(actual.next(), None);
+                    }
+
+                    #[test]
+                    fn can_be_advanced_the_number_of_elements_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let mut actual = Fixed::from(expected);
+                        let actual = actual.iter_mut();
+
+                        assert_eq!(actual.count(), expected.len());
+                    }
+
+                    #[test]
+                    fn yields_correct_elements_in_correct_order_when_not_empty() {
+                        let mut expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let mut actual = Fixed::from(expected);
+                        let actual = actual.iter_mut();
+
+                        assert!(actual.eq(expected.iter_mut()));
+                    }
+
+                    #[test]
+                    fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
+                        const ELEMENTS: usize = 8;
+
+                        let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                        let mut actual = Fixed::from(expected);
+                        let mut iter = actual.iter_mut();
+
+                        for value in (0..ELEMENTS).rev() {
+                            let element = iter.next().expect("an element");
+
+                            *element = value;
+                        }
+
+                        drop(iter);
+
+                        expected.reverse();
+
+                        assert_eq!(actual.data, expected);
+                    }
                 }
 
-                #[test]
-                fn in_order() {
-                    let mut expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected);
+                mod size_hint {
+                    use super::*;
 
-                    assert!(actual.iter_mut().rev().eq(expected.iter_mut().rev()));
-                }
-            }
+                    #[test]
+                    fn lower_bound_is_number_of_elements_when_constructed() {
+                        let expected = [0, 1, 2, 3, 4, 5];
 
-            mod exact_size {
-                use super::*;
+                        let mut actual = Fixed::from(expected);
+                        let actual = actual.iter_mut();
 
-                #[test]
-                fn hint() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected);
+                        let (lower, _upper) = actual.size_hint();
 
-                    assert_eq!(
-                        actual.iter_mut().size_hint(),
-                        (expected.len(), Some(expected.len()))
-                    );
-                }
+                        assert_eq!(lower, expected.len());
+                    }
 
-                #[test]
-                fn len() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected);
+                    #[test]
+                    fn lower_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
 
-                    assert_eq!(actual.iter_mut().len(), expected.len());
-                }
+                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter_mut();
 
-                #[test]
-                fn updates() {
-                    let expected = [0, 1, 2, 3, 4, 5];
-                    let mut actual = Fixed::from(expected);
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
 
-                    let mut actual = actual.iter_mut();
+                            let (lower, _upper) = actual.size_hint();
 
-                    for remaining in (0..expected.len()).rev() {
-                        _ = actual.next();
+                            assert_eq!(lower, expected);
+                        }
+                    }
 
-                        assert_eq!(actual.len(), remaining);
+                    #[test]
+                    fn upper_bound_is_number_of_elements_when_constructed() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+
+                        let mut actual = Fixed::from(expected);
+                        let actual = actual.iter_mut();
+
+                        let (_lower, upper) = actual.size_hint();
+
+                        assert_eq!(upper, Some(expected.len()));
+                    }
+
+                    #[test]
+                    fn upper_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
+
+                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter_mut();
+
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
+
+                            let (_lower, upper) = actual.size_hint();
+
+                            assert_eq!(upper, Some(expected));
+                        }
                     }
                 }
             }
 
-            mod fused {
+            mod double_ended_iterator {
+                use super::*;
+
+                mod next_back {
+                    use super::*;
+
+                    #[test]
+                    fn yields_none_when_empty() {
+                        let underlying: [usize; 0] = [];
+                        debug_assert!(underlying.is_empty());
+
+                        let mut actual = Fixed::from(underlying);
+                        let mut actual = actual.iter_mut().rev();
+
+                        assert_eq!(actual.next(), None);
+                    }
+
+                    #[test]
+                    fn can_be_advanced_the_number_of_elements_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let mut actual = Fixed::from(expected);
+                        let actual = actual.iter_mut().rev();
+
+                        assert_eq!(actual.count(), expected.len());
+                    }
+
+                    #[test]
+                    fn yields_correct_elements_in_correct_order_when_not_empty() {
+                        let expected = [0, 1, 2, 3, 4, 5];
+                        debug_assert!(!expected.is_empty());
+
+                        let mut actual = Fixed::from(expected);
+                        let actual = actual.iter_mut().rev();
+
+                        assert!(actual.eq(expected.iter().rev()));
+                    }
+
+                    #[test]
+                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
+                        let mut actual = Fixed::from([0, 1]);
+                        let mut actual = actual.iter_mut();
+
+                        _ = actual.next().expect("consumes element with value 0");
+                        _ = actual.next_back().expect("consumes element with value 1");
+
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
+                        const ELEMENTS: usize = 8;
+
+                        let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                        let mut actual = Fixed::from(expected);
+                        let mut iter = actual.iter_mut().rev();
+
+                        for value in 0..ELEMENTS {
+                            let element = iter.next().expect("an element");
+
+                            *element = value;
+                        }
+
+                        drop(iter);
+
+                        expected.reverse();
+
+                        assert_eq!(actual.data, expected);
+                    }
+                }
+
+                mod size_hint {
+                    use super::*;
+
+                    #[test]
+                    fn lower_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
+
+                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter_mut().rev();
+
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
+
+                            let (lower, _upper) = actual.size_hint();
+
+                            assert_eq!(lower, expected);
+                        }
+                    }
+
+                    #[test]
+                    fn upper_bound_updates_when_advanced() {
+                        const ELEMENTS: usize = 8;
+
+                        let mut actual = Fixed::from(core::array::from_fn::<_, ELEMENTS, _>(|index| index));
+                        let mut actual = actual.iter_mut().rev();
+
+                        for expected in (0..ELEMENTS).rev() {
+                            _ = actual.next().expect("an element");
+
+                            let (_lower, upper) = actual.size_hint();
+
+                            assert_eq!(upper, Some(expected));
+                        }
+                    }
+                }
+            }
+
+            mod fused_iterator {
                 use super::*;
 
                 #[test]
-                fn empty() {
-                    let mut actual = Fixed::<(), 0>::default();
+                fn continues_to_yield_none_when_is_empty() {
+                    let underlying: [usize; 0] = [];
+                    debug_assert!(underlying.is_empty());
+
+                    let mut actual = Fixed::from(underlying);
                     let mut actual = actual.iter_mut();
 
                     // Yields `None` at least once.
@@ -1499,12 +1783,12 @@ mod test {
                 }
 
                 #[test]
-                fn exhausted() {
-                    let mut actual = Fixed::from([()]);
+                fn continues_to_yield_none_when_exhausted() {
+                    let mut actual = Fixed::from([0]);
                     let mut actual = actual.iter_mut();
 
                     // Exhaust the elements.
-                    let _: &() = actual.next().expect("the one element");
+                    _ = actual.next().expect("the one element");
 
                     // Yields `None` at least once.
                     assert_eq!(actual.next(), None);
