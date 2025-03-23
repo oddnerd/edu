@@ -818,24 +818,32 @@ impl<T> Dynamic<T> {
             return None;
         }
 
-        let front = self.as_mut_ptr();
+        let buffer = self.buffer;
 
-        // SAFETY: index in bounds => aligned within the allocated object.
-        let index = unsafe { front.add(index) };
+        // SAFETY: valid capacity => aligned within the allocated object.
+        let mut front = unsafe { buffer.add(self.front_capacity) };
 
-        // SAFETY:
-        // * both pointers are valid for reads and write.
-        // * both pointers are aligned.
-        // * no aliasing restrictions.
-        unsafe {
-            core::ptr::swap(front, index);
+        if index != 0 {
+            // SAFETY: index in bounds => aligned within the allocated object.
+            let index = unsafe { front.add(index) };
+
+            // SAFETY:
+            // * Both pointers are valid for reads and write.
+            // * Both pointers are aligned.
+            // * No aliasing restrictions.
+            unsafe { NonNull::swap(front, index); }
         }
 
         // SAFETY:
-        // * owned memory => pointer is valid for reads.
-        // * Underlying `T` is initialized.
-        // * This takes ownership (moved out of the buffer).
-        let element = unsafe { front.read() };
+        // * Owned memory => valid for reads and writes.
+        // * Underlying `MaybeUninit<T>` is initialized.
+        // * Has mutable reference to self => no other reference exists.
+        let element = unsafe { front.as_mut() };
+
+        // SAFETY:
+        // * Index in bounds => underlying `T` is initialized.
+        // * Value is prevented from being reused after move.
+        let element = unsafe { element.assume_init_read() };
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
