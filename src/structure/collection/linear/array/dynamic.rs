@@ -421,7 +421,7 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
-    /// Allocate space for exactly `capacity` elements to be appended.
+    /// Allocate space for exactly `capacity` elements to be [`Self::append`].
     ///
     /// If this is okay, that many element can be appended in constant time
     /// without possibility of error. Moreover, this maintains pointer validity
@@ -469,7 +469,11 @@ impl<T> Dynamic<T> {
             return Ok(self);
         };
 
-        let capacity = isize::try_from(capacity).map_err(|_| FailedAllocation)?;
+        let Ok(capacity) = isize::try_from(capacity) else {
+            debug_assert!(capacity > isize::MAX as usize, "cannot allocate more than `isize::MAX` bytes");
+
+            return Err(FailedAllocation);
+        };
 
         self.resize(capacity)
     }
