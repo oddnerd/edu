@@ -1178,6 +1178,62 @@ mod test {
                 }
             }
         }
+
+        mod debug {
+            use super::*;
+
+            #[test]
+            fn is_an_empty_list_when_empty() {
+                let expected: [usize; 0] = [];
+                debug_assert!(expected.is_empty());
+
+                let actual = Fixed::from(expected).into_iter();
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+
+            #[test]
+            fn is_a_list_of_the_correct_elements_in_the_correct_order_when_not_empty() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(expected.is_empty());
+
+                let actual = Fixed::from(expected).into_iter();
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+
+            #[test]
+            fn does_not_contain_elements_yielded_from_the_front() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(!expected.is_empty());
+
+                let mut actual = Fixed::from(expected).into_iter();
+
+                for start in 1..=expected.len() {
+                    _ = actual.next().expect("an element");
+
+                    let expected = &expected[start..];
+
+                    assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                }
+            }
+
+            #[test]
+            fn does_not_contain_elements_yielded_from_the_back() {
+                let expected = [0, 1, 2, 3, 4, 5];
+                debug_assert!(!expected.is_empty());
+
+                let mut actual = Fixed::from(expected).into_iter();
+
+                for start in 1..=expected.len() {
+                    _ = actual.next_back().expect("an element");
+
+                    let expected = &expected[start..];
+
+                    assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                }
+            }
+        }
     }
 
     mod fmt {
