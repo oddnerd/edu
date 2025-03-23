@@ -1004,7 +1004,7 @@ impl<T> Dynamic<T> {
         };
 
         let Some(elements) = end.checked_sub(start) else {
-            panic!("range had end index before start index")
+            panic!("range has end index before start index")
         };
 
         // SAFETY: points to the where the first initialized element goes.
