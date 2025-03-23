@@ -107,6 +107,10 @@ impl<T> Dynamic<T> {
     /// pointers to the buffer remain valid, they may not point to an
     /// initialized element let alone the element they were assigned to.
     ///
+    /// See also [`Self::capacity_front`] and [`Self::capacity_back`] to know
+    /// how many elements can can be inserted at a specific end without
+    /// modifying the underlying allocation.
+    ///
     /// # Performance
     /// #### Time Complexity
     /// | Worst | Best | Average |
