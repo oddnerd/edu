@@ -356,7 +356,7 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// Allocate space for exactly `capacity` elements to be prepended.
+    /// Allocate space for exactly `capacity` elements to be [`Self::prepend`].
     ///
     /// If this is okay, that many element can be prepended in constant time
     /// without possibility of error. Moreover, this maintains pointer validity
@@ -404,13 +404,17 @@ impl<T> Dynamic<T> {
             return Ok(self);
         };
 
-        let capacity = isize::try_from(capacity).map_err(|_| FailedAllocation)?;
+        let Ok(capacity) = isize::try_from(capacity) else {
+            debug_assert!(capacity > isize::MAX as usize, "cannot allocate more than `isize::MAX` bytes");
+
+            return Err(FailedAllocation);
+        };
 
         _ = self.resize(capacity)?;
 
         if self.initialized > 0 {
             let Ok(_) = self.shift(capacity) else {
-                unreachable!("not enough back capacity to shift into");
+                unreachable!("there is enough back capacity to shift into");
             };
         }
 
