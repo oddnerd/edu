@@ -3237,8 +3237,8 @@ mod test {
                 debug_assert_eq!(actual.capacity(), CAPACITY * 2);
 
                 for element in 0..CAPACITY {
-                    _ = actual.append(element);
-                    _ = actual.prepend(element);
+                    _ = actual.append(element).expect("uses capacity");
+                    _ = actual.prepend(element).expect("uses capacity");
                 }
 
                 assert_eq!(actual.buffer, allocation);
