@@ -2639,21 +2639,27 @@ impl<T> Drop for Drain<'_, T> {
             return;
         }
 
+        // Drop any remaining elements yet to be yielded.
         self.for_each(drop);
 
+        // Increase back capacity.
         if self.range.end == self.underlying.initialized {
             if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
                 self.underlying.back_capacity = capacity;
             } else {
                 unreachable!("allocated more than `isize::MAX` bytes");
             }
-        } else if self.range.start == 0 {
+        }
+        // Increase front capacity.
+        else if self.range.start == 0 {
             if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
                 self.underlying.front_capacity = capacity;
             } else {
                 unreachable!("allocated more than `isize::MAX` bytes");
             }
-        } else {
+        }
+        // There exists two disjoint groups of initialized elements.
+        else {
             let leading = self.range.start;
 
             let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
