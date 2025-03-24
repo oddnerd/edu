@@ -1510,25 +1510,30 @@ impl<T> Iterator for Dynamic<T> {
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
         (self.initialized > 0).then(|| {
-            let element = self.as_mut_ptr();
+            // SAFETY: stays aligned within the allocated object.
+            let mut first = unsafe { self.buffer.add(self.front_capacity) };
 
             if let Some(decremented) = self.initialized.checked_sub(1) {
                 self.initialized = decremented;
             } else {
-                unreachable!("no initialized element to remove");
-            };
+                unreachable!("at least one initialized element");
+            }
 
             if let Some(incremented) = self.front_capacity.checked_add(1) {
                 self.front_capacity = incremented;
             } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
 
             // SAFETY:
-            // * owned memory => pointer is valid for reads.
-            // * Underlying `T` is initialized.
-            // * This takes ownership (moved out of the buffer).
-            unsafe { element.read() }
+            // * The `MaybeUninit<T>` is initialized.
+            // * We have a unique mutable reference to self and the buffer.
+            let element = unsafe { first.as_mut() };
+
+            // SAFETY:
+            // * The underlying `T` is initialized.
+            // * Element is prevented from being read after this move.
+            unsafe { element.assume_init_read() }
         })
     }
 
