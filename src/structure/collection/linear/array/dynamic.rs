@@ -2647,7 +2647,7 @@ impl<T> Drop for Drain<'_, T> {
             if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
                 self.underlying.back_capacity = capacity;
             } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
             }
         }
         // Increase front capacity.
@@ -2655,7 +2655,7 @@ impl<T> Drop for Drain<'_, T> {
             if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
                 self.underlying.front_capacity = capacity;
             } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
             }
         }
         // There exists two disjoint groups of initialized elements.
@@ -2667,7 +2667,7 @@ impl<T> Drop for Drain<'_, T> {
             };
 
             let Ok(offset) = isize::try_from(self.range.len()) else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
 
             let only_front_capacity =
@@ -2683,7 +2683,7 @@ impl<T> Drop for Drain<'_, T> {
 
                 let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len())
                 else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 };
 
                 self.underlying.front_capacity = capacity;
@@ -2700,7 +2700,7 @@ impl<T> Drop for Drain<'_, T> {
 
                 let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len())
                 else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 };
 
                 self.underlying.back_capacity = capacity;
