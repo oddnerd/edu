@@ -2635,8 +2635,7 @@ impl<T> Drop for Drain<'_, T> {
     /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
     /// ```
     fn drop(&mut self) {
-        if self.underlying.initialized == 0 {
-            debug_assert_eq!(self.range, 0..0, "drained uninitialized elements");
+        if self.range.is_empty() {
             return;
         }
 
