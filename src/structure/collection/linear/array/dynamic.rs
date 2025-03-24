@@ -2964,25 +2964,16 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
 
-                let src = {
-                    let current: *const T = current;
+                let hole = NonNull::from(current);
 
-                    // SAFETY: stays aligned within the allocated object.
-                    unsafe { current.add(1) }.cast_mut()
-                };
-
-                let dst = {
-                    let current: *const T = current;
-                    current.cast_mut()
-                };
+                // SAFETY: aligned within the allocated object, or one byte past.
+                let trailing = unsafe { hole.add(1) };
 
                 // SAFETY:
-                // * owned memory => source/destination valid for read/writes.
-                // * no aliasing restrictions => source and destination can overlap.
-                // * underlying buffer is aligned => both pointers are aligned.
-                unsafe {
-                    core::ptr::copy(src, dst, self.trailing);
-                }
+                // * Source is valid for reads of that many elements.
+                // * Destination is valid for writes of that many elements.
+                // * Can overlap because no aliasing restrictions.
+                unsafe { trailing.copy_to(hole, self.trailing); }
 
                 return Some(element);
             }
