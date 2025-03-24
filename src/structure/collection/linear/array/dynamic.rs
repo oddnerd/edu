@@ -1657,7 +1657,7 @@ impl<T> Drop for Dynamic<T> {
         self.by_ref().for_each(drop);
 
         let Ok(_) = self.shrink(None) else {
-            unreachable!("deallocation failure");
+            unreachable!("deallocation cannot fail");
         };
     }
 }
