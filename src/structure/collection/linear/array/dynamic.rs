@@ -2473,12 +2473,12 @@ impl<T> Iterator for Drain<'_, T> {
     /// #### Time Complexity
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// #### Memory Complexity
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -2552,7 +2552,15 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
