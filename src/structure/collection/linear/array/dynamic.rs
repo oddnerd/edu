@@ -974,10 +974,9 @@ impl<T> Dynamic<T> {
     /// Note this does _NOT_ modify internal capacity state.
     ///
     /// # Safety
-    /// The `range` must be within bounds, even when shifted by `offset`.
-    ///
-    /// # Panics
-    /// If the start bound is not before the end bound of `range`.
+    /// * The `range` must refer to initialized elements.
+    /// * Must remain in the allocated object whe moved `offset` positions.
+    /// * Must not overwrite initialized elements outside of the `range`.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -991,6 +990,13 @@ impl<T> Dynamic<T> {
     /// | O(1) | 𝛀(1) | 𝚯(1) |
     #[inline]
     unsafe fn shift_range(&mut self, range: impl core::ops::RangeBounds<usize>, offset: isize) {
+        // TODO: various debug asserts have been added to verify safety within
+        // debug builds (tests). However, these are themselves untested and
+        // have had some equal signs added to inequalities to make existing
+        // tests pass so are not full thought out.
+
+        // TODO: assert will not overwrite other initialized elements.
+
         let start = match range.start_bound() {
             core::ops::Bound::Unbounded => 0,
             core::ops::Bound::Included(start) => *start,
@@ -1003,25 +1009,34 @@ impl<T> Dynamic<T> {
             core::ops::Bound::Excluded(end) => *end,
         };
 
-        let Some(elements) = end.checked_sub(start) else {
-            panic!("range has end index before start index")
-        };
+        debug_assert!(end >= start, "range must be a positive number of elements");
 
-        // SAFETY: points to the where the first initialized element goes.
-        let ptr = unsafe { self.buffer.as_ptr().add(self.front_capacity) };
+        let elements = end.abs_diff(start);
 
-        // SAFETY: caller promises this will stay in bounds.
-        let source = unsafe { ptr.add(start) };
+        debug_assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "there must be an allocation for the following pointer operations to be safe");
 
-        // SAFETY: caller promises this will stay in bounds.
+        // SAFETY: allocation exists => aligned within the allocated object.
+        let first = unsafe { self.buffer.add(self.front_capacity) };
+
+        debug_assert!(start <= self.initialized && end <= self.initialized, "range must be within bounds of initialized elements");
+
+        // SAFETY: valid range => stay aligned within the allocated object.
+        let source = unsafe { first.add(start) };
+
+        debug_assert!(if offset.is_negative() {
+            self.front_capacity.checked_add(start) >= Some(offset.unsigned_abs())
+        } else {
+            start.checked_add(elements).and_then(|sum| sum.checked_add(offset.unsigned_abs())) <= self.initialized.checked_add(self.back_capacity)
+        }, "offsetting the elements must stay within the allocated object");
+
+        // SAFETY: stays aligned within the allocated object.
         let destination = unsafe { source.offset(offset) };
 
         // SAFETY:
-        // * start/end in bounds => source/destination valid for read/write.
-        // * ranges can overlap => no aliasing restrictions.
-        unsafe {
-            core::ptr::copy(source, destination, elements);
-        }
+        // * Source is valid to read `elements` instances of `T`.
+        // * Destination is valid to write `elements` instance of `T`.
+        // * No aliasing restrictions because ranges can overlap.
+        unsafe { source.copy_to(destination, elements); }
     }
 
     /// (Re)allocate the buffer to modify back capacity by `capacity`.
