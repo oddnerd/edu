@@ -2820,13 +2820,8 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             // SAFETY: the element is initialized.
             let current = unsafe { self.next_front.as_ref() };
 
-            self.next_front = {
-                // SAFETY: aligned within the allocated object, or one byte past.
-                let ptr = unsafe { self.next_front.as_ptr().add(1) };
-
-                // SAFETY: `head` is not null => pointer is not null.
-                unsafe { NonNull::new_unchecked(ptr) }
-            };
+            // SAFETY: aligned within the allocated object, or one byte past.
+            self.next_front = unsafe { self.next_front.add(1) };
 
             if (self.predicate)(current) {
                 // SAFETY:
