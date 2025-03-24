@@ -404,13 +404,13 @@ impl<T> Dynamic<T> {
             return Ok(self);
         };
 
+        _ = self.reserve_back(capacity)?;
+
         let Ok(capacity) = isize::try_from(capacity) else {
             debug_assert!(capacity > isize::MAX as usize, "cannot allocate more than `isize::MAX` bytes");
 
             return Err(FailedAllocation);
         };
-
-        _ = self.resize(capacity)?;
 
         if self.initialized > 0 {
             let Ok(_) = self.shift(capacity) else {
