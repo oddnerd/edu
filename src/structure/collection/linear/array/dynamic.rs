@@ -1654,30 +1654,7 @@ impl<T> Drop for Dynamic<T> {
     /// core::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
     /// ```
     fn drop(&mut self) {
-        for index in 0..self.initialized {
-            let ptr = self.buffer.as_ptr();
-
-            // SAFETY: stays aligned within the allocated object.
-            let ptr = unsafe { ptr.add(self.front_capacity) };
-
-            // SAFETY: index is within bounds, so within allocated object.
-            let ptr = unsafe { ptr.add(index) };
-
-            // SAFETY: the `MaybeUninit<T>` is initialized.
-            let element = unsafe { &mut *ptr };
-
-            // SAFETY: The `T` is initialized => safe drop.
-            unsafe {
-                element.assume_init_drop();
-            }
-        }
-
-        if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
-            self.back_capacity = capacity;
-            self.initialized = 0;
-        } else {
-            unreachable!("allocated more than `isize::MAX` bytes");
-        }
+        self.by_ref().for_each(drop);
 
         let Ok(_) = self.shrink(None) else {
             unreachable!("deallocation failure");
