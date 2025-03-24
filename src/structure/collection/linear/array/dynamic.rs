@@ -2810,11 +2810,11 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             core::ptr::copy(src, dst, count);
         };
 
-        while self.remaining != 0 {
-            if let Some(remaining) = self.remaining.checked_sub(1) {
-                self.remaining = remaining;
+        while self.remaining > 0 {
+            if let Some(decremented) = self.remaining.checked_sub(1) {
+                self.remaining = decremented;
             } else {
-                unreachable!("no remaining element");
+                unreachable!("loop ensures `remaining > 0`");
             }
 
             // SAFETY: the element is initialized.
