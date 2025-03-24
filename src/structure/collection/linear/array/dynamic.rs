@@ -2710,7 +2710,7 @@ impl<T> Drop for Drain<'_, T> {
 }
 
 impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
-    /// List the elements being drained.
+    /// List the elements within the range that have yet to be yielded.
     ///
     /// # Performance
     /// #### Time Complexity
