@@ -1316,7 +1316,15 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
