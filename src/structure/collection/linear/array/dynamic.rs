@@ -2041,14 +2041,22 @@ impl<T> List for Dynamic<T> {
         }
 
         let element = {
-            // SAFETY: index within bounds => aligned within allocated object.
-            let ptr = unsafe { self.as_ptr().add(index) };
+            let Some(offset) = self.front_capacity.checked_add(index) else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            };
+
+            // SAFETY: aligned within the allocated object.
+            let mut ptr = unsafe { self.buffer.add(offset) };
 
             // SAFETY:
-            // * owned memory => pointer is valid for reads.
-            // * Underlying `T` is initialized.
-            // * This takes ownership (moved out of the buffer).
-            unsafe { ptr.read() }
+            // * The `MaybeUninit<T>` is initialized.
+            // * We have a unique mutable reference to self and the element.
+            let element = unsafe { ptr.as_mut() };
+
+            // SAFETY:
+            // * The underlying `T` is initialized.
+            // * Element is prevented from being read after this move.
+            unsafe { element.assume_init_read() }
         };
 
         // Increase front capacity.
