@@ -2266,7 +2266,15 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// Move an `element` on the top of the stack.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -2291,7 +2299,15 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// Move out the element at the top of the stack.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -2315,7 +2331,15 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// Query the element at the top of the stack.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -2335,7 +2359,15 @@ impl<T> super::super::Queue for Dynamic<T> {
     /// Move an `element` to the end of the queue.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
@@ -2360,7 +2392,15 @@ impl<T> super::super::Queue for Dynamic<T> {
     /// Move out the element at the front of the queue.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -2384,7 +2424,15 @@ impl<T> super::super::Queue for Dynamic<T> {
     /// Query the element at the front of the queue.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
