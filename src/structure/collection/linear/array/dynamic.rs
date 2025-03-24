@@ -1974,6 +1974,15 @@ impl<T> List for Dynamic<T> {
         }
         // Consume back capacity.
         else if self.reserve(1).is_ok() {
+            // SAFETY: there is back capacity to shift into.
+            unsafe { self.shift_range(index.., 1); }
+
+            if let Some(decremented) = self.back_capacity.checked_sub(1) {
+                self.back_capacity = decremented;
+            } else {
+                unreachable!("more than zero back capacity");
+            };
+
             ptr = {
                 let Some(offset) = self.front_capacity.checked_add(index) else {
                     unreachable!("index is within bounds");
@@ -1983,15 +1992,6 @@ impl<T> List for Dynamic<T> {
 
                 // SAFETY: the uninitialized element to insert into.
                 unsafe { self.buffer.add(offset) }
-            };
-
-            // SAFETY: there is back capacity to shift into.
-            unsafe { self.shift_range(index.., 1); }
-
-            if let Some(decremented) = self.back_capacity.checked_sub(1) {
-                self.back_capacity = decremented;
-            } else {
-                unreachable!("more than zero back capacity");
             };
         }
         // The above allocation failed.
