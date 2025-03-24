@@ -2795,7 +2795,10 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// assert_eq!(actual.next(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
+        // The first element that does not match the predicate.
         let first_retained = self.next_front;
+
+        // How many consecutive elements after that also do not match.
         let mut consecutive_retained = 0;
 
         // SAFETY:
