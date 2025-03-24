@@ -2250,32 +2250,7 @@ impl<T> List for Dynamic<T> {
     /// assert_eq!(instance.capacity(), 6);
     /// ```
     fn clear(&mut self) {
-        if self.initialized == 0 {
-            return;
-        }
-
-        let ptr = self.as_mut_ptr().cast::<MaybeUninit<T>>();
-
-        for index in 0..self.initialized {
-            // SAFETY: index in bounds => aligned within the allocated object.
-            let ptr = unsafe { ptr.add(index) };
-
-            // SAFETY: the `MaybeUninit<T>` is initialized.
-            let element = unsafe { &mut *ptr };
-
-            // SAFETY: the underlying `T` is initialized.
-            unsafe {
-                element.assume_init_drop();
-            }
-        }
-
-        if let Some(capacity) = self.back_capacity.checked_add(self.initialized) {
-            self.back_capacity = capacity;
-        } else {
-            unreachable!("allocated more than `isize::MAX` bytes");
-        }
-
-        self.initialized = 0;
+        self.by_ref().for_each(drop);
     }
 }
 
