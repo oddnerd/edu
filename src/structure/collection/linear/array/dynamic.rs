@@ -2265,7 +2265,7 @@ impl<T> List for Dynamic<T> {
 impl<T> super::super::Stack for Dynamic<T> {
     // TODO: it seems weird this expands to the front.
 
-    /// Move an `element` on the top of the stack.
+    /// Insert an `element` on the top of the stack.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -2298,7 +2298,7 @@ impl<T> super::super::Stack for Dynamic<T> {
         self.prepend(element)
     }
 
-    /// Move out the element at the top of the stack.
+    /// Remove the element at the top of the stack.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -2330,7 +2330,7 @@ impl<T> super::super::Stack for Dynamic<T> {
         self.front()
     }
 
-    /// Query the element at the top of the stack.
+    /// Obtain a reference to the element at the top of the stack.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -2358,7 +2358,7 @@ impl<T> super::super::Stack for Dynamic<T> {
 }
 
 impl<T> super::super::Queue for Dynamic<T> {
-    /// Move an `element` to the end of the queue.
+    /// Insert an `element` to the end of the queue.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -2391,7 +2391,7 @@ impl<T> super::super::Queue for Dynamic<T> {
         self.append(element)
     }
 
-    /// Move out the element at the front of the queue.
+    /// Remove the element at the front of the queue.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -2423,7 +2423,7 @@ impl<T> super::super::Queue for Dynamic<T> {
         self.front()
     }
 
-    /// Query the element at the front of the queue.
+    /// Obtain a reference to the element at the front of the queue.
     ///
     /// # Performance
     /// #### Time Complexity
