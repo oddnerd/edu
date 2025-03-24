@@ -2171,7 +2171,15 @@ impl<T> List for Dynamic<T> {
     /// thereby maintaining order.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
