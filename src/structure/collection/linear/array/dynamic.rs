@@ -1410,15 +1410,21 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     fn index(&self, index: usize) -> &Self::Output {
         assert!(index < self.initialized, "index out of bounds");
 
-        let ptr = self.as_ptr();
+        let buffer = self.buffer;
 
-        // SAFETY: index within bounds => stays within the allocated object.
-        let ptr = unsafe { ptr.add(index) };
+        // SAFETY: allocation exists => aligned within the allocated object.
+        let first = unsafe { buffer.add(self.front_capacity) };
+
+        // SAFETY: index in bounds => aligned within the allocated object.
+        let index = unsafe { first.add(index) };
 
         // SAFETY:
-        // * the underlying `T` is initialized.
-        // * lifetime bound to self => valid lifetime to return.
-        unsafe { &*ptr }
+        // * The `MaybeUninit<T>` is initialized.
+        // * The lifetime is bound to self.
+        let element = unsafe { index.as_ref() };
+
+        // SAFETY: The underlying `T` is initialized.
+        unsafe { element.assume_init_ref() }
     }
 }
 
@@ -1454,15 +1460,21 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         assert!(index < self.initialized, "index out of bounds");
 
-        let ptr = self.as_mut_ptr();
+        let buffer = self.buffer;
 
-        // SAFETY: index within bounds => stays within the allocated object.
-        let ptr = unsafe { ptr.add(index) };
+        // SAFETY: allocation exists => aligned within the allocated object.
+        let first = unsafe { buffer.add(self.front_capacity) };
+
+        // SAFETY: index in bounds => aligned within the allocated object.
+        let mut index = unsafe { first.add(index) };
 
         // SAFETY:
-        // * the underlying `T` is initialized.
-        // * lifetime bound to self => valid lifetime to return.
-        unsafe { &mut *ptr }
+        // * The `MaybeUninit<T>` is initialized.
+        // * The lifetime is bound to self.
+        let element = unsafe { index.as_mut() };
+
+        // SAFETY: The underlying `T` is initialized.
+        unsafe { element.assume_init_mut() }
     }
 }
 
