@@ -3196,7 +3196,7 @@ mod test {
             use super::*;
 
             #[test]
-            fn only_front_capacity() {
+            fn is_front_capacity_when_only_front_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 _ = actual.reserve_front(256).expect("successful allocation");
@@ -3205,7 +3205,7 @@ mod test {
             }
 
             #[test]
-            fn only_back_capacity() {
+            fn is_back_capacity_when_only_back_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 _ = actual.reserve_back(256).expect("successful allocation");
@@ -3214,7 +3214,7 @@ mod test {
             }
 
             #[test]
-            fn front_and_back_capacity() {
+            fn is_sum_of_front_and_back_capacity_when_both() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
                 _ = actual.reserve_front(256).expect("successful allocation");
@@ -3224,21 +3224,24 @@ mod test {
             }
 
             #[test]
-            fn does_not_invalidate_pointers_for_that_many_additions() {
-                let mut actual =
-                    Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            fn that_many_elements_can_be_inserted_without_reallocation() {
+                const CAPACITY: usize = 256;
 
-                let ptr = actual.buffer.as_ptr();
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                for index in 0..actual.capacity() {
-                    if index % 2 == 0 {
-                        _ = actual.append(index).expect("uses capacity");
-                    } else {
-                        _ = actual.prepend(index).expect("uses capacity");
-                    }
+                _ = actual.reserve_front(CAPACITY).expect("successful allocation");
+                _ = actual.reserve_back(CAPACITY).expect("successful allocation");
+
+                let allocation = actual.buffer;
+
+                debug_assert_eq!(actual.capacity(), CAPACITY * 2);
+
+                for element in 0..CAPACITY {
+                    _ = actual.append(element);
+                    _ = actual.prepend(element);
                 }
 
-                assert_eq!(ptr, actual.buffer.as_ptr());
+                assert_eq!(actual.buffer, allocation);
             }
         }
 
