@@ -2713,7 +2713,15 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
     /// List the elements being drained.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut list = f.debug_list();
 
