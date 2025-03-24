@@ -2848,7 +2848,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
                     self.underlying.initialized = decremented;
                 } else {
-                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                    unreachable!("at least the element being removed");
                 }
 
                 return Some(element);
@@ -2955,13 +2955,13 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
                     self.underlying.initialized = decremented;
                 } else {
-                    unreachable!("no initialized element to remove");
+                    unreachable!("at least the element being removed");
                 }
 
                 if let Some(incremented) = self.underlying.back_capacity.checked_add(1) {
                     self.underlying.back_capacity = incremented;
                 } else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
 
                 let src = {
