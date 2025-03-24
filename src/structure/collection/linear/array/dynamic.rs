@@ -2801,15 +2801,6 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         // How many consecutive elements after that also do not match.
         let mut consecutive_retained = 0;
 
-        // SAFETY:
-        // * owned memory => source/destination valid for read/writes.
-        // * no aliasing restrictions => source and destination can overlap.
-        // * underlying buffer is aligned => both pointers are aligned.
-        let shift_retained = |src: *mut T, dst: *mut T, count| unsafe {
-            // Shift the current run of retained elements to the left.
-            core::ptr::copy(src, dst, count);
-        };
-
         while self.remaining > 0 {
             if let Some(decremented) = self.remaining.checked_sub(1) {
                 self.remaining = decremented;
@@ -2827,49 +2818,37 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
                 // SAFETY: takes ownership (moved out of underlying buffer).
                 let element = unsafe { core::ptr::read(current) };
 
+                #[expect(clippy::collapsible_else_if, reason = "increase front or back capacity")]
                 if self.underlying.as_ptr() == current {
-                    // Will not shift, instead increasing front capacity.
                     if let Some(incremented) = self.underlying.front_capacity.checked_add(1) {
                         self.underlying.front_capacity = incremented;
                     } else {
-                        unreachable!("allocated more than `isize::MAX` bytes");
+                        unreachable!("cannot allocate more than `isize::MAX` bytes");
                     }
 
-                    // The current element will be left uninitialized.
-                    self.retained = {
-                        // SAFETY: at most one byte past the allocated object.
-                        let ptr = unsafe { self.retained.as_ptr().add(1) };
-
-                        // SAFETY: `retained` is not null => pointer is not null.
-                        unsafe { NonNull::new_unchecked(ptr) }
-                    };
+                    // SAFETY: at most one byte past the allocated object.
+                    self.retained = unsafe { self.retained.add(1) };
                 } else {
-                    // will shift elements to increase back capacity.
                     if let Some(incremented) = self.underlying.back_capacity.checked_add(1) {
                         self.underlying.back_capacity = incremented;
                     } else {
-                        unreachable!("allocated more than `isize::MAX` bytes");
+                        unreachable!("cannot allocate more than `isize::MAX` bytes");
                     }
                 }
 
-                shift_retained(
-                    first_retained.as_ptr(),
-                    self.retained.as_ptr(),
-                    consecutive_retained,
-                );
+                // SAFETY:
+                // * Source is valid for reads of that many elements.
+                // * Destination is valid for writes of that many elements.
+                // * Can overlap because no aliasing restrictions.
+                unsafe { first_retained.copy_to(self.retained, consecutive_retained); }
 
-                self.retained = {
-                    // SAFETY: next uninitialized element, or one byte past.
-                    let ptr = unsafe { self.retained.as_ptr().add(consecutive_retained) };
-
-                    // SAFETY: `retained` is not null => pointer is not null.
-                    unsafe { NonNull::new_unchecked(ptr) }
-                };
+                // SAFETY: next uninitialized element, or one byte past.
+                self.retained = unsafe { self.retained.add(consecutive_retained) };
 
                 if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
                     self.underlying.initialized = decremented;
                 } else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
 
                 return Some(element);
@@ -2891,19 +2870,15 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         // elements. Nevertheless, previous iterations of the loop ensure the
         // pointer and counter denote a valid range of retained elements (if
         // any) so they can still be shifted before returning none.
-        shift_retained(
-            first_retained.as_ptr(),
-            self.retained.as_ptr(),
-            consecutive_retained,
-        );
 
-        self.retained = {
-            // SAFETY: at most one byte past the allocated object.
-            let ptr = unsafe { self.retained.as_ptr().add(consecutive_retained) };
+        // SAFETY:
+        // * Source is valid for reads of that many elements.
+        // * Destination is valid for writes of that many elements.
+        // * Can overlap because no aliasing restrictions.
+        unsafe { first_retained.copy_to(self.retained, consecutive_retained); }
 
-            // SAFETY: `retained` is not null => pointer is not null.
-            unsafe { NonNull::new_unchecked(ptr) }
-        };
+        // SAFETY: next uninitialized element, or one byte past.
+        self.retained = unsafe { self.retained.add(consecutive_retained) };
 
         None
     }
