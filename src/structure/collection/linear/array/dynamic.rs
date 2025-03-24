@@ -3141,7 +3141,15 @@ mod test {
             use super::*;
 
             #[test]
-            fn increases_capacity() {
+            fn does_not_increase_capacity_when_when_zero_requested() {
+                let actual = Dynamic::<usize>::with_capacity(0).expect("does no allocation");
+
+                assert_eq!(actual.front_capacity, 0);
+                assert_eq!(actual.back_capacity, 0);
+            }
+
+            #[test]
+            fn increases_capacity_when_non_zero_requested() {
                 let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
 
                 assert_eq!(actual.capacity(), 256);
@@ -3150,14 +3158,20 @@ mod test {
             }
 
             #[test]
-            fn allocates_memory() {
-                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            fn allocates_memory_when_non_zero_requested() {
+                const CAPACITY: usize = 256;
 
-                for index in 0..actual.capacity() {
-                    let ptr = unsafe { actual.buffer.as_ptr().add(index) };
+                let actual = Dynamic::<usize>::with_capacity(CAPACITY).expect("successful allocation");
+
+                let allocation = actual.buffer;
+
+                for index in 0..CAPACITY {
+                    let mut ptr = unsafe { allocation.add(index) };
+
+                    let element = unsafe { ptr.as_mut() };
 
                     // Ideally, this will seg-fault if unowned memory.
-                    _ = unsafe { &mut *ptr }.write(index);
+                    _ = element.write(index);
                 }
             }
 
@@ -3169,16 +3183,12 @@ mod test {
             }
 
             #[test]
-            fn zero_capacity_cannot_fail() {
-                let _actual = Dynamic::<usize>::with_capacity(0).expect("does no allocation");
-            }
+            fn can_allocate_maximum_possible_when_zero_size_type() {
+                let actual = Dynamic::<()>::with_capacity(isize::MAX as usize).expect("ZSTs do not occupy memory");
 
-            #[test]
-            fn zero_size_types_cannot_fail() {
-                let capacity = usize::try_from(isize::MAX).expect("usize::MAX > isize::MAX");
-
-                let _actual =
-                    Dynamic::<()>::with_capacity(capacity).expect("ZSTs do not occupy memory");
+                assert_eq!(actual.capacity(), isize::MAX as usize);
+                assert_eq!(actual.capacity_front(), isize::MAX as usize);
+                assert_eq!(actual.capacity_back(), isize::MAX as usize);
             }
         }
 
