@@ -1079,7 +1079,7 @@ impl<T> Dynamic<T> {
         }
 
         let Some(unchanged) = self.front_capacity.checked_add(self.initialized) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
 
         let new = {
@@ -1092,7 +1092,7 @@ impl<T> Dynamic<T> {
         };
 
         let Some(total) = unchanged.checked_add(self.back_capacity) else {
-            unreachable!("allocated more than `isize::MAX` bytes");
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
 
         let ptr = {
@@ -1104,14 +1104,14 @@ impl<T> Dynamic<T> {
                 } else {
                     debug_assert_eq!(capacity, 0, "otherwise occupies memory");
 
-                    // empty => The pointer will _NOT_ be read/written to.
+                    // self is empty => pointer will _NOT_ be read/written to.
                     NonNull::<T>::dangling().as_ptr()
                 }
             }
             // Modify an existing buffer allocation.
             else {
                 let Ok(existing) = core::alloc::Layout::array::<T>(total) else {
-                    return Err(FailedAllocation);
+                    unreachable!("this is the layout of the existing allocation");
                 };
 
                 let ptr = self.buffer.as_ptr().cast::<u8>();
@@ -1119,24 +1119,23 @@ impl<T> Dynamic<T> {
                 // Deallocate.
                 if unchanged == 0 && capacity == 0 {
                     // SAFETY:
-                    // * allocated using the corresponding allocator.
-                    // * `existing_layout` is currently allocated.
-                    // * `new_layout` has non-zero size.
-                    // * `Layout` => `new.size() <= isize::MAX`.
+                    // * Allocated using the corresponding allocator.
+                    // * `existing` is the layout of the current allocation.
+                    // * `existing` has non-zero size.
                     unsafe {
                         alloc::alloc::dealloc(ptr, existing);
                     }
 
-                    // empty state => will _NOT_ be read/written to.
+                    // self is empty => pointer will _NOT_ be read/written to.
                     NonNull::<T>::dangling().as_ptr()
                 }
                 // Reallocate.
                 else {
                     // SAFETY:
-                    // * allocated using the corresponding allocator.
-                    // * `existing_layout` is currently allocated.
-                    // * `new_layout` has non-zero size.
-                    // * `Layout` => `new.size() <= isize::MAX`.
+                    // * Allocated using the corresponding allocator.
+                    // * `existing` is tje layout of the current allocation.
+                    // * `new` has non-zero size.
+                    // * `new` is fewer than `isize::MAX` bytes.
                     unsafe { alloc::alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
                 }
             }
@@ -1145,6 +1144,7 @@ impl<T> Dynamic<T> {
         // `MaybeUninit<T>` has the same layout as `T`.
         let ptr = ptr.cast::<MaybeUninit<T>>();
 
+        // Null pointer => allocation failed.
         self.buffer = match NonNull::new(ptr) {
             Some(ptr) => ptr,
             None => return Err(FailedAllocation),
