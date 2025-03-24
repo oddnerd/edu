@@ -2743,7 +2743,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
 ///
 /// See [`Dynamic::withdraw`].
 struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
-    /// The underlying [`Dynamic`] begin withdrawn from.
+    /// The underlying [`Dynamic`] being withdrawn from.
     underlying: &'a mut Dynamic<T>,
 
     /// The predicate based upon which elements are withdrawn.
