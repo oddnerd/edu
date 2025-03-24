@@ -2660,10 +2660,12 @@ impl<T> Drop for Drain<'_, T> {
         }
         // There exists two disjoint groups of initialized elements.
         else {
+            // The number of elements before the range that was drained.
             let leading = self.range.start;
 
+            // The number of elements after the range that was drained.
             let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
-                unreachable!("not enough initialized elements to remove");
+                unreachable!("range is limited to initialized elements");
             };
 
             let Ok(offset) = isize::try_from(self.range.len()) else {
