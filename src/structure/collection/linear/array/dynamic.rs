@@ -3027,20 +3027,18 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// assert!(instance.eq([1, 3, 5]));
     /// ```
     fn drop(&mut self) {
-        // Drop all remaining elements to withdraw.
+        // Drop all elements yet to be yielded.
         self.for_each(drop);
 
         if self.trailing > 0 {
             // SAFETY: aligned within the allocated object, or one byte past.
-            let trailing = unsafe { self.next_back.as_ptr().add(1) };
+            let trailing = unsafe { self.next_back.add(1) };
 
             // SAFETY:
-            // * owned memory => source/destination valid for read/writes.
-            // * no aliasing restrictions => source and destination can overlap.
-            // * underlying buffer is aligned => both pointers are aligned.
-            unsafe {
-                core::ptr::copy(trailing, self.retained.as_ptr(), self.trailing);
-            }
+            // * Source is valid for reads of that many elements.
+            // * Destination is valid for writes of that many elements.
+            // * Can overlap because no aliasing restrictions.
+            unsafe { trailing.copy_to(self.retained, self.trailing); }
         }
     }
 }
