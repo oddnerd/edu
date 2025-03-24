@@ -2677,35 +2677,37 @@ impl<T> Drop for Drain<'_, T> {
             let only_back_capacity =
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
+            // Shift leading elements to increase front capacity.
             if only_front_capacity || (!only_back_capacity && trailing > leading) {
+                #[expect(clippy::shadow_unrelated, reason = "the elements themselves")]
+                let leading = 0..self.range.start;
+
                 // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
-                unsafe {
-                    self.underlying.shift_range(0..self.range.start, offset);
-                }
+                unsafe { self.underlying.shift_range(leading, offset); }
 
-                let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len())
-                else {
+                if let Some(capacity) = self.underlying.front_capacity.checked_add(self.range.len()) {
+                    self.underlying.front_capacity = capacity;
+                } else {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
-                };
+                }
+            }
+            // Shift trailing element to increase back capacity.
+            else {
+                #[expect(clippy::shadow_unrelated, reason = "the elements themselves")]
+                let trailing = self.range.end..self.underlying.initialized;
 
-                self.underlying.front_capacity = capacity;
-            } else {
                 let Some(offset) = offset.checked_neg() else {
                     unreachable!("offset was a positive number of elements");
                 };
 
                 // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
-                unsafe {
-                    self.underlying
-                        .shift_range(self.range.end..self.underlying.initialized, offset);
-                }
+                unsafe { self.underlying.shift_range(trailing, offset); }
 
-                let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len())
-                else {
+                if let Some(capacity) = self.underlying.back_capacity.checked_add(self.range.len()) {
+                    self.underlying.back_capacity = capacity;
+                } else {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
-                };
-
-                self.underlying.back_capacity = capacity;
+                }
             }
         }
 
