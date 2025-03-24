@@ -2815,7 +2815,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             self.next_front = unsafe { self.next_front.add(1) };
 
             if (self.predicate)(current) {
-                // SAFETY: takes ownership (moved out of underlying buffer).
+                // SAFETY: element is prevented from being read after this move.
                 let element = unsafe { core::ptr::read(current) };
 
                 #[expect(clippy::collapsible_else_if, reason = "increase front or back capacity")]
@@ -2949,10 +2949,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             }
 
             if (self.predicate)(current) {
-                // SAFETY:
-                // * owned memory => pointer is valid for reads.
-                // * Underlying `T` is initialized.
-                // * This takes ownership (moved out of the buffer).
+                // SAFETY: element is prevented from being read after this move.
                 let element = unsafe { core::ptr::read(current) };
 
                 if let Some(decremented) = self.underlying.initialized.checked_sub(1) {
