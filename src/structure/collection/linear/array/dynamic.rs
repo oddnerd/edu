@@ -1753,20 +1753,17 @@ impl<T> Linear for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = if self.initialized > 0 {
-            // The pointer will only ever be read, no written to.
-            let ptr = self.as_ptr().cast_mut();
-
-            // SAFETY: initialized elements => `ptr` is non-null
-            unsafe { NonNull::new_unchecked(ptr) }
+            // SAFETY: stays aligned with the allocated object.
+            unsafe { self.buffer.add(self.front_capacity) }
         } else {
-            debug_assert_eq!(self.initialized, 0, "initialized elements");
-
-            // no initialized elements => The pointer will not be read.
+            // The pointer will not be read.
             NonNull::dangling()
         };
 
-        // SAFETY: `ptr` is dangling if and only if no elements have been
-        // initialized, in which case the pointer will not be read.
+        // `MaybeUninit<T>` has the same memory layout as `T`.
+        let ptr = ptr.cast::<T>();
+
+        // SAFETY: points to a contigious buffer of initialized elements.
         unsafe { super::Iter::new(ptr, self.initialized) }
     }
 
@@ -1801,19 +1798,17 @@ impl<T> Linear for Dynamic<T> {
     + ExactSizeIterator
     + core::iter::FusedIterator {
         let ptr = if self.initialized > 0 {
-            let ptr = self.as_mut_ptr();
-
-            // SAFETY: initialized elements => `ptr` is non-null
-            unsafe { NonNull::new_unchecked(ptr) }
+            // SAFETY: stays aligned with the allocated object.
+            unsafe { self.buffer.add(self.front_capacity) }
         } else {
-            debug_assert_eq!(self.initialized, 0, "initialized elements");
-
-            // no initialized elements => The pointer will not be read.
+            // The pointer will not be read.
             NonNull::dangling()
         };
 
-        // SAFETY: `ptr` is dangling if and only if no elements have been
-        // initialized, in which case the pointer will not be read.
+        // `MaybeUninit<T>` has the same memory layout as `T`.
+        let ptr = ptr.cast::<T>();
+
+        // SAFETY: points to a contigious buffer of initialized elements.
         unsafe { super::IterMut::new(ptr, self.initialized) }
     }
 }
