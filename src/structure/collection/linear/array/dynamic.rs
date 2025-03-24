@@ -1948,10 +1948,8 @@ impl<T> List for Dynamic<T> {
             return Err(element);
         }
 
-        let mut ptr = self.buffer;
-
         // Consume front capacity.
-        if index == 0 && self.capacity_front() > 0 {
+        let mut ptr = if index == 0 && self.capacity_front() > 0 {
             // Shift all capacity to front capacity.
             if self.initialized == 0 {
                 if let Some(capacity) = self.front_capacity.checked_add(self.back_capacity) {
@@ -1969,8 +1967,8 @@ impl<T> List for Dynamic<T> {
                 unreachable!("more than zero front capacity.");
             };
 
-            // SAFETY: rightmost uninitialized element before initialized.
-            ptr = unsafe { ptr.add(self.front_capacity) };
+            // SAFETY: aligned within the allocated object.
+            unsafe { self.buffer.add(self.front_capacity) }
         }
         // Consume back capacity.
         else if self.reserve(1).is_ok() {
@@ -1983,23 +1981,19 @@ impl<T> List for Dynamic<T> {
                 unreachable!("more than zero back capacity");
             };
 
-            ptr = {
-                let Some(offset) = self.front_capacity.checked_add(index) else {
-                    unreachable!("index is within bounds");
-                };
-
-                // TODO: `ptr.add(offset)` breaks tests, why?
-
-                // SAFETY: the uninitialized element to insert into.
-                unsafe { self.buffer.add(offset) }
+            let Some(offset) = self.front_capacity.checked_add(index) else {
+                unreachable!("index is within bounds");
             };
+
+            // SAFETY: aligned within the allocated object.
+            unsafe { self.buffer.add(offset) }
         }
         // The above allocation failed.
         else {
             debug_assert_eq!(self.capacity(), 0, "no capacity to insert into");
 
             return Err(element);
-        }
+        };
 
         if let Some(incremented) = self.initialized.checked_add(1) {
             self.initialized = incremented;
