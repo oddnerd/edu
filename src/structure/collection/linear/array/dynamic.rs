@@ -2263,6 +2263,8 @@ impl<T> List for Dynamic<T> {
 }
 
 impl<T> super::super::Stack for Dynamic<T> {
+    // TODO: it seems weird this expands to the front.
+
     /// Move an `element` on the top of the stack.
     ///
     /// # Performance
