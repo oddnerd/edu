@@ -1481,10 +1481,18 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
 impl<T> Iterator for Dynamic<T> {
     type Item = T;
 
-    /// Obtain the first initialized element.
+    /// Move out the first initialized element, if any.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
