@@ -3381,7 +3381,7 @@ mod test {
 
                 _ = actual.reserve(256).expect("successful allocation");
 
-                assert!(actual.capacity() > 0);
+                assert!(actual.capacity() >= 256);
             }
 
             #[test]
