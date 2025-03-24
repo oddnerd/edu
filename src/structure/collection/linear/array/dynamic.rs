@@ -1852,11 +1852,13 @@ impl<T> Array for Dynamic<T> {
     fn as_ptr(&self) -> *const Self::Element {
         assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "no allocation to point to");
 
-        // `MaybeUninit<T>` has the same layout as `T`.
-        let ptr = self.buffer.cast::<T>().as_ptr().cast_const();
+        // SAFETY: aligned within the allocated object.
+        let ptr = unsafe { self.buffer.add(self.front_capacity) };
 
-        // SAFETY: Stays aligned within the allocated object.
-        unsafe { ptr.add(self.front_capacity) }
+        // `MaybeUninit<T>` has the same layout as `T`.
+        let ptr = ptr.cast::<T>();
+
+        ptr.as_ptr()
     }
 
     /// Obtain a pointer to the contigious initialized elements.
@@ -1896,11 +1898,13 @@ impl<T> Array for Dynamic<T> {
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
         assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "no allocation to point to");
 
-        // `MaybeUninit<T>` has the same layout as `T`.
-        let ptr = self.buffer.cast::<T>().as_ptr();
+        // SAFETY: aligned within the allocated object.
+        let ptr = unsafe { self.buffer.add(self.front_capacity) };
 
-        // SAFETY: Stays aligned within the allocated object.
-        unsafe { ptr.add(self.front_capacity) }
+        // `MaybeUninit<T>` has the same layout as `T`.
+        let ptr = ptr.cast::<T>();
+
+        ptr.as_ptr()
     }
 }
 
