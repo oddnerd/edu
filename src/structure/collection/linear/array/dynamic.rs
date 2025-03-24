@@ -2726,11 +2726,13 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
         let mut list = f.debug_list();
 
         let slice = {
-            // SAFETY: index in bounds => aligned within the allocated object.
-            let ptr = unsafe { self.underlying.as_ptr().add(self.next.start) };
+            let first = self.underlying.as_ptr();
 
-            // SAFETY: points to yet to be yielded slice.
-            unsafe { core::slice::from_raw_parts(ptr, self.next.len()) }
+            // SAFETY: aligned within the allocated object.
+            let start = unsafe { first.add(self.next.start) };
+
+            // SAFETY: points to that many initialized instances of `T`.
+            unsafe { core::slice::from_raw_parts(start, self.next.len()) }
         };
 
         list.entries(slice).finish()
