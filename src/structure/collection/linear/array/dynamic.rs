@@ -2824,10 +2824,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             self.next_front = unsafe { self.next_front.add(1) };
 
             if (self.predicate)(current) {
-                // SAFETY:
-                // * owned memory => pointer is valid for reads.
-                // * Underlying `T` is initialized.
-                // * This takes ownership (moved out of the buffer).
+                // SAFETY: takes ownership (moved out of underlying buffer).
                 let element = unsafe { core::ptr::read(current) };
 
                 if self.underlying.as_ptr() == current {
