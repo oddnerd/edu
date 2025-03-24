@@ -2088,14 +2088,22 @@ impl<T> List for Dynamic<T> {
         Some(element)
     }
 
-    /// Optimally remove elements within `range` by-value.
+    /// Optimally remove elements within `range`.
     ///
     /// This method is more efficient than using `remove` for sequential
     /// elements, moving elements out of the buffer as iterated and shifting
-    /// once only when the iterator has been dropped.
+    /// once only when the iterator is dropped.
     ///
     /// # Performance
-    /// This method takes O(N) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
