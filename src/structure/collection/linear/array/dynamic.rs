@@ -1254,8 +1254,6 @@ impl<T> FromIterator<T> for Dynamic<T> {
     /// assert!(actual.eq(expected))
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
-        let iter = iter.into_iter();
-
         let mut instance = Self::default();
 
         instance.extend(iter);
