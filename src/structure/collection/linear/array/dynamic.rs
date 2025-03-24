@@ -1294,13 +1294,13 @@ impl<T> Extend<T> for Dynamic<T> {
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
         let iter = iter.into_iter();
 
-        // `size_hint` can _NOT_ be trusted to exact size.
+        // `size_hint` can _NOT_ be trusted.
         let count = {
             let (min, max) = iter.size_hint();
             max.unwrap_or(min)
         };
 
-        // Append will allocate for each realized element reserve if fails.
+        // Append will allocate for each realized element if reserve fails.
         drop(self.reserve_back(count));
 
         for element in iter {
