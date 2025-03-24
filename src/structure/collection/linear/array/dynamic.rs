@@ -1952,18 +1952,6 @@ impl<T> List for Dynamic<T> {
 
         // Consume front capacity.
         if index == 0 && self.capacity_front() > 0 {
-            // TODO: this can be simplified by reordering.
-
-            // The rightmost uninitialized element before those initialized.
-            ptr = {
-                let Some(offset) = self.capacity_front().checked_sub(1) else {
-                    unreachable!("more than zero front capacity")
-                };
-
-                // SAFETY: aligned within the allocated object.
-                unsafe { ptr.add(offset) }
-            };
-
             // Shift all capacity to front capacity.
             if self.initialized == 0 {
                 if let Some(capacity) = self.front_capacity.checked_add(self.back_capacity) {
@@ -1980,6 +1968,9 @@ impl<T> List for Dynamic<T> {
             } else {
                 unreachable!("more than zero front capacity.");
             };
+
+            // SAFETY: rightmost uninitialized element before initialized.
+            ptr = unsafe { ptr.add(self.front_capacity) };
         }
         // Consume back capacity.
         else if self.reserve(1).is_ok() {
