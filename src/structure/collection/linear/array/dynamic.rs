@@ -1829,7 +1829,15 @@ impl<T> Array for Dynamic<T> {
     /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -1873,7 +1881,15 @@ impl<T> Array for Dynamic<T> {
     /// be yielded for zero-size types despite not occupying memory.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
