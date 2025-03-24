@@ -2012,7 +2012,15 @@ impl<T> List for Dynamic<T> {
     /// Remove the element at `index`.
     ///
     /// # Performance
-    /// This methods takes O(N) time and O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
