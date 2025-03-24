@@ -500,12 +500,12 @@ impl<T> Dynamic<T> {
     /// #### Time Complexity
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// #### Memory Complexity
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
