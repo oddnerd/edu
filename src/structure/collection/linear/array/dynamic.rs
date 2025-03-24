@@ -2931,11 +2931,11 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        while self.remaining != 0 {
+        while self.remaining > 0 {
             if let Some(decremented) = self.remaining.checked_sub(1) {
                 self.remaining = decremented;
             } else {
-                unreachable!("no remaining element");
+                unreachable!("loop ensures `remaining > 0`");
             }
 
             // SAFETY: the element is initialized.
