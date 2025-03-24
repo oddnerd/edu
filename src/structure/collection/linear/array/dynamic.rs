@@ -2064,27 +2064,25 @@ impl<T> List for Dynamic<T> {
             if let Some(incremented) = self.front_capacity.checked_add(1) {
                 self.front_capacity = incremented;
             } else {
-                unreachable!("allocated more that `isize::MAX` bytes");
+                unreachable!("cannot allocate more that `isize::MAX` bytes");
             };
         }
         // Increase back capacity.
         else {
-            // SAFETY: there is back capacity to shift into.
-            unsafe {
-                self.shift_range(index.saturating_add(1).., -1);
-            }
+            // SAFETY: shifting into the removed element.
+            unsafe { self.shift_range(index.saturating_add(1).., -1); }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
             } else {
-                unreachable!("allocated more that `isize::MAX` bytes");
+                unreachable!("cannot allocate more that `isize::MAX` bytes");
             };
         }
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
         } else {
-            unreachable!("no initialized element to remove");
+            unreachable!("at least the element being removed");
         };
 
         Some(element)
