@@ -2498,8 +2498,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.next().map_or_else(
-            || None,
+        self.next.next().map(
             |index| {
                 let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
 
@@ -2513,7 +2512,7 @@ impl<T> Iterator for Drain<'_, T> {
                 // * owned memory => pointer is valid for reads.
                 // * Underlying `T` is initialized.
                 // * This takes ownership (moved out of the buffer).
-                Some(unsafe { element.assume_init_read() })
+                unsafe { element.assume_init_read() }
             },
         )
     }
