@@ -3475,6 +3475,21 @@ mod test {
             }
 
             #[test]
+            fn that_many_elements_can_be_appended_without_reallocation() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                _ = actual.reserve(256).expect("successful allocation");
+
+                let allocation = actual.buffer;
+
+                for element in 0..256 {
+                    _ = actual.append(element).expect("uses capacity");
+                }
+
+                assert_eq!(actual.buffer, allocation);
+            }
+
+            #[test]
             fn does_not_decrease_capacity_when_less_than_back_capacity_and_is_empty() {
                 let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
                 debug_assert_eq!(actual.initialized, 0);
@@ -3660,6 +3675,21 @@ mod test {
                 _ = actual.reserve_front(256).expect("successful allocation");
 
                 assert!(actual.eq(expected));
+            }
+
+            #[test]
+            fn that_many_elements_can_be_prepended_without_reallocation() {
+                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+
+                _ = actual.reserve_front(256).expect("successful allocation");
+
+                let allocation = actual.buffer;
+
+                for element in 0..256 {
+                    _ = actual.prepend(element).expect("uses capacity");
+                }
+
+                assert_eq!(actual.buffer, allocation);
             }
 
             #[test]
