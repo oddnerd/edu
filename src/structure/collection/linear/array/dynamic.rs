@@ -2660,13 +2660,11 @@ impl<T> Drop for Drain<'_, T> {
         }
         // There exists two disjoint groups of initialized elements.
         else {
-            // The number of elements before the range that was drained.
-            let leading = self.range.start;
+            // The elements before the range that was drained.
+            let leading = 0..self.range.start;
 
-            // The number of elements after the range that was drained.
-            let Some(trailing) = self.underlying.initialized.checked_sub(self.range.end) else {
-                unreachable!("range is limited to initialized elements");
-            };
+            // The elements after the range that was drained.
+            let trailing = self.range.end..self.underlying.initialized;
 
             let Ok(offset) = isize::try_from(self.range.len()) else {
                 unreachable!("cannot allocate more than `isize::MAX` bytes");
@@ -2678,10 +2676,7 @@ impl<T> Drop for Drain<'_, T> {
                 self.underlying.front_capacity == 0 && self.underlying.back_capacity != 0;
 
             // Shift leading elements to increase front capacity.
-            if only_front_capacity || (!only_back_capacity && trailing > leading) {
-                #[expect(clippy::shadow_unrelated, reason = "the elements themselves")]
-                let leading = 0..self.range.start;
-
+            if only_front_capacity || (!only_back_capacity && trailing.len() > leading.len()) {
                 // SAFETY: [front capacity] [shift] [drained] [remain] [back capacity]
                 unsafe { self.underlying.shift_range(leading, offset); }
 
@@ -2693,11 +2688,8 @@ impl<T> Drop for Drain<'_, T> {
             }
             // Shift trailing element to increase back capacity.
             else {
-                #[expect(clippy::shadow_unrelated, reason = "the elements themselves")]
-                let trailing = self.range.end..self.underlying.initialized;
-
                 let Some(offset) = offset.checked_neg() else {
-                    unreachable!("offset was a positive number of elements");
+                    unreachable!("element count cannot be `isize::MIN`");
                 };
 
                 // SAFETY: [front capacity] [remain] [drained] [shift] [back capacity]
