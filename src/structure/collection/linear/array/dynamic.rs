@@ -1564,10 +1564,18 @@ impl<T> Iterator for Dynamic<T> {
 }
 
 impl<T> DoubleEndedIterator for Dynamic<T> {
-    /// Obtain the last initialized element.
+    /// Move out the last initialized element, if any.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
