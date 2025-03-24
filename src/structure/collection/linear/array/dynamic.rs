@@ -2500,18 +2500,21 @@ impl<T> Iterator for Drain<'_, T> {
     fn next(&mut self) -> Option<Self::Item> {
         self.next.next().map(
             |index| {
-                let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
+                let Some(offset) = self.underlying.front_capacity.checked_add(index) else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                };
 
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = unsafe { ptr.add(index) };
-
-                // SAFETY: index in bounds => aligned within the allocated object.
-                let element = unsafe { &mut *ptr };
+                // SAFETY: aligned within the allocated object.
+                let mut ptr = unsafe { self.underlying.buffer.add(offset) };
 
                 // SAFETY:
-                // * owned memory => pointer is valid for reads.
-                // * Underlying `T` is initialized.
-                // * This takes ownership (moved out of the buffer).
+                // * The `MaybeUninit<T>` is initialized.
+                // * We have a unique mutable reference to self and the element.
+                let element = unsafe { ptr.as_mut() };
+
+                // SAFETY:
+                // * The underlying `T` is initialized.
+                // * Element is prevented from being read after this move.
                 unsafe { element.assume_init_read() }
             },
         )
@@ -2568,24 +2571,24 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.next.next_back().map_or_else(
-            || None,
-            |index| {
-                let ptr = self.underlying.as_mut_ptr().cast::<MaybeUninit<T>>();
+        self.next.next_back().map(|index| {
+            let Some(offset) = self.underlying.front_capacity.checked_add(index) else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
+            };
 
-                // SAFETY: stays aligned within the allocated object.
-                let ptr = unsafe { ptr.add(index) };
+            // SAFETY: aligned within the allocated object.
+            let mut ptr = unsafe { self.underlying.buffer.add(offset) };
 
-                // SAFETY: index in bounds => aligned within the allocated object.
-                let element = unsafe { &mut *ptr };
+            // SAFETY:
+            // * The `MaybeUninit<T>` is initialized.
+            // * We have a unique mutable reference to self and the element.
+            let element = unsafe { ptr.as_mut() };
 
-                // SAFETY:
-                // * owned memory => pointer is valid for reads.
-                // * Underlying `T` is initialized.
-                // * This takes ownership (moved out of the buffer).
-                Some(unsafe { element.assume_init_read() })
-            },
-        )
+            // SAFETY:
+            // * The underlying `T` is initialized.
+            // * Element is prevented from being read after this move.
+            unsafe { element.assume_init_read() }
+        })
     }
 }
 
