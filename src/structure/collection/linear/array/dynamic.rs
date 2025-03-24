@@ -2941,15 +2941,11 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             // SAFETY: the element is initialized.
             let current = unsafe { self.next_back.as_ref() };
 
-            // Do _NOT_ moved the pointer _before_ the allocated object.
+            // Although it is safe to move a pointer one bytes past the
+            // allocated object, it is _NOT_ safe to move it one bytes before.
             if self.remaining != 0 {
-                self.next_back = {
-                    // SAFETY: aligned within the allocated object.
-                    let ptr = unsafe { self.next_back.as_ptr().sub(1) };
-
-                    // SAFETY: `retained` is not null => pointer is not null.
-                    unsafe { NonNull::new_unchecked(ptr) }
-                };
+                // SAFETY: aligned within the allocated object.
+                self.next_back = unsafe { self.next_back.sub(1) };
             }
 
             if (self.predicate)(current) {
