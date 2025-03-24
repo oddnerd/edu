@@ -2981,7 +2981,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             if let Some(incremented) = self.trailing.checked_add(1) {
                 self.trailing = incremented;
             } else {
-                unreachable!("allocated more than `isize::MAX`");
+                unreachable!("cannot allocate more than `isize::MAX`");
             };
         }
 
