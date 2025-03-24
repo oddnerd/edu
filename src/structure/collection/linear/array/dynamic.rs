@@ -3061,16 +3061,16 @@ impl<T, F: FnMut(&T) -> bool> core::fmt::Debug for Withdraw<'_, T, F> {
     /// | :-: | :-: | :-: |
     /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let origin = self.underlying.buffer.as_ptr().cast::<T>();
+        let origin = self.underlying.buffer.cast::<T>();
 
         // SAFETY: both pointers are aligned within the allocated object.
-        let head = unsafe { self.next_front.as_ptr().offset_from(origin) };
+        let head = unsafe { self.next_front.offset_from(origin) };
 
         // SAFETY: both pointers are aligned within the allocated object.
-        let retained = unsafe { self.retained.as_ptr().offset_from(origin) };
+        let retained = unsafe { self.retained.offset_from(origin) };
 
         // SAFETY: both pointers are aligned within the allocated object.
-        let tail = unsafe { self.next_back.as_ptr().offset_from(origin) };
+        let tail = unsafe { self.next_back.offset_from(origin) };
 
         f.debug_struct("Withdraw")
             .field("head index", &head)
