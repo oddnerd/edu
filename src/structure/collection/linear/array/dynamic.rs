@@ -2201,24 +2201,23 @@ impl<T> List for Dynamic<T> {
         predicate: impl FnMut(&T) -> bool,
     ) -> impl DoubleEndedIterator<Item = Self::Element> {
         let head = if self.initialized == 0 {
-            // is empty => this pointer will _NOT_ be modified or read.
+            // The pointer will not be read.
             NonNull::dangling()
         } else {
-            // SAFETY: at least one element exist => pointer cannot be null.
-            unsafe { NonNull::new_unchecked(self.as_mut_ptr()) }
-        };
+            // SAFETY: aligned within the allocated object.
+            unsafe { self.buffer.add(self.front_capacity) }
+        }
+        // `MaybeUninit<T>` has the same layout as `T`.
+        .cast::<T>();
 
         let tail = {
-            let ptr = {
-                let offset = self.initialized.saturating_sub(1);
+            let offset = self.initialized.saturating_sub(1);
 
-                // SAFETY: stays aligned within the allocated object.
-                unsafe { head.as_ptr().add(offset) }
-            };
-
-            // SAFETY: `head` cannot be null => pointer cannot be null.
-            unsafe { NonNull::new_unchecked(ptr) }
-        };
+            // SAFETY: aligned within the allocated object.
+            unsafe { head.add(offset) }
+        }
+        // `MaybeUninit<T>` has the same layout as `T`.
+        .cast::<T>();
 
         let remaining = self.initialized;
 
