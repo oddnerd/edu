@@ -45,7 +45,7 @@ impl<'a, T: 'a> IterMut<'a, T> {
 impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
-    /// Obtain the next element from the front.
+    /// Obtain the element with the lowest index yet to be yielded, if any.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -97,7 +97,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
 }
 
 impl<'a, T: 'a> DoubleEndedIterator for IterMut<'a, T> {
-    /// Obtain the next element from the back.
+    /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
     /// #### Time Complexity

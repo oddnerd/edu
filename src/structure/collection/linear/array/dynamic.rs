@@ -1481,7 +1481,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
 impl<T> Iterator for Dynamic<T> {
     type Item = T;
 
-    /// Move out the first initialized element, if any.
+    /// Remove the leftmost element, if any.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -1564,7 +1564,7 @@ impl<T> Iterator for Dynamic<T> {
 }
 
 impl<T> DoubleEndedIterator for Dynamic<T> {
-    /// Move out the last initialized element, if any.
+    /// Remove the rightmost element, if any.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -2467,7 +2467,7 @@ struct Drain<'a, T> {
 impl<T> Iterator for Drain<'_, T> {
     type Item = T;
 
-    /// Obtain the next element, if there are any left.
+    /// Obtain the element with the lowest index yet to be yielded, if any.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -2531,7 +2531,7 @@ impl<T> Iterator for Drain<'_, T> {
 }
 
 impl<T> DoubleEndedIterator for Drain<'_, T> {
-    /// Obtain the final element, if there are any left.
+    /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
     /// This methods takes O(1) time and consumes O(1) memory.
@@ -2723,7 +2723,7 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     type Item = T;
 
-    /// Obtain the next element, if there are any left.
+    /// Obtain the element with the lowest index yet to be yielded, if any.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(1) memory.
@@ -2881,7 +2881,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 }
 
 impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
-    /// Obtain the next element, if there are any left.
+    /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(1) memory.

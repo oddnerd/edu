@@ -447,7 +447,7 @@ pub struct IntoIter<T, const N: usize> {
 impl<T, const N: usize> Iterator for IntoIter<T, N> {
     type Item = T;
 
-    /// Obtain the next element, if there are any left.
+    /// Obtain the element with the lowest index yet to be yielded, if any.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -513,7 +513,7 @@ impl<T, const N: usize> Iterator for IntoIter<T, N> {
 }
 
 impl<T, const N: usize> DoubleEndedIterator for IntoIter<T, N> {
-    /// Obtain the final element, if there are any left.
+    /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
     /// #### Time Complexity
