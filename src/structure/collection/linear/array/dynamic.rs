@@ -2883,10 +2883,18 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
         None
     }
 
-    /// Query how many elements can be yielded.
+    /// Query how many elements could possibly be yielded.
     ///
     /// # Performance
-    /// This method takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
