@@ -2159,7 +2159,7 @@ impl<T> List for Dynamic<T> {
         Drain {
             underlying: self,
             range: normalized.clone(),
-            next: normalized.clone(),
+            unyielded: normalized.clone(),
         }
     }
 
@@ -2461,7 +2461,7 @@ struct Drain<'a, T> {
     range: core::ops::Range<usize>,
 
     /// The index range of elements being drained that have yet to be yielded.
-    next: core::ops::Range<usize>,
+    unyielded: core::ops::Range<usize>,
 }
 
 impl<T> Iterator for Drain<'_, T> {
@@ -2498,7 +2498,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next(&mut self) -> Option<Self::Item> {
-        self.next.next().map(
+        self.unyielded.next().map(
             |index| {
                 let Some(offset) = self.underlying.front_capacity.checked_add(index) else {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
@@ -2544,7 +2544,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// assert_eq!(actual.size_hint(), (6, Some(6)));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.next.len(), Some(self.next.len()))
+        (self.unyielded.len(), Some(self.unyielded.len()))
     }
 }
 
@@ -2579,7 +2579,7 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// assert_eq!(actual.next_back(), None);
     /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.next.next_back().map(|index| {
+        self.unyielded.next_back().map(|index| {
             let Some(offset) = self.underlying.front_capacity.checked_add(index) else {
                 unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
@@ -2729,10 +2729,10 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
             let first = self.underlying.as_ptr();
 
             // SAFETY: aligned within the allocated object.
-            let start = unsafe { first.add(self.next.start) };
+            let start = unsafe { first.add(self.unyielded.start) };
 
             // SAFETY: points to that many initialized instances of `T`.
-            unsafe { core::slice::from_raw_parts(start, self.next.len()) }
+            unsafe { core::slice::from_raw_parts(start, self.unyielded.len()) }
         };
 
         list.entries(slice).finish()
