@@ -2995,7 +2995,15 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
     /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     ///
     /// # Examples
     /// ```
@@ -3045,7 +3053,15 @@ impl<T, F: FnMut(&T) -> bool> core::fmt::Debug for Withdraw<'_, T, F> {
     /// allocated object.
     ///
     /// # Performance
-    /// This methods takes O(1) time and consumes O(1) memory.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(1) | 𝛀(1) | 𝚯(1) |
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let origin = self.underlying.buffer.as_ptr().cast::<T>();
 
