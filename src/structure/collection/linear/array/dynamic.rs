@@ -1948,16 +1948,19 @@ impl<T> List for Dynamic<T> {
             return Err(element);
         }
 
-        let mut ptr = self.buffer.as_ptr();
+        let mut ptr = self.buffer;
 
-        // consume front capacity.
+        // Consume front capacity.
         if index == 0 && self.capacity_front() > 0 {
+            // TODO: this can be simplified by reordering.
+
+            // The rightmost uninitialized element before those initialized.
             ptr = {
                 let Some(offset) = self.capacity_front().checked_sub(1) else {
-                    unreachable!("zero front capacity")
+                    unreachable!("more than zero front capacity")
                 };
 
-                // SAFETY: the last uninitialized element in the front.
+                // SAFETY: aligned within the allocated object.
                 unsafe { ptr.add(offset) }
             };
 
@@ -1966,7 +1969,7 @@ impl<T> List for Dynamic<T> {
                 if let Some(capacity) = self.front_capacity.checked_add(self.back_capacity) {
                     self.front_capacity = capacity;
                 } else {
-                    unreachable!("allocated more than `isize::MAX` bytes");
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
                 };
 
                 self.back_capacity = 0;
@@ -1975,47 +1978,50 @@ impl<T> List for Dynamic<T> {
             if let Some(decremented) = self.front_capacity.checked_sub(1) {
                 self.front_capacity = decremented;
             } else {
-                unreachable!("no front capacity to insert into");
+                unreachable!("more than zero front capacity.");
             };
         }
-        // consume back capacity.
+        // Consume back capacity.
         else if self.reserve(1).is_ok() {
             ptr = {
                 let Some(offset) = self.front_capacity.checked_add(index) else {
-                    unreachable!("index out of bounds");
+                    unreachable!("index is within bounds");
                 };
 
+                // TODO: `ptr.add(offset)` breaks tests, why?
+
                 // SAFETY: the uninitialized element to insert into.
-                unsafe { self.buffer.as_ptr().add(offset) }
+                unsafe { self.buffer.add(offset) }
             };
 
             // SAFETY: there is back capacity to shift into.
-            unsafe {
-                self.shift_range(index.., 1);
-            }
+            unsafe { self.shift_range(index.., 1); }
 
-            if let Some(decrement) = self.back_capacity.checked_sub(1) {
-                self.back_capacity = decrement;
+            if let Some(decremented) = self.back_capacity.checked_sub(1) {
+                self.back_capacity = decremented;
             } else {
-                unreachable!("no back capacity to insert into");
+                unreachable!("more than zero back capacity");
             };
-        } else {
+        }
+        // The above allocation failed.
+        else {
             debug_assert_eq!(self.capacity(), 0, "no capacity to insert into");
 
             return Err(element);
         }
 
-        if let Some(increment) = self.initialized.checked_add(1) {
-            self.initialized = increment;
+        if let Some(incremented) = self.initialized.checked_add(1) {
+            self.initialized = incremented;
         } else {
-            unreachable!("allocated more that `isize::MAX` bytes");
+            unreachable!("cannot allocate more that `isize::MAX` bytes");
         };
 
-        // SAFETY: the `MaybeUninit<T>` is initialized even if the `T` isn't.
-        let uninit_element = unsafe { &mut *ptr };
+        // SAFETY:
+        // * The `MaybeUninit<T>` is initialized.
+        // * We have a unique mutable reference to self and the element.
+        let uninitialized = unsafe { ptr.as_mut() };
 
-        // the underlying `T` is unutilized.
-        Ok(uninit_element.write(element))
+        Ok(uninitialized.write(element))
     }
 
     /// Remove the element at `index`.
