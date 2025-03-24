@@ -1198,7 +1198,15 @@ impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Performance
-    /// This methods takes O(N) time and consumes O(N) memory for the result.
+    /// #### Time Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    ///
+    /// #### Memory Complexity
+    /// | Worst | Best | Average |
+    /// | :-: | :-: | :-: |
+    /// | O(N) | 𝛀(N) | 𝚯(N) |
     ///
     /// # Examples
     /// ```
