@@ -1527,7 +1527,7 @@ impl<T> Iterator for Dynamic<T> {
 
             // SAFETY:
             // * The `MaybeUninit<T>` is initialized.
-            // * We have a unique mutable reference to self and the buffer.
+            // * We have a unique mutable reference to self and the element.
             let element = unsafe { first.as_mut() };
 
             // SAFETY:
@@ -1596,25 +1596,30 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
             if let Some(decremented) = self.initialized.checked_sub(1) {
                 self.initialized = decremented;
             } else {
-                unreachable!("no initialized element to remove");
+                unreachable!("at least one initialized element");
             }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
                 self.back_capacity = incremented;
             } else {
-                unreachable!("allocated more than `isize::MAX` bytes");
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
 
-            let ptr = self.as_mut_ptr();
+            // SAFETY: stays aligned within the allocated object.
+            let first = unsafe { self.buffer.add(self.front_capacity) };
 
-            // SAFETY: final initialized element in the allocated object.
-            let element = unsafe { ptr.add(self.initialized) };
+            // SAFETY: stays aligned within the allocated object.
+            let mut last = unsafe { first.add(self.initialized) };
 
             // SAFETY:
-            // * owned memory => pointer is valid for reads.
-            // * Underlying `T` is initialized.
-            // * This takes ownership (moved out of the buffer).
-            unsafe { element.read() }
+            // * The `MaybeUninit<T>` is initialized.
+            // * We have a unique mutable reference to self and the element.
+            let element = unsafe { last.as_mut() };
+
+            // SAFETY:
+            // * The underlying `T` is initialized.
+            // * Element is prevented from being read after this move.
+            unsafe { element.assume_init_read() }
         })
     }
 }
