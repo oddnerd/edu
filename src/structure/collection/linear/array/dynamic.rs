@@ -1379,7 +1379,7 @@ impl<T: Eq> Eq for Dynamic<T> {}
 impl<T> core::ops::Index<usize> for Dynamic<T> {
     type Output = T;
 
-    /// Query the initialized element `index` positions from the start.
+    /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
     /// This method has the precondition that the `index` is within bounds.
