@@ -3544,6 +3544,7 @@ mod test {
 
                 debug_assert_ne!(actual.initialized, 0);
                 debug_assert_eq!(actual.front_capacity, 256);
+                debug_assert_eq!(actual.back_capacity, 0);
 
                 let allocation = actual.buffer;
 
