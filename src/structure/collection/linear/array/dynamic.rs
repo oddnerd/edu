@@ -3729,7 +3729,7 @@ mod test {
 
                 let allocation = actual.buffer;
 
-                _ = actual.reserve_front(256).expect("uses front capacity");
+                _ = actual.reserve_front(256).expect("uses back capacity");
 
                 assert_eq!(actual.capacity_front(), 256);
                 assert_eq!(actual.buffer, allocation);
