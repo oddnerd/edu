@@ -3562,6 +3562,7 @@ mod test {
 
                 debug_assert_ne!(actual.initialized, 0);
                 debug_assert_eq!(actual.front_capacity, 128);
+                debug_assert_eq!(actual.back_capacity, 0);
 
                 _ = actual.reserve(256).expect("successful allocation");
 
