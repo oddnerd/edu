@@ -3742,6 +3742,7 @@ mod test {
                 _ = actual.reserve_back(256).expect("successful allocation");
 
                 debug_assert_ne!(actual.initialized, 0);
+                debug_assert_eq!(actual.front_capacity, 0);
                 debug_assert_eq!(actual.back_capacity, 256);
 
                 let allocation = actual.buffer;
