@@ -3507,11 +3507,12 @@ mod test {
                 _ = actual.reserve_back(256);
 
                 debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.capacity_back(), 256);
+                debug_assert_eq!(actual.front_capacity, 0);
+                debug_assert_eq!(actual.back_capacity, 256);
 
                 _ = actual.reserve(0).expect("already enough capacity");
 
-                assert_eq!(actual.capacity(), 256);
+                assert_eq!(actual.back_capacity, 256);
             }
 
             #[test]
