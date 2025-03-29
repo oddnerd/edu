@@ -3290,8 +3290,9 @@ mod test {
             fn is_front_capacity_when_not_empty_and_back_capacity() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                _ = actual.reserve_front(256).expect("successful allocation");
-                _ = actual.reserve_back(256).expect("successful allocation");
+                _ = actual.reserve_back(512).expect("successful allocation");
+
+                _ = actual.shift(256).expect("back capacity to shift into");
 
                 assert_eq!(actual.capacity_front(), 256);
             }
