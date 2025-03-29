@@ -320,25 +320,18 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         // Reclaim any front capacity.
-        if self.initialized > 0 {
-            let Ok(offset) = isize::try_from(self.front_capacity) else {
-                unreachable!("cannot allocate than `isize::MAX` bytes");
+        if self.front_capacity > 0 {
+            let Ok(front_capacity) = isize::try_from(self.front_capacity) else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
 
-            let Some(offset) = offset.checked_neg() else {
-                unreachable!("is a positive number => cannot be `isize::MIN`");
+            let Some(front_capacity) = front_capacity.checked_neg() else {
+                unreachable!("is positive number => cannot be `isize::MIN`");
             };
 
-            let Ok(_) = self.shift(offset) else {
-                unreachable!("there is enough front capacity to shift into");
+            let Ok(_) = self.shift(front_capacity) else {
+                unreachable!("exactly that much front capacity");
             };
-
-            if let Some(total) = usize::checked_add(self.front_capacity, self.back_capacity) {
-                self.front_capacity = 0;
-                self.back_capacity = total;
-            } else {
-                unreachable!("cannot allocate than `isize::MAX` bytes");
-            }
         }
 
         // Prevent amortized growth when unnecessary.
@@ -404,19 +397,17 @@ impl<T> Dynamic<T> {
             return Ok(self);
         };
 
-        _ = self.reserve_back(capacity)?;
-
         let Ok(capacity) = isize::try_from(capacity) else {
             debug_assert!(capacity > isize::MAX as usize, "cannot allocate more than `isize::MAX` bytes");
 
             return Err(FailedAllocation);
         };
 
-        if self.initialized > 0 {
-            let Ok(_) = self.shift(capacity) else {
-                unreachable!("there is enough back capacity to shift into");
-            };
-        }
+        _ = self.resize(capacity)?;
+
+        let Ok(_) = self.shift(capacity) else {
+            unreachable!("enough back capacity to shift into");
+        };
 
         Ok(self)
     }
@@ -463,28 +454,6 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
-        // Reclaim any front capacity.
-        if self.initialized > 0 {
-            let Ok(offset) = isize::try_from(self.front_capacity) else {
-                unreachable!("cannot allocate than `isize::MAX` bytes");
-            };
-
-            let Some(offset) = offset.checked_neg() else {
-                unreachable!("is a positive number => cannot be `isize::MIN`");
-            };
-
-            let Ok(_) = self.shift(offset) else {
-                unreachable!("there is enough front capacity to shift into");
-            };
-
-            if let Some(total) = usize::checked_add(self.front_capacity, self.back_capacity) {
-                self.front_capacity = 0;
-                self.back_capacity = total;
-            } else {
-                unreachable!("cannot allocate than `isize::MAX` bytes");
-            }
-        }
-
         let Some(capacity) = capacity.checked_sub(self.capacity_back()) else {
             debug_assert!(self.capacity_back() > capacity, "enough capacity");
 
