@@ -681,7 +681,7 @@ impl<T> Dynamic<T> {
 
     /// Shift the initialized elements `offset` positions within the buffer.
     ///
-    /// This method  maintains the order of initialized elements, but shifts
+    /// This method maintains the order of initialized elements, but shifts
     /// them thereby converting some portion of the capacity from front to
     /// back, or vice versa.
     ///
