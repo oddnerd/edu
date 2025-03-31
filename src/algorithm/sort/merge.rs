@@ -173,7 +173,12 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
         let auxiliary = auxiliary.chunks_mut(length);
 
         for (input, output) in elements.zip(auxiliary) {
-            let (left, right) = input.split_at_mut(length / 2);
+            let Some((left, right)) = input.split_at_mut_checked(length / 2) else {
+                debug_assert!(input.len() < length, "chunk is final elements not evenly divided");
+                debug_assert!(input.is_sorted(), "this implies it is already sorted and can be merged in next iteration");
+
+                continue;
+            };
 
             merge::iterative(left, right, output);
 
