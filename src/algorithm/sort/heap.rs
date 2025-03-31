@@ -396,7 +396,7 @@ mod construct_heap {
     /// | O(1) | 𝛀(1) | 𝚯(1) |
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
         // All leaves will be ordered when their parent is sifted down.
-        let last_parent = elements.len() / 2;
+        let last_parent = elements.len().div_ceil(2);
 
         for parent in (0..=last_parent).rev() {
             let Some(heap) = elements.get_mut(parent..) else {
