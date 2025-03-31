@@ -43,7 +43,7 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
         };
 
         // Sift down the leaf into the max-heap (excluding sorted elements).
-        sift_down::bottom_up(heap);
+        sift_down::bottom_up(0, heap);
     }
 }
 
@@ -110,11 +110,12 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
             elements.swap(unsorted, 0);
         }
 
-        let Some(heap) = elements.get_mut(root..unsorted) else {
+        let Some(heap) = elements.get_mut(..unsorted) else {
             unreachable!("loop ensures both are within bounds");
         };
 
-        sift_down::top_down(heap);
+        // Sift down the leaf into the max-heap (excluding sorted elements).
+        sift_down::top_down(root, heap);
     }
 }
 
@@ -163,7 +164,7 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
         };
 
         // Sift down the leaf into the max-heap (excluding sorted elements).
-        sift_down::top_down(heap);
+        sift_down::top_down(0, heap);
     }
 }
 
@@ -275,9 +276,7 @@ mod sift_down {
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
     /// | O(1) | 𝛀(1) | 𝚯(1) |
-    pub(super) fn top_down<T: Ord>(max_heap: &mut [T]) {
-        let mut root = 0;
-
+    pub(super) fn top_down<T: Ord>(mut root: usize, max_heap: &mut [T]) {
         loop {
             let (Some(left_child), Some(right_child)) = (left_child(root), right_child(root))
             else {
@@ -327,17 +326,15 @@ mod sift_down {
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
     /// | O(1) | 𝛀(1) | 𝚯(1) |
-    pub(super) fn bottom_up<T: Ord>(max_heap: &mut [T]) {
-        let mut current = 0;
-
+    pub(super) fn bottom_up<T: Ord>(mut root: usize, max_heap: &mut [T]) {
         // Traverse down to leaf where the smallest possible value goes.
         loop {
-            let (Some(left_child), Some(right_child)) = (left_child(current), right_child(current))
+            let (Some(left_child), Some(right_child)) = (left_child(root), right_child(root))
             else {
                 unreachable!("loop ensures current is internal node with children");
             };
 
-            current = match (max_heap.get(left_child), max_heap.get(right_child)) {
+            root = match (max_heap.get(left_child), max_heap.get(right_child)) {
                 (Some(left), Some(right)) => {
                     if right > left {
                         right_child
@@ -353,26 +350,26 @@ mod sift_down {
 
         // Traverse upwards from that leaf to find where root should go.
         loop {
-            if max_heap.first() > max_heap.get(current) {
-                let Some(parent) = parent(current) else {
+            if max_heap.first() > max_heap.get(root) {
+                let Some(parent) = parent(root) else {
                     unreachable!("`root != 0` => not overall root => has children");
                 };
 
-                current = parent;
+                root = parent;
             } else {
                 break;
             }
         }
 
         // Swap root into that position and propagate upwards.
-        while current > 0 {
-            max_heap.swap(0, current);
+        while root > 0 {
+            max_heap.swap(0, root);
 
-            let Some(parent) = parent(current) else {
+            let Some(parent) = parent(root) else {
                 unreachable!("`root != 0` => not overall root => has children");
             };
 
-            current = parent;
+            root = parent;
         }
     }
 }
@@ -399,12 +396,8 @@ mod construct_heap {
         let last_parent = elements.len().div_ceil(2);
 
         for parent in (0..=last_parent).rev() {
-            let Some(heap) = elements.get_mut(parent..) else {
-                unreachable!("loop condition ensures in bounds");
-            };
-
             // The children of `node` are already heap ordered, so sift down.
-            sift_down::top_down(heap);
+            sift_down::top_down(parent, elements);
         }
     }
 
