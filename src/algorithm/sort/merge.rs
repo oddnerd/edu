@@ -351,7 +351,7 @@ mod test {
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "auxiliary must be clone of elements"]
-        fn panics_if_auxiliary_is_not_clone_of_elements() {
+        fn when_auxiliary_is_not_a_clone_of_elements_then_panics() {
             let mut elements = [5, 4, 3, 2, 1];
             let mut auxiliary = [0, 0, 0, 0, 0];
 
@@ -359,8 +359,11 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_empty() {
+        fn when_empty_then_does_nothing() {
             let mut elements: [usize; 0] = [];
+
+            debug_assert!(elements.is_empty());
+
             let mut auxiliary = elements;
 
             top_down(&mut elements, &mut auxiliary);
@@ -369,54 +372,156 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_single_element() {
-            let mut elements = [0];
-            let mut auxiliary = elements;
+        fn when_single_element_then_does_not_modify_it() {
+            for element in 0..256 {
+                let mut elements = [element];
 
-            top_down(&mut elements, &mut auxiliary);
+                debug_assert_eq!(elements.len(), 1);
 
-            assert_eq!(elements, [0]);
+                let mut auxiliary = elements;
+
+                top_down(&mut elements, &mut auxiliary);
+
+                assert_eq!(elements, [element]);
+            }
         }
 
         #[test]
-        fn does_not_modify_input_when_already_sorted() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            let mut auxiliary = elements;
-            debug_assert!(elements.is_sorted());
+        fn when_all_elements_are_equivalent_then_does_not_modify_them() {
+            for value in 0..256 {
+                for length in 2..256 {
+                    let mut elements: Vec<_> = core::iter::repeat_n(value, length).collect();
 
-            top_down(&mut elements, &mut auxiliary);
+                    debug_assert!(elements.iter().all(|element| element == &value));
 
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+                    let mut auxiliary = elements.clone();
+
+                    top_down(&mut elements, &mut auxiliary);
+
+                    assert!(elements.into_iter().all(|element| element == value));
+                }
+            }
         }
 
         #[test]
-        fn will_swap_elements_if_in_decreasing_order() {
-            let mut elements = [1, 0];
-            let mut auxiliary = elements;
+        fn when_already_sorted_then_maintains_order() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).collect();
 
-            top_down(&mut elements, &mut auxiliary);
+                debug_assert!(elements.is_sorted());
 
-            assert_eq!(elements, [0, 1]);
+                let mut auxiliary = elements.clone();
+
+                top_down(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_odd_length() {
-            let mut elements = [2, 1, 0];
-            let mut auxiliary = elements;
+        fn when_in_reverse_sorted_order_then_is_reversed() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).rev().collect();
 
-            top_down(&mut elements, &mut auxiliary);
+                debug_assert!(elements.iter().rev().is_sorted());
 
-            assert_eq!(elements, [0, 1, 2]);
+                let mut auxiliary = elements.clone();
+
+                top_down(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_even_length() {
-            let mut elements = [2, 0, 3, 1];
-            let mut auxiliary = elements;
+        fn when_elements_are_repeated_then_they_are_grouped_together() {
+            for repeat in 2..128 {
+                let mut elements: Vec<_> = (0..256)
+                    .map(|element| {
+                        if element % repeat == 0 {
+                            repeat
+                        } else {
+                            element
+                        }
+                    })
+                    .collect();
 
-            top_down(&mut elements, &mut auxiliary);
+                let count = elements.len().div_ceil(repeat);
 
-            assert_eq!(elements, [0, 1, 2, 3]);
+                debug_assert_eq!(
+                    elements
+                        .iter()
+                        .filter(|element| *element == &repeat)
+                        .count(),
+                    count
+                );
+
+                let mut auxiliary = elements.clone();
+
+                top_down(&mut elements, &mut auxiliary);
+
+                let index = elements
+                    .iter()
+                    .position(|element| element == &repeat)
+                    .expect("first occurrence of repeated element");
+
+                assert!(
+                    elements[index..index + count]
+                        .iter()
+                        .all(|element| element == &repeat)
+                );
+            }
+        }
+
+        #[test]
+        fn when_odd_number_of_elements_then_sorts_them() {
+            for length in (1..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 != 0);
+
+                let mut auxiliary = elements.clone();
+
+                top_down(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_even_number_of_elements_then_sorts_them() {
+            for length in (0..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 == 0);
+
+                let mut auxiliary = elements.clone();
+
+                top_down(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_chunks_are_sorted_then_sorts_them_into_rest() {
+            for length in 2..255 {
+                let mut elements: Vec<_> = (0..256).rev().collect();
+
+                for chunk in elements.chunks_mut(length) {
+                    chunk.reverse();
+
+                    debug_assert!(chunk.is_sorted());
+                }
+
+                debug_assert!(!elements.is_sorted());
+
+                let mut auxiliary = elements.clone();
+
+                top_down(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
     }
 
@@ -426,7 +531,7 @@ mod test {
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "auxiliary must be clone of elements"]
-        fn panics_if_auxiliary_is_not_clone_of_elements() {
+        fn when_auxiliary_is_not_a_clone_of_elements_then_panics() {
             let mut elements = [5, 4, 3, 2, 1];
             let mut auxiliary = [0, 0, 0, 0, 0];
 
@@ -434,8 +539,11 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_empty() {
+        fn when_empty_then_does_nothing() {
             let mut elements: [usize; 0] = [];
+
+            debug_assert!(elements.is_empty());
+
             let mut auxiliary = elements;
 
             natural(&mut elements, &mut auxiliary);
@@ -444,54 +552,156 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_single_element() {
-            let mut elements = [0];
-            let mut auxiliary = elements;
+        fn when_single_element_then_does_not_modify_it() {
+            for element in 0..256 {
+                let mut elements = [element];
 
-            natural(&mut elements, &mut auxiliary);
+                debug_assert_eq!(elements.len(), 1);
 
-            assert_eq!(elements, [0]);
+                let mut auxiliary = elements;
+
+                natural(&mut elements, &mut auxiliary);
+
+                assert_eq!(elements, [element]);
+            }
         }
 
         #[test]
-        fn does_not_modify_input_when_already_sorted() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            let mut auxiliary = elements;
-            debug_assert!(elements.is_sorted());
+        fn when_all_elements_are_equivalent_then_does_not_modify_them() {
+            for value in 0..256 {
+                for length in 2..256 {
+                    let mut elements: Vec<_> = core::iter::repeat_n(value, length).collect();
 
-            natural(&mut elements, &mut auxiliary);
+                    debug_assert!(elements.iter().all(|element| element == &value));
 
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+                    let mut auxiliary = elements.clone();
+
+                    natural(&mut elements, &mut auxiliary);
+
+                    assert!(elements.into_iter().all(|element| element == value));
+                }
+            }
         }
 
         #[test]
-        fn will_swap_elements_if_in_decreasing_order() {
-            let mut elements = [1, 0];
-            let mut auxiliary = elements;
+        fn when_already_sorted_then_maintains_order() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).collect();
 
-            natural(&mut elements, &mut auxiliary);
+                debug_assert!(elements.is_sorted());
 
-            assert_eq!(elements, [0, 1]);
+                let mut auxiliary = elements.clone();
+
+                natural(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_odd_length() {
-            let mut elements = [2, 1, 0];
-            let mut auxiliary = elements;
+        fn when_in_reverse_sorted_order_then_is_reversed() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).rev().collect();
 
-            natural(&mut elements, &mut auxiliary);
+                debug_assert!(elements.iter().rev().is_sorted());
 
-            assert_eq!(elements, [0, 1, 2]);
+                let mut auxiliary = elements.clone();
+
+                natural(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_even_length() {
-            let mut elements = [2, 0, 3, 1];
-            let mut auxiliary = elements;
+        fn when_elements_are_repeated_then_they_are_grouped_together() {
+            for repeat in 2..128 {
+                let mut elements: Vec<_> = (0..256)
+                    .map(|element| {
+                        if element % repeat == 0 {
+                            repeat
+                        } else {
+                            element
+                        }
+                    })
+                    .collect();
 
-            natural(&mut elements, &mut auxiliary);
+                let count = elements.len().div_ceil(repeat);
 
-            assert_eq!(elements, [0, 1, 2, 3]);
+                debug_assert_eq!(
+                    elements
+                        .iter()
+                        .filter(|element| *element == &repeat)
+                        .count(),
+                    count
+                );
+
+                let mut auxiliary = elements.clone();
+
+                natural(&mut elements, &mut auxiliary);
+
+                let index = elements
+                    .iter()
+                    .position(|element| element == &repeat)
+                    .expect("first occurrence of repeated element");
+
+                assert!(
+                    elements[index..index + count]
+                        .iter()
+                        .all(|element| element == &repeat)
+                );
+            }
+        }
+
+        #[test]
+        fn when_odd_number_of_elements_then_sorts_them() {
+            for length in (1..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 != 0);
+
+                let mut auxiliary = elements.clone();
+
+                natural(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_even_number_of_elements_then_sorts_them() {
+            for length in (0..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 == 0);
+
+                let mut auxiliary = elements.clone();
+
+                natural(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_chunks_are_sorted_then_sorts_them_into_rest() {
+            for length in 2..255 {
+                let mut elements: Vec<_> = (0..256).rev().collect();
+
+                for chunk in elements.chunks_mut(length) {
+                    chunk.reverse();
+
+                    debug_assert!(chunk.is_sorted());
+                }
+
+                debug_assert!(!elements.is_sorted());
+
+                let mut auxiliary = elements.clone();
+
+                natural(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
     }
 
@@ -501,7 +711,7 @@ mod test {
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "auxiliary must be clone of elements"]
-        fn panics_if_auxiliary_is_not_clone_of_elements() {
+        fn when_auxiliary_is_not_a_clone_of_elements_then_panics() {
             let mut elements = [5, 4, 3, 2, 1];
             let mut auxiliary = [0, 0, 0, 0, 0];
 
@@ -509,8 +719,11 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_empty() {
+        fn when_empty_then_does_nothing() {
             let mut elements: [usize; 0] = [];
+
+            debug_assert!(elements.is_empty());
+
             let mut auxiliary = elements;
 
             bottom_up(&mut elements, &mut auxiliary);
@@ -519,54 +732,156 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_single_element() {
-            let mut elements = [0];
-            let mut auxiliary = elements;
+        fn when_single_element_then_does_not_modify_it() {
+            for element in 0..256 {
+                let mut elements = [element];
 
-            bottom_up(&mut elements, &mut auxiliary);
+                debug_assert_eq!(elements.len(), 1);
 
-            assert_eq!(elements, [0]);
+                let mut auxiliary = elements;
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                assert_eq!(elements, [element]);
+            }
         }
 
         #[test]
-        fn does_not_modify_input_when_already_sorted() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            let mut auxiliary = elements;
-            debug_assert!(elements.is_sorted());
+        fn when_all_elements_are_equivalent_then_does_not_modify_them() {
+            for value in 0..256 {
+                for length in 2..256 {
+                    let mut elements: Vec<_> = core::iter::repeat_n(value, length).collect();
 
-            bottom_up(&mut elements, &mut auxiliary);
+                    debug_assert!(elements.iter().all(|element| element == &value));
 
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+                    let mut auxiliary = elements.clone();
+
+                    bottom_up(&mut elements, &mut auxiliary);
+
+                    assert!(elements.into_iter().all(|element| element == value));
+                }
+            }
         }
 
         #[test]
-        fn will_swap_elements_if_in_decreasing_order() {
-            let mut elements = [1, 0];
-            let mut auxiliary = elements;
+        fn when_already_sorted_then_maintains_order() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).collect();
 
-            bottom_up(&mut elements, &mut auxiliary);
+                debug_assert!(elements.is_sorted());
 
-            assert_eq!(elements, [0, 1]);
+                let mut auxiliary = elements.clone();
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_odd_length() {
-            let mut elements = [2, 1, 0];
-            let mut auxiliary = elements;
+        fn when_in_reverse_sorted_order_then_is_reversed() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).rev().collect();
 
-            bottom_up(&mut elements, &mut auxiliary);
+                debug_assert!(elements.iter().rev().is_sorted());
 
-            assert_eq!(elements, [0, 1, 2]);
+                let mut auxiliary = elements.clone();
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_even_length() {
-            let mut elements = [2, 0, 3, 1];
-            let mut auxiliary = elements;
+        fn when_elements_are_repeated_then_they_are_grouped_together() {
+            for repeat in 2..128 {
+                let mut elements: Vec<_> = (0..256)
+                    .map(|element| {
+                        if element % repeat == 0 {
+                            repeat
+                        } else {
+                            element
+                        }
+                    })
+                    .collect();
 
-            bottom_up(&mut elements, &mut auxiliary);
+                let count = elements.len().div_ceil(repeat);
 
-            assert_eq!(elements, [0, 1, 2, 3]);
+                debug_assert_eq!(
+                    elements
+                        .iter()
+                        .filter(|element| *element == &repeat)
+                        .count(),
+                    count
+                );
+
+                let mut auxiliary = elements.clone();
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                let index = elements
+                    .iter()
+                    .position(|element| element == &repeat)
+                    .expect("first occurrence of repeated element");
+
+                assert!(
+                    elements[index..index + count]
+                        .iter()
+                        .all(|element| element == &repeat)
+                );
+            }
+        }
+
+        #[test]
+        fn when_odd_number_of_elements_then_sorts_them() {
+            for length in (1..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 != 0);
+
+                let mut auxiliary = elements.clone();
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_even_number_of_elements_then_sorts_them() {
+            for length in (0..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 == 0);
+
+                let mut auxiliary = elements.clone();
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_chunks_are_sorted_then_sorts_them_into_rest() {
+            for length in 2..255 {
+                let mut elements: Vec<_> = (0..256).rev().collect();
+
+                for chunk in elements.chunks_mut(length) {
+                    chunk.reverse();
+
+                    debug_assert!(chunk.is_sorted());
+                }
+
+                debug_assert!(!elements.is_sorted());
+
+                let mut auxiliary = elements.clone();
+
+                bottom_up(&mut elements, &mut auxiliary);
+
+                assert!(elements.is_sorted());
+            }
         }
     }
 
@@ -574,8 +889,10 @@ mod test {
         use super::*;
 
         #[test]
-        fn handles_when_input_is_empty() {
+        fn when_empty_then_does_nothing() {
             let mut elements: [usize; 0] = [];
+
+            debug_assert!(elements.is_empty());
 
             in_place(&mut elements);
 
@@ -583,49 +900,140 @@ mod test {
         }
 
         #[test]
-        fn handles_when_input_is_single_element() {
-            let mut elements = [0];
+        fn when_single_element_then_does_not_modify_it() {
+            for element in 0..256 {
+                let mut elements = [element];
 
-            in_place(&mut elements);
+                debug_assert_eq!(elements.len(), 1);
 
-            assert_eq!(elements, [0]);
+                in_place(&mut elements);
+
+                assert_eq!(elements, [element]);
+            }
         }
 
         #[test]
-        fn does_not_modify_input_when_already_sorted() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
-            debug_assert!(elements.is_sorted());
+        fn when_all_elements_are_equivalent_then_does_not_modify_them() {
+            for value in 0..256 {
+                for length in 2..256 {
+                    let mut elements: Vec<_> = core::iter::repeat_n(value, length).collect();
 
-            in_place(&mut elements);
+                    debug_assert!(elements.iter().all(|element| element == &value));
 
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+                    in_place(&mut elements);
+
+                    assert!(elements.into_iter().all(|element| element == value));
+                }
+            }
         }
 
         #[test]
-        fn will_swap_elements_if_in_decreasing_order() {
-            let mut elements = [1, 0];
+        fn when_already_sorted_then_maintains_order() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).collect();
 
-            in_place(&mut elements);
+                debug_assert!(elements.is_sorted());
 
-            assert_eq!(elements, [0, 1]);
+                in_place(&mut elements);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_odd_length() {
-            let mut elements = [2, 1, 0];
+        fn when_in_reverse_sorted_order_then_is_reversed() {
+            for length in 2..256 {
+                let mut elements: Vec<_> = (0..length).rev().collect();
 
-            in_place(&mut elements);
+                debug_assert!(elements.iter().rev().is_sorted());
 
-            assert_eq!(elements, [0, 1, 2]);
+                in_place(&mut elements);
+
+                assert!(elements.is_sorted());
+            }
         }
 
         #[test]
-        fn correctly_orders_elements_when_input_has_even_length() {
-            let mut elements = [2, 0, 3, 1];
+        fn when_elements_are_repeated_then_they_are_grouped_together() {
+            for repeat in 2..128 {
+                let mut elements: Vec<_> = (0..256)
+                    .map(|element| {
+                        if element % repeat == 0 {
+                            repeat
+                        } else {
+                            element
+                        }
+                    })
+                    .collect();
 
-            in_place(&mut elements);
+                let count = elements.len().div_ceil(repeat);
 
-            assert_eq!(elements, [0, 1, 2, 3]);
+                debug_assert_eq!(
+                    elements
+                        .iter()
+                        .filter(|element| *element == &repeat)
+                        .count(),
+                    count
+                );
+
+                in_place(&mut elements);
+
+                let index = elements
+                    .iter()
+                    .position(|element| element == &repeat)
+                    .expect("first occurrence of repeated element");
+
+                assert!(
+                    elements[index..index + count]
+                        .iter()
+                        .all(|element| element == &repeat)
+                );
+            }
+        }
+
+        #[test]
+        fn when_odd_number_of_elements_then_sorts_them() {
+            for length in (1..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 != 0);
+
+                in_place(&mut elements);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_even_number_of_elements_then_sorts_them() {
+            for length in (0..256).step_by(2) {
+                let mut elements: Vec<_> = (0..length).rev().collect();
+
+                debug_assert!(elements.len() % 2 == 0);
+
+                in_place(&mut elements);
+
+                assert!(elements.is_sorted());
+            }
+        }
+
+        #[test]
+        fn when_chunks_are_sorted_then_sorts_them_into_rest() {
+            for length in 2..255 {
+                let mut elements: Vec<_> = (0..256).rev().collect();
+
+                for chunk in elements.chunks_mut(length) {
+                    chunk.reverse();
+
+                    debug_assert!(chunk.is_sorted());
+                }
+
+                debug_assert!(!elements.is_sorted());
+
+                in_place(&mut elements);
+
+                assert!(elements.is_sorted());
+            }
         }
     }
 }
