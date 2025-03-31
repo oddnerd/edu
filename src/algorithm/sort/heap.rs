@@ -382,7 +382,7 @@ mod construct_heap {
     use super::sift_down;
     use super::sift_up;
 
-    /// Arrange `element` into max-heap (children less than parent) order.
+    /// Arrange `elements` into max-heap (children less than parent) order.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -408,7 +408,7 @@ mod construct_heap {
         }
     }
 
-    /// Arrange `element` into max-heap (children less than parent) order.
+    /// Arrange `elements` into max-heap (children less than parent) order.
     ///
     /// # Performance
     /// #### Time Complexity
