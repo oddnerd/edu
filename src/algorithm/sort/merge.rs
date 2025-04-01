@@ -286,6 +286,10 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
             in_place(left);
             in_place(right);
 
+            let Some(middle) = range.start.checked_add(middle) else {
+                unreachable!("less than `range.end` => less than `usize::MAX`");
+            };
+
             merge(elements, range.start..middle, middle..range.end, output);
         } else {
             elements.swap(output, range.start);
