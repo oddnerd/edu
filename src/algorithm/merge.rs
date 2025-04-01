@@ -398,12 +398,17 @@ mod test {
         }
 
         #[test]
-        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second() {
+        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second()
+         {
             let mut first = [0, 1, 2];
             let mut second = [3, 4, 5];
             let mut output = [usize::default(); 6];
 
-            debug_assert!(first.iter().all(|first| second.iter().all(|second| first < second)));
+            debug_assert!(
+                first
+                    .iter()
+                    .all(|first| second.iter().all(|second| first < second))
+            );
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -411,12 +416,17 @@ mod test {
         }
 
         #[test]
-        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first() {
+        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first()
+         {
             let mut first = [3, 4, 5];
             let mut second = [0, 1, 2];
             let mut output = [usize::default(); 6];
 
-            debug_assert!(second.iter().all(|second| first.iter().all(|first| second < first)));
+            debug_assert!(
+                second
+                    .iter()
+                    .all(|second| first.iter().all(|first| second < first))
+            );
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -424,7 +434,8 @@ mod test {
         }
 
         #[test]
-        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly() {
+        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly()
+         {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
@@ -573,12 +584,17 @@ mod test {
         }
 
         #[test]
-        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second() {
+        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second()
+         {
             let mut first = [0, 1, 2];
             let mut second = [3, 4, 5];
             let mut output = [usize::default(); 6];
 
-            debug_assert!(first.iter().all(|first| second.iter().all(|second| first < second)));
+            debug_assert!(
+                first
+                    .iter()
+                    .all(|first| second.iter().all(|second| first < second))
+            );
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -586,12 +602,17 @@ mod test {
         }
 
         #[test]
-        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first() {
+        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first()
+         {
             let mut first = [3, 4, 5];
             let mut second = [0, 1, 2];
             let mut output = [usize::default(); 6];
 
-            debug_assert!(second.iter().all(|second| first.iter().all(|first| second < first)));
+            debug_assert!(
+                second
+                    .iter()
+                    .all(|second| first.iter().all(|first| second < first))
+            );
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -599,7 +620,8 @@ mod test {
         }
 
         #[test]
-        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly() {
+        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly()
+         {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
@@ -729,12 +751,17 @@ mod test {
         }
 
         #[test]
-        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second() {
+        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second()
+         {
             let mut elements = [0, 1, 2, 3, 4, 5];
             let middle = 3;
 
             let (first, second) = elements.split_at(middle);
-            debug_assert!(first.iter().all(|first| second.iter().all(|second| first < second)));
+            debug_assert!(
+                first
+                    .iter()
+                    .all(|first| second.iter().all(|second| first < second))
+            );
 
             in_place(&mut elements, middle);
 
@@ -742,12 +769,17 @@ mod test {
         }
 
         #[test]
-        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first() {
+        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first()
+         {
             let mut elements = [3, 4, 5, 0, 1, 2];
             let middle = 3;
 
             let (first, second) = elements.split_at(middle);
-            debug_assert!(second.iter().all(|second| first.iter().all(|first| second < first)));
+            debug_assert!(
+                second
+                    .iter()
+                    .all(|second| first.iter().all(|first| second < first))
+            );
 
             in_place(&mut elements, middle);
 
@@ -755,7 +787,8 @@ mod test {
         }
 
         #[test]
-        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly() {
+        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly()
+         {
             let mut elements = [0, 2, 4, 1, 3, 5];
             let middle = 3;
 
@@ -766,7 +799,7 @@ mod test {
 
         #[test]
         fn when_first_input_is_longer_than_second_then_remaining_are_appended_to_output() {
-            let mut elements = [2, 3, 4, 5, 0 ,1];
+            let mut elements = [2, 3, 4, 5, 0, 1];
             let middle = 4;
 
             debug_assert!(elements[..middle].len() > elements[middle..].len());
