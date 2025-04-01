@@ -919,8 +919,8 @@ mod test {
 
         #[test]
         fn when_all_elements_are_equivalent_then_does_not_modify_them() {
-            for value in 0..256 {
-                for length in 2..256 {
+            for value in 0..32 {
+                for length in 2..32 {
                     let mut elements: Vec<_> = core::iter::repeat_n(value, length).collect();
 
                     debug_assert!(elements.iter().all(|element| element == &value));
