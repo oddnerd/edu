@@ -128,8 +128,10 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_none_when_input_contains_no_elements() {
+        fn when_elements_is_empty_then_yields_none() {
             let elements: [usize; 0] = [];
+
+            debug_assert!(elements.is_empty());
 
             let actual = linear(&elements, &12345);
 
@@ -137,8 +139,17 @@ mod test {
         }
 
         #[test]
-        fn yields_correct_index_when_contained() {
-            const ELEMENTS: usize = 8;
+        fn when_element_is_not_contained_then_yields_none() {
+            let elements = [0, 1, 2, 3, 4, 5];
+
+            let actual = linear(&elements, &12345);
+
+            assert_eq!(actual, None);
+        }
+
+        #[test]
+        fn when_elements_is_contained_then_yields_correct_index() {
+            const ELEMENTS: usize = 256;
 
             let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
@@ -147,15 +158,6 @@ mod test {
 
                 assert_eq!(actual, Some(desired));
             }
-        }
-
-        #[test]
-        fn yields_none_when_not_contained() {
-            let elements = [0, 1, 2, 3, 4, 5];
-
-            let actual = linear(&elements, &12345);
-
-            assert_eq!(actual, None);
         }
     }
 
