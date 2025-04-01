@@ -291,102 +291,140 @@ mod test {
 
         #[test]
         #[should_panic = "output length must be sum of input lengths"]
-        fn length_of_output_cannot_be_smaller_than_sum_of_input_lengths() {
+        fn when_length_of_output_is_smaller_than_sum_of_input_lengths_then_panics() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [];
+
+            debug_assert!(output.len() < first.len() + second.len());
 
             iterative(&mut first, &mut second, &mut output);
         }
 
         #[test]
         #[should_panic = "output length must be sum of input lengths"]
-        fn length_of_output_cannot_be_larger_than_sum_of_input_lengths() {
+        fn when_length_of_output_is_larger_than_sum_of_input_lengths_then_panics() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 7];
 
+            debug_assert!(output.len() > first.len() + second.len());
+
             iterative(&mut first, &mut second, &mut output);
         }
 
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn first_slice_must_be_sorted_in_increasing_order() {
+        fn when_first_input_is_not_sorted_increasingly_then_panics() {
             let mut first = [4, 2, 0];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(!first.is_sorted());
+            debug_assert!(second.is_sorted());
+
             iterative(&mut first, &mut second, &mut output);
         }
 
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn second_slice_must_be_sorted_in_increasing_order() {
+        fn when_second_input_is_not_sorted_increasingly_then_panics() {
             let mut first = [0, 2, 4];
             let mut second = [5, 3, 1];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(first.is_sorted());
+            debug_assert!(!second.is_sorted());
+
             iterative(&mut first, &mut second, &mut output);
         }
 
         #[test]
-        fn is_elements_of_second_when_first_is_empty() {
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn when_both_inputs_are_not_sorted_increasingly_then_panics() {
+            let mut first = [4, 2, 0];
+            let mut second = [5, 3, 1];
+            let mut output = [usize::default(); 6];
+
+            debug_assert!(!first.is_sorted());
+            debug_assert!(!second.is_sorted());
+
+            iterative(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        fn when_first_input_is_empty_then_output_is_elements_of_second_input() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(first.is_empty());
+            debug_assert!(!second.is_empty());
+
             iterative(&mut first, &mut second, &mut output);
 
             assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn is_elements_of_first_when_second_is_empty() {
+        fn when_second_input_is_empty_then_output_is_elements_of_first_input() {
             let mut first = [0, 1, 2, 3, 4, 5];
             let mut second = [];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(!first.is_empty());
+            debug_assert!(second.is_empty());
+
             iterative(&mut first, &mut second, &mut output);
 
             assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn handles_when_both_inputs_are_empty() {
+        fn when_both_inputs_are_empty_then_output_is_empty() {
             let mut first = [];
             let mut second = [];
             let mut output: [usize; 0] = [];
 
-            // Ideally, this will panic if it accesses invalid memory.
-            iterative(&mut first, &mut second, &mut output);
-        }
-
-        #[test]
-        fn consumes_element_from_first_when_it_is_less_than_second() {
-            let mut first = [0];
-            let mut second = [1];
-            let mut output = [usize::default(); 2];
+            debug_assert!(first.is_empty());
+            debug_assert!(second.is_empty());
 
             iterative(&mut first, &mut second, &mut output);
 
-            assert_eq!(output, [0, 1]);
+            assert_eq!(output, []);
         }
 
         #[test]
-        fn consumes_element_from_second_when_it_is_less_than_first() {
-            let mut first = [1];
-            let mut second = [0];
-            let mut output = [usize::default(); 2];
+        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second() {
+            let mut first = [0, 1, 2];
+            let mut second = [3, 4, 5];
+            let mut output = [usize::default(); 6];
+
+            debug_assert!(first.iter().all(|first| second.iter().all(|second| first < second)));
 
             iterative(&mut first, &mut second, &mut output);
 
-            assert_eq!(output, [0, 1]);
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn alternates_between_first_and_second_so_output_is_in_increasing_order() {
+        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first() {
+            let mut first = [3, 4, 5];
+            let mut second = [0, 1, 2];
+            let mut output = [usize::default(); 6];
+
+            debug_assert!(second.iter().all(|second| first.iter().all(|first| second < first)));
+
+            iterative(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
@@ -397,10 +435,12 @@ mod test {
         }
 
         #[test]
-        fn appends_elements_of_first_when_longer_than_second() {
+        fn when_first_input_is_longer_than_second_then_remaining_are_appended_to_output() {
             let mut first = [2, 3, 4, 5];
             let mut second = [0, 1];
             let mut output = [usize::default(); 6];
+
+            debug_assert!(first.len() > second.len());
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -408,10 +448,12 @@ mod test {
         }
 
         #[test]
-        fn appends_elements_of_second_when_longer_than_first() {
+        fn when_second_input_is_longer_than_first_then_remaining_are_appended_to_output() {
             let mut first = [0, 1];
             let mut second = [2, 3, 4, 5];
             let mut output = [usize::default(); 6];
+
+            debug_assert!(second.len() > first.len());
 
             iterative(&mut first, &mut second, &mut output);
 
@@ -424,102 +466,140 @@ mod test {
 
         #[test]
         #[should_panic = "output length must be sum of input lengths"]
-        fn length_of_output_cannot_be_smaller_than_sum_of_input_lengths() {
+        fn when_length_of_output_is_smaller_than_sum_of_input_lengths_then_panics() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [];
+
+            debug_assert!(output.len() < first.len() + second.len());
 
             parallel(&mut first, &mut second, &mut output);
         }
 
         #[test]
         #[should_panic = "output length must be sum of input lengths"]
-        fn length_of_output_cannot_be_larger_than_sum_of_input_lengths() {
+        fn when_length_of_output_is_larger_than_sum_of_input_lengths_then_panics() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 7];
 
+            debug_assert!(output.len() > first.len() + second.len());
+
             parallel(&mut first, &mut second, &mut output);
         }
 
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn first_slice_must_be_sorted_in_increasing_order() {
+        fn when_first_input_is_not_sorted_increasingly_then_panics() {
             let mut first = [4, 2, 0];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(!first.is_sorted());
+            debug_assert!(second.is_sorted());
+
             parallel(&mut first, &mut second, &mut output);
         }
 
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn second_slice_must_be_sorted_in_increasing_order() {
+        fn when_second_input_is_not_sorted_increasingly_then_panics() {
             let mut first = [0, 2, 4];
             let mut second = [5, 3, 1];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(first.is_sorted());
+            debug_assert!(!second.is_sorted());
+
             parallel(&mut first, &mut second, &mut output);
         }
 
         #[test]
-        fn is_elements_of_second_when_first_is_empty() {
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn when_both_inputs_are_not_sorted_increasingly_then_panics() {
+            let mut first = [4, 2, 0];
+            let mut second = [5, 3, 1];
+            let mut output = [usize::default(); 6];
+
+            debug_assert!(!first.is_sorted());
+            debug_assert!(!second.is_sorted());
+
+            parallel(&mut first, &mut second, &mut output);
+        }
+
+        #[test]
+        fn when_first_input_is_empty_then_output_is_elements_of_second_input() {
             let mut first = [];
             let mut second = [0, 1, 2, 3, 4, 5];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(first.is_empty());
+            debug_assert!(!second.is_empty());
+
             parallel(&mut first, &mut second, &mut output);
 
             assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn is_elements_of_first_when_second_is_empty() {
+        fn when_second_input_is_empty_then_output_is_elements_of_first_input() {
             let mut first = [0, 1, 2, 3, 4, 5];
             let mut second = [];
             let mut output = [usize::default(); 6];
 
+            debug_assert!(!first.is_empty());
+            debug_assert!(second.is_empty());
+
             parallel(&mut first, &mut second, &mut output);
 
             assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn handles_when_both_inputs_are_empty() {
+        fn when_both_inputs_are_empty_then_output_is_empty() {
             let mut first = [];
             let mut second = [];
             let mut output: [usize; 0] = [];
 
-            // Ideally, this will panic if it accesses invalid memory.
-            parallel(&mut first, &mut second, &mut output);
-        }
-
-        #[test]
-        fn consumes_element_from_first_when_it_is_less_than_second() {
-            let mut first = [0];
-            let mut second = [1];
-            let mut output = [usize::default(); 2];
+            debug_assert!(first.is_empty());
+            debug_assert!(second.is_empty());
 
             parallel(&mut first, &mut second, &mut output);
 
-            assert_eq!(output, [0, 1]);
+            assert_eq!(output, []);
         }
 
         #[test]
-        fn consumes_element_from_second_when_it_is_less_than_first() {
-            let mut first = [1];
-            let mut second = [0];
-            let mut output = [usize::default(); 2];
+        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second() {
+            let mut first = [0, 1, 2];
+            let mut second = [3, 4, 5];
+            let mut output = [usize::default(); 6];
+
+            debug_assert!(first.iter().all(|first| second.iter().all(|second| first < second)));
 
             parallel(&mut first, &mut second, &mut output);
 
-            assert_eq!(output, [0, 1]);
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn alternates_between_first_and_second_so_output_is_in_increasing_order() {
+        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first() {
+            let mut first = [3, 4, 5];
+            let mut second = [0, 1, 2];
+            let mut output = [usize::default(); 6];
+
+            debug_assert!(second.iter().all(|second| first.iter().all(|first| second < first)));
+
+            parallel(&mut first, &mut second, &mut output);
+
+            assert_eq!(output, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly() {
             let mut first = [0, 2, 4];
             let mut second = [1, 3, 5];
             let mut output = [usize::default(); 6];
@@ -530,10 +610,12 @@ mod test {
         }
 
         #[test]
-        fn appends_elements_of_first_when_longer_than_second() {
+        fn when_first_input_is_longer_than_second_then_remaining_are_appended_to_output() {
             let mut first = [2, 3, 4, 5];
             let mut second = [0, 1];
             let mut output = [usize::default(); 6];
+
+            debug_assert!(first.len() > second.len());
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -541,10 +623,12 @@ mod test {
         }
 
         #[test]
-        fn appends_elements_of_second_when_longer_than_first() {
+        fn when_second_input_is_longer_than_first_then_remaining_are_appended_to_output() {
             let mut first = [0, 1];
             let mut second = [2, 3, 4, 5];
             let mut output = [usize::default(); 6];
+
+            debug_assert!(second.len() > first.len());
 
             parallel(&mut first, &mut second, &mut output);
 
@@ -556,90 +640,150 @@ mod test {
         use super::*;
 
         #[test]
+        #[should_panic = "middle must be in bounds"]
+        fn when_middle_is_outside_then_bounds_of_elements_then_panics() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let middle = 7;
+
+            debug_assert!(middle > elements.len());
+
+            in_place(&mut elements, middle);
+        }
+
+        #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn first_slice_must_be_sorted_in_increasing_order() {
+        fn when_first_input_is_not_sorted_increasingly_then_panics() {
             let mut elements = [4, 2, 0, 1, 3, 5];
+            let middle = 3;
 
-            in_place(&mut elements, 3);
+            debug_assert!(!elements[..middle].is_sorted());
+            debug_assert!(elements[middle..].is_sorted());
+
+            in_place(&mut elements, middle);
         }
 
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn second_slice_must_be_sorted_in_increasing_order() {
+        fn when_second_input_is_not_sorted_increasingly_then_panics() {
             let mut elements = [0, 2, 4, 5, 3, 1];
+            let middle = 3;
 
-            in_place(&mut elements, 3);
+            debug_assert!(elements[..middle].is_sorted());
+            debug_assert!(!elements[middle..].is_sorted());
+
+            in_place(&mut elements, middle);
         }
 
         #[test]
-        fn is_elements_of_second_when_first_is_empty() {
-            let mut elements = [0, 1, 2, 3, 4, 5];
+        #[cfg_attr(not(debug_assertions), ignore)]
+        #[should_panic = "elements must be sorted in increasing order"]
+        fn when_both_inputs_are_not_sorted_increasingly_then_panics() {
+            let mut elements = [4, 2, 0, 5, 3, 1];
+            let middle = 3;
 
-            in_place(&mut elements, 0);
+            debug_assert!(!elements[..middle].is_sorted());
+            debug_assert!(!elements[middle..].is_sorted());
+
+            in_place(&mut elements, middle);
+        }
+
+        #[test]
+        fn when_first_input_is_empty_then_output_is_elements_of_second_input() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let middle = 0;
+
+            debug_assert!(elements[..middle].is_empty());
+            debug_assert!(!elements[middle..].is_empty());
+
+            in_place(&mut elements, middle);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn is_elements_of_first_when_second_is_empty() {
+        fn when_second_input_is_empty_then_output_is_elements_of_first_input() {
             let mut elements = [0, 1, 2, 3, 4, 5];
+            let middle = elements.len();
 
-            in_place(&mut elements, 6);
+            debug_assert!(!elements[..middle].is_empty());
+            debug_assert!(elements[middle..].is_empty());
+
+            in_place(&mut elements, middle);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
 
         #[test]
-        fn handles_when_both_inputs_are_empty() {
+        fn when_both_inputs_are_empty_then_output_is_empty() {
             let mut elements: [usize; 0] = [];
+            let middle = 0;
 
-            // Ideally, this will panic if it accesses invalid memory.
-            in_place(&mut elements, 0);
+            debug_assert!(elements[..middle].is_empty());
+            debug_assert!(elements[middle..].is_empty());
+
+            in_place(&mut elements, middle);
+
+            assert_eq!(elements, []);
         }
 
         #[test]
-        fn consumes_element_from_first_when_it_is_less_than_second() {
-            let mut elements = [0, 1];
-
-            in_place(&mut elements, 1);
-
-            assert_eq!(elements, [0, 1]);
-        }
-
-        #[test]
-        fn consumes_element_from_second_when_it_is_less_than_first() {
-            let mut elements = [1, 0];
-
-            in_place(&mut elements, 1);
-
-            assert_eq!(elements, [0, 1]);
-        }
-
-        #[test]
-        fn alternates_between_first_and_second_so_output_is_in_increasing_order() {
-            let mut elements = [0, 2, 4, 1, 3, 5];
-
-            in_place(&mut elements, 3);
-
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn appends_elements_of_first_when_longer_than_second() {
-            let mut elements = [2, 3, 4, 5, 0, 1];
-
-            in_place(&mut elements, 4);
-
-            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
-        }
-
-        #[test]
-        fn appends_elements_of_second_when_longer_than_first() {
+        fn when_elements_from_first_input_are_less_than_elements_from_second_input_then_output_has_first_elements_before_second() {
             let mut elements = [0, 1, 2, 3, 4, 5];
+            let middle = 3;
 
-            in_place(&mut elements, 2);
+            let (first, second) = elements.split_at(middle);
+            debug_assert!(first.iter().all(|first| second.iter().all(|second| first < second)));
+
+            in_place(&mut elements, middle);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn when_elements_from_second_input_are_less_than_elements_from_first_input_then_output_has_second_elements_before_first() {
+            let mut elements = [3, 4, 5, 0, 1, 2];
+            let middle = 3;
+
+            let (first, second) = elements.split_at(middle);
+            debug_assert!(second.iter().all(|second| first.iter().all(|first| second < first)));
+
+            in_place(&mut elements, middle);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn when_the_smallest_element_alternates_between_the_first_and_second_input_then_output_is_sorted_increasingly() {
+            let mut elements = [0, 2, 4, 1, 3, 5];
+            let middle = 3;
+
+            in_place(&mut elements, middle);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn when_first_input_is_longer_than_second_then_remaining_are_appended_to_output() {
+            let mut elements = [2, 3, 4, 5, 0 ,1];
+            let middle = 4;
+
+            debug_assert!(elements[..middle].len() > elements[middle..].len());
+
+            in_place(&mut elements, middle);
+
+            assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
+        }
+
+        #[test]
+        fn when_second_input_is_longer_than_first_then_remaining_are_appended_to_output() {
+            let mut elements = [0, 1, 2, 3, 4, 5];
+            let middle = 2;
+
+            debug_assert!(elements[middle..].len() > elements[..middle].len());
+
+            in_place(&mut elements, middle);
 
             assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
         }
