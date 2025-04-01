@@ -334,7 +334,8 @@ pub fn bingo<T: Ord>(elements: &mut [T]) {
 
             minimum_index = index;
         } else {
-            debug_assert_eq!(split_index, elements.len(), "all sorted");
+            debug_assert!(elements.is_sorted(), "all sorted");
+
             break;
         }
 
