@@ -206,6 +206,16 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// # Panics
 /// If the provided `middle` is out of bounds.
 ///
+/// # Algorithm
+/// If the next element from the left input is the smallest, then it is already
+/// in sorted position so the left can be advanced. However, if the next
+/// element from the right input is smaller, then all remaining elements from
+/// the left input plus the next right element can be rotated right once (with
+/// wrapping behaviour) thereby placing that right element into sorted position
+/// ahead of both inputs so the right input can then be advanced the algorithm
+/// repeated until either input is exhausted, in which case the remaining
+/// elements are therefore in sorted position to the right of everything else.
+///
 /// # Performance
 /// #### Time Complexity
 /// | Worst | Best | Average |
