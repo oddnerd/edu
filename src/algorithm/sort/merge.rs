@@ -275,7 +275,7 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
     /// Sort a `range` of `elements` into the same slice, starting at `output`.
     fn sort_into<T: Ord>(elements: &mut [T], range: core::ops::Range<usize>, output: usize) {
         if range.len() > 1 {
-            let middle = range.len() / 2;
+            let middle = range.len().div_euclid(2);
 
             let Some(sorting) = elements.get_mut(range.clone()) else {
                 unreachable!("caller ensures range is within bounds");
