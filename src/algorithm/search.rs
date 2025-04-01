@@ -167,15 +167,19 @@ mod test {
         #[test]
         #[cfg_attr(not(debug_assertions), ignore)]
         #[should_panic = "elements must be sorted in increasing order"]
-        fn panics_if_elements_are_not_sorted_in_increasing_order() {
+        fn when_elements_is_not_sorted_in_increasing_order_then_panics() {
             let elements = [5, 4, 3, 2, 1];
+
+            debug_assert!(!elements.is_sorted());
 
             _ = binary(&elements, &12345);
         }
 
         #[test]
-        fn is_none_when_input_contains_no_elements() {
+        fn when_elements_is_empty_then_yields_none() {
             let elements: [usize; 0] = [];
+
+            debug_assert!(elements.is_empty());
 
             let actual = binary(&elements, &12345);
 
@@ -183,8 +187,8 @@ mod test {
         }
 
         #[test]
-        fn yields_correct_index_when_contained() {
-            const ELEMENTS: usize = 8;
+        fn when_elements_is_contained_then_yields_correct_index() {
+            const ELEMENTS: usize = 256;
 
             let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
@@ -196,30 +200,14 @@ mod test {
         }
 
         #[test]
-        fn yields_none_when_not_contained_and_would_be_first_element() {
-            let elements = [1, 2, 3, 4, 5];
+        fn when_element_is_not_contained_then_yields_none() {
+            for desired in 0..256 {
+                let mut elements: Vec<_> = (0..256).collect();
 
-            let actual = binary(&elements, &0);
+                _ = elements.remove(desired);
 
-            assert_eq!(actual, None);
-        }
-
-        #[test]
-        fn yields_none_when_not_contained_and_would_be_last_element() {
-            let elements = [0, 1, 2, 3, 4];
-
-            let actual = binary(&elements, &5);
-
-            assert_eq!(actual, None);
-        }
-
-        #[test]
-        fn yields_none_when_not_contained_and_would_be_middle_element() {
-            let elements = [0, 1, 2, 4, 5];
-
-            let actual = binary(&elements, &3);
-
-            assert_eq!(actual, None);
+                assert_eq!(binary(&elements, &desired), None);
+            }
         }
     }
 }
