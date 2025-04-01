@@ -261,7 +261,7 @@ pub fn in_place<T: Ord>(elements: &mut [T]) {
                 }
                 (Some(_), None) => first.next(),
                 (None, Some(_)) => second.next(),
-                (None, None) => None,
+                (None, None) => return,
             };
 
             let Some(input_index) = input_index else {
