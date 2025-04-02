@@ -815,8 +815,9 @@ mod test {
             use super::*;
 
             #[test]
-            fn is_zero_when_underlying_is_empty() {
+            fn when_empty_then_yields_zero() {
                 let mut underlying: [usize; 0] = [];
+
                 debug_assert!(underlying.is_empty());
 
                 let actual = Dope::from(underlying.as_mut_slice());
@@ -825,16 +826,17 @@ mod test {
             }
 
             #[test]
-            fn is_number_of_elements_when_underlying_is_not_empty() {
-                const ELEMENTS: usize = 8;
+            fn when_not_empty_then_is_number_of_elements() {
+                let mut underlying: Vec<_> = (0..256).collect();
 
-                let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-                debug_assert!(!underlying.is_empty());
+                for length in 1..=underlying.len() {
+                    let underlying = &mut underlying[..length];
 
-                for count in 1..=ELEMENTS {
-                    let actual = Dope::from(&mut underlying[..count]);
+                    debug_assert_eq!(underlying.len(), length);
 
-                    assert_eq!(actual.count(), count);
+                    let actual = Dope::from(underlying);
+
+                    assert_eq!(actual.count(), length);
                 }
             }
         }
