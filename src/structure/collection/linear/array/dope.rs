@@ -494,21 +494,37 @@ mod test {
             use super::*;
 
             #[test]
-            fn sets_pointer() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn when_underlying_is_empty_then_sets_members() {
+                let mut underlying: [usize; 0] = [];
 
-                let actual = Dope::from(expected.as_mut_slice());
+                let underlying = underlying.as_mut_slice();
 
-                assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+                let ptr = underlying.as_mut_ptr();
+                let count = underlying.len();
+
+                debug_assert!(underlying.is_empty());
+
+                let actual = Dope::from(underlying);
+
+                assert_eq!(actual.ptr.as_ptr(), ptr);
+                assert_eq!(actual.count, count);
             }
 
             #[test]
-            fn sets_element_count() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn when_underlying_is_not_empty_then_sets_members() {
+                let mut underlying = [0, 1, 2, 3, 4, 5];
 
-                let actual = Dope::from(expected.as_mut_slice());
+                let underlying = underlying.as_mut_slice();
 
-                assert_eq!(actual.count, expected.len());
+                let ptr = underlying.as_mut_ptr();
+                let count = underlying.len();
+
+                debug_assert!(!underlying.is_empty());
+
+                let actual = Dope::from(underlying);
+
+                assert_eq!(actual.ptr.as_ptr(), ptr);
+                assert_eq!(actual.count, count);
             }
         }
     }
