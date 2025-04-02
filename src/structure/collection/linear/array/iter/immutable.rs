@@ -169,26 +169,19 @@ mod test {
             use super::*;
 
             #[test]
-            fn sets_pointer() {
-                let mut underlying = [0, 1, 2, 3, 4, 5];
+            fn when_pointer_is_dangling_and_count_is_zero_then_sets_members() {
+                let ptr = NonNull::<usize>::dangling();
+                let count = 0;
 
-                let expected = underlying.as_mut_ptr();
+                let actual = unsafe { Iter::new(ptr, count) };
 
-                let actual = {
-                    let ptr = underlying.as_mut_ptr();
-                    let ptr = unsafe { NonNull::new_unchecked(ptr) };
-
-                    unsafe { Iter::new(ptr, underlying.len()) }
-                };
-
-                assert_eq!(actual.ptr.as_ptr(), expected);
+                assert_eq!(actual.ptr, ptr);
+                assert_eq!(actual.count, 0);
             }
 
             #[test]
-            fn sets_element_count() {
+            fn when_pointer_is_not_dangling_and_count_is_non_zero_then_sets_members() {
                 let mut underlying = [0, 1, 2, 3, 4, 5];
-
-                let expected = underlying.len();
 
                 let actual = {
                     let ptr = underlying.as_mut_ptr();
@@ -197,7 +190,8 @@ mod test {
                     unsafe { Iter::new(ptr, underlying.len()) }
                 };
 
-                assert_eq!(actual.count, expected);
+                assert_eq!(actual.ptr.as_ptr(), underlying.as_mut_ptr());
+                assert_eq!(actual.count, underlying.len());
             }
         }
     }
