@@ -653,79 +653,206 @@ mod test {
     mod debug {
         use super::*;
 
-        #[test]
-        fn is_an_empty_list_when_underlying_is_empty() {
-            let expected: [usize; 0] = [];
-            debug_assert!(expected.is_empty());
+        mod when_count_is_zero {
+            use super::*;
 
-            let mut actual = expected;
+            #[test]
+            fn when_pointer_is_dangling_then_is_empty_list() {
+                let ptr = NonNull::<usize>::dangling();
+                let count = 0;
 
-            let actual = {
-                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                let actual = unsafe { IterMut::new(ptr, count) };
 
-                unsafe { IterMut::new(ptr, actual.len()) }
-            };
+                let expected: [usize; 0] = [];
 
-            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
-        }
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
 
-        #[test]
-        fn is_a_list_of_the_correct_elements_in_the_correct_order_when_underlying_is_not_empty() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            debug_assert!(!expected.is_empty());
+            #[test]
+            fn when_pointer_is_not_dangling_then_is_empty_list() {
+                let mut underlying: [usize; 0] = [];
+                let expected: [usize; 0] = underlying;
 
-            let mut actual = expected;
+                debug_assert_eq!(underlying.len(), 0);
 
-            let actual = {
-                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                let count = underlying.len();
 
-                unsafe { IterMut::new(ptr, actual.len()) }
-            };
-
-            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
-        }
-
-        #[test]
-        fn does_not_contain_elements_yielded_from_the_front() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            debug_assert!(!expected.is_empty());
-
-            let mut actual = expected;
-
-            let mut actual = {
-                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
-
-                unsafe { IterMut::new(ptr, actual.len()) }
-            };
-
-            for start in 1..=expected.len() {
-                _ = actual.next().expect("an element");
-
-                let expected = &expected[start..];
+                let actual = unsafe { IterMut::new(ptr, count) };
 
                 assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
             }
         }
 
-        #[test]
-        fn does_not_contain_elements_yielded_from_the_back() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            debug_assert!(!expected.is_empty());
+        mod when_count_is_greater_than_zero {
+            use super::*;
 
-            let mut actual = expected;
+            #[test]
+            fn when_not_advanced_then_is_correct_elements_in_correct_order() {
+                let mut underlying = [0, 1, 2, 3, 4, 5];
+                let expected = underlying;
 
-            let mut actual = {
-                let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                debug_assert_ne!(underlying.len(), 0);
 
-                unsafe { IterMut::new(ptr, actual.len()) }
-            };
+                let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                let count = underlying.len();
 
-            for end in (1..expected.len()).rev() {
-                _ = actual.next_back().expect("an element");
-
-                let expected = &expected[..end];
+                let actual = unsafe { IterMut::new(ptr, count) };
 
                 assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
+
+            mod when_advanced {
+                use super::*;
+
+                #[test]
+                fn when_from_front_then_does_not_include_yielded_elements() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
+
+                    debug_assert_ne!(underlying.len(), 0);
+
+                    for advancements in 0..underlying.len() {
+                        let expected = underlying[advancements..].to_vec();
+
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                        let count = underlying.len();
+
+                        let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                        for _ in 0..advancements {
+                            _ = actual.next().expect("an element");
+                        }
+
+                        assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                    }
+                }
+
+                #[test]
+                fn when_from_back_then_does_not_include_yielded_elements() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
+
+                    debug_assert_ne!(underlying.len(), 0);
+
+                    for advancements in 0..underlying.len() {
+                        let expected = underlying[..(underlying.len() - advancements)].to_vec();
+
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                        let count = underlying.len();
+
+                        let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                        for _ in 0..advancements {
+                            _ = actual.next_back().expect("an element");
+                        }
+
+                        assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                    }
+                }
+
+                #[test]
+                fn when_from_both_ends_then_does_not_include_yielded_elements() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
+
+                    debug_assert_ne!(underlying.len(), 0);
+
+                    for front in 0..underlying.len() {
+                        for back in front..underlying.len() {
+                            let expected = underlying[front..(underlying.len() - (back - front))].to_vec();
+
+                            let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                            let count = underlying.len();
+
+                            let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                            for _ in 0..front {
+                                _ = actual.next().expect("an element");
+                            }
+
+                            for _ in 0..(back - front) {
+                                _ = actual.next_back().expect("an element");
+                            }
+
+                            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                        }
+                    }
+                }
+            }
+
+            mod when_exhausted {
+                use super::*;
+
+                #[test]
+                fn when_from_front_then_is_empty_list() {
+                    for length in 1..256 {
+                        let mut underlying: Vec<_> = (0..length).collect();
+
+                        debug_assert!(!underlying.is_empty());
+
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                        let count = underlying.len();
+
+                        let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                        for _ in 0..length {
+                            _ = actual.next().expect("an element");
+                        }
+
+                        let expected: [usize; 0] = [];
+
+                        assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                    }
+                }
+
+                #[test]
+                fn when_from_back_then_is_empty_list() {
+                    for length in 1..256 {
+                        let mut underlying: Vec<_> = (0..length).collect();
+
+                        debug_assert!(!underlying.is_empty());
+
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                        let count = underlying.len();
+
+                        let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                        for _ in 0..length {
+                            _ = actual.next_back().expect("an element");
+                        }
+
+                        let expected: [usize; 0] = [];
+
+                        assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                    }
+                }
+
+                #[test]
+                fn when_from_both_ends_then_is_empty_list() {
+                    for length in 1..256 {
+                        let mut underlying: Vec<_> = (0..length).collect();
+
+                        debug_assert!(!underlying.is_empty());
+
+                        for front in 0..underlying.len() {
+
+                            let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                            let count = underlying.len();
+
+                            let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                            for _ in 0..front {
+                                _ = actual.next().expect("an element");
+                            }
+
+                            for _ in 0..(underlying.len() - front) {
+                                _ = actual.next_back().expect("an element");
+                            }
+
+                            let expected: [usize; 0] = [];
+
+                            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                        }
+                    }
+                }
             }
         }
     }
