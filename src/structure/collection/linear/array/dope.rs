@@ -855,103 +855,132 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn yields_none_when_underlying_is_empty() {
+                    fn when_empty_then_yields_none() {
                         let mut underlying: [usize; 0] = [];
+
                         debug_assert!(underlying.is_empty());
 
                         let actual = Dope::from(underlying.as_mut_slice());
+
                         let mut actual = actual.iter();
 
                         assert_eq!(actual.next(), None);
                     }
 
-                    #[test]
-                    fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
+                    mod when_not_empty {
+                        use super::*;
 
-                        let mut actual = expected;
-                        let actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter();
+                        #[test]
+                        fn then_can_be_advanced_count_times() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
 
-                        assert_eq!(actual.count(), expected.len());
-                    }
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
 
-                    #[test]
-                    fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
+                                let actual = Dope::from(underlying.as_mut_slice());
 
-                        let mut actual = expected;
-                        let actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter();
+                                let actual = actual.iter();
 
-                        assert!(actual.eq(expected.iter()));
+                                assert_eq!(actual.count(), length);
+                            }
+                        }
+
+                        #[test]
+                        fn then_yields_correct_elements_in_correct_order() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
+                                let expected = underlying.clone();
+
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
+
+                                let actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter();
+
+                                assert!(actual.eq(expected.iter()));
+                            }
+                        }
                     }
                 }
 
                 mod size_hint {
                     use super::*;
 
-                    #[test]
-                    fn lower_bound_is_number_of_elements_when_constructed() {
-                        let expected = [0, 1, 2, 3, 4, 5];
+                    mod when_constructed {
+                        use super::*;
 
-                        let mut actual = expected;
-                        let actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter();
+                        #[test]
+                        fn then_lower_bound_is_count() {
+                            for count in 0..256 {
+                                let mut underlying: Vec<_> = (0..count).collect();
 
-                        let (lower, _upper) = actual.size_hint();
+                                debug_assert_eq!(underlying.len(), count);
 
-                        assert_eq!(lower, expected.len());
-                    }
+                                let actual = Dope::from(underlying.as_mut_slice());
 
-                    #[test]
-                    fn lower_bound_updates_when_advanced() {
-                        const ELEMENTS: usize = 8;
+                                let actual = actual.iter();
 
-                        let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                                let (lower, _upper) = actual.size_hint();
 
-                        let actual = Dope::from(underlying.as_mut_slice());
-                        let mut actual = actual.iter();
+                                assert_eq!(lower, count);
+                            }
+                        }
 
-                        for expected in (0..ELEMENTS).rev() {
-                            _ = actual.next().expect("an element");
+                        #[test]
+                        fn then_upper_bound_is_count() {
+                            for count in 0..256 {
+                                let mut underlying: Vec<_> = (0..count).collect();
 
-                            let (lower, _upper) = actual.size_hint();
+                                debug_assert_eq!(underlying.len(), count);
 
-                            assert_eq!(lower, expected);
+                                let actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter();
+
+                                let (_lower, upper) = actual.size_hint();
+
+                                assert_eq!(upper, Some(count));
+                            }
                         }
                     }
 
-                    #[test]
-                    fn upper_bound_is_number_of_elements_when_constructed() {
-                        let expected = [0, 1, 2, 3, 4, 5];
+                    mod when_advanced {
+                        use super::*;
 
-                        let mut actual = expected;
-                        let actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter();
+                        #[test]
+                        fn then_lower_bound_decreases() {
+                            let mut underlying: Vec<_> = (0..256).collect();
 
-                        let (_lower, upper) = actual.size_hint();
+                            let actual = Dope::from(underlying.as_mut_slice());
 
-                        assert_eq!(upper, Some(expected.len()));
-                    }
+                            let mut actual = actual.iter();
 
-                    #[test]
-                    fn upper_bound_updates_when_advanced() {
-                        const ELEMENTS: usize = 8;
+                            for expected in (0..256).rev() {
+                                _ = actual.next().expect("an element");
 
-                        let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                                let (lower, _upper) = actual.size_hint();
 
-                        let actual = Dope::from(underlying.as_mut_slice());
-                        let mut actual = actual.iter();
+                                assert_eq!(lower, expected);
+                            }
+                        }
 
-                        for expected in (0..ELEMENTS).rev() {
-                            _ = actual.next().expect("an element");
+                        #[test]
+                        fn then_upper_bound_decreases() {
+                            let mut underlying: Vec<_> = (0..256).collect();
 
-                            let (_lower, upper) = actual.size_hint();
+                            let actual = Dope::from(underlying.as_mut_slice());
 
-                            assert_eq!(upper, Some(expected));
+                            let mut actual = actual.iter();
+
+                            for expected in (0..256).rev() {
+                                _ = actual.next().expect("an element");
+
+                                let (_lower, upper) = actual.size_hint();
+
+                                assert_eq!(upper, Some(expected));
+                            }
                         }
                     }
                 }
@@ -964,54 +993,74 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn yields_none_when_underlying_is_empty() {
+                    fn when_empty_then_yields_none() {
                         let mut underlying: [usize; 0] = [];
+
                         debug_assert!(underlying.is_empty());
 
                         let actual = Dope::from(underlying.as_mut_slice());
-                        let mut actual = actual.iter().rev();
 
-                        assert_eq!(actual.next(), None);
-                    }
-
-                    #[test]
-                    fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
-
-                        let mut actual = expected;
-                        let actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter().rev();
-
-                        assert_eq!(actual.count(), expected.len());
-                    }
-
-                    #[test]
-                    fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
-
-                        let mut actual = expected;
-                        let actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter().rev();
-
-                        assert!(actual.eq(expected.iter().rev()));
-                    }
-
-                    #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
-                     {
-                        let mut underlying = [0, 1];
-                        debug_assert!(!underlying.is_empty());
-
-                        let actual = Dope::from(underlying.as_mut_slice());
                         let mut actual = actual.iter();
 
-                        _ = actual.next().expect("consumes element with value 0");
-                        _ = actual.next_back().expect("consumes element with value 1");
-
-                        assert_eq!(actual.next(), None);
                         assert_eq!(actual.next_back(), None);
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_can_be_advanced_count_times() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
+
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
+
+                                let actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter().rev();
+
+                                assert_eq!(actual.count(), length);
+                            }
+                        }
+
+                        #[test]
+                        fn then_yields_correct_elements_in_correct_order() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
+                                let expected = underlying.clone();
+
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
+
+                                let actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter().rev();
+
+                                assert!(actual.eq(expected.iter().rev()));
+                            }
+                        }
+
+                        #[test]
+                        fn when_advanced_from_both_ends_then_prevents_yielding_elements_more_than_once() {
+                            let mut underlying: Vec<_> = (0..256).collect();
+
+                            for advancements in 1..underlying.len() {
+                                let actual = Dope::from(underlying.as_mut_slice());
+
+                                let mut actual = actual.iter();
+
+                                // Advance the iterator from the front that many times.
+                                for _ in 0..advancements {
+                                    _ = actual.next().expect("an element");
+                                }
+
+                                // So can advance from the back only the difference as
+                                // any more would require yielding an element already
+                                // yielded from the front.
+                                assert_eq!(actual.rev().count(), underlying.len() - advancements);
+                            }
+                        }
                     }
                 }
 
@@ -1025,6 +1074,7 @@ mod test {
                         let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
                         let actual = Dope::from(underlying.as_mut_slice());
+
                         let mut actual = actual.iter().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1043,6 +1093,7 @@ mod test {
                         let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
                         let actual = Dope::from(underlying.as_mut_slice());
+
                         let mut actual = actual.iter().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1060,14 +1111,14 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn continues_to_yield_none_when_underlying_is_empty() {
-                    let mut underlying: [usize; 0] = [];
-                    debug_assert!(underlying.is_empty());
+                fn when_empty_then_continues_to_yield_none() {
+                    let mut elements: [usize; 0] = [];
 
-                    let actual = Dope::from(underlying.as_mut_slice());
+                    let actual = Dope::from(elements.as_mut_slice());
+
                     let mut actual = actual.iter();
 
-                    // Yields `None` at least once.
+                    // Yields `None` once.
                     assert_eq!(actual.next(), None);
                     assert_eq!(actual.next_back(), None);
 
@@ -1076,23 +1127,69 @@ mod test {
                     assert_eq!(actual.next_back(), None);
                 }
 
-                #[test]
-                fn continues_to_yield_none_when_underlying_is_exhausted() {
-                    let mut underlying = [0];
+                mod when_not_empty {
+                    use super::*;
 
-                    let actual = Dope::from(underlying.as_mut_slice());
-                    let mut actual = actual.iter();
+                    #[test]
+                    fn when_exhausted_from_the_front_then_continues_to_yield_none() {
+                        let mut elements = [0];
 
-                    // Exhaust the elements.
-                    _ = actual.next().expect("the one element");
+                        let actual = Dope::from(elements.as_mut_slice());
 
-                    // Yields `None` at least once.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
+                        let mut actual = actual.iter();
 
-                    // Continues to yield `None`.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
+                        // Exhaust the element.
+                        _ = actual.next().expect("the one element");
+
+                        // Yields `None` once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn when_exhausted_from_the_back_then_continues_to_yield_none() {
+                        let mut elements = [0];
+
+                        let actual = Dope::from(elements.as_mut_slice());
+
+                        let mut actual = actual.iter();
+
+                        // Exhaust the element.
+                        _ = actual.next_back().expect("the one element");
+
+                        // Yields `None` once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn when_exhausted_from_both_ends_then_continues_to_yield_none() {
+                        let mut elements = [0, 0];
+
+                        let actual = Dope::from(elements.as_mut_slice());
+
+                        let mut actual = actual.iter();
+
+                        // Exhaust the element.
+                        _ = actual.next().expect("the first element");
+                        _ = actual.next_back().expect("the last element");
+
+                        // Yields `None` once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
                 }
             }
         }
@@ -1107,126 +1204,155 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn yields_none_when_underlying_is_empty() {
+                    fn when_empty_then_yields_none() {
                         let mut underlying: [usize; 0] = [];
+
                         debug_assert!(underlying.is_empty());
 
                         let mut actual = Dope::from(underlying.as_mut_slice());
+
                         let mut actual = actual.iter_mut();
 
                         assert_eq!(actual.next(), None);
                     }
 
-                    #[test]
-                    fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
+                    mod when_not_empty {
+                        use super::*;
 
-                        let mut actual = expected;
-                        let mut actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter_mut();
+                        #[test]
+                        fn then_can_be_advanced_count_times() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
 
-                        assert_eq!(actual.count(), expected.len());
-                    }
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
 
-                    #[test]
-                    fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                        let mut expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
+                                let mut actual = Dope::from(underlying.as_mut_slice());
 
-                        let mut actual = expected;
-                        let mut actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter_mut();
+                                let actual = actual.iter_mut();
 
-                        assert!(actual.eq(expected.iter_mut()));
-                    }
-
-                    #[test]
-                    fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
-                        const ELEMENTS: usize = 8;
-
-                        let mut actual = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-
-                        let mut expected = actual;
-                        expected.reverse();
-
-                        let mut dope = Dope::from(actual.as_mut_slice());
-                        let mut iter = dope.iter_mut();
-
-                        for value in (0..ELEMENTS).rev() {
-                            let element = iter.next().expect("an element");
-
-                            *element = value;
+                                assert_eq!(actual.count(), length);
+                            }
                         }
 
-                        drop(iter);
+                        #[test]
+                        fn then_yields_correct_elements_in_correct_order() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
+                                let expected = underlying.clone();
 
-                        assert_eq!(actual, expected);
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
+
+                                let mut actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter_mut();
+
+                                assert!(actual.eq(expected.iter()));
+                            }
+                        }
+
+                        #[test]
+                        fn when_yielded_reference_is_mutated_then_underlying_element_is_mutated() {
+                            const ELEMENTS: usize = 256;
+
+                            let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                            let mut expected = underlying;
+                            expected.reverse();
+
+                            let mut actual = Dope::from(underlying.as_mut_slice());
+                            let mut actual = actual.iter_mut();
+
+                            for value in (0..ELEMENTS).rev() {
+                                let element = actual.next().expect("an element");
+
+                                *element = value;
+                            }
+
+                            drop(actual);
+
+                            assert_eq!(underlying, expected);
+                        }
                     }
                 }
 
                 mod size_hint {
                     use super::*;
 
-                    #[test]
-                    fn lower_bound_is_number_of_elements_when_constructed() {
-                        let expected = [0, 1, 2, 3, 4, 5];
+                    mod when_constructed {
+                        use super::*;
 
-                        let mut actual = expected;
-                        let mut actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter_mut();
+                        #[test]
+                        fn then_lower_bound_is_count() {
+                            for count in 0..256 {
+                                let mut underlying: Vec<_> = (0..count).collect();
 
-                        let (lower, _upper) = actual.size_hint();
+                                debug_assert_eq!(underlying.len(), count);
 
-                        assert_eq!(lower, expected.len());
-                    }
+                                let mut actual = Dope::from(underlying.as_mut_slice());
 
-                    #[test]
-                    fn lower_bound_updates_when_advanced() {
-                        const ELEMENTS: usize = 8;
+                                let actual = actual.iter_mut();
 
-                        let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                                let (lower, _upper) = actual.size_hint();
 
-                        let mut actual = Dope::from(underlying.as_mut_slice());
-                        let mut actual = actual.iter_mut();
+                                assert_eq!(lower, count);
+                            }
+                        }
 
-                        for expected in (0..ELEMENTS).rev() {
-                            _ = actual.next().expect("an element");
+                        #[test]
+                        fn then_upper_bound_is_count() {
+                            for count in 0..256 {
+                                let mut underlying: Vec<_> = (0..count).collect();
 
-                            let (lower, _upper) = actual.size_hint();
+                                debug_assert_eq!(underlying.len(), count);
 
-                            assert_eq!(lower, expected);
+                                let mut actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter_mut();
+
+                                let (_lower, upper) = actual.size_hint();
+
+                                assert_eq!(upper, Some(count));
+                            }
                         }
                     }
 
-                    #[test]
-                    fn upper_bound_is_number_of_elements_when_constructed() {
-                        let expected = [0, 1, 2, 3, 4, 5];
+                    mod when_advanced {
+                        use super::*;
 
-                        let mut actual = expected;
-                        let mut actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter_mut();
+                        #[test]
+                        fn then_lower_bound_decreases() {
+                            let mut underlying: Vec<_> = (0..256).collect();
 
-                        let (_lower, upper) = actual.size_hint();
+                            let mut actual = Dope::from(underlying.as_mut_slice());
 
-                        assert_eq!(upper, Some(expected.len()));
-                    }
+                            let mut actual = actual.iter_mut();
 
-                    #[test]
-                    fn upper_bound_updates_when_advanced() {
-                        const ELEMENTS: usize = 8;
+                            for expected in (0..256).rev() {
+                                _ = actual.next().expect("an element");
 
-                        let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                                let (lower, _upper) = actual.size_hint();
 
-                        let mut actual = Dope::from(underlying.as_mut_slice());
-                        let mut actual = actual.iter_mut();
+                                assert_eq!(lower, expected);
+                            }
+                        }
 
-                        for expected in (0..ELEMENTS).rev() {
-                            _ = actual.next().expect("an element");
+                        #[test]
+                        fn then_upper_bound_decreases() {
+                            let mut underlying: Vec<_> = (0..256).collect();
 
-                            let (_lower, upper) = actual.size_hint();
+                            let mut actual = Dope::from(underlying.as_mut_slice());
 
-                            assert_eq!(upper, Some(expected));
+                            let mut actual = actual.iter_mut();
+
+                            for expected in (0..256).rev() {
+                                _ = actual.next().expect("an element");
+
+                                let (_lower, upper) = actual.size_hint();
+
+                                assert_eq!(upper, Some(expected));
+                            }
                         }
                     }
                 }
@@ -1239,77 +1365,97 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn yields_none_when_underlying_is_empty() {
+                    fn when_empty_then_yields_none() {
                         let mut underlying: [usize; 0] = [];
+
                         debug_assert!(underlying.is_empty());
 
                         let mut actual = Dope::from(underlying.as_mut_slice());
-                        let mut actual = actual.iter_mut().rev();
 
-                        assert_eq!(actual.next(), None);
-                    }
-
-                    #[test]
-                    fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
-
-                        let mut actual = expected;
-                        let mut actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter_mut().rev();
-
-                        assert_eq!(actual.count(), expected.len());
-                    }
-
-                    #[test]
-                    fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                        let expected = [0, 1, 2, 3, 4, 5];
-                        debug_assert!(!expected.is_empty());
-
-                        let mut actual = expected;
-                        let mut actual = Dope::from(actual.as_mut_slice());
-                        let actual = actual.iter_mut().rev();
-
-                        assert!(actual.eq(expected.iter().rev()));
-                    }
-
-                    #[test]
-                    fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends()
-                     {
-                        let mut underlying = [0, 1];
-                        debug_assert!(!underlying.is_empty());
-
-                        let mut actual = Dope::from(underlying.as_mut_slice());
                         let mut actual = actual.iter_mut();
 
-                        _ = actual.next().expect("consumes element with value 0");
-                        _ = actual.next_back().expect("consumes element with value 1");
-
-                        assert_eq!(actual.next(), None);
                         assert_eq!(actual.next_back(), None);
                     }
 
-                    #[test]
-                    fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
-                        const ELEMENTS: usize = 8;
+                    mod when_not_empty {
+                        use super::*;
 
-                        let mut actual = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                        #[test]
+                        fn then_can_be_advanced_count_times() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
 
-                        let mut expected = actual;
-                        expected.reverse();
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
 
-                        let mut dope = Dope::from(actual.as_mut_slice());
-                        let mut iter = dope.iter_mut().rev();
+                                let mut actual = Dope::from(underlying.as_mut_slice());
 
-                        for value in 0..ELEMENTS {
-                            let element = iter.next().expect("an element");
+                                let actual = actual.iter_mut().rev();
 
-                            *element = value;
+                                assert_eq!(actual.count(), length);
+                            }
                         }
 
-                        drop(iter);
+                        #[test]
+                        fn then_yields_correct_elements_in_correct_order() {
+                            for length in 1..256 {
+                                let mut underlying: Vec<_> = (0..length).collect();
+                                let expected = underlying.clone();
 
-                        assert_eq!(actual, expected);
+                                debug_assert!(!underlying.is_empty());
+                                debug_assert_eq!(underlying.len(), length);
+
+                                let mut actual = Dope::from(underlying.as_mut_slice());
+
+                                let actual = actual.iter_mut().rev();
+
+                                assert!(actual.eq(expected.iter().rev()));
+                            }
+                        }
+
+                        #[test]
+                        fn when_yielded_reference_is_mutated_then_underlying_element_is_mutated() {
+                            const ELEMENTS: usize = 256;
+
+                            let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                            let mut expected = underlying;
+                            expected.reverse();
+
+                            let mut actual = Dope::from(underlying.as_mut_slice());
+                            let mut actual = actual.iter_mut().rev();
+
+                            for value in 0..ELEMENTS {
+                                let element = actual.next().expect("an element");
+
+                                *element = value;
+                            }
+
+                            drop(actual);
+
+                            assert_eq!(underlying, expected);
+                        }
+
+                        #[test]
+                        fn when_advanced_from_both_ends_then_prevents_yielding_elements_more_than_once() {
+                            let mut underlying: Vec<_> = (0..256).collect();
+
+                            for advancements in 1..underlying.len() {
+                                let mut actual = Dope::from(underlying.as_mut_slice());
+
+                                let mut actual = actual.iter_mut();
+
+                                // Advance the iterator from the front that many times.
+                                for _ in 0..advancements {
+                                    _ = actual.next().expect("an element");
+                                }
+
+                                // So can advance from the back only the difference as
+                                // any more would require yielding an element already
+                                // yielded from the front.
+                                assert_eq!(actual.rev().count(), underlying.len() - advancements);
+                            }
+                        }
                     }
                 }
 
@@ -1323,6 +1469,7 @@ mod test {
                         let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
                         let mut actual = Dope::from(underlying.as_mut_slice());
+
                         let mut actual = actual.iter_mut().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1341,6 +1488,7 @@ mod test {
                         let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
 
                         let mut actual = Dope::from(underlying.as_mut_slice());
+
                         let mut actual = actual.iter_mut().rev();
 
                         for expected in (0..ELEMENTS).rev() {
@@ -1358,14 +1506,14 @@ mod test {
                 use super::*;
 
                 #[test]
-                fn continues_to_yield_none_when_underlying_is_empty() {
-                    let mut underlying: [usize; 0] = [];
-                    debug_assert!(underlying.is_empty());
+                fn when_empty_then_continues_to_yield_none() {
+                    let mut elements: [usize; 0] = [];
 
-                    let mut actual = Dope::from(underlying.as_mut_slice());
+                    let mut actual = Dope::from(elements.as_mut_slice());
+
                     let mut actual = actual.iter_mut();
 
-                    // Yields `None` at least once.
+                    // Yields `None` once.
                     assert_eq!(actual.next(), None);
                     assert_eq!(actual.next_back(), None);
 
@@ -1374,23 +1522,69 @@ mod test {
                     assert_eq!(actual.next_back(), None);
                 }
 
-                #[test]
-                fn continues_to_yield_none_when_underlying_is_exhausted() {
-                    let mut underlying = [0];
+                mod when_not_empty {
+                    use super::*;
 
-                    let mut actual = Dope::from(underlying.as_mut_slice());
-                    let mut actual = actual.iter_mut();
+                    #[test]
+                    fn when_exhausted_from_the_front_then_continues_to_yield_none() {
+                        let mut elements = [0];
 
-                    // Exhaust the elements.
-                    _ = actual.next().expect("the one element");
+                        let mut actual = Dope::from(elements.as_mut_slice());
 
-                    // Yields `None` at least once.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
+                        let mut actual = actual.iter_mut();
 
-                    // Continues to yield `None`.
-                    assert_eq!(actual.next(), None);
-                    assert_eq!(actual.next_back(), None);
+                        // Exhaust the element.
+                        _ = actual.next().expect("the one element");
+
+                        // Yields `None` once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn when_exhausted_from_the_back_then_continues_to_yield_none() {
+                        let mut elements = [0];
+
+                        let mut actual = Dope::from(elements.as_mut_slice());
+
+                        let mut actual = actual.iter_mut();
+
+                        // Exhaust the element.
+                        _ = actual.next_back().expect("the one element");
+
+                        // Yields `None` once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
+
+                    #[test]
+                    fn when_exhausted_from_both_ends_then_continues_to_yield_none() {
+                        let mut elements = [0, 0];
+
+                        let mut actual = Dope::from(elements.as_mut_slice());
+
+                        let mut actual = actual.iter_mut();
+
+                        // Exhaust the element.
+                        _ = actual.next().expect("the first element");
+                        _ = actual.next_back().expect("the last element");
+
+                        // Yields `None` once.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+
+                        // Continues to yield `None`.
+                        assert_eq!(actual.next(), None);
+                        assert_eq!(actual.next_back(), None);
+                    }
                 }
             }
         }
