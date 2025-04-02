@@ -533,128 +533,133 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_symmetric() {
-            // a == b <=> b == a
-
-            let elements = [0, 1, 2, 3, 4, 5];
-
-            let mut a = elements;
+        fn when_both_empty_then_equivalent() {
+            let mut a: [usize; 0] = [];
             let a = Dope::from(a.as_mut_slice());
 
-            let mut b = elements;
+            let mut b: [usize; 0] = [];
             let b = Dope::from(b.as_mut_slice());
 
+            debug_assert!(a.is_empty());
+            debug_assert!(b.is_empty());
+
             assert_eq!(a, b);
-            assert_eq!(b, a);
         }
 
         #[test]
-        fn is_transitive() {
-            // a == b && b == c <=> a == c
+        fn when_different_length_and_same_subset_then_not_equivalent() {
+            for length in 2..256 {
+                let mut a: Vec<_> = (0..length).collect();
 
-            let elements = [0, 1, 2, 3, 4, 5];
+                for subset in 1..length {
+                    let mut b = a[..subset].to_vec();
 
-            let mut a = elements;
-            let a = Dope::from(a.as_mut_slice());
+                    debug_assert_eq!(a[..subset], b[..]);
 
-            let mut b = elements;
-            let b = Dope::from(b.as_mut_slice());
+                    let a = Dope::from(a.as_mut_slice());
+                    let b = Dope::from(b.as_mut_slice());
 
-            let mut c = elements;
-            let c = Dope::from(c.as_mut_slice());
-
-            assert_eq!(a, b);
-            assert_eq!(b, c);
-            assert_eq!(a, c);
+                    assert_ne!(a, b);
+                }
+            }
         }
 
         #[test]
-        fn is_equal_when_same_elements_in_same_order() {
-            const ELEMENTS: usize = 8;
+        fn when_same_length_and_different_element_then_inequivalent() {
+            for length in 1..256 {
+                let mut a: Vec<_> = (0..length).collect();
+                let mut b: Vec<_> = (0..length).collect();
 
-            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                debug_assert_eq!(a.len(), b.len());
 
-            for end in 1..ELEMENTS {
-                let mut a = elements;
-                let a = Dope::from(&mut a[..end]);
+                for different in 0..length {
+                    b[different] = 12345;
 
-                let mut b = elements;
-                let b = Dope::from(&mut b[..end]);
+                    debug_assert_ne!(a[different], b[different]);
+                }
+
+                let a = Dope::from(a.as_mut_slice());
+                let b = Dope::from(b.as_mut_slice());
+
+                assert_ne!(a, b);
+            }
+        }
+
+        #[test]
+        fn when_same_length_and_same_elements_but_different_order_then_inequivalent() {
+            for length in 2..32 {
+                let mut a: Vec<_> = (0..length).collect();
+                let mut b: Vec<_> = (0..length).collect();
+
+                debug_assert_eq!(a.len(), b.len());
+                debug_assert_eq!(a, b);
+
+                for _ in 1..length {
+                    b.rotate_right(1);
+
+                    debug_assert_ne!(a, b);
+
+                    let a = Dope::from(a.as_mut_slice());
+                    let b = Dope::from(b.as_mut_slice());
+
+                    assert_ne!(a, b);
+                }
+            }
+        }
+
+        #[test]
+        fn when_same_length_and_same_element_and_same_order_then_equivalent() {
+            for length in 1..256 {
+                let mut a: Vec<_> = (0..length).collect();
+                let mut b: Vec<_> = (0..length).collect();
+
+                debug_assert_eq!(a, b);
+
+                let a = Dope::from(a.as_mut_slice());
+                let b = Dope::from(b.as_mut_slice());
 
                 assert_eq!(a, b);
             }
         }
 
         #[test]
-        fn is_equal_when_both_underlyings_are_empty() {
-            let elements: [usize; 0] = [];
-            debug_assert!(elements.is_empty());
+        fn when_equivalent_then_is_symmetric() {
+            // a == b <=> b == a
 
-            let mut a = elements;
-            let a = Dope::from(a.as_mut_slice());
+            for length in 0..256 {
+                let mut a: Vec<_> = (0..length).collect();
+                let mut b: Vec<_> = (0..length).collect();
 
-            let mut b = elements;
-            let b = Dope::from(b.as_mut_slice());
+                debug_assert_eq!(a, b);
 
-            assert_eq!(a, b);
-        }
-
-        #[test]
-        fn is_not_equal_when_same_elements_in_different_order() {
-            const ELEMENTS: usize = 8;
-
-            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-
-            let mut a = elements;
-            let a = Dope::from(a.as_mut_slice());
-
-            for offset in 1..ELEMENTS {
-                let mut b = elements;
-                b.rotate_right(offset);
+                let a = Dope::from(a.as_mut_slice());
                 let b = Dope::from(b.as_mut_slice());
 
-                assert_ne!(a, b);
+                assert_eq!(a, b);
+                assert_eq!(b, a);
             }
         }
 
         #[test]
-        fn is_not_equal_when_an_element_has_a_different_value() {
-            const ELEMENTS: usize = 8;
+        fn when_equivalent_then_is_transitive() {
+            // a == b && b == c <=> a == c
 
-            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+            for length in 0..256 {
+                let mut a: Vec<_> = (0..length).collect();
+                let mut b: Vec<_> = (0..length).collect();
+                let mut c: Vec<_> = (0..length).collect();
 
-            let mut a = elements;
-            let a = Dope::from(a.as_mut_slice());
+                debug_assert_eq!(a, b);
+                debug_assert_eq!(b, c);
+                debug_assert_eq!(a, c);
 
-            for index in 0..ELEMENTS {
-                let mut b = elements;
-
-                b[index] = 12345; // Some arbitrary distinct value.
-
+                let a = Dope::from(a.as_mut_slice());
                 let b = Dope::from(b.as_mut_slice());
+                let c = Dope::from(c.as_mut_slice());
 
-                assert_ne!(a, b);
-            }
-        }
-
-        #[test]
-        fn is_not_equal_when_different_lengths_but_equal_subset() {
-            const ELEMENTS: usize = 8;
-
-            let elements = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-
-            let mut a = elements;
-            let a = Dope::from(a.as_mut_slice());
-
-            for end in 1..ELEMENTS {
-                let mut b = elements;
-                let b = &mut b[..end];
-
-                debug_assert_eq!(&elements[..end], b);
-
-                let b = Dope::from(b);
-
-                assert_ne!(a, b);
+                assert_eq!(a, b);
+                assert_eq!(b, a);
+                assert_eq!(a, c);
             }
         }
     }
@@ -663,14 +668,14 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_reflexive() {
-            // a == a
+        fn when_compared_against_self_then_is_equivalent() {
+            for length in 0..256 {
+                let mut underlying: Vec<_> = (0..length).collect();
 
-            let mut elements = [0, 1, 2, 3, 4, 5];
+                let actual = Dope::from(underlying.as_mut_slice());
 
-            let a = Dope::from(elements.as_mut_slice());
-
-            assert_eq!(a, a);
+                assert_eq!(actual, actual);
+            }
         }
     }
 
