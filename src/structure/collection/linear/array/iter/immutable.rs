@@ -437,7 +437,7 @@ mod test {
                         }
 
                         // So can advance from the back only the difference as
-                        // and more would require yielding an element already
+                        // any more would require yielding an element already
                         // yielded from the front.
                         assert_eq!(actual.rev().count(), underlying.len() - advancements);
                     }
