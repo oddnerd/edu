@@ -357,73 +357,91 @@ mod test {
         mod next_back {
             use super::*;
 
-            #[test]
-            fn yields_none_when_underlying_is_empty() {
-                let mut expected: [usize; 0] = [];
-                debug_assert!(expected.is_empty());
+            mod when_count_is_zero {
+                use super::*;
 
-                let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+                #[test]
+                fn when_pointer_is_dangling_then_yields_none() {
+                    let ptr = NonNull::<usize>::dangling();
+                    let count = 0;
 
-                    unsafe { Iter::new(ptr, expected.len()) }
+                    let mut actual = unsafe { Iter::new(ptr, count) };
+
+                    assert_eq!(actual.next_back(), None);
                 }
-                .rev();
 
-                assert_eq!(actual.next(), None);
+                #[test]
+                fn when_pointer_is_not_dangling_then_yields_none() {
+                    let mut underlying: [usize; 0] = [];
+
+                    debug_assert!(underlying.is_empty());
+
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
+
+                    let mut actual = unsafe { Iter::new(ptr, count) };
+
+                    assert_eq!(actual.next_back(), None);
+                }
             }
 
-            #[test]
-            fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                debug_assert!(!expected.is_empty());
+            mod when_count_is_greater_than_zero {
+                use super::*;
 
-                let mut actual = expected;
+                #[test]
+                fn then_can_be_advanced_count_times() {
+                    for count in 1..256 {
+                        let mut underlying: Vec<_> = (0..count).collect();
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                        debug_assert!(count > 0);
+                        debug_assert_eq!(underlying.len(), count);
 
-                    unsafe { Iter::new(ptr, actual.len()) }
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+
+                        let actual = unsafe { Iter::new(ptr, count) }.rev();
+
+                        assert_eq!(actual.count(), count);
+                    }
                 }
-                .rev();
 
-                assert_eq!(actual.count(), expected.len());
-            }
+                #[test]
+                fn then_yields_correct_elements_in_correct_order() {
+                    for count in 1..256 {
+                        let mut underlying: Vec<_> = (0..count).collect();
+                        let expected = underlying.clone();
 
-            #[test]
-            fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                debug_assert!(!expected.is_empty());
+                        debug_assert!(count > 0);
+                        debug_assert_eq!(underlying.len(), count);
 
-                let mut actual = expected;
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                        let actual = unsafe { Iter::new(ptr, count) }.rev();
 
-                    unsafe { Iter::new(ptr, actual.len()) }
+                        assert!(actual.eq(expected.iter().rev()));
+                    }
                 }
-                .rev();
 
-                assert!(actual.eq(expected.iter().rev()));
-            }
+                #[test]
+                fn when_advanced_from_both_ends_then_prevents_yielding_elements_more_than_once() {
+                    let mut underlying: Vec<_> = (0..256).collect();
 
-            #[test]
-            fn prevents_elements_from_being_yielded_more_than_once_when_advanced_from_both_ends() {
-                let underlying = [0, 1];
-                debug_assert!(!underlying.is_empty());
+                    for advancements in 1..underlying.len() {
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                        let count = underlying.len();
 
-                let mut actual = underlying;
+                        let mut actual = unsafe { Iter::new(ptr, count) };
 
-                let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                        // Advance the iterator from the front that many times.
+                        for _ in 0..advancements {
+                            _ = actual.next().expect("an element");
+                        }
 
-                    unsafe { Iter::new(ptr, actual.len()) }
-                };
-
-                _ = actual.next().expect("consumes element with value 0");
-                _ = actual.next_back().expect("consumes element with value 1");
-
-                assert_eq!(actual.next(), None);
-                assert_eq!(actual.next_back(), None);
+                        // So can advance from the back only the difference as
+                        // and more would require yielding an element already
+                        // yielded from the front.
+                        assert_eq!(actual.rev().count(), underlying.len() - advancements);
+                    }
+                }
             }
         }
 
