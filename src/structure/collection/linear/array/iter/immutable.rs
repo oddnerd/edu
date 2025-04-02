@@ -202,50 +202,65 @@ mod test {
         mod next {
             use super::*;
 
-            #[test]
-            fn yields_none_when_underlying_is_empty() {
-                let mut underlying: [usize; 0] = [];
-                debug_assert!(underlying.is_empty());
+            mod when_count_is_zero {
+                use super::*;
 
-                let mut actual = {
+                #[test]
+                fn when_pointer_is_dangling_then_yields_none() {
+                    let ptr = NonNull::<usize>::dangling();
+                    let count = 0;
+
+                    let mut actual = unsafe { Iter::new(ptr, count) };
+
+                    assert_eq!(actual.next(), None);
+                }
+
+                #[test]
+                fn when_pointer_is_not_dangling_then_yields_none() {
+                    let mut underlying: [usize; 0] = [];
+
+                    debug_assert!(underlying.is_empty());
+
                     let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
 
-                    unsafe { Iter::new(ptr, underlying.len()) }
-                };
+                    let mut actual = unsafe { Iter::new(ptr, count) };
 
-                assert_eq!(actual.next(), None);
+                    assert_eq!(actual.next(), None);
+                }
             }
 
-            #[test]
-            fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                debug_assert!(!expected.is_empty());
+            mod when_count_is_greater_than_zero {
+                use super::*;
 
-                let mut actual = expected;
+                #[test]
+                fn then_can_be_advanced_count_times() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                    debug_assert!(!underlying.is_empty());
 
-                    unsafe { Iter::new(ptr, actual.len()) }
-                };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
 
-                assert_eq!(actual.count(), expected.len());
-            }
+                    let actual = unsafe { Iter::new(ptr, count) };
 
-            #[test]
-            fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                debug_assert!(!expected.is_empty());
+                    assert_eq!(actual.count(), underlying.len());
+                }
 
-                let mut actual = expected;
+                #[test]
+                fn then_yields_correct_elements_in_correct_order() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
+                    let expected = underlying;
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                    debug_assert!(!underlying.is_empty());
 
-                    unsafe { Iter::new(ptr, actual.len()) }
-                };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
 
-                assert!(actual.eq(expected.iter()));
+                    let actual = unsafe { Iter::new(ptr, count) };
+
+                    assert!(actual.eq(expected.iter()));
+                }
             }
         }
 

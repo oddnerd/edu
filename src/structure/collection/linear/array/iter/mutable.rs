@@ -202,74 +202,88 @@ mod test {
         mod next {
             use super::*;
 
-            #[test]
-            fn yields_none_when_underlying_is_empty() {
-                let mut underlying: [usize; 0] = [];
-                debug_assert!(underlying.is_empty());
+            mod when_count_is_zero {
+                use super::*;
 
-                let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                #[test]
+                fn when_pointer_is_dangling_then_yields_none() {
+                    let ptr = NonNull::<usize>::dangling();
+                    let count = 0;
 
-                    unsafe { IterMut::new(ptr, underlying.len()) }
-                };
+                    let mut actual = unsafe { IterMut::new(ptr, count) };
 
-                assert_eq!(actual.next(), None);
-            }
-
-            #[test]
-            fn can_be_advanced_the_number_of_elements_when_underlying_is_not_empty() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                debug_assert!(!expected.is_empty());
-
-                let mut actual = expected;
-
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
-
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
-
-                assert_eq!(actual.count(), expected.len());
-            }
-
-            #[test]
-            fn yields_correct_elements_in_correct_order_when_underlying_is_not_empty() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                debug_assert!(!expected.is_empty());
-
-                let mut actual = expected;
-
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
-
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
-
-                assert!(actual.eq(expected.iter()));
-            }
-
-            #[test]
-            fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
-                const ELEMENTS: usize = 8;
-
-                let mut actual = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
-
-                let mut expected = actual;
-                expected.reverse();
-
-                let mut iter = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
-
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
-
-                for value in (0..ELEMENTS).rev() {
-                    let element = iter.next().expect("an element");
-
-                    *element = value;
+                    assert_eq!(actual.next(), None);
                 }
 
-                assert_eq!(actual, expected);
+                #[test]
+                fn when_pointer_is_not_dangling_then_yields_none() {
+                    let mut underlying: [usize; 0] = [];
+
+                    debug_assert!(underlying.is_empty());
+
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
+
+                    let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                    assert_eq!(actual.next(), None);
+                }
+            }
+
+            mod when_count_is_greater_than_zero {
+                use super::*;
+
+                #[test]
+                fn then_can_be_advanced_count_times() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
+
+                    debug_assert!(!underlying.is_empty());
+
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
+
+                    let actual = unsafe { IterMut::new(ptr, count) };
+
+                    assert_eq!(actual.count(), underlying.len());
+                }
+
+                #[test]
+                fn then_yields_correct_elements_in_correct_order() {
+                    let mut underlying = [0, 1, 2, 3, 4, 5];
+                    let mut expected = underlying;
+
+                    debug_assert!(!underlying.is_empty());
+
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
+
+                    let actual = unsafe { IterMut::new(ptr, count) };
+
+                    assert!(actual.eq(expected.iter_mut()));
+                }
+
+                #[test]
+                fn when_yielded_reference_is_mutated_then_underlying_element_is_mutated() {
+                    const ELEMENTS: usize = 256;
+
+                    let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+
+                    let mut expected = underlying;
+                    expected.reverse();
+
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
+
+                    let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                    for value in (0..ELEMENTS).rev() {
+                        let element = actual.next().expect("an element");
+
+                        *element = value;
+                    }
+
+                    assert_eq!(underlying, expected);
+                }
             }
         }
 
