@@ -290,81 +290,81 @@ mod test {
         mod size_hint {
             use super::*;
 
-            #[test]
-            fn lower_bound_is_number_of_elements_when_constructed() {
-                let expected = [0, 1, 2, 3, 4, 5];
+            mod when_constructed {
+                use super::*;
 
-                let mut actual = expected;
+                #[test]
+                fn then_lower_bound_is_count() {
+                    for count in 0..256 {
+                        let mut underlying: Vec<_> = (0..count).collect();
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                        debug_assert_eq!(underlying.len(), count);
 
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                let (lower, _upper) = actual.size_hint();
+                        let actual = unsafe { IterMut::new(ptr, count) };
 
-                assert_eq!(lower, expected.len());
-            }
+                        let (lower, _upper) = actual.size_hint();
 
-            #[test]
-            fn lower_bound_updates_when_advanced() {
-                let expected = [0, 1, 2, 3, 4, 5];
+                        assert_eq!(lower, count);
+                    }
+                }
 
-                let mut actual = expected;
+                #[test]
+                fn then_upper_bound_is_count() {
+                    for count in 0..256 {
+                        let mut underlying: Vec<_> = (0..count).collect();
 
-                let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                        debug_assert_eq!(underlying.len(), count);
 
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
-                for expected in (0..expected.len()).rev() {
-                    _ = actual.next().expect("an element");
+                        let actual = unsafe { IterMut::new(ptr, count) };
 
-                    let (lower, _upper) = actual.size_hint();
+                        let (_lower, upper) = actual.size_hint();
 
-                    assert_eq!(lower, expected);
+                        assert_eq!(upper, Some(count));
+                    }
                 }
             }
 
-            #[test]
-            fn upper_bound_is_number_of_elements_when_constructed() {
-                let expected = [0, 1, 2, 3, 4, 5];
+            mod when_advanced {
+                use super::*;
 
-                let mut actual = expected;
+                #[test]
+                fn then_lower_bound_decreases() {
+                    let mut underlying: Vec<_> = (0..256).collect();
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
 
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
+                    let mut actual = unsafe { IterMut::new(ptr, count) };
 
-                let (_lower, upper) = actual.size_hint();
+                    for expected in (0..underlying.len()).rev() {
+                        _ = actual.next().expect("an element");
 
-                assert_eq!(upper, Some(expected.len()));
-            }
+                        let (lower, _upper) = actual.size_hint();
 
-            #[test]
-            fn upper_bound_updates_when_advanced() {
-                let expected = [0, 1, 2, 3, 4, 5];
+                        assert_eq!(lower, expected);
+                    }
+                }
 
-                let mut actual = expected;
+                #[test]
+                fn then_upper_bound_decreases() {
+                    let mut underlying: Vec<_> = (0..256).collect();
 
-                let mut actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(actual.as_mut_ptr()) };
+                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                    let count = underlying.len();
 
-                    unsafe { IterMut::new(ptr, actual.len()) }
-                };
+                    let mut actual = unsafe { IterMut::new(ptr, count) };
 
-                #[expect(clippy::shadow_unrelated, reason = "derived from length")]
-                for expected in (0..expected.len()).rev() {
-                    _ = actual.next().expect("an element");
+                    for expected in (0..underlying.len()).rev() {
+                        _ = actual.next().expect("an element");
 
-                    let (_lower, upper) = actual.size_hint();
+                        let (_lower, upper) = actual.size_hint();
 
-                    assert_eq!(upper, Some(expected));
+                        assert_eq!(upper, Some(expected));
+                    }
                 }
             }
         }
