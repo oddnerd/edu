@@ -782,24 +782,29 @@ mod test {
         use super::*;
 
         #[test]
-        fn is_an_empty_list_when_underlying_is_empty() {
-            let expected: [usize; 0] = [];
-            debug_assert!(expected.is_empty());
+        fn when_empty_then_is_empty_list() {
+            let mut underlying: [usize; 0] = [];
+            let expected = underlying;
 
-            let mut underlying = expected;
+            debug_assert!(underlying.is_empty());
+
             let actual = Dope::from(underlying.as_mut_slice());
 
             assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
         }
 
         #[test]
-        fn is_a_list_of_the_correct_elements_in_the_correct_order_when_underlying_is_not_empty() {
-            let expected = [0, 1, 2, 3, 4, 5];
+        fn when_not_empty_then_is_correct_elements_in_correct_order() {
+            for length in 1..256 {
+                let mut underlying: Vec<_> = (0..length).collect();
+                let expected = underlying.clone();
 
-            let mut underlying = expected;
-            let actual = Dope::from(underlying.as_mut_slice());
+                debug_assert!(!underlying.is_empty());
 
-            assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+                let actual = Dope::from(underlying.as_mut_slice());
+
+                assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
+            }
         }
     }
 
