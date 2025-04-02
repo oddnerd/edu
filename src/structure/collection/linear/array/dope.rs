@@ -456,29 +456,33 @@ mod test {
             use super::*;
 
             #[test]
-            fn sets_pointer() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn when_underlying_is_empty_then_sets_members() {
+                let mut underlying: [usize; 0] = [];
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+                debug_assert!(underlying.is_empty());
 
-                    unsafe { Dope::new(ptr, expected.len()) }
-                };
+                let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                let count = underlying.len();
 
-                assert_eq!(actual.ptr.as_ptr(), expected.as_mut_ptr());
+                let actual = unsafe { Dope::new(ptr, count) };
+
+                assert_eq!(actual.ptr.as_ptr(), underlying.as_mut_ptr());
+                assert_eq!(actual.count, underlying.len());
             }
 
             #[test]
-            fn sets_element_count() {
-                let mut expected = [0, 1, 2, 3, 4, 5];
+            fn when_underlying_is_not_empty_then_sets_members() {
+                let mut underlying = [0, 1, 2, 3, 4, 5];
 
-                let actual = {
-                    let ptr = unsafe { NonNull::new_unchecked(expected.as_mut_ptr()) };
+                debug_assert!(!underlying.is_empty());
 
-                    unsafe { Dope::new(ptr, expected.len()) }
-                };
+                let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+                let count = underlying.len();
 
-                assert_eq!(actual.count, expected.len());
+                let actual = unsafe { Dope::new(ptr, count) };
+
+                assert_eq!(actual.ptr.as_ptr(), underlying.as_mut_ptr());
+                assert_eq!(actual.count, underlying.len());
             }
         }
     }
