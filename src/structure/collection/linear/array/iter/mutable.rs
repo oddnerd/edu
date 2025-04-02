@@ -235,31 +235,35 @@ mod test {
 
                 #[test]
                 fn then_can_be_advanced_count_times() {
-                    let mut underlying = [0, 1, 2, 3, 4, 5];
+                    for count in 1..256 {
+                        let mut underlying: Vec<_> = (0..count).collect();
 
-                    debug_assert!(!underlying.is_empty());
+                        debug_assert!(count > 0);
+                        debug_assert_eq!(underlying.len(), count);
 
-                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
-                    let count = underlying.len();
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                    let actual = unsafe { IterMut::new(ptr, count) };
+                        let actual = unsafe { IterMut::new(ptr, count) };
 
-                    assert_eq!(actual.count(), underlying.len());
+                        assert_eq!(actual.count(), count);
+                    }
                 }
 
                 #[test]
                 fn then_yields_correct_elements_in_correct_order() {
-                    let mut underlying = [0, 1, 2, 3, 4, 5];
-                    let mut expected = underlying;
+                    for count in 1..256 {
+                        let mut underlying: Vec<_> = (0..count).collect();
+                        let expected = underlying.clone();
 
-                    debug_assert!(!underlying.is_empty());
+                        debug_assert!(count > 0);
+                        debug_assert_eq!(underlying.len(), count);
 
-                    let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
-                    let count = underlying.len();
+                        let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
 
-                    let actual = unsafe { IterMut::new(ptr, count) };
+                        let actual = unsafe { IterMut::new(ptr, count) };
 
-                    assert!(actual.eq(expected.iter_mut()));
+                        assert!(actual.eq(expected.iter()));
+                    }
                 }
 
                 #[test]
