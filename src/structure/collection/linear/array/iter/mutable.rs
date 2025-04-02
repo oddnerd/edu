@@ -543,47 +543,110 @@ mod test {
     mod fused_iterator {
         use super::*;
 
-        #[test]
-        fn continues_to_yield_none_when_underlying_is_empty() {
-            let mut underlying: [usize; 0] = [];
-            debug_assert!(underlying.is_empty());
+        mod when_count_is_zero {
+            use super::*;
 
-            let mut actual = {
-                let ptr = unsafe { NonNull::new_unchecked(underlying.as_mut_ptr()) };
+            #[test]
+            fn when_pointer_is_dangling_then_continues_to_yield_none() {
+                let ptr = NonNull::<usize>::dangling();
+                let count = 0;
 
-                unsafe { IterMut::new(ptr, underlying.len()) }
-            };
+                let mut actual = unsafe { IterMut::new(ptr, count) };
 
-            // Yields `None` at least once.
-            assert_eq!(actual.next(), None);
-            assert_eq!(actual.next_back(), None);
+                // Yields `None` once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
 
-            // Continues to yield `None`.
-            assert_eq!(actual.next(), None);
-            assert_eq!(actual.next_back(), None);
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+
+            #[test]
+            fn when_pointer_is_not_dangling_then_continues_to_yield_none() {
+                let mut elements: [usize; 0] = [];
+
+                let ptr = unsafe { NonNull::new_unchecked(elements.as_mut_ptr()) };
+                let count = elements.len();
+
+                let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                // Yields `None` once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
         }
 
-        #[test]
-        fn continues_to_yield_none_when_underlying_is_exhausted() {
-            let mut underlying = [0];
+        mod when_count_is_greater_than_zero {
+            use super::*;
 
-            let mut actual = {
-                let ptr = underlying.as_mut_ptr();
-                let ptr = unsafe { NonNull::new_unchecked(ptr) };
+            #[test]
+            fn when_exhausted_from_the_front_then_continues_to_yield_none() {
+                let mut elements = [0];
 
-                unsafe { IterMut::new(ptr, underlying.len()) }
-            };
+                let ptr = unsafe { NonNull::new_unchecked(elements.as_mut_ptr()) };
+                let count = elements.len();
 
-            // Exhaust the elements.
-            _ = actual.next().expect("the one element");
+                let mut actual = unsafe { IterMut::new(ptr, count) };
 
-            // Yields `None` at least once.
-            assert_eq!(actual.next(), None);
-            assert_eq!(actual.next_back(), None);
+                // Exhaust the element.
+                _ = actual.next().expect("the one element");
 
-            // Continues to yield `None`.
-            assert_eq!(actual.next(), None);
-            assert_eq!(actual.next_back(), None);
+                // Yields `None` once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+
+            #[test]
+            fn when_exhausted_from_the_back_then_continues_to_yield_none() {
+                let mut elements = [0];
+
+                let ptr = unsafe { NonNull::new_unchecked(elements.as_mut_ptr()) };
+                let count = elements.len();
+
+                let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                // Exhaust the element.
+                _ = actual.next_back().expect("the one element");
+
+                // Yields `None` once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
+
+            #[test]
+            fn when_exhausted_from_both_ends_then_continues_to_yield_none() {
+                let mut elements = [0, 0];
+
+                let ptr = unsafe { NonNull::new_unchecked(elements.as_mut_ptr()) };
+                let count = elements.len();
+
+                let mut actual = unsafe { IterMut::new(ptr, count) };
+
+                // Exhaust the element.
+                _ = actual.next().expect("the first element");
+                _ = actual.next_back().expect("the last element");
+
+                // Yields `None` once.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+
+                // Continues to yield `None`.
+                assert_eq!(actual.next(), None);
+                assert_eq!(actual.next_back(), None);
+            }
         }
     }
 
