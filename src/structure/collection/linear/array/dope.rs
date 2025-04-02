@@ -1597,7 +1597,7 @@ mod test {
             use super::*;
 
             #[test]
-            fn is_correct_address_when_underlying_is_empty() {
+            fn when_underlying_is_empty_then_yields_correct_address() {
                 let mut expected: [usize; 0] = [];
                 debug_assert!(expected.is_empty());
 
@@ -1607,7 +1607,7 @@ mod test {
             }
 
             #[test]
-            fn is_correct_address_when_underlying_is_not_empty() {
+            fn when_underlying_is_not_empty_then_yields_correct_address() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
                 debug_assert!(!expected.is_empty());
 
@@ -1621,7 +1621,7 @@ mod test {
             use super::*;
 
             #[test]
-            fn is_correct_address_when_underlying_is_empty() {
+            fn when_underlying_is_empty_then_yields_correct_address() {
                 let mut expected: [usize; 0] = [];
                 debug_assert!(expected.is_empty());
 
@@ -1631,7 +1631,7 @@ mod test {
             }
 
             #[test]
-            fn is_correct_address_when_underlying_is_not_empty() {
+            fn when_underlying_is_not_empty_then_yields_correct_address() {
                 let mut expected = [0, 1, 2, 3, 4, 5];
                 debug_assert!(!expected.is_empty());
 
@@ -1641,7 +1641,7 @@ mod test {
             }
 
             #[test]
-            fn underlying_element_is_updated_when_yielded_pointer_is_mutated() {
+            fn when_pointer_is_mutated_then_underlying_element_is_mutated() {
                 const ELEMENTS: usize = 8;
 
                 let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
