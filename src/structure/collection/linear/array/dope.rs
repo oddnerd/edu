@@ -686,33 +686,35 @@ mod test {
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_indexing_into_empty_underlying() {
+        fn when_empty_then_panics() {
             let mut underlying: [usize; 0] = [];
 
-            let instance = Dope::from(underlying.as_mut_slice());
+            let actual = Dope::from(underlying.as_mut_slice());
 
-            _ = instance.index(0);
+            _ = actual.index(0);
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_index_is_out_of_bounds() {
+        fn when_index_is_out_of_bounds_then_panics() {
             let mut underlying = [0, 1, 2, 3, 4, 5];
 
-            let instance = Dope::from(underlying.as_mut_slice());
+            let actual = Dope::from(underlying.as_mut_slice());
 
-            _ = instance.index(6);
+            _ = actual.index(6);
         }
 
         #[test]
-        fn yields_correct_element_when_index_is_inside_bounds() {
-            const ELEMENTS: usize = 8;
+        fn when_index_is_within_bounds_then_yields_correct_element() {
+            // Note that value of each underlying element is not merely its
+            // index to ensure the element instead of its index is yielded.
 
-            let underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+            let mut underlying: Vec<_> = (0..256).rev().collect();
 
-            #[expect(clippy::needless_range_loop, reason = "explicitly testing index")]
-            for index in 0..ELEMENTS {
-                assert_eq!(underlying.index(index), &index);
+            let actual = Dope::from(underlying.as_mut_slice());
+
+            for (index, expected) in (0..256).rev().enumerate() {
+                assert_eq!(actual.index(index), &expected);
             }
         }
     }
@@ -724,52 +726,55 @@ mod test {
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_indexing_into_empty_underlying() {
+        fn when_empty_then_panics() {
             let mut underlying: [usize; 0] = [];
 
-            let mut instance = Dope::from(underlying.as_mut_slice());
+            let mut actual = Dope::from(underlying.as_mut_slice());
 
-            _ = instance.index_mut(0);
+            _ = actual.index_mut(0);
         }
 
         #[test]
         #[should_panic = "index out of bounds"]
-        fn panics_when_index_is_out_of_bounds() {
+        fn when_index_is_out_of_bounds_then_panics() {
             let mut underlying = [0, 1, 2, 3, 4, 5];
 
-            let mut instance = Dope::from(underlying.as_mut_slice());
+            let mut actual = Dope::from(underlying.as_mut_slice());
 
-            _ = instance.index_mut(6);
+            _ = actual.index_mut(6);
         }
 
         #[test]
-        fn yields_correct_element_when_index_is_inside_bounds() {
-            const ELEMENTS: usize = 8;
+        fn when_index_is_within_bounds_then_yields_correct_element() {
+            // Note that value of each underlying element is not merely its
+            // index to ensure the element instead of its index is yielded.
 
-            let mut underlying = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+            let mut underlying: Vec<_> = (0..256).rev().collect();
 
-            #[expect(clippy::needless_range_loop, reason = "explicitly testing index")]
-            for index in 0..ELEMENTS {
-                assert_eq!(underlying.index_mut(index), &index);
+            let mut actual = Dope::from(underlying.as_mut_slice());
+
+            for (index, expected) in (0..256).rev().enumerate() {
+                assert_eq!(actual.index_mut(index), &expected);
             }
         }
 
         #[test]
-        fn underlying_element_is_updated_when_yielded_reference_is_mutated() {
-            const ELEMENTS: usize = 8;
+        fn when_yielded_reference_is_mutated_then_underlying_element_is_mutated() {
+            for mutated in 0..256 {
+                let mut underlying: Vec<_> = (0..256).collect();
 
-            let mut expected = core::array::from_fn::<_, ELEMENTS, _>(|index| index);
+                let mut actual = Dope::from(underlying.as_mut_slice());
 
-            let mut actual = expected;
-            let mut instance = Dope::from(actual.as_mut_slice());
+                *actual.index_mut(mutated) = 12345;
 
-            for (index, value) in (0..ELEMENTS).rev().enumerate() {
-                *instance.index_mut(index) = value;
+                for (index, element) in underlying.iter().enumerate() {
+                    if index == mutated {
+                        assert_eq!(element, &12345);
+                    } else {
+                        assert_eq!(element, &index);
+                    }
+                }
             }
-
-            expected.reverse();
-
-            assert_eq!(actual, expected);
         }
     }
 
