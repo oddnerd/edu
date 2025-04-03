@@ -4477,7 +4477,7 @@ mod test {
                 }
             }
 
-            mod when_some_front_capacity_and_no_back_capacity {
+            mod when_only_front_capacity {
                 use super::*;
 
                 mod when_zero_requested {
@@ -5175,7 +5175,7 @@ mod test {
                 }
             }
 
-            mod when_no_front_capacity_and_some_back_capacity {
+            mod when_only_back_capacity {
                 use super::*;
 
                 mod when_zero_requested {
@@ -5847,7 +5847,7 @@ mod test {
                 }
             }
 
-            mod when_some_front_capacity_and_some_back_capacity {
+            mod when_both_front_and_back_capacity {
                 use super::*;
 
                 mod when_zero_requested {
