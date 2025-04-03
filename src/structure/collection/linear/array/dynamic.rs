@@ -4251,7 +4251,8 @@ mod test {
 
                             _ = actual.reserve(0).expect("does no allocation");
 
-                            assert_eq!(actual.capacity(), 0);
+                            assert_eq!(actual.front_capacity, 0);
+                            assert_eq!(actual.back_capacity, 0);
                         }
 
                         #[test]
@@ -4281,7 +4282,8 @@ mod test {
 
                             _ = actual.reserve(0).expect("does not alter allocation");
 
-                            assert_eq!(actual.capacity(), 0);
+                            assert_eq!(actual.front_capacity, 0);
+                            assert_eq!(actual.back_capacity, 0);
                         }
 
                         #[test]
