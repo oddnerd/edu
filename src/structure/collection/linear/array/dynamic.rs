@@ -3155,43 +3155,51 @@ mod test {
                 }
             }
 
-            #[test]
-            fn has_exactly_that_much_capacity_when_non_zero_requested() {
-                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+            mod when_more_than_zero_requested {
+                use super::*;
 
-                assert_eq!(actual.capacity(), 256);
-            }
+                #[test]
+                fn then_has_exactly_that_much_capacity() {
+                    for capacity in 1..256 {
+                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
-            #[test]
-            fn allocates_memory_when_non_zero_requested() {
-                const CAPACITY: usize = 256;
-
-                let actual = Dynamic::<usize>::with_capacity(CAPACITY).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for index in 0..CAPACITY {
-                    let mut ptr = unsafe { allocation.add(index) };
-
-                    let element = unsafe { ptr.as_mut() };
-
-                    // Ideally, this will seg-fault if unowned memory.
-                    _ = element.write(index);
+                        assert_eq!(actual.capacity(), capacity);
+                    }
                 }
-            }
 
-            #[test]
-            fn does_not_initialize_elements() {
-                let actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+                #[test]
+                fn then_does_not_initialize_elements() {
+                    for capacity in 1..256 {
+                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
-                assert_eq!(actual.initialized, 0);
-            }
+                        assert_eq!(actual.initialized, 0);
+                    }
+                }
 
-            #[test]
-            fn can_allocate_maximum_possible_when_zero_size_type() {
-                let actual = Dynamic::<()>::with_capacity(isize::MAX as usize).expect("ZSTs do not occupy memory");
+                #[test]
+                fn then_allocates_memory() {
+                    for capacity in 1..256 {
+                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
-                assert_eq!(actual.capacity(), isize::MAX as usize);
+                        let allocation = actual.buffer;
+
+                        for index in 0..capacity {
+                            let mut ptr = unsafe { allocation.add(index) };
+
+                            let element = unsafe { ptr.as_mut() };
+
+                            // Ideally, this will seg-fault if unowned memory.
+                            _ = element.write(index);
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_can_allocate_maximum_possible_when_zero_size_type() {
+                    let actual = Dynamic::<()>::with_capacity(isize::MAX as usize).expect("ZSTs do not occupy memory");
+
+                    assert_eq!(actual.capacity(), isize::MAX as usize);
+                }
             }
         }
 
