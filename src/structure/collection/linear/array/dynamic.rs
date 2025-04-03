@@ -4224,7 +4224,7 @@ mod test {
             use super::*;
 
             #[test]
-            fn can_allocate_maximum_possible_when_zero_size_type() {
+            fn when_zero_size_type_then_can_allocate_maximum_possible_amount() {
                 let mut actual = Dynamic::<()>::default();
 
                 _ = actual.reserve(isize::MAX as usize).expect("ZSTs do not occupy memory");
