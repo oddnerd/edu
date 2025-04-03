@@ -3137,10 +3137,11 @@ mod test {
             use super::*;
 
             #[test]
-            fn does_not_increase_capacity_when_zero_requested() {
+            fn when_zero_requested_then_does_not_allocate() {
                 let actual = Dynamic::<usize>::with_capacity(0).expect("does no allocation");
 
                 assert_eq!(actual.front_capacity, 0);
+                assert_eq!(actual.initialized, 0);
                 assert_eq!(actual.back_capacity, 0);
             }
 
