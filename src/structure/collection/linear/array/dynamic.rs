@@ -4274,29 +4274,35 @@ mod test {
 
                         #[test]
                         fn then_does_not_increase_capacity() {
-                            let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                            for elements in 1..256 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
 
-                            debug_assert_ne!(actual.initialized, 0);
-                            debug_assert_eq!(actual.front_capacity, 0);
-                            debug_assert_eq!(actual.back_capacity, 0);
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
 
-                            _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("does not alter allocation");
 
-                            assert_eq!(actual.front_capacity, 0);
-                            assert_eq!(actual.back_capacity, 0);
+                                assert_eq!(actual.front_capacity, 0);
+                                assert_eq!(actual.back_capacity, 0);
+                            }
                         }
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                            for elements in 1..256 {
+                                let expected: Vec<_> = (0..elements).collect();
 
-                            debug_assert_ne!(actual.initialized, 0);
-                            debug_assert_eq!(actual.front_capacity, 0);
-                            debug_assert_eq!(actual.back_capacity, 0);
+                                let mut actual: Dynamic<_> = expected.iter().copied().collect();
 
-                            _ = actual.reserve(0).expect("does not alter allocation");
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
 
-                            assert!(actual.eq([0, 1, 2, 3, 4, 5]));
+                                _ = actual.reserve(0).expect("does not alter allocation");
+
+                                assert!(actual.eq(expected));
+                            }
                         }
                     }
                 }
