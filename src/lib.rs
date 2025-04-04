@@ -1,5 +1,11 @@
 //! Hand-written implementations in Rust for personal reference.
 
+// TODO: check for tests which use a constant and can be parameterized,
+// particularly those which are of the form `const CAPACITY: usize`.
+
+// TODO: expected values that are collected into a `Vec<_>` do not need to be
+// and it would increase test performance to remove the unnecessary allocation.
+
 // Disable counter-productive lints within tests.
 #![cfg_attr(
     test,
