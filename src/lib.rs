@@ -6,6 +6,9 @@
 // TODO: expected values that are collected into a `Vec<_>` do not need to be
 // and it would increase test performance to remove the unnecessary allocation.
 
+// TODO: many tests default to loops of 256 or 64 iterations. This should
+// provably be reduced to like 32 at most to reduce the performance burden.
+
 // Disable counter-productive lints within tests.
 #![cfg_attr(
     test,
