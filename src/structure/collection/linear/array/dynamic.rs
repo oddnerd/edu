@@ -11671,7 +11671,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+                                        _ = actual.reserve_back(capacity).expect("already enough capacity");
 
                                         assert_eq!(actual.buffer, allocation);
                                     }
