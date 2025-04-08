@@ -1057,12 +1057,8 @@ impl<T> Dynamic<T> {
     /// | O(N) | 𝛀(1) | 𝚯(N) |
     #[inline]
     fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
-        // TODO: when empty, this will double count available capacity
-        // because `capacity_back()` will implicitly count front capacity, yet
-        // `unchanged` will explicitly count it.
-
         let capacity = self
-            .capacity_back()
+            .back_capacity
             .checked_add_signed(capacity)
             .ok_or(FailedAllocation)?;
 
