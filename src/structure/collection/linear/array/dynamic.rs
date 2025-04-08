@@ -10105,7 +10105,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
 
                                     let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
