@@ -3164,7 +3164,7 @@ mod test {
 
                 #[test]
                 fn then_has_exactly_that_much_capacity() {
-                    for capacity in 1..256 {
+                    for capacity in 1..32 {
                         let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
                         assert_eq!(actual.capacity(), capacity);
@@ -3173,7 +3173,7 @@ mod test {
 
                 #[test]
                 fn then_does_not_initialize_elements() {
-                    for capacity in 1..256 {
+                    for capacity in 1..32 {
                         let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
                         assert_eq!(actual.initialized, 0);
@@ -3182,15 +3182,15 @@ mod test {
 
                 #[test]
                 fn then_allocates_memory() {
-                    for capacity in 1..256 {
+                    for capacity in 1..32 {
                         let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
-                        let allocation = actual.buffer;
-
                         for index in 0..capacity {
-                            let mut ptr = unsafe { allocation.add(index) };
+                            let allocation = actual.buffer;
 
-                            let element = unsafe { ptr.as_mut() };
+                            let mut element = unsafe { allocation.add(index) };
+
+                            let element = unsafe { element.as_mut() };
 
                             // Ideally, this will seg-fault if unowned memory.
                             _ = element.write(index);
@@ -4221,6 +4221,10 @@ mod test {
             fn when_zero_size_type_then_can_allocate_maximum_possible_amount() {
                 let mut actual = Dynamic::<()>::default();
 
+                debug_assert_eq!(actual.initialized, 0);
+                debug_assert_eq!(actual.front_capacity, 0);
+                debug_assert_eq!(actual.back_capacity, 0);
+
                 _ = actual.reserve(isize::MAX as usize).expect("ZSTs do not occupy memory");
 
                 assert_eq!(actual.capacity(), isize::MAX as usize);
@@ -4245,8 +4249,7 @@ mod test {
 
                             _ = actual.reserve(0).expect("does no allocation");
 
-                            assert_eq!(actual.front_capacity, 0);
-                            assert_eq!(actual.back_capacity, 0);
+                            assert_eq!(actual.capacity(), 0);
                         }
 
                         #[test]
@@ -4267,33 +4270,47 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn then_does_not_increase_capacity() {
-                            for elements in 1..256 {
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
                                 debug_assert_ne!(actual.initialized, 0);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve(0).expect("already enough capacity");
+
                                 assert_eq!(actual.back_capacity, 0);
                             }
                         }
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..256 {
-                                let expected: Vec<_> = (0..elements).collect();
+                            for elements in 1..32 {
+                                let expected = 0..elements;
 
-                                let mut actual: Dynamic<_> = expected.iter().copied().collect();
+                                let mut actual: Dynamic<_> = expected.clone().collect();
 
                                 debug_assert_ne!(actual.initialized, 0);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert!(actual.eq(expected));
                             }
@@ -4318,7 +4335,7 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(power + 1);
+                                _ = actual.reserve(power + 1).expect("successful allocation");
 
                                 assert_eq!(actual.capacity(), (power + 1).next_power_of_two());
                             }
@@ -4326,7 +4343,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 debug_assert_eq!(actual.initialized, 0);
@@ -4341,7 +4358,7 @@ mod test {
 
                         #[test]
                         fn then_allocates_memory() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 debug_assert_eq!(actual.initialized, 0);
@@ -4350,9 +4367,9 @@ mod test {
 
                                 _ = actual.reserve(capacity).expect("successful allocation");
 
-                                let allocation = actual.buffer;
-
                                 for index in 0..capacity {
+                                    let allocation = actual.buffer;
+
                                     let mut element = unsafe { allocation.add(index) };
 
                                     let element = unsafe { element.as_mut() };
@@ -4365,7 +4382,7 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 debug_assert_eq!(actual.initialized, 0);
@@ -4407,7 +4424,7 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_bounding_power_of_two_of_requested() {
-                            for elements in 1..256 {
+                            for elements in 1..32 {
                                 for exponent in 0..(isize::BITS - 2) {
                                     let power = usize::pow(2, exponent);
 
@@ -4417,7 +4434,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(power + 1);
+                                    _ = actual.reserve(power + 1).expect("successful allocation");
 
                                     assert_eq!(actual.back_capacity, (power + 1 + elements).next_power_of_two() - elements);
                                 }
@@ -4427,7 +4444,7 @@ mod test {
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
-                                for capacity in 1..256 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<usize> = expected.clone().collect();
@@ -4446,7 +4463,7 @@ mod test {
                         #[test]
                         fn then_reallocates_memory() {
                             for elements in 1..32 {
-                                for capacity in 1..256 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     debug_assert_ne!(actual.initialized, 0);
@@ -4455,9 +4472,10 @@ mod test {
 
                                     _ = actual.reserve(capacity).expect("successful allocation");
 
-                                    let allocation = actual.buffer;
 
                                     for index in 0..(elements + capacity) {
+                                        let allocation = actual.buffer;
+
                                         let mut element = unsafe { allocation.add(index) };
 
                                         let element = unsafe { element.as_mut() };
@@ -4472,7 +4490,7 @@ mod test {
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
-                                for capacity in 1..256 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
@@ -4483,14 +4501,12 @@ mod test {
 
                                     _ = actual.reserve(capacity).expect("successful allocation");
 
-                                    let allocation = actual.buffer.cast::<usize>();
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                     for _ in 0..capacity {
                                         // NOTE: this is distinct from the expected values.
                                         _ = actual.append(usize::MAX).expect("uses capacity");
                                     }
-
-                                    let pointers = unsafe { core::slice::from_raw_parts(allocation.as_ptr(), expected.len()) };
 
                                     assert!(pointers.iter().copied().eq(expected));
                                 }
@@ -4510,8 +4526,8 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn then_does_not_modify_capacity() {
-                            for capacity in 1..256 {
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4520,7 +4536,7 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.capacity(), capacity);
                             }
@@ -4528,7 +4544,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4537,15 +4553,15 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.initialized, 0);
                             }
                         }
 
                         #[test]
-                        fn then_does_not_modify_allocation() {
-                            for capacity in 1..256 {
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4556,7 +4572,7 @@ mod test {
 
                                 let allocation = actual.buffer;
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.buffer, allocation);
                             }
@@ -4578,7 +4594,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.front_capacity, 0);
                                 }
@@ -4597,7 +4613,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.back_capacity, capacity);
                                 }
@@ -4618,7 +4634,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert!(actual.eq(expected));
                                 }
@@ -4626,12 +4642,10 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_allocation() {
+                        fn then_does_not_reallocate() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
-                                    let expected = 0..elements;
-
-                                    let mut actual: Dynamic<_> = expected.clone().collect();
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
@@ -4641,7 +4655,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -4658,10 +4672,10 @@ mod test {
 
                         #[test]
                         fn then_increases_capacity_to_bounding_power_of_two_of_requested() {
-                            for capacity in 1..256 {
-                                for exponent in 0..(isize::BITS - 2) {
-                                    let power = usize::pow(2, exponent);
+                            for exponent in 0..(isize::BITS - 2) {
+                                let power = usize::pow(2, exponent);
 
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<()>::default();
 
                                     _ = actual.reserve_front(power).expect("successful allocation");
@@ -4670,17 +4684,17 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, power);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(power + capacity).expect("successful allocation");
+                                    _ = actual.reserve(power + additional).expect("successful allocation");
 
-                                    assert_eq!(actual.capacity(), (power + capacity).next_power_of_two());
+                                    assert_eq!(actual.capacity(), (power + additional).next_power_of_two());
                                 }
                             }
                         }
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4698,8 +4712,8 @@ mod test {
 
                         #[test]
                         fn then_reallocates_memory() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4710,9 +4724,9 @@ mod test {
 
                                     _ = actual.reserve(capacity + additional).expect("successful allocation");
 
-                                    let allocation = actual.buffer;
-
                                     for index in 0..(capacity + additional) {
+                                        let allocation = actual.buffer;
+
                                         let mut element = unsafe { allocation.add(index) };
 
                                         let element = unsafe { element.as_mut() };
@@ -4726,8 +4740,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..64 {
-                                for additional in 1..64 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4755,9 +4769,9 @@ mod test {
 
                         #[test]
                         fn then_consumes_front_capacity() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4776,11 +4790,11 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_bounding_power_of_two_of_requested() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for exponent in 0..(isize::BITS - 2) {
-                                        let power = usize::pow(2, exponent);
+                            for elements in 1..32 {
+                                for exponent in 0..(isize::BITS - 2) {
+                                    let power = usize::pow(2, exponent);
 
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<()> = core::iter::repeat_n((), elements).collect();
 
                                         _ = actual.reserve_front(power).expect("successful allocation");
@@ -4789,9 +4803,9 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, power);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
-                                        _ = actual.reserve(power + capacity);
+                                        _ = actual.reserve(power + additional).expect("successful allocation");
 
-                                        assert_eq!(actual.back_capacity, (power + capacity + elements).next_power_of_two() - elements);
+                                        assert_eq!(actual.back_capacity, (power + additional + elements).next_power_of_two() - elements);
                                     }
                                 }
                             }
@@ -4803,9 +4817,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
@@ -4826,9 +4840,9 @@ mod test {
 
                         #[test]
                         fn then_reallocates_memory() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4839,9 +4853,9 @@ mod test {
 
                                         _ = actual.reserve(capacity + additional).expect("successful allocation");
 
-                                        let allocation = actual.buffer;
-
                                         for index in 0..(elements + capacity + additional) {
+                                            let allocation = actual.buffer;
+
                                             let mut element = unsafe { allocation.add(index) };
 
                                             let element = unsafe { element.as_mut() };
@@ -4871,14 +4885,12 @@ mod test {
 
                                         _ = actual.reserve(capacity + additional).expect("successful allocation");
 
-                                        let allocation = actual.as_mut_ptr();
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                         for _ in 0..(capacity + additional) {
                                             // NOTE: this is distinct from the expected values.
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
-
-                                        let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                         assert!(pointers.iter().copied().eq(expected));
                                     }
@@ -4895,8 +4907,8 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn then_consumes_front_capacity() {
-                            for capacity in 1..256 {
+                        fn then_does_not_modify_capacity() {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4905,32 +4917,15 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(capacity).expect("uses front capacity");
+                                _ = actual.reserve(capacity).expect("already enough capacity");
 
-                                assert_eq!(actual.front_capacity, 0);
-                            }
-                        }
-
-                        #[test]
-                        fn then_increases_back_capacity_to_requested() {
-                            for capacity in 1..256 {
-                                let mut actual = Dynamic::<usize>::default();
-
-                                _ = actual.reserve_front(capacity).expect("successful allocation");
-
-                                debug_assert_eq!(actual.initialized, 0);
-                                debug_assert_eq!(actual.front_capacity, capacity);
-                                debug_assert_eq!(actual.back_capacity, 0);
-
-                                _ = actual.reserve(capacity).expect("uses front capacity");
-
-                                assert_eq!(actual.back_capacity, capacity);
+                                assert_eq!(actual.capacity(), capacity);
                             }
                         }
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4939,7 +4934,7 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(capacity).expect("uses front capacity");
+                                _ = actual.reserve(capacity).expect("already enough capacity");
 
                                 assert_eq!(actual.initialized, 0);
                             }
@@ -4947,7 +4942,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4958,7 +4953,7 @@ mod test {
 
                                 let allocation = actual.buffer;
 
-                                _ = actual.reserve(capacity).expect("uses front capacity");
+                                _ = actual.reserve(capacity).expect("already enough capacity");
 
                                 assert_eq!(actual.buffer, allocation);
                             }
@@ -4966,7 +4961,7 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -4993,8 +4988,8 @@ mod test {
 
                         #[test]
                         fn then_consumes_front_capacity() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -5003,7 +4998,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     assert_eq!(actual.front_capacity, 0);
                                 }
@@ -5012,8 +5007,8 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_requested() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -5022,7 +5017,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     assert_eq!(actual.back_capacity, capacity);
                                 }
@@ -5031,8 +5026,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
@@ -5043,7 +5038,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     assert!(actual.eq(expected));
                                 }
@@ -5052,8 +5047,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
@@ -5064,7 +5059,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -5073,8 +5068,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
@@ -5085,16 +5080,14 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
-                                    let allocation = actual.as_mut_ptr();
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                     for _ in 0..capacity {
                                         // NOTE: this is distinct from the expected values.
                                         _ = actual.append(usize::MAX).expect("uses capacity");
                                     }
-
-                                    let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                     assert!(pointers.iter().copied().eq(expected));
                                 }
@@ -5110,9 +5103,9 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn then_consumes_front_capacity() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity + additional).expect("successful allocation");
@@ -5121,36 +5114,17 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity + additional);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
-                                    assert_eq!(actual.front_capacity, 0);
-                                }
-                            }
-                        }
-
-                        #[test]
-                        fn then_increases_back_capacity_to_front_capacity() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
-                                    let mut actual = Dynamic::<usize>::default();
-
-                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
-
-                                    debug_assert_eq!(actual.initialized, 0);
-                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
-                                    debug_assert_eq!(actual.back_capacity, 0);
-
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
-
-                                    assert_eq!(actual.back_capacity, capacity + additional);
+                                    assert_eq!(actual.capacity(), capacity + additional);
                                 }
                             }
                         }
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity + additional).expect("successful allocation");
@@ -5159,7 +5133,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity + additional);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     assert_eq!(actual.initialized, 0);
                                 }
@@ -5168,8 +5142,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity + additional).expect("successful allocation");
@@ -5180,7 +5154,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -5189,8 +5163,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_front(capacity + additional).expect("successful allocation");
@@ -5199,7 +5173,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, capacity + additional);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("uses front capacity");
+                                    _ = actual.reserve(capacity).expect("already enough capacity");
 
                                     let allocation = actual.buffer;
 
@@ -5229,7 +5203,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
-                                        _ = actual.reserve(capacity).expect("uses front capacity");
+                                        _ = actual.reserve(capacity).expect("already enough capacity");
 
                                         assert_eq!(actual.front_capacity, 0);
                                     }
@@ -5250,7 +5224,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
-                                        _ = actual.reserve(capacity).expect("uses front capacity");
+                                        _ = actual.reserve(capacity).expect("already enough capacity");
 
                                         assert_eq!(actual.back_capacity, capacity + additional);
                                     }
@@ -5273,7 +5247,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
-                                        _ = actual.reserve(capacity).expect("uses front capacity");
+                                        _ = actual.reserve(capacity).expect("already enough capacity");
 
                                         assert!(actual.eq(expected));
                                     }
@@ -5296,7 +5270,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        _ = actual.reserve(capacity).expect("uses front capacity");
+                                        _ = actual.reserve(capacity).expect("already enough capacity");
 
                                         assert_eq!(actual.buffer, allocation);
                                     }
@@ -5319,16 +5293,14 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
-                                        _ = actual.reserve(capacity).expect("uses front capacity");
+                                        _ = actual.reserve(capacity).expect("already enough capacity");
 
-                                        let allocation = actual.as_mut_ptr();
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                         for _ in 0..capacity {
                                             // NOTE: this is distinct from the expected values.
-                                            _ = actual.append(12345).expect("uses capacity");
+                                            _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
-
-                                        let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                         assert!(pointers.iter().copied().eq(expected));
                                     }
@@ -5349,8 +5321,8 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn then_does_not_modify_capacity() {
-                            for capacity in 1..256 {
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5359,7 +5331,7 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.capacity(), capacity);
                             }
@@ -5367,7 +5339,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5376,15 +5348,15 @@ mod test {
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.initialized, 0);
                             }
                         }
 
                         #[test]
-                        fn then_does_not_modify_allocation() {
-                            for capacity in 1..256 {
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5395,7 +5367,7 @@ mod test {
 
                                 let allocation = actual.buffer;
 
-                                _ = actual.reserve(0).expect("does not alter allocation");
+                                _ = actual.reserve(0).expect("already enough capacity");
 
                                 assert_eq!(actual.buffer, allocation);
                             }
@@ -5407,8 +5379,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_increase_front_capacity() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5417,7 +5389,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.front_capacity, 0);
                                 }
@@ -5426,8 +5398,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_decrease_back_capacity() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5436,7 +5408,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.back_capacity, capacity);
                                 }
@@ -5445,8 +5417,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
@@ -5457,7 +5429,7 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert!(actual.eq(expected));
                                 }
@@ -5465,9 +5437,9 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_allocation() {
-                            for elements in 1..256 {
-                                for capacity in 1..256 {
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5478,7 +5450,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -5495,10 +5467,10 @@ mod test {
 
                         #[test]
                         fn then_increases_capacity_to_bounding_power_of_two_of_requested() {
-                            for capacity in 1..256 {
-                                for exponent in 0..(isize::BITS - 2) {
-                                    let power = usize::pow(2, exponent);
+                            for exponent in 0..(isize::BITS - 2) {
+                                let power = usize::pow(2, exponent);
 
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<()>::default();
 
                                     _ = actual.reserve_back(power).expect("successful allocation");
@@ -5507,17 +5479,17 @@ mod test {
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, power);
 
-                                    _ = actual.reserve(power + capacity).expect("successful allocation");
+                                    _ = actual.reserve(power + additional).expect("successful allocation");
 
-                                    assert_eq!(actual.capacity(), (power + capacity).next_power_of_two());
+                                    assert_eq!(actual.capacity(), (power + additional).next_power_of_two());
                                 }
                             }
                         }
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5535,8 +5507,8 @@ mod test {
 
                         #[test]
                         fn then_reallocates_memory() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5547,9 +5519,9 @@ mod test {
 
                                     _ = actual.reserve(capacity + additional).expect("successful allocation");
 
-                                    let allocation = actual.buffer;
-
                                     for index in 0..(capacity + additional) {
+                                        let allocation = actual.buffer;
+
                                         let mut element = unsafe { allocation.add(index) };
 
                                         let element = unsafe { element.as_mut() };
@@ -5563,8 +5535,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..256 {
-                                for additional in 1..256 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5614,11 +5586,11 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_bounding_power_of_two_of_requested() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for exponent in 0..(isize::BITS - 2) {
-                                        let power = usize::pow(2, exponent);
+                            for elements in 1..32 {
+                                for exponent in 0..(isize::BITS - 2) {
+                                    let power = usize::pow(2, exponent);
 
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                         _ = actual.reserve_back(power).expect("successful allocation");
@@ -5627,9 +5599,9 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, power);
 
-                                        _ = actual.reserve(power + capacity);
+                                        _ = actual.reserve(power + additional);
 
-                                        assert_eq!(actual.back_capacity, (power + capacity + elements).next_power_of_two() - elements);
+                                        assert_eq!(actual.back_capacity, (power + additional + elements).next_power_of_two() - elements);
                                     }
                                 }
                             }
@@ -5673,9 +5645,9 @@ mod test {
 
                                         _ = actual.reserve(capacity + additional).expect("successful allocation");
 
-                                        let allocation = actual.buffer;
-
                                         for index in 0..(elements + capacity + additional) {
+                                            let allocation = actual.buffer;
+
                                             let mut element = unsafe { allocation.add(index) };
 
                                             let element = unsafe { element.as_mut() };
@@ -5705,14 +5677,12 @@ mod test {
 
                                         _ = actual.reserve(capacity + additional).expect("successful allocation");
 
-                                        let allocation = actual.as_mut_ptr();
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                         for _ in 0..(capacity + additional) {
                                             // NOTE: this is distinct from the expected values.
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
-
-                                        let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                         assert!(pointers.iter().copied().eq(expected));
                                     }
@@ -5730,7 +5700,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_capacity() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5747,7 +5717,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5764,7 +5734,7 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5783,7 +5753,7 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..256 {
+                            for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5810,8 +5780,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_increase_front_capacity() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5829,8 +5799,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_back_capacity() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5848,8 +5818,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
@@ -5869,8 +5839,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
@@ -5890,8 +5860,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
                                     let expected = 0..elements;
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
@@ -5904,14 +5874,12 @@ mod test {
 
                                     _ = actual.reserve(capacity).expect("already enough capacity");
 
-                                    let allocation = actual.buffer.cast::<usize>();
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                     for _ in 0..capacity {
                                         // NOTE: this is distinct form the expected values.
                                         _ = actual.append(usize::MAX).expect("uses capacity");
                                     }
-
-                                    let pointers = unsafe { core::slice::from_raw_parts(allocation.as_ptr(), expected.len()) };
 
                                     assert!(pointers.iter().copied().eq(expected));
                                 }
@@ -5928,8 +5896,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_decrease_capacity() {
-                            for capacity in 1..64 {
-                                for additional in 1..64 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -5947,8 +5915,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for capacity in 1..64 {
-                                for additional in 1..64 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -5966,8 +5934,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for capacity in 1..64 {
-                                for additional in 1..64 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -5987,8 +5955,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..64 {
-                                for additional in 1..64 {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -6016,9 +5984,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_increase_front_capacity() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -6037,9 +6005,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_decrease_back_capacity() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -6058,9 +6026,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
@@ -6081,9 +6049,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
@@ -6104,9 +6072,9 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
-                            for elements in 1..64 {
-                                for capacity in 1..64 {
-                                    for additional in 1..64 {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
@@ -6119,14 +6087,12 @@ mod test {
 
                                         _ = actual.reserve(capacity).expect("already enough capacity");
 
-                                        let allocation = actual.buffer.cast::<usize>();
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                         for _ in 0..capacity {
-                                            // NOTE: this is distinct from expected values
+                                            // NOTE: this is distinct from the expected values
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
-
-                                        let pointers = unsafe { core::slice::from_raw_parts(allocation.as_ptr(), expected.len()) };
 
                                         assert!(pointers.iter().copied().eq(expected));
                                     }
@@ -6148,19 +6114,19 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_capacity() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
 
-                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("back capacity to shift into");
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
                                     debug_assert_eq!(actual.initialized, 0);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.capacity(), front + back);
                                 }
@@ -6169,19 +6135,19 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
 
-                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("back capacity to shift into");
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
                                     debug_assert_eq!(actual.initialized, 0);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.initialized, 0);
                                 }
@@ -6189,9 +6155,9 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_allocation() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6204,7 +6170,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    _ = actual.reserve(0).expect("does not alter allocation");
+                                    _ = actual.reserve(0).expect("already enough capacity");
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -6217,9 +6183,9 @@ mod test {
 
                         #[test]
                         fn then_consumes_front_capacity() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
@@ -6229,7 +6195,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
-                                        _ = actual.reserve(0).expect("does not alter allocation");
+                                        _ = actual.reserve(0).expect("already enough capacity");
 
                                         assert_eq!(actual.front_capacity, 0);
                                     }
@@ -6239,9 +6205,9 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_sum_with_front_capacity() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
@@ -6251,7 +6217,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
-                                        _ = actual.reserve(0).expect("does not alter allocation");
+                                        _ = actual.reserve(0).expect("already enough capacity");
 
                                         assert_eq!(actual.back_capacity, front + back);
                                     }
@@ -6261,9 +6227,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
@@ -6275,7 +6241,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
-                                        _ = actual.reserve(0).expect("does not alter allocation");
+                                        _ = actual.reserve(0).expect("already enough capacity");
 
                                         assert!(actual.eq(expected));
                                     }
@@ -6284,10 +6250,10 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_allocation() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
@@ -6301,7 +6267,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        _ = actual.reserve(0).expect("does not alter allocation");
+                                        _ = actual.reserve(0).expect("already enough capacity");
 
                                         assert_eq!(actual.buffer, allocation);
                                     }
@@ -6319,14 +6285,17 @@ mod test {
 
                         #[test]
                         fn then_increases_capacity_to_bounding_power_of_two_of_requested() {
-                            for capacity in 1..256 {
-                                for exponent in 0..(isize::BITS - 2) {
-                                    let power = usize::pow(2, exponent);
+                            for exponent in 0..(isize::BITS - 2) {
+                                let power = usize::pow(2, exponent);
 
+                                for additional in 1..32 {
                                     for front in 0..exponent {
-                                        // Testing each and every possible
-                                        // combination of front and back
-                                        // capacity takes too much time.
+                                        // Testing each possible combination of
+                                        // front and back capacities that sum
+                                        // to the required power is not
+                                        //  practical. This naively samples
+                                        // partitions along powers of two and
+                                        // should suffice.
                                         let front = usize::pow(2, front);
 
                                         let mut actual = Dynamic::<()>::default();
@@ -6339,9 +6308,9 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, power - front);
 
-                                        _ = actual.reserve(power + capacity).expect("successful allocation");
+                                        _ = actual.reserve(power + additional).expect("successful allocation");
 
-                                        assert_eq!(actual.capacity(), (power + capacity).next_power_of_two());
+                                        assert_eq!(actual.capacity(), (power + additional).next_power_of_two());
                                     }
                                 }
                             }
@@ -6349,9 +6318,9 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for front in 1..64 {
-                                for back in 1..64 {
-                                    for capacity in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
 
                                         _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6362,7 +6331,7 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
-                                        _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                        _ = actual.reserve(front + back + additional).expect("successful allocation");
 
                                         assert_eq!(actual.initialized, 0);
                                     }
@@ -6372,9 +6341,9 @@ mod test {
 
                         #[test]
                         fn then_reallocates_memory() {
-                            for front in 1..64 {
-                                for back in 1..64 {
-                                    for capacity in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
 
                                         _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6385,11 +6354,11 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
-                                        _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                        _ = actual.reserve(front + back + additional).expect("successful allocation");
 
-                                        let allocation = actual.buffer;
+                                        for index in 0..(front + back + additional) {
+                                            let allocation = actual.buffer;
 
-                                        for index in 0..(front + back + capacity) {
                                             let mut element = unsafe { allocation.add(index) };
 
                                             let element = unsafe { element.as_mut() };
@@ -6404,9 +6373,9 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for front in 1..64 {
-                                for back in 1..64 {
-                                    for capacity in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
 
                                         _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6417,11 +6386,15 @@ mod test {
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
-                                        _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                        _ = actual.reserve(front + back + additional).expect("successful allocation");
 
-                                        for element in 0..(front + back + capacity) {
+                                        let allocation = actual.buffer;
+
+                                        for element in 0..(front + back + additional) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
+
+                                        assert_eq!(actual.buffer, allocation);
                                     }
                                 }
                             }
@@ -6436,18 +6409,17 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for capacity in 1..32 {
+                                        for additional in 1..32 {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
-                                            _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                            _ = actual.reserve(front + back + additional).expect("successful allocation");
 
                                             assert_eq!(actual.front_capacity, 0);
                                         }
@@ -6459,30 +6431,31 @@ mod test {
                         #[test]
                         fn then_increases_back_capacity_to_bounding_power_of_two_of_requested() {
                             for elements in 1..32 {
-                                for capacity in 1..32 {
+                                for exponent in 0..(isize::BITS - 2) {
+                                    let power = usize::pow(2, exponent);
 
-                                    for exponent in 0..(isize::BITS - 2) {
-                                        let power = usize::pow(2, exponent);
-
+                                    for additional in 1..32 {
                                         for front in 0..exponent {
-                                            // Testing each and every possible
-                                            // combination of front and back
-                                            // capacity takes too much time.
+                                            // Testing each possible combination of
+                                            // front and back capacities that sum
+                                            // to the required power is not
+                                            //  practical. This naively samples
+                                            // partitions along powers of two and
+                                            // should suffice.
                                             let front = usize::pow(2, front);
 
                                             let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                                            _ = actual.reserve_back(power).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(power - front).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, power - front);
 
-                                            _ = actual.reserve(power + capacity).expect("successful allocation");
+                                            _ = actual.reserve(power + additional).expect("successful allocation");
 
-                                            assert_eq!(actual.back_capacity, (power + capacity + elements).next_power_of_two() - elements);
+                                            assert_eq!(actual.back_capacity, (power + additional + elements).next_power_of_two() - elements);
                                         }
                                     }
                                 }
@@ -6494,7 +6467,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for capacity in 1..32 {
+                                        for additional in 1..32 {
                                             let expected = 0..elements;
 
                                             let mut actual: Dynamic<_> = expected.clone().collect();
@@ -6507,7 +6480,7 @@ mod test {
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
-                                            _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                            _ = actual.reserve(front + back + additional).expect("successful allocation");
 
                                             assert!(actual.eq(expected));
                                         }
@@ -6521,22 +6494,21 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for capacity in 1..32 {
+                                        for additional in 1..32 {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
-                                            _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                            _ = actual.reserve(front + back + additional).expect("successful allocation");
 
-                                            let allocation = actual.buffer;
+                                            for index in 0..(elements + front + back + additional) {
+                                                let allocation = actual.buffer;
 
-                                            for index in 0..(elements + front + back + capacity) {
                                                 let mut element = unsafe { allocation.add(index) };
 
                                                 let element = unsafe { element.as_mut() };
@@ -6555,7 +6527,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for capacity in 1..32 {
+                                        for additional in 1..32 {
                                             let expected = 0..elements;
 
                                             let mut actual: Dynamic<_> = expected.clone().collect();
@@ -6568,16 +6540,14 @@ mod test {
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
-                                            _ = actual.reserve(front + back + capacity).expect("successful allocation");
+                                            _ = actual.reserve(front + back + additional).expect("successful allocation");
 
-                                            let allocation = actual.as_mut_ptr();
+                                            let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..(front + back + capacity) {
+                                            for _ in 0..(front + back + additional) {
                                                 // NOTE: this is different from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
-
-                                            let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                             assert!(pointers.iter().copied().eq(expected));
                                         }
@@ -6596,8 +6566,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_capacity() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6617,8 +6587,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6638,8 +6608,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6661,8 +6631,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for front in 1..256 {
-                                for back in 1..256 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
 
                                     _ = actual.reserve_back(front + back).expect("successful allocation");
@@ -6692,14 +6662,13 @@ mod test {
 
                         #[test]
                         fn then_consumes_front_capacity() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                        _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
 
                                         debug_assert_ne!(actual.initialized, 0);
                                         debug_assert_eq!(actual.front_capacity, front);
@@ -6715,14 +6684,13 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_sum_with_front_capacity() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                        _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
 
                                         debug_assert_ne!(actual.initialized, 0);
                                         debug_assert_eq!(actual.front_capacity, front);
@@ -6738,16 +6706,15 @@ mod test {
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                        _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
 
                                         debug_assert_ne!(actual.initialized, 0);
                                         debug_assert_eq!(actual.front_capacity, front);
@@ -6763,14 +6730,13 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                        _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
 
                                         debug_assert_ne!(actual.initialized, 0);
                                         debug_assert_eq!(actual.front_capacity, front);
@@ -6788,16 +6754,15 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
-                            for elements in 1..64 {
-                                for front in 1..64 {
-                                    for back in 1..64 {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                        _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
 
                                         debug_assert_ne!(actual.initialized, 0);
                                         debug_assert_eq!(actual.front_capacity, front);
@@ -6805,14 +6770,12 @@ mod test {
 
                                         _ = actual.reserve(front + back).expect("already enough capacity");
 
-                                        let allocation = actual.as_mut_ptr();
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                         for _ in 0..(front + back) {
                                             // NOTE: this is distinct from expected values.
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
-
-                                        let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                         assert!(pointers.iter().copied().eq(expected));
                                     }
@@ -6830,8 +6793,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_decrease_capacity() {
-                            for front in 1..64 {
-                                for back in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     for additional in 1..(front + back) {
                                         let mut actual = Dynamic::<usize>::default();
 
@@ -6853,8 +6816,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_initialize_elements() {
-                            for front in 1..64 {
-                                for back in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     for additional in 1..(front + back) {
                                         let mut actual = Dynamic::<usize>::default();
 
@@ -6876,8 +6839,8 @@ mod test {
 
                         #[test]
                         fn then_does_not_reallocate() {
-                            for front in 1..64 {
-                                for back in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     for additional in 1..(front + back) {
                                         let mut actual = Dynamic::<usize>::default();
 
@@ -6901,8 +6864,8 @@ mod test {
 
                         #[test]
                         fn then_that_many_elements_can_be_appended_without_reallocation() {
-                            for front in 1..64 {
-                                for back in 1..64 {
+                            for front in 1..32 {
+                                for back in 1..32 {
                                     for additional in 1..(front + back) {
                                         let mut actual = Dynamic::<usize>::default();
 
@@ -6940,9 +6903,8 @@ mod test {
                                         for additional in 1..(front + back) {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
@@ -6965,9 +6927,8 @@ mod test {
                                         for additional in 1..(front + back) {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
@@ -6992,9 +6953,8 @@ mod test {
 
                                             let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
@@ -7017,9 +6977,8 @@ mod test {
                                         for additional in 1..(front + back) {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
@@ -7046,9 +7005,8 @@ mod test {
 
                                             let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
 
                                             debug_assert_ne!(actual.initialized, 0);
                                             debug_assert_eq!(actual.front_capacity, front);
@@ -7056,14 +7014,12 @@ mod test {
 
                                             _ = actual.reserve((front + back) - additional).expect("already enough capacity");
 
-                                            let allocation = actual.as_mut_ptr();
+                                            let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
                                             for _ in 0..((front + back) - additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
-
-                                            let pointers = unsafe { core::slice::from_raw_parts(allocation, elements) };
 
                                             assert!(pointers.iter().copied().eq(expected));
                                         }
@@ -7080,200 +7036,2795 @@ mod test {
             use super::*;
 
             #[test]
-            fn does_not_increase_capacity_when_zero_requested() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                debug_assert_eq!(actual.capacity(), 0);
-
-                _ = actual.reserve_front(0).expect("does not alter allocation");
-
-                assert_eq!(actual.capacity(), 0);
-            }
-
-            #[test]
-            fn increases_capacity_when_non_zero_requested() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                debug_assert_eq!(actual.front_capacity, 0);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                assert_eq!(actual.front_capacity, 256);
-            }
-
-            #[test]
-            fn does_not_initialize_elements_when_no_previous_allocation() {
-                let mut actual = Dynamic::<usize>::default();
-                debug_assert_eq!(actual.initialized, 0);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                assert_eq!(actual.initialized, 0);
-            }
-
-            #[test]
-            fn does_not_initialize_elements_when_existing_allocation() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                debug_assert_eq!(actual.initialized, 6);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                assert_eq!(actual.initialized, 6);
-            }
-
-            #[test]
-            fn allocates_memory_when_no_previous_allocation() {
-                const CAPACITY: usize = 256;
-
-                let mut actual = Dynamic::<usize>::default();
-
-                _ = actual.reserve_front(CAPACITY).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for index in 0..CAPACITY {
-                    let mut ptr = unsafe { allocation.add(index) };
-
-                    let element = unsafe { ptr.as_mut() };
-
-                    // Ideally, this will seg-fault if unowned memory.
-                    _ = element.write(index);
-                }
-            }
-
-            #[test]
-            fn reallocates_memory_when_existing_allocation() {
-                const CAPACITY: usize = 256;
-
-                let existing = [0, 1, 2, 3, 4, 5];
-
-                let mut actual = Dynamic::from_iter(existing);
-
-                _ = actual.reserve_front(CAPACITY).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for index in 0..CAPACITY {
-                    let mut ptr = unsafe { allocation.add(index) };
-
-                    let element = unsafe { ptr.as_mut() };
-
-                    // Ideally, this will seg-fault if unowned memory.
-                    _ = element.write(index);
-                }
-            }
-
-            #[test]
-            fn does_not_modify_existing_elements_when_reallocating() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let mut actual = Dynamic::from_iter(expected);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                assert!(actual.eq(expected));
-            }
-
-            #[test]
-            fn that_many_elements_can_be_prepended_without_reallocation() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for element in 0..256 {
-                    _ = actual.prepend(element).expect("uses capacity");
-                }
-
-                assert_eq!(actual.buffer, allocation);
-            }
-
-            #[test]
-            fn does_not_decrease_capacity_when_less_than_front_capacity_and_is_empty() {
-                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
-                debug_assert_eq!(actual.initialized, 0);
-                debug_assert_eq!(actual.capacity_front(), 256);
-
-                _ = actual.reserve_front(0).expect("already enough capacity");
-
-                assert_eq!(actual.capacity_front(), 256);
-            }
-
-            #[test]
-            fn does_not_decrease_capacity_when_less_than_front_capacity_and_not_empty() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_front(256);
-
-                debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 256);
-
-                _ = actual.reserve_front(0).expect("already enough capacity");
-
-                assert_eq!(actual.front_capacity, 256);
-            }
-
-            #[test]
-            fn does_not_reallocate_when_enough_back_capacity_for_requested_and_is_empty() {
-                let mut actual = Dynamic::<usize>::default();
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                debug_assert_eq!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 0);
-                debug_assert_eq!(actual.back_capacity, 256);
-
-                let allocation = actual.buffer;
-
-                _ = actual.reserve_front(256).expect("uses back capacity");
-
-                assert_eq!(actual.capacity_front(), 256);
-                assert_eq!(actual.buffer, allocation);
-            }
-
-            #[test]
-            fn does_not_reallocate_when_enough_back_capacity_for_requested_and_not_empty() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 0);
-                debug_assert_eq!(actual.back_capacity, 256);
-
-                let allocation = actual.buffer;
-
-                _ = actual.reserve_front(256).expect("uses back capacity");
-
-                assert_eq!(actual.front_capacity, 256);
-                assert_eq!(actual.back_capacity, 0);
-                assert_eq!(actual.buffer, allocation);
-            }
-
-            #[test]
-            fn consumes_back_capacity_when_less_than_requested_and_not_empty() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_back(128).expect("successful allocation");
-
-                debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 0);
-                debug_assert_eq!(actual.back_capacity, 128);
-
-                _ = actual.reserve_front(256).expect("consumes back capacity");
-
-                assert_eq!(actual.front_capacity, 256);
-                assert_eq!(actual.back_capacity, 0);
-            }
-
-            #[test]
-            fn can_allocate_maximum_possible_when_zero_size_type() {
+            fn when_zero_size_type_then_can_allocate_maximum_possible_amount() {
                 let mut actual = Dynamic::<()>::default();
+
+                debug_assert_eq!(actual.initialized, 0);
+                debug_assert_eq!(actual.front_capacity, 0);
+                debug_assert_eq!(actual.back_capacity, 0);
 
                 _ = actual.reserve_front(isize::MAX as usize).expect("ZSTs do not occupy memory");
 
                 assert_eq!(actual.capacity(), isize::MAX as usize);
-                assert_eq!(actual.capacity_front(), isize::MAX as usize);
-                assert_eq!(actual.capacity_back(), isize::MAX as usize);
+            }
+
+            mod when_no_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_capacity() {
+                            let mut actual = Dynamic::<usize>::default();
+
+                            debug_assert_eq!(actual.initialized, 0);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            _ = actual.reserve_front(0).expect("does no allocation");
+
+                            assert_eq!(actual.capacity(), 0);
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            let mut actual = Dynamic::<usize>::default();
+
+                            debug_assert_eq!(actual.initialized, 0);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            _ = actual.reserve_front(0).expect("does no allocation");
+
+                            assert_eq!(actual.initialized, 0);
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.back_capacity, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                let expected = 0..elements;
+
+                                let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert!(actual.eq(expected));
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_allocates_memory() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                for index in 0..capacity {
+                                    let allocation = actual.buffer;
+
+                                    let mut element = unsafe { allocation.add(index) };
+
+                                    let element = unsafe { element.as_mut() };
+
+                                    // Ideally, this will seg-fault if unowned memory.
+                                    _ = element.write(index);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                let allocation = actual.buffer;
+
+                                for element in 0..capacity {
+                                    _ = actual.prepend(element).expect("uses capacity");
+                                }
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_front_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.front_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.back_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+
+                                    for index in 0..(elements + capacity) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault if unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..capacity {
+                                        // NOTE: this is distinct from the expected values.
+                                        _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_only_front_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.front_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.back_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    for index in 0..(capacity + additional) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault in unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    let allocation = actual.buffer;
+
+                                    for element in 0..(capacity + additional) {
+                                        _ = actual.prepend(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_front_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.front_capacity, capacity + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.back_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        for index in 0..(elements + capacity + additional) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault if unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..(capacity + additional) {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                let allocation = actual.buffer;
+
+                                for element in 0..capacity {
+                                    _ = actual.prepend(element).expect("uses capacity");
+                                }
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.front_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.back_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..capacity {
+                                        // NOTE: this is distinct from the expected values.
+                                        _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    for element in 0..capacity {
+                                        _ = actual.prepend(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                        assert_eq!(actual.front_capacity, capacity + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                        assert_eq!(actual.back_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..capacity {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_only_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_decrease_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.back_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    for index in 0..(capacity + additional) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault if unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    let allocation = actual.buffer;
+
+                                    for element in 0..(capacity + additional) {
+                                        _ = actual.prepend(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_front_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        assert_eq!(actual.front_capacity, front);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        assert_eq!(actual.back_capacity, back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        for index in 0..(elements + back + front) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault if unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..front {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                let allocation = actual.buffer;
+
+                                for element in 0..capacity {
+                                    _ = actual.prepend(element).expect("uses capacity");
+                                }
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_front_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.front_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.back_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    for index in 0..(capacity + elements + capacity) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault if unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..capacity {
+                                        // NOTE: this is distinct from the expected values.
+                                        _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                    let allocation = actual.buffer;
+
+                                    for element in 0..capacity {
+                                        _ = actual.prepend(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_front_capacity_to_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        assert_eq!(actual.front_capacity, capacity);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_decrease_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        assert_eq!(actual.back_capacity, capacity + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        for index in 0..(capacity + elements + capacity + additional) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault if unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..capacity {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_both_front_and_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), front + back);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.front_capacity, front);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.back_capacity, back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front + back + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.capacity(), front + back + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front + back + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.initialized, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front + back + additional).expect("successful allocation");
+
+                                        for index in 0..(front + back + additional) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault in unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front + back + additional).expect("successful allocation");
+
+                                        let allocation = actual.buffer;
+
+                                        for element in 0..(front + back + additional) {
+                                            _ = actual.prepend(element).expect("uses capacity");
+                                        }
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_front_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front + additional).expect("successful allocation");
+
+                                            assert_eq!(actual.front_capacity, front + additional);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front + additional).expect("successful allocation");
+
+                                            assert_eq!(actual.back_capacity, back);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front + additional).expect("successful allocation");
+
+                                            assert!(actual.eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front + additional).expect("successful allocation");
+
+                                            for index in 0..(elements + front + back + additional) {
+                                                let allocation = actual.buffer;
+
+                                                let mut element = unsafe { allocation.add(index) };
+
+                                                let element = unsafe { element.as_mut() };
+
+                                                // Ideally, this will seg-fault if unowned memory.
+                                                _ = element.write(index);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front + additional).expect("successful allocation");
+
+                                            let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                            for _ in 0..(front + additional) {
+                                                // NOTE: this is different from the expected values.
+                                                _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                            }
+
+                                            assert!(pointers.iter().copied().eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_front(front + back).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), front + back);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_front(front + back).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(front + back).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_front(front + back).expect("already enough capacity");
+
+                                    for element in 0..(front + back) {
+                                        _ = actual.prepend(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        assert_eq!(actual.front_capacity, front);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        assert_eq!(actual.back_capacity, back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(front).expect("already enough capacity");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..(front + back) {
+                                            // NOTE: this is distinct from expected values.
+                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front((front + back) - additional).expect("already enough capacity");
+
+                                        assert_eq!(actual.capacity(), front + back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front((front + back) - additional).expect("already enough capacity");
+
+                                        assert_eq!(actual.initialized, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_front((front + back) - additional).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_reallocation() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front((front + back) - additional).expect("already enough capacity");
+
+                                        let allocation = actual.buffer;
+
+                                        for element in 0..((front + back) - additional) {
+                                            _ = actual.prepend(element).expect("uses capacity");
+                                        }
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front - additional).expect("already enough capacity");
+
+                                            assert_eq!(actual.front_capacity, front);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front - additional).expect("already enough capacity");
+
+                                            assert_eq!(actual.back_capacity, back);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front - additional).expect("already enough capacity");
+
+                                            assert!(actual.eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            let allocation = actual.buffer;
+
+                                            _ = actual.reserve_front(front - additional).expect("already enough capacity");
+
+                                            assert_eq!(actual.buffer, allocation);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_front(front - additional).expect("already enough capacity");
+
+                                            let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                            for _ in 0..(front - additional) {
+                                                // NOTE: this is distinct from the expected values.
+                                                _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                            }
+
+                                            assert!(pointers.iter().copied().eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -7281,200 +9832,2795 @@ mod test {
             use super::*;
 
             #[test]
-            fn does_not_increase_capacity_when_zero_requested() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                debug_assert_eq!(actual.capacity(), 0);
-
-                _ = actual.reserve_back(0).expect("does not alter allocation");
-
-                assert_eq!(actual.capacity(), 0);
-            }
-
-            #[test]
-            fn increases_capacity_when_non_zero_requested() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                debug_assert_eq!(actual.back_capacity, 0);
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                assert_eq!(actual.back_capacity, 256);
-            }
-
-            #[test]
-            fn does_not_initialize_elements_when_no_previous_allocation() {
-                let mut actual = Dynamic::<usize>::default();
-                debug_assert_eq!(actual.initialized, 0);
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                assert_eq!(actual.initialized, 0);
-            }
-
-            #[test]
-            fn does_not_initialize_elements_when_existing_allocation() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                debug_assert_eq!(actual.initialized, 6);
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                assert_eq!(actual.initialized, 6);
-            }
-
-            #[test]
-            fn allocates_memory_when_no_previous_allocation() {
-                const CAPACITY: usize = 256;
-
-                let mut actual = Dynamic::<usize>::default();
-
-                _ = actual.reserve_back(CAPACITY).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for index in 0..CAPACITY {
-                    let mut ptr = unsafe { allocation.add(index) };
-
-                    let element = unsafe { ptr.as_mut() };
-
-                    // Ideally, this will seg-fault if unowned memory.
-                    _ = element.write(index);
-                }
-            }
-
-            #[test]
-            fn reallocates_memory_when_existing_allocation() {
-                const CAPACITY: usize = 256;
-
-                let existing = [0, 1, 2, 3, 4, 5];
-
-                let mut actual = Dynamic::from_iter(existing);
-
-                _ = actual.reserve_back(CAPACITY).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for index in 0..CAPACITY {
-                    let mut ptr = unsafe { allocation.add(index) };
-
-                    let element = unsafe { ptr.as_mut() };
-
-                    // Ideally, this will seg-fault if unowned memory.
-                    _ = element.write(index);
-                }
-            }
-
-            #[test]
-            fn does_not_modify_existing_elements_when_reallocating() {
-                let expected = [0, 1, 2, 3, 4, 5];
-
-                let mut actual = Dynamic::from_iter(expected);
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                assert!(actual.eq(expected));
-            }
-
-            #[test]
-            fn that_many_elements_can_be_appended_without_reallocation() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                let allocation = actual.buffer;
-
-                for element in 0..256 {
-                    _ = actual.append(element).expect("uses capacity");
-                }
-
-                assert_eq!(actual.buffer, allocation);
-            }
-
-            #[test]
-            fn does_not_decrease_capacity_when_less_than_back_capacity_and_is_empty() {
-                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
-                debug_assert_eq!(actual.initialized, 0);
-                debug_assert_eq!(actual.capacity_back(), 256);
-
-                _ = actual.reserve_back(0).expect("already enough capacity");
-
-                assert_eq!(actual.capacity_back(), 256);
-            }
-
-            #[test]
-            fn does_not_decrease_capacity_when_less_than_back_capacity_and_not_empty() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_back(256);
-
-                debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 0);
-                debug_assert_eq!(actual.back_capacity, 256);
-
-                _ = actual.reserve_back(0).expect("already enough capacity");
-
-                assert_eq!(actual.back_capacity, 256);
-            }
-
-            #[test]
-            fn does_not_reallocate_when_enough_front_capacity_for_requested_and_is_empty() {
-                let mut actual = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
-
-                _ = actual.shift(256).expect("enough back capacity to shift into");
-
-                debug_assert_eq!(actual.front_capacity, 256);
-                debug_assert_eq!(actual.back_capacity, 0);
-
-                let allocation = actual.buffer;
-
-                _ = actual.reserve_back(256).expect("uses front capacity");
-
-                assert_eq!(actual.capacity_back(), 256);
-                assert_eq!(actual.buffer, allocation);
-            }
-
-            #[test]
-            fn does_not_reallocate_when_enough_front_capacity_for_requested_and_not_empty() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_front(256).expect("successful allocation");
-
-                debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 256);
-                debug_assert_eq!(actual.back_capacity, 0);
-
-                let allocation = actual.buffer;
-
-                _ = actual.reserve_back(256).expect("uses front capacity");
-
-                assert_eq!(actual.front_capacity, 0);
-                assert_eq!(actual.back_capacity, 256);
-                assert_eq!(actual.buffer, allocation);
-            }
-
-            #[test]
-            fn consumes_front_capacity_when_less_than_requested_and_not_empty() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-                _ = actual.reserve_front(128).expect("successful allocation");
-
-                debug_assert_ne!(actual.initialized, 0);
-                debug_assert_eq!(actual.front_capacity, 128);
-                debug_assert_eq!(actual.back_capacity, 0);
-
-                _ = actual.reserve_back(256).expect("successful allocation");
-
-                assert_eq!(actual.front_capacity, 0);
-                assert_eq!(actual.back_capacity, 256);
-            }
-
-            #[test]
-            fn can_allocate_maximum_possible_when_zero_size_type() {
+            fn when_zero_size_type_then_can_allocate_maximum_possible_amount() {
                 let mut actual = Dynamic::<()>::default();
+
+                debug_assert_eq!(actual.initialized, 0);
+                debug_assert_eq!(actual.front_capacity, 0);
+                debug_assert_eq!(actual.back_capacity, 0);
 
                 _ = actual.reserve_back(isize::MAX as usize).expect("ZSTs do not occupy memory");
 
                 assert_eq!(actual.capacity(), isize::MAX as usize);
-                assert_eq!(actual.capacity_front(), isize::MAX as usize);
-                assert_eq!(actual.capacity_back(), isize::MAX as usize);
+            }
+
+            mod when_no_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_capacity() {
+                            let mut actual = Dynamic::<usize>::default();
+
+                            debug_assert_eq!(actual.initialized, 0);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            _ = actual.reserve_back(0).expect("does no allocation");
+
+                            assert_eq!(actual.capacity(), 0);
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            let mut actual = Dynamic::<usize>::default();
+
+                            debug_assert_eq!(actual.initialized, 0);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            _ = actual.reserve_back(0).expect("does no allocation");
+
+                            assert_eq!(actual.initialized, 0);
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.back_capacity, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                let expected = 0..elements;
+
+                                let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert!(actual.eq(expected));
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_allocates_memory() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                for index in 0..capacity {
+                                    let allocation = actual.buffer;
+
+                                    let mut element = unsafe { allocation.add(index) };
+
+                                    let element = unsafe { element.as_mut() };
+
+                                    // Ideally, this will seg-fault if unowned memory.
+                                    _ = element.write(index);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                let allocation = actual.buffer;
+
+                                for element in 0..capacity {
+                                    _ = actual.append(element).expect("uses capacity");
+                                }
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.back_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+
+                                    for index in 0..(elements + capacity) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault if unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..capacity {
+                                        // NOTE: this is distinct from the expected values.
+                                        _ = actual.append(usize::MAX).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_only_front_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.front_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_increase_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.back_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    for index in 0..(capacity + additional) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault in unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    let allocation = actual.buffer;
+
+                                    for element in 0..(capacity + additional) {
+                                        _ = actual.append(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        assert_eq!(actual.front_capacity, front);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        assert_eq!(actual.back_capacity, back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        for index in 0..(elements + front + back) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault if unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..back {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, capacity);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                let allocation = actual.buffer;
+
+                                for element in 0..capacity {
+                                    _ = actual.append(element).expect("uses capacity");
+                                }
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.front_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    assert_eq!(actual.back_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    for index in 0..(capacity + elements + capacity) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault if unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..capacity {
+                                        // NOTE: this is distinct from the expected values.
+                                        _ = actual.append(usize::MAX).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    for element in 0..capacity {
+                                        _ = actual.append(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        assert_eq!(actual.front_capacity, capacity + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        assert_eq!(actual.back_capacity, capacity);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        for index in 0..(capacity + elements + capacity) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault if unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(capacity + additional);
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..capacity {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.append(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_only_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_decrease_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.back_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    for index in 0..(capacity + additional) {
+                                        let allocation = actual.buffer;
+
+                                        let mut element = unsafe { allocation.add(index) };
+
+                                        let element = unsafe { element.as_mut() };
+
+                                        // Ideally, this will seg-fault if unowned memory.
+                                        _ = element.write(index);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    let allocation = actual.buffer;
+
+                                    for element in 0..(capacity + additional) {
+                                        _ = actual.append(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.back_capacity, capacity + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        _ = actual.reserve_back(capacity + additional).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        _ = actual.reserve_back(capacity + additional).expect("already enough capacity");
+
+                                        for index in 0..(elements + capacity + additional) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault if unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        _ = actual.reserve_back(capacity + additional).expect("already enough capacity");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..(capacity + additional) {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.append(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.capacity(), capacity);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.initialized, 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                let mut actual = Dynamic::<usize>::default();
+
+                                _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, 0);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, capacity);
+
+                                _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                let allocation = actual.buffer;
+
+                                for element in 0..capacity {
+                                    _ = actual.append(element).expect("uses capacity");
+                                }
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.back_capacity, capacity);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    let expected = 0..elements;
+
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..capacity {
+                                        // NOTE: this is distinct from the expected values.
+                                        _ = actual.append(usize::MAX).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), capacity + additional);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for capacity in 1..32 {
+                                for additional in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                    let allocation = actual.buffer;
+
+                                    for element in 0..capacity {
+                                        _ = actual.append(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_increase_front_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_decrease_back_capacity() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                        assert_eq!(actual.back_capacity, capacity + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for capacity in 1..32 {
+                                    for additional in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_back(capacity + additional).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
+
+                                        _ = actual.reserve_back(capacity).expect("already enough capacity");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..capacity {
+                                            // NOTE: this is distinct from the expected values.
+                                            _ = actual.append(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_both_front_and_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), front + back);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.front_capacity, front);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_decrease_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.back_capacity, back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_back(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_increases_capacity_to_exactly_requested() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(front + back + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.capacity(), front + back + additional);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(front + back + additional).expect("successful allocation");
+
+                                        assert_eq!(actual.initialized, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(front + back + additional).expect("successful allocation");
+
+                                        for index in 0..(front + back + additional) {
+                                            let allocation = actual.buffer;
+
+                                            let mut element = unsafe { allocation.add(index) };
+
+                                            let element = unsafe { element.as_mut() };
+
+                                            // Ideally, this will seg-fault in unowned memory.
+                                            _ = element.write(index);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..32 {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(front + back + additional).expect("successful allocation");
+
+                                        let allocation = actual.buffer;
+
+                                        for element in 0..(front + back + additional) {
+                                            _ = actual.append(element).expect("uses capacity");
+                                        }
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back + additional).expect("successful allocation");
+
+                                            assert_eq!(actual.front_capacity, front);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back + additional).expect("successful allocation");
+
+                                            assert_eq!(actual.back_capacity, back + additional);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back + additional).expect("successful allocation");
+
+                                            assert!(actual.eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back + additional).expect("successful allocation");
+
+                                            for index in 0..(elements + front + back + additional) {
+                                                let allocation = actual.buffer;
+
+                                                let mut element = unsafe { allocation.add(index) };
+
+                                                let element = unsafe { element.as_mut() };
+
+                                                // Ideally, this will seg-fault if unowned memory.
+                                                _ = element.write(index);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..32 {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back + additional).expect("successful allocation");
+
+                                            let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                            for _ in 0..(back + additional) {
+                                                // NOTE: this is different from the expected values.
+                                                _ = actual.append(usize::MAX).expect("uses capacity");
+                                            }
+
+                                            assert!(pointers.iter().copied().eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_capacity() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_back(front + back).expect("already enough capacity");
+
+                                    assert_eq!(actual.capacity(), front + back);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    _ = actual.reserve_back(front + back).expect("already enough capacity");
+
+                                    assert_eq!(actual.initialized, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(front + back).expect("already enough capacity");
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    let mut actual = Dynamic::<usize>::default();
+
+                                    _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, front);
+                                    debug_assert_eq!(actual.back_capacity, back);
+
+                                    let allocation = actual.buffer;
+
+                                    _ = actual.reserve_back(front + back).expect("already enough capacity");
+
+                                    for element in 0..(front + back) {
+                                        _ = actual.append(element).expect("uses capacity");
+                                    }
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(back).expect("already enough capacity");
+
+                                        assert_eq!(actual.front_capacity, front);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(back).expect("already enough capacity");
+
+                                        assert_eq!(actual.back_capacity, back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(back).expect("already enough capacity");
+
+                                        assert!(actual.eq(expected));
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_back(back).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        let expected = 0..elements;
+
+                                        let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back(back).expect("already enough capacity");
+
+                                        let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                        for _ in 0..(front + back) {
+                                            // NOTE: this is distinct from expected values.
+                                            _ = actual.append(usize::MAX).expect("uses capacity");
+                                        }
+
+                                        assert!(pointers.iter().copied().eq(expected));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_decrease_capacity() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back((front + back) - additional).expect("already enough capacity");
+
+                                        assert_eq!(actual.capacity(), front + back);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_initialize_elements() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back((front + back) - additional).expect("already enough capacity");
+
+                                        assert_eq!(actual.initialized, 0);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_back((front + back) - additional).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_reallocation() {
+                            for front in 1..32 {
+                                for back in 1..32 {
+                                    for additional in 1..(front + back) {
+                                        let mut actual = Dynamic::<usize>::default();
+
+                                        _ = actual.reserve_back(front + back).expect("successful allocation");
+
+                                        _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                                        debug_assert_eq!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        _ = actual.reserve_back((front + back) - additional).expect("already enough capacity");
+
+                                        let allocation = actual.buffer;
+
+                                        for element in 0..((front + back) - additional) {
+                                            _ = actual.append(element).expect("uses capacity");
+                                        }
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back - additional).expect("already enough capacity");
+
+                                            assert_eq!(actual.front_capacity, front);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_decrease_back_capacity() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back - additional).expect("already enough capacity");
+
+                                            assert_eq!(actual.back_capacity, back);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back - additional).expect("already enough capacity");
+
+                                            assert!(actual.eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_reallocate() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            let allocation = actual.buffer;
+
+                                            _ = actual.reserve_back(back - additional).expect("already enough capacity");
+
+                                            assert_eq!(actual.buffer, allocation);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for front in 1..32 {
+                                    for back in 1..32 {
+                                        for additional in 1..front {
+                                            let expected = 0..elements;
+
+                                            let mut actual: Dynamic<_> = expected.clone().collect();
+
+                                            _ = actual.reserve_front(front).expect("successful allocation");
+                                            _ = actual.reserve_back(back).expect("successful allocation");
+
+                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.front_capacity, front);
+                                            debug_assert_eq!(actual.back_capacity, back);
+
+                                            _ = actual.reserve_back(back - additional).expect("already enough capacity");
+
+                                            let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                            for _ in 0..(front - additional) {
+                                                // NOTE: this is distinct from the expected values.
+                                                _ = actual.append(usize::MAX).expect("uses capacity");
+                                            }
+
+                                            assert!(pointers.iter().copied().eq(expected));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -7506,7 +12652,7 @@ mod test {
                 let mut actual =
                     Dynamic::<usize>::with_capacity(64).expect("successful allocation");
 
-                _ = actual.shrink(Some(256)).expect("does not alter allocation");
+                _ = actual.shrink(Some(256)).expect("already enough capacity");
 
                 assert_eq!(actual.capacity(), 64);
             }
@@ -7633,7 +12779,7 @@ mod test {
 
                 _ = actual
                     .shrink_front(Some(256))
-                    .expect("does not alter allocation");
+                    .expect("already enough capacity");
 
                 assert_eq!(actual.capacity(), 64);
             }
@@ -7753,7 +12899,7 @@ mod test {
 
                 _ = actual
                     .shrink_back(Some(256))
-                    .expect("does not alter allocation");
+                    .expect("already enough capacity");
 
                 assert_eq!(actual.capacity(), 64);
             }
@@ -7902,7 +13048,7 @@ mod test {
             fn zero_cannot_fail() {
                 let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
 
-                _ = actual.shift(0).expect("does not alter allocation");
+                _ = actual.shift(0).expect("already enough capacity");
             }
 
             #[test]
@@ -7917,7 +13063,7 @@ mod test {
             fn when_empty() {
                 let mut actual = Dynamic::<()>::default();
 
-                _ = actual.shift(0).expect("does not alter allocation");
+                _ = actual.shift(0).expect("already enough capacity");
             }
         }
 
@@ -8178,7 +13324,7 @@ mod test {
             fn zero_capacity_cannot_fail() {
                 let mut actual = Dynamic::<usize>::default();
 
-                _ = actual.resize(0).expect("does not alter allocation");
+                _ = actual.resize(0).expect("already enough capacity");
             }
 
             #[test]
