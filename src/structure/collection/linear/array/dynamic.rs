@@ -12488,7 +12488,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for additional in 1..front {
+                                        for additional in 1..back {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
                                             _ = actual.reserve_front(front).expect("successful allocation");
@@ -12512,7 +12512,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for additional in 1..front {
+                                        for additional in 1..back {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
                                             _ = actual.reserve_front(front).expect("successful allocation");
@@ -12536,7 +12536,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for additional in 1..front {
+                                        for additional in 1..back {
                                             let expected = 0..elements;
 
                                             let mut actual: Dynamic<_> = expected.clone().collect();
@@ -12562,7 +12562,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for additional in 1..front {
+                                        for additional in 1..back {
                                             let mut actual: Dynamic<_> = (0..elements).collect();
 
                                             _ = actual.reserve_front(front).expect("successful allocation");
@@ -12588,7 +12588,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        for additional in 1..front {
+                                        for additional in 1..back {
                                             let expected = 0..elements;
 
                                             let mut actual: Dynamic<_> = expected.clone().collect();
@@ -12604,7 +12604,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..(front - additional) {
+                                            for _ in 0..(back - additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
