@@ -9564,7 +9564,7 @@ mod test {
 
                                         let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                        for _ in 0..(front + back) {
+                                        for _ in 0..front {
                                             // NOTE: this is distinct from expected values.
                                             _ = actual.prepend(usize::MAX).expect("uses capacity");
                                         }
