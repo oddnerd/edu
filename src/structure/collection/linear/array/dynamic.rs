@@ -319,6 +319,11 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.as_ptr(), ptr);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
+        // Prevent amortized growth when unnecessary.
+        if self.back_capacity >= capacity {
+            return Ok(self);
+        }
+
         // Reclaim any front capacity.
         if self.front_capacity > 0 {
             let Ok(front_capacity) = isize::try_from(self.front_capacity) else {
@@ -332,11 +337,6 @@ impl<T> Dynamic<T> {
             let Ok(_) = self.shift(front_capacity) else {
                 unreachable!("exactly that much front capacity");
             };
-        }
-
-        // Prevent amortized growth when unnecessary.
-        if self.back_capacity >= capacity {
-            return Ok(self);
         }
 
         // Attempt to do amortized growth, but fall back to requested capacity.
@@ -10489,7 +10489,7 @@ mod test {
 
                                         for _ in 0..back {
                                             // NOTE: this is distinct from the expected values.
-                                            _ = actual.prepend(usize::MAX).expect("uses capacity");
+                                            _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
 
                                         assert!(pointers.iter().copied().eq(expected));
@@ -12360,7 +12360,7 @@ mod test {
 
                                         let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                        for _ in 0..(front + back) {
+                                        for _ in 0..back {
                                             // NOTE: this is distinct from expected values.
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
