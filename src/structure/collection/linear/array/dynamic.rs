@@ -1067,10 +1067,14 @@ impl<T> Dynamic<T> {
             .checked_add_signed(capacity)
             .ok_or(FailedAllocation)?;
 
+        let Some(unchanged) = usize::checked_add(self.front_capacity, self.initialized) else {
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
+        };
+
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if size_of::<T>() == 0 {
             // Global allocator API limits allocation to `isize:MAX` bytes.
-            if capacity > isize::MAX as usize {
+            if usize::checked_add(unchanged, capacity).is_some_and(|total| total > isize::MAX as usize) {
                 return Err(FailedAllocation);
             }
 
