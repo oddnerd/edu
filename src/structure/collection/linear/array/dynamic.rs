@@ -3884,7 +3884,7 @@ mod test {
                                 for back in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    _ = actual.reserve_back(front).expect("successful allocation");
+                                    _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
                                     debug_assert_ne!(actual.initialized, 0);
