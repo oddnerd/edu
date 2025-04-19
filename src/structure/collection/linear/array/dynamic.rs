@@ -1653,7 +1653,7 @@ impl<T> Drop for Dynamic<T> {
     fn drop(&mut self) {
         self.by_ref().for_each(drop);
 
-        let Ok(_) = self.shrink(None) else {
+        let Ok(_) = self.shrink(0) else {
             unreachable!("deallocation cannot fail");
         };
     }
@@ -19524,7 +19524,7 @@ mod test {
             fn will_reallocate_when_no_capacity() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
-                _ = actual.shrink(None).expect("no capacity");
+                _ = actual.shrink(0).expect("no capacity");
 
                 _ = actual.insert(2, 12345).expect("successful allocation");
             }
