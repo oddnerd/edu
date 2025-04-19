@@ -527,7 +527,7 @@ impl<T> Dynamic<T> {
     /// instance.shrink(None).expect("successful deallocation");
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
+    pub fn shrink(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Ok(offset) = isize::try_from(self.front_capacity) else {
             unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
@@ -587,9 +587,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
-        let capacity = capacity.unwrap_or(0);
-
+    pub fn shrink_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(extra) = self.capacity_front().checked_sub(capacity) else {
             debug_assert!(self.capacity_front() < capacity, "small enough");
 
@@ -655,9 +653,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
-        let capacity = capacity.unwrap_or(0);
-
+    pub fn shrink_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(extra) = self.capacity_back().checked_sub(capacity) else {
             debug_assert!(self.capacity_back() < capacity, "small enough");
 
