@@ -527,7 +527,7 @@ impl<T> Dynamic<T> {
     /// instance.shrink(None).expect("successful deallocation");
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
+    pub fn shrink(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Ok(offset) = isize::try_from(self.front_capacity) else {
             unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
@@ -587,9 +587,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_front(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
-        let capacity = capacity.unwrap_or(0);
-
+    pub fn shrink_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(extra) = self.capacity_front().checked_sub(capacity) else {
             debug_assert!(self.capacity_front() < capacity, "small enough");
 
@@ -655,9 +653,7 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
-    pub fn shrink_back(&mut self, capacity: Option<usize>) -> Result<&mut Self, FailedAllocation> {
-        let capacity = capacity.unwrap_or(0);
-
+    pub fn shrink_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(extra) = self.capacity_back().checked_sub(capacity) else {
             debug_assert!(self.capacity_back() < capacity, "small enough");
 
@@ -1657,7 +1653,7 @@ impl<T> Drop for Dynamic<T> {
     fn drop(&mut self) {
         self.by_ref().for_each(drop);
 
-        let Ok(_) = self.shrink(None) else {
+        let Ok(_) = self.shrink(0) else {
             unreachable!("deallocation cannot fail");
         };
     }
@@ -3888,7 +3884,7 @@ mod test {
                                 for back in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    _ = actual.reserve_back(front).expect("successful allocation");
+                                    _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
                                     debug_assert_ne!(actual.initialized, 0);
@@ -19528,7 +19524,7 @@ mod test {
             fn will_reallocate_when_no_capacity() {
                 let expected = [0, 1, 2, 3, 4, 5];
                 let mut actual: Dynamic<_> = expected.iter().copied().collect();
-                _ = actual.shrink(None).expect("no capacity");
+                _ = actual.shrink(0).expect("no capacity");
 
                 _ = actual.insert(2, 12345).expect("successful allocation");
             }
