@@ -17846,16 +17846,889 @@ mod test {
         mod shrink {
             use super::*;
 
+            mod when_no_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_only_front_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_only_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_both_front_and_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_both_less_than_requested {
+                    use super::*;
+
+                    mod when_sum_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_sum_is_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_sum_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_front_is_exactly_requested {
+                    use super::*;
+
+                    mod when_back_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_back_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_back_is_exactly_requested {
+                    use super::*;
+
+                    mod when_front_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_front_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_both_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_front_is_more_than_requested_and_back_is_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_front_is_less_than_requested_and_back_is_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_both_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
         }
 
         mod shrink_front {
             use super::*;
 
+            mod when_no_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_only_front_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_only_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_both_front_and_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_both_less_than_requested {
+                    use super::*;
+
+                    mod when_sum_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_sum_is_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_sum_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_front_is_exactly_requested {
+                    use super::*;
+
+                    mod when_back_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_back_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_back_is_exactly_requested {
+                    use super::*;
+
+                    mod when_front_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_front_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_both_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_front_is_more_than_requested_and_back_is_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_front_is_less_than_requested_and_back_is_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_both_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
         }
 
         mod shrink_back {
             use super::*;
 
+            mod when_no_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_only_front_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_only_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
+
+            mod when_both_front_and_back_capacity {
+                use super::*;
+
+                mod when_zero_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_both_less_than_requested {
+                    use super::*;
+
+                    mod when_sum_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_sum_is_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_sum_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_front_is_exactly_requested {
+                    use super::*;
+
+                    mod when_back_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_back_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_back_is_exactly_requested {
+                    use super::*;
+
+                    mod when_front_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+
+                    mod when_front_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+                        }
+                    }
+                }
+
+                mod when_both_exactly_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_front_is_more_than_requested_and_back_is_less_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_front_is_less_than_requested_and_back_is_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+
+                mod when_both_more_than_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+                    }
+                }
+            }
         }
 
         mod shift {
