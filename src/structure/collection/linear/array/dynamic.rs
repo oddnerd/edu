@@ -10859,6 +10859,25 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                        _ = actual.reserve_front(front).expect("successful allocation");
+                                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.front_capacity, front);
+                                        debug_assert_eq!(actual.back_capacity, back);
+
+                                        let allocation = actual.buffer;
+
+                                        _ = actual.reserve_front(0).expect("already enough capacity");
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+
                                         let expected = 0..elements;
 
                                         let mut actual: Dynamic<_> = expected.clone().collect();
@@ -15324,9 +15343,7 @@ mod test {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
-                                        let expected = 0..elements;
-
-                                        let mut actual: Dynamic<_> = expected.clone().collect();
+                                        let mut actual: Dynamic<_> = (0..elements).collect();
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
