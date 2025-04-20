@@ -4542,7 +4542,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_front_many_elements_can_be_prepended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
@@ -4649,7 +4649,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_prepended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -5186,7 +5186,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocation() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocation() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -5201,7 +5201,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    for element in 0..capacity {
+                                    for element in 0..(capacity + additional) {
                                         _ = actual.append(element).expect("uses capacity");
                                     }
 
@@ -5303,7 +5303,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -5321,7 +5321,7 @@ mod test {
 
                                         let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                        for _ in 0..capacity {
+                                        for _ in 0..(capacity + additional) {
                                             // NOTE: this is distinct from the expected values.
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
@@ -5398,7 +5398,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_back_many_elements_can_be_appended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
@@ -5505,7 +5505,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -6039,7 +6039,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocation() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocation() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -6054,7 +6054,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    for element in 0..capacity {
+                                    for element in 0..(capacity + additional) {
                                         _ = actual.append(element).expect("uses capacity");
                                     }
 
@@ -6156,7 +6156,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -6174,7 +6174,7 @@ mod test {
 
                                         let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                        for _ in 0..capacity {
+                                        for _ in 0..(capacity + additional) {
                                             // NOTE: this is distinct from the expected values
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
@@ -6256,33 +6256,6 @@ mod test {
                                     let allocation = actual.buffer;
 
                                     _ = actual.reserve(0).expect("already enough capacity");
-
-                                    assert_eq!(actual.buffer, allocation);
-                                }
-                            }
-                        }
-
-                        #[test]
-                        fn then_capacity_many_elements_can_be_prepended_without_reallocation() {
-                            for front in 1..32 {
-                                for back in 1..32 {
-                                    let mut actual = Dynamic::<usize>::default();
-
-                                    _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("back capacity to shift into");
-
-                                    debug_assert_eq!(actual.initialized, 0);
-                                    debug_assert_eq!(actual.front_capacity, front);
-                                    debug_assert_eq!(actual.back_capacity, back);
-
-                                    _ = actual.reserve(0).expect("already enough capacity");
-
-                                    let allocation = actual.buffer;
-
-                                    for element in 0..(front + back) {
-                                        _ = actual.prepend(element).expect("uses capacity");
-                                    }
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -7120,7 +7093,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for front in 1..32 {
                                     for back in 1..32 {
                                         for additional in 1..usize::min(front, back) {
@@ -7257,7 +7230,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -7278,7 +7251,7 @@ mod test {
 
                                                 let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                                for _ in 0..(front + back - additional) {
+                                                for _ in 0..(front + back) {
                                                     // NOTE: this is distinct from the expected values.
                                                     _ = actual.append(usize::MAX).expect("uses capacity");
                                                 }
@@ -7368,7 +7341,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for front in 1..32 {
                                     for back in 1..front {
                                         let mut actual = Dynamic::<usize>::default();
@@ -7385,7 +7358,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..front {
+                                        for element in 0..(front + back) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -7491,7 +7464,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..front {
@@ -7510,7 +7483,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..front {
+                                            for _ in 0..(front + back) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -7595,7 +7568,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -7612,7 +7585,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + capacity + additional) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -7749,7 +7722,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -7768,7 +7741,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -7780,7 +7753,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_front_many_elements_can_be_prepended_and_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -7804,7 +7777,7 @@ mod test {
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -7893,7 +7866,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for back in 1..32 {
                                     for front in 1..back {
                                         let mut actual = Dynamic::<usize>::default();
@@ -7910,7 +7883,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..back {
+                                        for element in 0..(front + back) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -8189,7 +8162,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -8206,7 +8179,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + additional + capacity) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -8771,7 +8744,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -8789,7 +8762,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(more + less) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -8904,7 +8877,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -8924,7 +8897,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(less + more) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -9016,7 +8989,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -9034,7 +9007,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(less + more) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -9182,7 +9155,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -9202,7 +9175,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..more {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -9215,7 +9188,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_front_many_elements_can_be_prepended_and_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -9240,7 +9213,7 @@ mod test {
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..more {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -9332,7 +9305,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for additional_front in 1..32 {
                                     for additional_back in 1..32 {
@@ -9350,7 +9323,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + additional_front + capacity + additional_back) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -9498,7 +9471,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -9518,7 +9491,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional_back) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -9531,7 +9504,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_front_many_elements_can_be_prepended_and_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -9556,7 +9529,7 @@ mod test {
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional_back) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -10533,7 +10506,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -10548,7 +10521,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("already enough capacity");
 
-                                    for element in 0..capacity {
+                                    for element in 0..(capacity + additional) {
                                         _ = actual.prepend(element).expect("uses capacity");
                                     }
 
@@ -10650,7 +10623,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_prepended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -10668,7 +10641,7 @@ mod test {
 
                                         let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                        for _ in 0..capacity {
+                                        for _ in 0..(capacity + additional) {
                                             // NOTE: this is distinct from the expected values.
                                             _ = actual.prepend(usize::MAX).expect("uses capacity");
                                         }
@@ -11462,31 +11435,6 @@ mod test {
                                     let allocation = actual.buffer;
 
                                     _ = actual.reserve_front(capacity).expect("already enough capacity");
-
-                                    assert_eq!(actual.buffer, allocation);
-                                }
-                            }
-                        }
-
-                        #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
-                            for capacity in 1..32 {
-                                for additional in 1..32 {
-                                    let mut actual = Dynamic::<usize>::default();
-
-                                    _ = actual.reserve_back(capacity + additional).expect("successful allocation");
-
-                                    debug_assert_eq!(actual.initialized, 0);
-                                    debug_assert_eq!(actual.front_capacity, 0);
-                                    debug_assert_eq!(actual.back_capacity, capacity + additional);
-
-                                    _ = actual.reserve_front(capacity).expect("already enough capacity");
-
-                                    let allocation = actual.buffer;
-
-                                    for element in 0..capacity {
-                                        _ = actual.prepend(element).expect("uses capacity");
-                                    }
 
                                     assert_eq!(actual.buffer, allocation);
                                 }
@@ -12662,36 +12610,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
-                                for front in 1..32 {
-                                    for back in 1..32 {
-                                        for additional in 1..usize::min(front, back) {
-                                            let mut actual = Dynamic::<usize>::default();
-
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
-
-                                            debug_assert_eq!(actual.initialized, 0);
-                                            debug_assert_eq!(actual.front_capacity, front);
-                                            debug_assert_eq!(actual.back_capacity, back);
-
-                                            _ = actual.reserve_front(front + back - additional).expect("already enough capacity");
-
-                                            let allocation = actual.buffer;
-
-                                            for element in 0..(front + back - additional) {
-                                                _ = actual.prepend(element).expect("uses capacity");
-                                            }
-
-                                            assert_eq!(actual.buffer, allocation);
-                                        }
-                                    }
-                                }
-                            }
-
-                            #[test]
-                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                                 for front in 1..32 {
                                     for back in 1..32 {
                                         for additional in 1..usize::min(front, back) {
@@ -12979,7 +12898,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_prepended_without_reallocating() {
+                            fn then_capacity_many_elements_can_be_prepended_without_reallocating() {
                                 for front in 1..32 {
                                     for back in 1..front {
                                         let mut actual = Dynamic::<usize>::default();
@@ -12996,7 +12915,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..front {
+                                        for element in 0..(front + back) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -13273,7 +13192,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -13290,35 +13209,8 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + capacity + additional) {
                                             _ = actual.prepend(element).expect("uses capacity");
-                                        }
-
-                                        assert_eq!(actual.buffer, allocation);
-                                    }
-                                }
-                            }
-
-                            #[test]
-                            fn then_back_many_elements_can_be_appended_without_reallocating_memory() {
-                                for capacity in 1..32 {
-                                    for additional in 1..32 {
-                                        let mut actual = Dynamic::<usize>::default();
-
-                                        _ = actual.reserve_back(capacity + capacity + additional).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(capacity).expect("too small to wrap")).expect("enough back capacity to shift into");
-
-                                        debug_assert_eq!(actual.initialized, 0);
-                                        debug_assert_eq!(actual.front_capacity, capacity);
-                                        debug_assert_eq!(actual.back_capacity, capacity + additional);
-
-                                        _ = actual.reserve_front(capacity).expect("already enough capacity");
-
-                                        let allocation = actual.buffer;
-
-                                        for element in 0..(capacity + additional) {
-                                            _ = actual.append(element).expect("uses capacity");
                                         }
 
                                         assert_eq!(actual.buffer, allocation);
@@ -13598,7 +13490,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                                 for back in 1..32 {
                                     for front in 1..back {
                                         let mut actual = Dynamic::<usize>::default();
@@ -13615,7 +13507,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..back {
+                                        for element in 0..(front + back) {
                                             _ = actual.prepend(element).expect("uses capacity");
                                         }
 
@@ -13868,7 +13760,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -13885,7 +13777,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + additional + capacity) {
                                             _ = actual.prepend(element).expect("uses capacity");
                                         }
 
@@ -13991,7 +13883,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_prepended_without_invalidating_pointers() {
+                            fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -14010,7 +13902,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
@@ -14053,7 +13945,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_requested_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -14072,7 +13964,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
@@ -14157,7 +14049,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocation_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocation_memory() {
                             for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
@@ -14173,7 +14065,7 @@ mod test {
 
                                 let allocation = actual.buffer;
 
-                                for element in 0..capacity {
+                                for element in 0..(capacity + capacity) {
                                     _ = actual.prepend(element).expect("uses capacity");
                                 }
 
@@ -14441,7 +14333,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -14459,7 +14351,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(more + less) {
                                             _ = actual.prepend(element).expect("uses capacity");
                                         }
 
@@ -14574,7 +14466,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_invalidating_pointers() {
+                        fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -14594,7 +14486,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..more {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
@@ -14640,7 +14532,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_requested_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -14660,7 +14552,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..more {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
@@ -14757,7 +14649,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -14775,7 +14667,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(less + more) {
                                             _ = actual.prepend(element).expect("uses capacity");
                                         }
 
@@ -15047,7 +14939,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for additional_front in 1..32 {
                                     for additional_back in 1..32 {
@@ -15065,7 +14957,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + additional_front + capacity + additional_back) {
                                             _ = actual.prepend(element).expect("uses capacity");
                                         }
 
@@ -15180,7 +15072,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_invalidating_pointers() {
+                        fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -15200,7 +15092,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional_front) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
@@ -15246,7 +15138,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_requested_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -15266,7 +15158,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional_front) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
@@ -16359,31 +16251,6 @@ mod test {
                                 }
                             }
                         }
-
-                        #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocation() {
-                            for capacity in 1..32 {
-                                for additional in 1..32 {
-                                    let mut actual = Dynamic::<usize>::default();
-
-                                    _ = actual.reserve_front(capacity + additional).expect("successful allocation");
-
-                                    debug_assert_eq!(actual.initialized, 0);
-                                    debug_assert_eq!(actual.front_capacity, capacity + additional);
-                                    debug_assert_eq!(actual.back_capacity, 0);
-
-                                    let allocation = actual.buffer;
-
-                                    _ = actual.reserve_back(capacity).expect("already enough capacity");
-
-                                    for element in 0..capacity {
-                                        _ = actual.append(element).expect("uses capacity");
-                                    }
-
-                                    assert_eq!(actual.buffer, allocation);
-                                }
-                            }
-                        }
                     }
 
                     mod when_not_empty {
@@ -17251,7 +17118,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocation() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocation() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -17266,7 +17133,7 @@ mod test {
 
                                     let allocation = actual.buffer;
 
-                                    for element in 0..capacity {
+                                    for element in 0..(capacity + additional) {
                                         _ = actual.append(element).expect("uses capacity");
                                     }
 
@@ -17368,7 +17235,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -17386,7 +17253,7 @@ mod test {
 
                                         let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                        for _ in 0..capacity {
+                                        for _ in 0..(capacity + additional) {
                                             // NOTE: this is distinct from the expected values.
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
@@ -18404,35 +18271,6 @@ mod test {
                                     }
                                 }
                             }
-
-                            #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
-                                for front in 1..32 {
-                                    for back in 1..32 {
-                                        for additional in 1..usize::min(front, back) {
-                                            let mut actual = Dynamic::<usize>::default();
-
-                                            _ = actual.reserve_back(front + back).expect("successful allocation");
-
-                                            _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
-
-                                            debug_assert_eq!(actual.initialized, 0);
-                                            debug_assert_eq!(actual.front_capacity, front);
-                                            debug_assert_eq!(actual.back_capacity, back);
-
-                                            _ = actual.reserve_back(front + back - additional).expect("already enough capacity");
-
-                                            let allocation = actual.buffer;
-
-                                            for element in 0..(front + back - additional) {
-                                                _ = actual.append(element).expect("uses capacity");
-                                            }
-
-                                            assert_eq!(actual.buffer, allocation);
-                                        }
-                                    }
-                                }
-                            }
                         }
 
                         mod when_not_empty {
@@ -18694,7 +18532,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for front in 1..32 {
                                     for back in 1..front {
                                         let mut actual = Dynamic::<usize>::default();
@@ -18711,7 +18549,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..front {
+                                        for element in 0..(front + back) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -18964,7 +18802,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -18981,7 +18819,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + capacity + additional) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -19118,7 +18956,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -19137,7 +18975,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(elements).expect("uses capacity");
                                             }
@@ -19149,7 +18987,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_front_many_elmeents_can_be_prepended_and_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elmeents_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -19262,7 +19100,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for back in 1..32 {
                                     for front in 1..back {
                                         let mut actual = Dynamic::<usize>::default();
@@ -19279,7 +19117,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..back {
+                                        for element in 0..(front + back) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -19556,7 +19394,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_front_many_elements_can_be_prepended_without_reallocating_memeory() {
+                            fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -19574,33 +19412,6 @@ mod test {
                                         let allocation = actual.buffer;
 
                                         for element in 0..(capacity + additional) {
-                                            _ = actual.prepend(element).expect("uses capacity");
-                                        }
-
-                                        assert_eq!(actual.buffer, allocation);
-                                    }
-                                }
-                            }
-
-                            #[test]
-                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
-                                for capacity in 1..32 {
-                                    for additional in 1..32 {
-                                        let mut actual = Dynamic::<usize>::default();
-
-                                        _ = actual.reserve_back(capacity + additional + capacity).expect("successful allocation");
-
-                                        _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
-
-                                        debug_assert_eq!(actual.initialized, 0);
-                                        debug_assert_eq!(actual.front_capacity, capacity + additional);
-                                        debug_assert_eq!(actual.back_capacity, capacity);
-
-                                        _ = actual.reserve_back(capacity).expect("already enough capacity");
-
-                                        let allocation = actual.buffer;
-
-                                        for element in 0..capacity {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -19872,7 +19683,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocation_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocation_memory() {
                             for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
@@ -19888,7 +19699,7 @@ mod test {
 
                                 let allocation = actual.buffer;
 
-                                for element in 0..capacity {
+                                for element in 0..(capacity + capacity) {
                                     _ = actual.append(element).expect("uses capacity");
                                 }
 
@@ -20156,7 +19967,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -20174,7 +19985,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(more + less) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -20446,7 +20257,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -20464,7 +20275,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(less + more) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -20612,7 +20423,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -20632,7 +20443,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..more {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -20645,7 +20456,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_front_many_elements_can_be_prepended_and_that_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -20670,7 +20481,7 @@ mod test {
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..more {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -20762,7 +20573,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
+                        fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                             for capacity in 1..32 {
                                 for additional_front in 1..32 {
                                     for additional_back in 1..32 {
@@ -20780,7 +20591,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
-                                        for element in 0..capacity {
+                                        for element in 0..(capacity + capacity) {
                                             _ = actual.append(element).expect("uses capacity");
                                         }
 
@@ -20928,7 +20739,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -20948,7 +20759,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional_back) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -20961,7 +20772,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_front_many_elements_can_be_prepended_and_requested_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -20986,7 +20797,7 @@ mod test {
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
 
-                                            for _ in 0..capacity {
+                                            for _ in 0..(capacity + additional_back) {
                                                 // NOTE: this is distinct from the expected values.
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
