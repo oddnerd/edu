@@ -589,9 +589,9 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn shrink_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(extra) = self.capacity_front().checked_sub(capacity) else {
-            debug_assert!(self.capacity_front() < capacity, "small enough");
+            debug_assert!(self.capacity_front() < capacity, "fewer capacity");
 
-            return Ok(self);
+            return Err(FailedAllocation);
         };
 
         let Ok(extra) = isize::try_from(extra) else {
@@ -655,9 +655,9 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn shrink_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(extra) = self.capacity_back().checked_sub(capacity) else {
-            debug_assert!(self.capacity_back() < capacity, "small enough");
+            debug_assert!(self.capacity_back() < capacity, "fewer capacity");
 
-            return Ok(self);
+            return Err(FailedAllocation);
         };
 
         let Ok(extra) = isize::try_from(extra) else {
