@@ -588,6 +588,20 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
+        // When empty, there is do distinction between front and back capacity
+        // instead referring to one continuous buffer of uninitialized
+        // elements. To simplify the logic of this function and make it more
+        // similar to other 'shrink' variants, transparently move all
+        // capacity to the back end.
+        if self.initialized == 0 {
+            let Some(total) = usize::checked_add(self.front_capacity, self.back_capacity) else {
+                unreachable!("cannot allocate more than `isize::MAX` bytes")
+            };
+
+            self.front_capacity = 0;
+            self.back_capacity = total;
+        }
+
         let Some(extra) = self.capacity_front().checked_sub(capacity) else {
             debug_assert!(self.capacity_front() < capacity, "fewer capacity");
 
@@ -602,9 +616,11 @@ impl<T> Dynamic<T> {
             unreachable!("positive number => cannot be `isize::MIN`");
         };
 
-        let Ok(_) = self.shift(extra) else {
-            unreachable!("enough front capacity to shift into");
-        };
+        if self.initialized != 0 {
+            let Ok(_) = self.shift(extra) else {
+                unreachable!("enough front capacity to shift into");
+            };
+        }
 
         self.resize(extra)
     }
