@@ -602,11 +602,9 @@ impl<T> Dynamic<T> {
             unreachable!("positive number => cannot be `isize::MIN`");
         };
 
-        if self.initialized > 0 {
-            let Ok(_) = self.shift(extra) else {
-                unreachable!("enough front capacity to shift into");
-            };
-        }
+        let Ok(_) = self.shift(extra) else {
+            unreachable!("enough front capacity to shift into");
+        };
 
         self.resize(extra)
     }
