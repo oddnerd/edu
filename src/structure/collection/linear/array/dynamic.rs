@@ -31091,10 +31091,18 @@ mod test {
 
                     mod when_empty {
                         use super::*;
+
+                        // then_decreases_capacity_to_zero
+                        // then_does_not_initialize_elements
                     }
 
                     mod when_not_empty {
                         use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_decreases_back_capacity_to_zero
+                        // then_does_not_modify_initialied_elements
+                        // then_front_many_elements_can_be_prepended_without_reallocating_memory
                     }
                 }
 
@@ -31106,10 +31114,22 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_does_not_modify_capacity
+                            // then_does_not_initalize_elements
+                            // then_does_not_reallocate_memory
+                            // then_capacity_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back-capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_front_many_elements_can_be_prepened_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepened_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
 
@@ -31118,10 +31138,22 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_does_not_modify_capacity
+                            // then_does_not_initalize_elements
+                            // then_does_not_reallocate_memory
+                            // then_requested_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back-capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_front_many_elements_can_be_prepened_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepened_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
 
@@ -31130,10 +31162,21 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_decreases_capacity_to_exactly_requested
+                            // then_does_not_initalize_elements
+                            // then_requested_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back-capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_front_many_elements_can_be_prepened_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepened_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
                 }
@@ -31146,10 +31189,22 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_decreases_capacity_to_exactly_requested
+                            // then_does_not_initialize_elements
+                            // then_requested_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_inititalized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
 
@@ -31158,10 +31213,21 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_decreases_capacity_to_exactly_requested
+                            // then_does_not_initialize_elements
+                            // then_requested_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_decreases_back_capacity_to_exactly_requested
+                            // then_does_not_modify_initialized_elements
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
                 }
@@ -31174,10 +31240,22 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_decreases_capacity_to_exactly_requested
+                            // then_does_not_initialize_elements
+                            // then_requested_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
 
@@ -31186,10 +31264,22 @@ mod test {
 
                         mod when_empty {
                             use super::*;
+
+                            // then_decreases_capacity_to_exactly_requested
+                            // then_does_not_initialize_elements
+                            // then_requested_many_elements_can_be_appended_without_reallocating_memory
                         }
 
                         mod when_not_empty {
                             use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                         }
                     }
                 }
@@ -31199,10 +31289,22 @@ mod test {
 
                     mod when_empty {
                         use super::*;
+
+                        // then_decreases_capacity_to_exactly_requested
+                        // then_does_not_initialize_elements
+                        // then_requested_many_elements_can_be_appended_without_reallocating_memory
                     }
 
                     mod when_not_empty {
                         use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                        // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                     }
                 }
 
@@ -31211,10 +31313,21 @@ mod test {
 
                     mod when_empty {
                         use super::*;
+
+                        // then_decreases_capacity_to_exactly_requested
+                        // then_does_not_initialize_elements
+                        // then_requested_many_elements_can_be_appended_without_reallocating_memory
                     }
 
                     mod when_not_empty {
                         use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                        // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                     }
                 }
 
@@ -31223,10 +31336,20 @@ mod test {
 
                     mod when_empty {
                         use super::*;
+
+                        // then_decreases_capacity_to_exactly_requested
+                        // then_does_not_initialize_elements
+                        // then_requested_many_elements_can_be_appended_without_reallocating_memory
                     }
 
                     mod when_not_empty {
                         use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_decreases_back_capacity_to_exactly_requested
+                        // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                        // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                     }
                 }
 
@@ -31235,10 +31358,20 @@ mod test {
 
                     mod when_empty {
                         use super::*;
+
+                        // then_decreases_capacity_to_exactly_requested
+                        // then_does_not_initialize_elements
+                        // then_requested_many_elements_can_be_appended_without_reallocating_memory
                     }
 
                     mod when_not_empty {
                         use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_decreases_back_capacity_to_exactly_requested
+                        // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                        // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
                     }
                 }
             }
