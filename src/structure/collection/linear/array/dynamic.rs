@@ -6474,7 +6474,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_front_man_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
@@ -14246,7 +14246,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_both_reqeusted_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                        fn then_both_requested_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -15046,7 +15046,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_inititalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -17994,7 +17994,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_reqested_many_elements_can_be_appended_without_reallocating_memory() {
+                            fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
                                 for front in 1..32 {
                                     for back in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -18025,7 +18025,7 @@ mod test {
                             use super::*;
 
                             #[test]
-                            fn then_does_not_modify_fron_capacity() {
+                            fn then_does_not_modify_front_capacity() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -18633,7 +18633,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_initilaized_elements() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..front {
@@ -18903,7 +18903,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_initilaized_elements() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -19013,7 +19013,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_front_many_elmeents_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -19201,7 +19201,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_initilaized_elements() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for back in 1..32 {
                                         for front in 1..back {
@@ -20364,7 +20364,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initilaized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -20680,7 +20680,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_inititalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -21885,7 +21885,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_initalize_elements() {
+                        fn then_does_not_initialize_elements() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -21996,7 +21996,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -22097,7 +22097,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_initalize_elements() {
+                        fn then_does_not_initialize_elements() {
                             for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
@@ -22198,7 +22198,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -22471,7 +22471,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_intialize_elements() {
+                        fn then_does_not_initialize_elements() {
                             for front in 1..32 {
                                 for back in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -22540,7 +22540,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_intiialized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
@@ -22702,7 +22702,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_initalized_elements() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -23445,7 +23445,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_inititalized_elements() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -23631,7 +23631,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_initialized_elmenets() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for back in 1..32 {
                                         for front in 1..back {
@@ -23811,7 +23811,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_initialized_elmenets() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for capacity in 1..32 {
                                         for additional in 1..32 {
@@ -23982,7 +23982,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initialized_elmenets() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -24168,7 +24168,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_inititalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -24258,7 +24258,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_initalize_elements() {
+                        fn then_does_not_initialize_elements() {
                             for capacity in 1..32 {
                                 for more in capacity..(capacity + 32) {
                                     for less in 1..capacity {
@@ -24362,7 +24362,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_intialized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
@@ -24556,7 +24556,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initiailzied_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional_front in 1..32 {
@@ -25592,7 +25592,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_intiialized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -26230,7 +26230,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_capacity_many_elements_can_be_appended_without_invadiating_pointers() {
+                        fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -30207,7 +30207,7 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn then_decreases_capacity_to_exactly_reqeusted() {
+                        fn then_decreases_capacity_to_exactly_requested() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -30528,7 +30528,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_initalize_elements() {
+                        fn then_does_not_initialize_elements() {
                             for capacity in 1..32 {
                                 for additional in 1..32 {
                                     let mut actual = Dynamic::<usize>::default();
@@ -30639,7 +30639,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -30740,7 +30740,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_initalize_elements() {
+                        fn then_does_not_initialize_elements() {
                             for capacity in 1..32 {
                                 let mut actual = Dynamic::<usize>::default();
 
@@ -30841,7 +30841,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initalized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     let expected = 0..elements;
@@ -31028,7 +31028,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_intiialized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for additional in 1..32 {
@@ -31183,7 +31183,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_initialied_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for front in 1..32 {
                                     for back in 1..32 {
@@ -31269,7 +31269,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_initalize_elements() {
+                            fn then_does_not_initialize_elements() {
                                 for front in 1..32 {
                                     for back in 1..32 {
                                         for additional in 1..32 {
@@ -31427,7 +31427,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_front_many_elements_can_be_prepened_without_invalidating_pointers() {
+                            fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -31495,7 +31495,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_front_many_elements_can_be_prepened_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -31563,7 +31563,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_initalize_elements() {
+                            fn then_does_not_initialize_elements() {
                                 for front in 1..32 {
                                     for back in 1..32 {
                                         let mut actual = Dynamic::<usize>::default();
@@ -31730,7 +31730,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_front_many_elements_can_be_prepened_without_invalidating_pointers() {
+                            fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -31792,7 +31792,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_front_many_elements_can_be_prepened_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -31859,7 +31859,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_initalize_elements() {
+                            fn then_does_not_initialize_elements() {
                                 for front in 1..32 {
                                     for back in 1..32 {
                                         for additional in 1..usize::min(front, back) {
@@ -32015,7 +32015,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_front_many_elements_can_be_prepened_without_invalidating_pointers() {
+                            fn then_front_many_elements_can_be_prepended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -32081,7 +32081,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_both_front_many_elements_can_be_prepened_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                            fn then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..32 {
@@ -32248,7 +32248,7 @@ mod test {
                             }
 
                             #[test]
-                            fn then_does_not_modify_inititalized_elements() {
+                            fn then_does_not_modify_initialized_elements() {
                                 for elements in 1..32 {
                                     for front in 1..32 {
                                         for back in 1..front {
@@ -33574,7 +33574,7 @@ mod test {
                         }
 
                         #[test]
-                        fn then_does_not_modify_intiialized_elements() {
+                        fn then_does_not_modify_initialized_elements() {
                             for elements in 1..32 {
                                 for capacity in 1..32 {
                                     for more in capacity..(capacity + 32) {
