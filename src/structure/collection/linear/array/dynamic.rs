@@ -4207,7 +4207,7 @@ mod test {
                     }
 
                     #[test]
-                    fn then_back_many_elements_can_be_appended_without_invalidating_pointers() {
+                    fn then_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
                         // TODO: this test fails. I believe because `append` (and maybe prepend) will consume front capacity even when not needed.
 
                         for elements in 1..32 {
