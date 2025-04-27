@@ -3,10 +3,13 @@
 /// Sort `elements` via naive bubble sort.
 ///
 /// # Algorithm
-/// Iterate through overlapping pairs of elements swapping the largest so it is
-/// closer to the end until the largest element has 'bubbled up' to the end
-/// of the unsorted elements. The element is now in sorted position so it can
-/// be discarded and the process repeated until all elements are sorted.
+/// Iterate through overlapping pairs of elements, swapping them if necessary
+/// such that the element with the largest value will be contained in the
+/// (theoretical) overlapping pair of elements in the next iteration. The
+/// element with overall largest value has now 'bubbled up' into sorted
+/// position and can be split from the remaining unsorted elements with smaller
+/// values. The process is repeated for each index finding the element with the
+/// next overall largest value until all elements are sorted.
 ///
 /// # Performance
 /// #### Time Complexity
