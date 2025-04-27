@@ -790,7 +790,7 @@ impl<T> Dynamic<T> {
         let destination = self.as_mut_ptr();
 
         let Some(offset) = offset.checked_neg() else {
-            unreachable!("offset out of bounds");
+            return Err(OutOfBounds);
         };
 
         // SAFETY: offset is in bounds => aligned within the allocated object.
