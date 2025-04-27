@@ -745,6 +745,7 @@ impl<T> Dynamic<T> {
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, OutOfBounds> {
         match offset.cmp(&0) {
+            // Shifting to the left.
             core::cmp::Ordering::Less => {
                 if let Some(capacity) = self.front_capacity.checked_sub(offset.unsigned_abs()) {
                     self.front_capacity = capacity;
@@ -763,6 +764,7 @@ impl<T> Dynamic<T> {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
             }
+            // Shifting to the right.
             core::cmp::Ordering::Greater => {
                 if let Some(capacity) = self.back_capacity.checked_sub(offset.unsigned_abs()) {
                     self.back_capacity = capacity;
@@ -781,6 +783,7 @@ impl<T> Dynamic<T> {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
                 }
             }
+            // No shifting.
             core::cmp::Ordering::Equal => return Ok(self),
         }
 
