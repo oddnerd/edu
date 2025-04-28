@@ -125,13 +125,14 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 /// Sort `elements` via top-down heap sort.
 ///
 /// # Algorithm
-/// In contrast to [`bottom_up`] which creates many small max-heaps from the
-/// leaves and then joins them together via sift-down, this creates only one
-/// max-heap containing the first element then iteratively adding the adjacent
-/// element as a leaf and sifting it up. Once all elements are in max-heap
-/// order, the overall max element (the root) can then be swapped with the leaf
-/// with the highest index thereby placing it in sorted order, sifting down the
-/// leaf to maintain ordering of the heap.
+/// Arrange the input into max-heap ordering by starting from the leftmost
+/// element which is itself max-heap ordered, and sifting up the right adjacent
+/// element until there is none. Since the root of a max-heap is the element
+/// with the largest value, therefore it can be placed into sorted order by
+/// swapping it with the leaf with the largest index (the largest index not yet
+/// containing a sorted element), discarding the new-leaf from the max-heap and
+/// sifting down the new root to maintain max-heap ordering of the remaining
+/// elements, repeating until the max-heap is empty.
 ///
 /// # Performance
 /// #### Time Complexity
@@ -225,7 +226,8 @@ fn parent(child: usize) -> Option<usize> {
 /// Sift the last leaf of a `max_heap` up to the correct position.
 ///
 /// # Algorithm
-/// Swap the leaf with its parent until the parent is greater.
+/// Iteratively swap the leaf with its parent until the parent is greater,
+/// thereby repairing the max-heap.
 ///
 /// # Performance
 /// #### Time Complexity
@@ -311,10 +313,11 @@ mod sift_down {
     /// Sift the root of a binary `max_heap` down to the correct position.
     ///
     /// # Algorithm
-    /// Traverse the heap down to the lead with the overall smallest value
+    /// Traverse the heap down to the leaf with the overall smallest value
     /// (this is presumably where the current root value came from), and then
     /// traverse upwards until a node is found which is greater than the value
-    /// being sifted down.
+    /// being sifted down, thenceforth swapping the current ancestor with the
+    /// root until the overall root is reached, thereby repairing the max-heap.
     ///
     /// This uses fewer comparison than [`top_down`], but will likely have
     /// worse performance for cheap comparisons.
