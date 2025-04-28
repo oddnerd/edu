@@ -175,12 +175,13 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// # Algorithm
 /// Iterate through non-overlapping pairs of elements, swapping them if
 /// necessary such that the element with the largest value is in the position
-/// with the larger of the two indexes. Repeat whilst alternating if elements
-/// are paired with the left or right neighbour thereby allowing elements with
-/// larger values to 'bubble up' multiple positions into sorted order via
-/// repeated swaps. Once two consecutive iterations occur without swapping any
-/// elements, therefore all overlapping pairs of elements are sorted, hence the
-/// entirety of the input has been sorted.
+/// with the larger of the two indexes. Each comparison and potential swap can
+/// be done in parallel since the pairs are disjoint. Repeat whilst alternating
+/// if elements are paired with the left or right neighbour thereby allowing
+/// elements with larger values to 'bubble up' multiple positions into sorted
+/// order via repeated swaps. Once two consecutive iterations occur without
+/// swapping any elements, therefore all overlapping pairs of elements are
+/// sorted, hence the entirety of the input has been sorted.
 ///
 /// # Performance
 /// #### Time Complexity
