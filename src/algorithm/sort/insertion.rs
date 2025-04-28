@@ -3,10 +3,12 @@
 /// Sort `elements` via iterative insertion sort.
 ///
 /// # Algorithm
-/// Starting from the first element of the slice which in isolation is a sorted
-/// subsection, iteratively move the element to the right of the sorted
-/// section to the left into sorted position within the sorted section
-/// until all elements have been moved into that sorted section.
+/// Partition the input such that there is the first element which in isolation
+/// is a sorted subsection, and the remaining unsorted elements. 'Insert' the
+/// unsorted element adjacent to the sorted section into the sorted section
+/// by iteratively swapping it with its neighbour in the direction of the
+/// sorted partition until the unsorted elements is in sorted position,
+/// repeated until all elements are sorted.
 ///
 /// # Performance
 /// #### Time Complexity
