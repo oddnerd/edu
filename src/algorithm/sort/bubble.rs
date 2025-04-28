@@ -173,10 +173,14 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// Sort `elements` via parallel (odd-even) bubble sort.
 ///
 /// # Algorithm
-/// Iterate through non-overlapping pairs of elements swapping the largest so
-/// it is closest to the end. Note that because each pair is independent, they
-/// can be compared in parallel. Repeat whilst alternating if elements are
-/// paired with their right or left neighbour until no swaps are necessary.
+/// Iterate through non-overlapping pairs of elements, swapping them if
+/// necessary such that the element with the largest value is in the position
+/// with the larger of the two indexes. Repeat whilst alternating if elements
+/// are paired with the left or right neighbour thereby allowing elements with
+/// larger values to 'bubble up' multiple positions into sorted order via
+/// repeated swaps. Once two consecutive iterations occur without swapping any
+/// elements, therefore all overlapping pairs of elements are sorted, hence the
+/// entirety of the input has been sorted.
 ///
 /// # Performance
 /// #### Time Complexity
