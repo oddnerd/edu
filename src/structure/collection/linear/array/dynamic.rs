@@ -3235,6 +3235,8 @@ mod test {
             }
         }
 
+        // TODO: capacity tests should be inverted to be only_front/only_back/both_front_and_back then when_empty/when_not_empty
+
         mod capacity {
             use super::*;
 
@@ -34269,84 +34271,532 @@ mod test {
         mod shift {
             use super::*;
 
-            #[test]
-            fn left_increases_back_capacity_and_decreases_front_capacity() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                _ = actual.reserve_front(256).expect("successful allocation");
+            mod when_no_capacity {
+                use super::*;
 
-                for _ in 0..256 {
-                    let front_capacity = actual.front_capacity;
-                    let back_capacity = actual.back_capacity;
+                mod when_zero_requested {
+                    use super::*;
 
-                    _ = actual.shift(-1).expect("front capacity to shift into");
+                    mod when_empty {
+                        use super::*;
 
-                    assert_eq!(actual.front_capacity, front_capacity - 1);
-                    assert_eq!(actual.back_capacity, back_capacity + 1);
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_does_not_invalidate_pointers
+                    }
+                }
+
+                mod when_negative_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_does_not_invalidate_pointers
+                    }
+                }
+
+                mod when_positive_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_does_not_invalidate_pointers
+                    }
                 }
             }
 
-            #[test]
-            fn left_does_not_modify_initialized_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Dynamic::from_iter(expected);
-                _ = actual.reserve_front(256).expect("successful allocation");
+            mod when_only_front_capacity {
+                use super::*;
 
-                for _ in 0..256 {
-                    _ = actual.shift(-1).expect("front capacity to shift into");
+                mod when_zero_requested {
+                    use super::*;
 
-                    assert!(actual.iter().eq(expected.iter()));
+                    mod when_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_reallocating_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_invalidating pointers
+                    }
+                }
+
+                mod when_negative_requested {
+                    use super::*;
+
+                    mod when_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                        }
+                    }
+
+                    mod when_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_decreases_front_capacity_to_zero
+                            // then_increases_back_capacity_to_sum_with_front_capacity
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_back_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_decreases_front_capacity_to_zero
+                            // then_increases_back_capacity_to_sum_with_front_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+
+                    mod when_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_decreases_front_capacity_to_zero
+                            // then_increases_back_capacity_to_sum_with_front_capacity
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_capacity_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_decreases_front_capacity_by_requested
+                            // then_increases_back_capacity_by_requested
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+                }
+
+                mod when_positive_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_reallocating_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                    }
                 }
             }
 
-            #[test]
-            fn right_increases_front_capacity_and_decreases_back_capacity() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-                _ = actual.reserve_back(256).expect("successful allocation");
+            mod when_only_back_capacity {
+                use super::*;
 
-                for _ in 0..256 {
-                    let front_capacity = actual.front_capacity;
-                    let back_capacity = actual.back_capacity;
+                mod when_zero_requested {
+                    use super::*;
 
-                    _ = actual.shift(1).expect("back capacity to shift into");
+                    mod when_empty {
+                        use super::*;
 
-                    assert_eq!(actual.front_capacity, front_capacity + 1);
-                    assert_eq!(actual.back_capacity, back_capacity - 1);
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                        // then_back_many_elements_can_be_appended_without_reallocating_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                    }
+                }
+
+                mod when_negative_requested {
+                    use super::*;
+
+                    mod when_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                        // then_back_many_elements_can_be_appended_without_reallocating_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                    }
+                }
+
+                mod when_positive_requested {
+                    use super::*;
+
+                    mod when_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_back_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+
+                    mod when_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_increases_front_capacity_to_sum_with_back
+                            // then_decreases_back_capacity_to_zero
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_increases_front_capacity_to_sum_with_back
+                            // then_decreases_back_capacity_to_zero
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                        }
+                    }
+
+                    mod when_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_increases_front_capacity_by_requested
+                            // then_decreases_back_capacity_by_requested
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_capacity_many_elements_can_be_prepended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_increases_front_capacity_by_requested
+                            // then_decreases_back_capacity_by_requested
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
                 }
             }
 
-            #[test]
-            fn right_does_not_modify_initialized_elements() {
-                let expected = [0, 1, 2, 3, 4, 5];
-                let mut actual = Dynamic::from_iter(expected);
-                _ = actual.reserve_back(256).expect("successful allocation");
+            mod when_both_front_and_back_capacity {
+                use super::*;
 
-                for _ in 0..256 {
-                    _ = actual.shift(1).expect("right capacity to shift into");
+                mod when_zero_requested {
+                    use super::*;
 
-                    assert!(actual.iter().eq(expected.iter()));
+                    mod when_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_initialize_elements
+                        // then_does_not_reallocate_memory
+                        // then_capacity_many_elements_can_be_prepended_without_reallocating_memory
+                        // then_capacity_many_elements_can_be_appended_without_reallocating_memory
+                    }
+
+                    mod when_not_empty {
+                        use super::*;
+
+                        // then_does_not_modify_front_capacity
+                        // then_does_not_modify_back_capacity
+                        // then_does_not_modify_initialized_elements
+                        // then_does_not_reallocate_memory
+                        // then_front_many_elements_can_be_prepended_without_invalidating_memory
+                        // then_back_many_elements_can_be_appended_without_invalidating_memory
+                        // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_memory
+                    }
                 }
-            }
 
-            #[test]
-            fn zero_cannot_fail() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                mod when_negative_requested {
+                    use super::*;
 
-                _ = actual.shift(0).expect("already enough capacity");
-            }
+                    mod when_front_is_less_than_requested {
+                        use super::*;
 
-            #[test]
-            fn errors_when_out_of_bounds() {
-                let mut actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+                        mod when_empty {
+                            use super::*;
 
-                _ = actual.shift(-1).expect_err("no front capacity");
-                _ = actual.shift(1).expect_err("no back capacity");
-            }
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_capacity_many_elements_can_be_prepended_without_reallocating_memory
+                            // then_capacity_many_elements_can_be_appended_without_reallocating_memory
+                        }
 
-            #[test]
-            fn when_empty() {
-                let mut actual = Dynamic::<()>::default();
+                        mod when_not_empty {
+                            use super::*;
 
-                _ = actual.shift(0).expect("already enough capacity");
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_memory
+                            // then_back_many_elements_can_be_appended_without_invalidating_memory
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_memory
+                        }
+                    }
+
+                    mod when_front_is_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_decreased_to_zero
+                            // then_back_capacity_is_increased_to_sum_with_front
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_back_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_decreased_to_zero
+                            // then_back_capacity_is_increased_to_sum_with_front
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+
+                    mod when_front_is_more_than_reqeusted {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_decreased_by_requested
+                            // then_back_capacity_is_increased_by_requested
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_capacity_many_elements_can_be_prepended_without_reallocating_memory
+                            // then_capacity_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_decreased_by_requested
+                            // then_back_capacity_is_increased_by_requested
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+                }
+
+                mod when_positive_requested {
+                    use super::*;
+
+                    mod when_back_is_less_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_capacity_many_elements_can_be_prepended_without_reallocating_memory
+                            // then_capacity_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_does_not_modify_front_capacity
+                            // then_does_not_modify_back_capacity
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_does_not_invalidate_pointers
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+
+                    mod when_back_is_exactly_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_increased_to_sum_with_back
+                            // then_back_capacity_is_decreased_to_zero
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_increased_to_sum_with_back
+                            // then_back_capacity_is_decreased_to_zero
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidaing_pointers
+                        }
+                    }
+
+                    mod when_back_is_more_than_requested {
+                        use super::*;
+
+                        mod when_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_increased_by_requested
+                            // then_back_capacity_is_decreased_by_requested
+                            // then_does_not_initialize_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_reallocating_memory
+                            // then_back_many_elements_can_be_appended_without_reallocating_memory
+                        }
+
+                        mod when_not_empty {
+                            use super::*;
+
+                            // then_front_capacity_is_increased_by_requested
+                            // then_back_capacity_is_decreased_by_requested
+                            // then_does_not_modify_initialized_elements
+                            // then_does_not_reallocate_memory
+                            // then_front_many_elements_can_be_prepended_without_invalidating_pointers
+                            // then_back_many_elements_can_be_appended_without_invalidating_pointers
+                            // then_both_front_many_elements_can_be_prepended_and_back_many_elements_can_be_appended_without_invalidating_pointers
+                        }
+                    }
+                }
             }
         }
 
