@@ -215,7 +215,7 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
     let mut offset = false;
 
     while !(even_pairs_sorted && odd_pairs_sorted) {
-        // Only on the second  Assume no swaps are necessary.
+        // Assume no swaps are necessary.
         if offset {
             odd_pairs_sorted = true;
         } else {
