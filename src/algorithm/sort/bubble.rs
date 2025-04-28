@@ -250,11 +250,15 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 /// Sort `elements` via comb bubble sort.
 ///
 /// # Algorithm
-/// Fundamentally the same as [`parallel`], except instead of comparing
-/// directly adjacent elements, this variation compares elements separated by
-/// some decreasing gap thereby allowing elements to move large distances with
-/// only a single swap. This effectively does to bubble sort what the
-/// [`super::insertion::shell`] variation does to insertion sort.
+/// Ostensibly the same as [`parallel`], however the elements within the
+/// disjoint pairs are separated by some gap rather than being directly
+/// adjacent, thereby allowing elements to move large distance with only a
+/// single swap. By iteratively decreasing the gap until it reaches one (1),
+/// it will therefore converge towards the 'gap-less' bubble sort, but should
+/// perform fewer swaps thereby having different performance characteristics.
+///
+/// This effectively does to bubble sort what the [`super::insertion::shell`]
+/// variation does to insertion sort.
 ///
 /// # Performance
 /// #### Time Complexity
