@@ -3,11 +3,15 @@
 /// Sort `elements` via bottom-up heap sort.
 ///
 /// # Algorithm
-/// Starting from lone elements which are themselves max-heap ordered,
-/// iteratively join these subtrees by sifting down the element corresponding
-/// to their parent until all elements are ordered. The max element (the root)
-/// can then be swapped with the leaf with the highest index thereby placing it
-/// in sorted order, sifting down the leaf to maintain ordering of the heap.
+/// Arrange the input into max-heap ordering by starting from leaves (which are
+/// themselves max-heap ordered) and iteratively joining sibling max-heap
+/// subtrees by sifting down the element at the index corresponding to their
+/// parent. Since the root of a max-heap is the element with the largest value,
+/// therefore it can be placed into sorted order by swapping it with the leaf
+/// with the largest index (the largest index not yet containing a sorted
+/// element), discarding the new-leaf from the max-heap and sifting down the
+/// new root to maintain max-heap ordering of the remaining elements, repeating
+/// until the max-heap is empty.
 ///
 /// # Performance
 /// #### Time Complexity
