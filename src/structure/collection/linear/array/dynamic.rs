@@ -1095,7 +1095,13 @@ impl<T> Dynamic<T> {
 
         // Zero-size types do _NOT_ occupy memory, so no (re/de)allocation.
         if size_of::<T>() == 0 {
-            // Global allocator API limits allocation to `isize:MAX` bytes.
+            // The global allocator API limits allocations to at most
+            // `isize::MAX` bytes. Although this limit could be ignored for
+            // ZSTs since they do not occupy memory, there are various
+            // restrictions to pointer arithmetic based on the assumption no
+            // single allocated object will exceed `isize::MAX` bytes.
+            // Accordingly, we limit the number of ZST elements to match so
+            // all arithmetic can be consistent regardless of underlying type.
             if usize::checked_add(unchanged, capacity).is_some_and(|total| total > isize::MAX as usize) {
                 return Err(FailedAllocation);
             }
