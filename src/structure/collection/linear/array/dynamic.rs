@@ -1162,7 +1162,7 @@ impl<T> Dynamic<T> {
                 else {
                     // SAFETY:
                     // * Allocated using the corresponding allocator.
-                    // * `existing` is tje layout of the current allocation.
+                    // * `existing` is the layout of the current allocation.
                     // * `new` has non-zero size.
                     // * `new` is fewer than `isize::MAX` bytes.
                     unsafe { alloc::alloc::realloc(ptr, existing, new.size()) }.cast::<T>()
