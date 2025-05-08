@@ -82,7 +82,7 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 
         for current in 1..remaining {
             let Some(previous) = current.checked_sub(1) else {
-                unreachable!("inner loop ensures `current_index >= 1`");
+                unreachable!("inner loop ensures `current >= 1`");
             };
 
             if elements.get(previous) > elements.get(current) {
