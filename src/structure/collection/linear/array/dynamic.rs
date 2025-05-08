@@ -3803,9 +3803,9 @@ mod test {
                     fn then_that_many_elements_can_be_prepended_without_invalidating_pointers() {
                         for elements in 1..32 {
                             for capacity in 1..32 {
-                                let expected: Vec<_> = (0..elements).collect();
+                                let expected = 0..elements;
 
-                                let mut actual: Dynamic<_> = expected.iter().copied().collect();
+                                let mut actual: Dynamic<_> = expected.clone().collect();
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
@@ -3819,7 +3819,7 @@ mod test {
                                     _ = actual.prepend(element).expect("uses capacity");
                                 }
 
-                                assert_eq!(pointers, expected.as_slice());
+                                assert!(pointers.iter().copied().eq(expected));
                             }
                         }
                     }
@@ -3966,9 +3966,9 @@ mod test {
                         for elements in 1..32 {
                             for front in 1..32 {
                                 for back in 1..32 {
-                                    let expected: Vec<_> = (0..elements).collect();
+                                    let expected = 0..elements;
 
-                                    let mut actual: Dynamic<_> = expected.iter().copied().collect();
+                                    let mut actual: Dynamic<_> = expected.clone().collect();
 
                                     _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
@@ -3983,7 +3983,7 @@ mod test {
                                         _ = actual.prepend(element).expect("uses capacity");
                                     }
 
-                                    assert_eq!(pointers, expected.as_slice());
+                                    assert!(pointers.iter().copied().eq(expected));
                                 }
                             }
                         }
