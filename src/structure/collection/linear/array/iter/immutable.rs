@@ -23,15 +23,7 @@ impl<'a, T: 'a> Iter<'a, T> {
     /// * `ptr` must point to `count` consecutive initialized instances of `T`.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     #[must_use]
     pub(in super::super) unsafe fn new(ptr: NonNull<T>, count: usize) -> Self {
         Self {
@@ -48,15 +40,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// Obtain the element with the lowest index yet to be yielded, if any.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     fn next(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             // SAFETY:
@@ -82,15 +66,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     /// Query how many elements have yet to be yielded.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.count, Some(self.count))
     }
@@ -100,15 +76,7 @@ impl<'a, T: 'a> DoubleEndedIterator for Iter<'a, T> {
     /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     fn next_back(&mut self) -> Option<Self::Item> {
         (self.count > 0).then(|| {
             let Some(decremented) = self.count.checked_sub(1) else {
@@ -138,15 +106,7 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Iter<'a, T> {
     /// List the elements yet to be yielded.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// This method always consumes O(N) memory and takes O(N) time.
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let data = self.ptr.as_ptr();
         let len = self.count;

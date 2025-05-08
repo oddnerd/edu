@@ -42,15 +42,7 @@ impl<'a, T: 'a> Dope<'a, T> {
     /// * `ptr` must point to `len` consecutive initialized instances of `T`.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -82,15 +74,7 @@ impl<'a, T: 'a> From<&'a mut [T]> for Dope<'a, T> {
     /// Construct from an existing mutable [`slice`].
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -119,15 +103,7 @@ impl<'a, T: 'a + PartialEq> PartialEq for Dope<'a, T> {
     /// Query if the elements have the same values and order as `other`.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
@@ -158,15 +134,7 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     /// If provided `index` is out of bounds.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -204,15 +172,7 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     /// If provided `index` is out of bounds.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -247,15 +207,7 @@ impl<'a, T: 'a + core::fmt::Debug> core::fmt::Debug for Dope<'a, T> {
     /// List the elements referenced to/contained.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// This method always consumes O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
@@ -278,15 +230,7 @@ impl<'a, T: 'a> Collection for Dope<'a, T> {
     /// Query how many elements are referenced to/contained.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -308,15 +252,7 @@ impl<'a, T: 'a> Linear for Dope<'a, T> {
     /// Immutably iterate the elements in order.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -345,15 +281,7 @@ impl<'a, T: 'a> Linear for Dope<'a, T> {
     /// Mutably iterate the elements in order.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -388,15 +316,7 @@ impl<'a, T: 'a> Array for Dope<'a, T> {
     /// `self` must outlive the resultant pointer.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -419,15 +339,7 @@ impl<'a, T: 'a> Array for Dope<'a, T> {
     /// `self` must outlive the resultant pointer.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
