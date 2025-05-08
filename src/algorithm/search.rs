@@ -8,15 +8,10 @@
 /// iteration finishes without finding a match.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(1) | 𝚯(N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the desired is the first
+/// element taking O(1) times, the worst-case is when the desired is the last
+/// elements taking O(N) times, and the average is O(N) time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Linear_search).
@@ -62,15 +57,10 @@ pub fn linear<T: PartialEq>(elements: &[T], desired: &T) -> Option<usize> {
 /// bounds become equivalent implying the desired element is not contained.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(log N) | 𝛀(1) | 𝚯(log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the desired is the middle
+/// elements taking O(1) time, the worst-case is when the desired is the first
+/// or last elements taking O(log N) time, and the average is O(log N) time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Binary_search).

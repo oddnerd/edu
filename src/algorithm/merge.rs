@@ -16,15 +16,8 @@
 /// elements are pushed in order to the output.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(N) | 𝚯(N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N) time complexity regardless
+/// of input.
 ///
 /// # Examples
 /// ```
@@ -103,26 +96,11 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 ///
 /// # Performance
 /// #### Executed Synchronously
-/// ##### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: |  :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
-///
-/// ##### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(N) | 𝚯(N) |
-///
+/// This algorithm consumes O(N) memory and has O(N ⋅ log N) time complexity
+/// regardless of input.
 /// #### Executed Asynchronously
-/// ##### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: |  :-: | :-: |
-/// | O(log<sup>2</sup> N) | 𝛀(log<sup>2</sup> N) | 𝚯(log<sup>2</sup> N) |
-///
-/// ##### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(log N) | 𝛀(log N) | 𝚯(log N) |
+/// This algorithm consumes O(log N) memory and has O(log<sup>2</sup> N) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -217,15 +195,11 @@ pub fn parallel<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
 /// elements are therefore in sorted position to the right of everything else.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # Examples
 /// ```

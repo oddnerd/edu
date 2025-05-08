@@ -16,15 +16,8 @@ use super::super::merge;
 /// with another.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(log N) | 𝛀(log N) | 𝚯(log N) |
+/// This algorithm consumes O(log N) memory and has O(N ⋅ log N) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -67,15 +60,11 @@ pub fn top_down<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// splitting the original input optimally to prevent unnecessary recursion.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(1) | 𝚯(N) |
+/// This algorithm consumes O(N) memory and has O(N ⋅ log N) time complexity in
+/// the worst-cast when the input is in reverse sorted order, consumes 𝛀(1)
+/// memory and has 𝛀(N) time complexity in the best-case when the input is
+/// already sorted, and on average consumes 𝚯(N) memory with 𝚯(N ⋅ log N) time
+/// complexity.
 ///
 /// # Examples
 /// ```
@@ -134,15 +123,8 @@ pub fn natural<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// recursive stack without needing to first descend down.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N ⋅ log N) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -201,15 +183,8 @@ pub fn bottom_up<T: Ord>(elements: &mut [T], auxiliary: &mut [T]) {
 /// right and unsorted on the left, repeating until all elements are sorted.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N ⋅ log N) time
+/// complexity regardless of input.
 ///
 /// # Citation
 /// This algorithm is from the following citation:

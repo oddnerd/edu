@@ -14,15 +14,8 @@
 /// position.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N<sup>2</sup>) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -63,15 +56,8 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 /// it does is the overall minimum unsorted element into sorted position.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N<sup>2</sup>) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -112,15 +98,11 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// element thereby maintaining the order of the remaining elements.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>3</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>3</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N<sup>2</sup>) time, the worst-case is when the input is in
+/// reverse sorted order taking O(N<sup>3/sup>) time, and the average is
+/// 𝚯(N<sup>2</sup>) time.
 ///
 /// # Examples
 /// ```
@@ -172,15 +154,8 @@ pub fn stable<T: Ord>(elements: &mut [T]) {
 /// unsorted elements in-between.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N<sup>2</sup>) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -237,15 +212,8 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// sorted position thereby being more efficient for inputs with duplicates.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N<sup>2</sup>) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```

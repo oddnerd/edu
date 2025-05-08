@@ -15,15 +15,8 @@
 /// position.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N<sup>2</sup>) time
+/// complexity regardless of input.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Cycle_sort).

@@ -12,15 +12,8 @@
 /// next overall largest value until all elements are sorted.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N<sup>2</sup>) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N<sup>2</sup>) time
+/// complexity regardless of input.
 ///
 /// # Examples
 /// ```
@@ -54,22 +47,21 @@ pub fn naive<T: Ord>(elements: &mut [T]) {
 /// of the input is naturally sorted and can be skipped in future iterations.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # Examples
 /// ```
 /// use rust::algorithm::sort::bubble::optimized;
 ///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
+/// // The final three elements, `[3, 4, 5]`, are naturally sorted.
+/// let mut elements = [2, 1, 0, 3, 4, 5];
 ///
+/// // This will iterate only once through the
+/// // naturally sorted elements at the end.
 /// optimized(&mut elements);
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
@@ -112,15 +104,11 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// performance characteristics.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Cocktail_shaker_sort).
@@ -129,8 +117,12 @@ pub fn optimized<T: Ord>(elements: &mut [T]) {
 /// ```
 /// use rust::algorithm::sort::bubble::bidirectional;
 ///
-/// let mut elements = [0, 5, 2, 3, 1, 4];
+/// // The first two elements `[0, 1]` are naturally sorted.
+/// // The final two elements `[4, 5]` are naturally sorted.
+/// let mut elements = [0, 1, 3, 2, 4, 5];
 ///
+/// // This will iterate only once through both the naturally sorted elements
+/// // at the start as well as the naturally sorted elements as the end.
 /// bidirectional(&mut elements);
 ///
 /// assert_eq!(elements, [0, 1, 2, 3, 4, 5]);
@@ -184,15 +176,11 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
 /// sorted, hence the entirety of the input has been sorted.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Odd%E2%80%93even_sort).
@@ -261,15 +249,18 @@ pub fn parallel<T: Ord>(elements: &mut [T]) {
 /// variation does to insertion sort.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N<sup>2</sup>) |
+/// This algorithm always consumes a constant amount of memory but has varying
+/// time complexity depending on the input. The best-case is when the input is
+/// already sorted taking 𝛀(N ⋅ log N) time, the worst-case is when the input
+/// is in reverse sorted order taking O(N<sup>2</sup>) time, and the average is
+/// 𝚯(N<sup>2</sup>) time.
 ///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// /// # Performance
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N ⋅ log N) time, the worst-case is when the input is in reverse
+/// sorted order taking O(N<sup>2</sup>) time, and the average is
+/// 𝚯(N<sup>2</sup>) time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Comb_sort).

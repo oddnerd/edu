@@ -14,15 +14,8 @@
 /// until the max-heap is empty.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N ⋅ log N) time complexity
+/// regardless of input.
 ///
 /// # Examples
 /// ```
@@ -61,15 +54,8 @@ pub fn bottom_up<T: Ord>(elements: &mut [T]) {
 /// prediction and potential inline expansion.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N ⋅ log N) time complexity
+/// regardless of input.
 ///
 /// # Examples
 /// ```
@@ -135,15 +121,8 @@ pub fn inline<T: Ord>(elements: &mut [T]) {
 /// elements, repeating until the max-heap is empty.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(N ⋅ log N) time complexity
+/// regardless of input.
 ///
 /// # Examples
 /// ```
@@ -173,51 +152,18 @@ pub fn top_down<T: Ord>(elements: &mut [T]) {
 }
 
 /// Index of the left child of the node at `root` in a binary heap.
-///
-/// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1)| 𝚯(1) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
 #[inline]
 fn left_child(root: usize) -> Option<usize> {
     root.checked_mul(2).and_then(|index| index.checked_add(1))
 }
 
 /// Index of the right child of the node at `root` in a binary heap.
-///
-/// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1)| 𝚯(1) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
 #[inline]
 fn right_child(root: usize) -> Option<usize> {
     root.checked_mul(2).and_then(|index| index.checked_add(2))
 }
 
 /// Index of the parent of the node at `child` in a binary heap.
-///
-/// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1)| 𝚯(1) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
 #[inline]
 fn parent(child: usize) -> Option<usize> {
     child.checked_sub(1).map(|index| index / 2)
@@ -230,15 +176,8 @@ fn parent(child: usize) -> Option<usize> {
 /// thereby repairing the max-heap.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(log N) | 𝛀(log N)| 𝚯(log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm consumes O(1) memory and has O(log N) time complexity
+/// regardless of input.
 fn sift_up<T: Ord>(max_heap: &mut [T]) {
     let Some(mut current) = max_heap.len().checked_sub(1) else {
         debug_assert!(max_heap.is_empty(), "only condition it is none");
@@ -272,15 +211,8 @@ mod sift_down {
     /// are less than it, thereby repairing the max-heap.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(log N) | 𝛀(log N)| 𝚯(log N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This algorithm consumes O(1) memory and has O(log N) time complexity
+    /// regardless of input.
     pub(super) fn top_down<T: Ord>(mut root: usize, max_heap: &mut [T]) {
         loop {
             let (Some(left_child), Some(right_child)) = (left_child(root), right_child(root))
@@ -323,15 +255,8 @@ mod sift_down {
     /// worse performance for cheap comparisons.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(log N) | 𝛀(log N)| 𝚯(log N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This algorithm consumes O(1) memory and has O(log N) time complexity
+    /// regardless of input.
     pub(super) fn bottom_up<T: Ord>(mut root: usize, max_heap: &mut [T]) {
         // Traverse down to leaf where the smallest possible value goes.
         loop {
@@ -388,15 +313,8 @@ mod construct_heap {
     /// Arrange `elements` into max-heap (children less than parent) order.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N)| 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This algorithm consumes O(1) memory and has O(N) time complexity
+    /// regardless of input.
     pub(super) fn bottom_up<T: Ord>(elements: &mut [T]) {
         // All leaves will be ordered when their parent is sifted down.
         let last_parent = elements.len().div_ceil(2);
@@ -410,15 +328,8 @@ mod construct_heap {
     /// Arrange `elements` into max-heap (children less than parent) order.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N ⋅ log N) | 𝛀(N ⋅ log N)| 𝚯(N ⋅ log N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This algorithm consumes O(1) memory and has O(N ⋅ log N) time
+    /// complexity regardless of input.
     pub(super) fn top_down<T: Ord>(elements: &mut [T]) {
         for leaf in 1..=elements.len() {
             let Some(heap) = elements.get_mut(..leaf) else {

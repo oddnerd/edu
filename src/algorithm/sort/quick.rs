@@ -80,15 +80,12 @@ fn recurse<T: Ord>(
 /// included in the partitions recursively sorted.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(log N) | 𝛀(log N) | 𝚯(log N) |
+/// This algorithm always consumes O(log N) memory but has varying time
+/// complexity depending on the input. The best-case occurs when the partition
+/// evenly divides the input into two sub-slices containing the same number of
+/// elements taking 𝛀(N ⋅ log N), the worst-case occurs when the partition
+/// separates a single element from the rest taking O(N<sup>2</sup>), and the
+/// average is 𝚯(N ⋅ log N) time.
 ///
 /// # Examples
 /// ```
@@ -192,15 +189,12 @@ pub fn hoare<T: Ord>(elements: &mut [T]) {
 /// evenly partition strings of equivalent elements.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(N) | 𝚯(N) |
+/// This algorithm always consumes O(N) memory but has varying time
+/// complexity depending on the input. The best-case occurs when the partition
+/// evenly divides the input into two sub-slices containing the same number of
+/// elements taking 𝛀(N ⋅ log N), the worst-case occurs when the partition
+/// separates a single element from the rest taking O(N<sup>2</sup>), and the
+/// average is 𝚯(N ⋅ log N) time.
 ///
 /// # Examples
 /// ```
@@ -278,15 +272,12 @@ pub fn lomuto<T: Ord>(elements: &mut [T]) {
 /// partition are less-than all elements within the right partition.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N ⋅ log N) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(N) | 𝚯(N) |
+/// This algorithm always consumes O(N) memory but has varying time
+/// complexity depending on the input. The best-case occurs when the partition
+/// evenly divides the input into two sub-slices containing the same number of
+/// elements taking 𝛀(N ⋅ log N), the worst-case occurs when the partition
+/// separates a single element from the rest taking O(N<sup>2</sup>), and the
+/// average is 𝚯(N ⋅ log N) time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Dutch_national_flag_problem).

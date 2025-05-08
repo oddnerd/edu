@@ -11,15 +11,11 @@
 /// repeated until all elements are sorted.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # Examples
 /// ```
@@ -58,15 +54,11 @@ pub fn iterative<T: Ord>(elements: &mut [T]) {
 /// to the left into sorted position within the sorted section.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N) | 𝛀(N) | 𝚯(N) |
+/// This algorithm always consumes O(N) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # Examples
 /// ```
@@ -114,15 +106,11 @@ pub fn recursive<T: Ord>(elements: &mut [T]) {
 /// thereby making fewer comparisons.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N ⋅ log N) time, the worst-case is when the input is in reverse
+/// sorted order taking O(N<sup>2</sup>) time, and the average is
+/// 𝚯(N<sup>2</sup>) time.
 ///
 /// # Examples
 /// ```
@@ -165,15 +153,11 @@ pub fn binary<T: Ord>(elements: &mut [T]) {
 /// of utilizing for loops.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>2</sup>) | 𝛀(N) | 𝚯(N<sup>2</sup>) |
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N) time, the worst-case is when the input is in reverse sorted
+/// order taking O(N<sup>2</sup>) time, and the average is 𝚯(N<sup>2</sup>)
+/// time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Gnome_sort).
@@ -242,17 +226,11 @@ pub fn gnome<T: Ord>(elements: &mut [T]) {
 /// constructing a complex gap sequence.
 ///
 /// # Performance
-/// #### Time Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(N<sup>3/2</sup>) | 𝛀(N ⋅ log N) | 𝚯(N<sup>5/4</sup>)[^1] |
-///
-/// [^1]: Generally accepted conjecture based on experiment.
-///
-/// #### Memory Complexity
-/// | Worst | Best | Average |
-/// | :-: | :-: | :-: |
-/// | O(1) | 𝛀(1) | 𝚯(1) |
+/// This algorithm always consumes O(1) memory but has varying time complexity
+/// depending on the input. The best-case is when the input is already sorted
+/// taking 𝛀(N ⋅ log N) time, the worst-case is when the input is in reverse
+/// sorted order taking O(N<sup>3/2</sup>) time, and the average is conjectured
+/// but generally accepted based on experiment to be 𝚯(N<sup>5/4</sup>) time.
 ///
 /// # See Also
 /// [Wikipedia](https://en.wikipedia.org/wiki/Shellsort).
