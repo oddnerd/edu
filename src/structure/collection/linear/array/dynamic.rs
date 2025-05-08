@@ -29842,7 +29842,6 @@ mod test {
                 }
 
                 mod when_less_than_requested {
-
                     use super::*;
 
                     mod when_empty {
