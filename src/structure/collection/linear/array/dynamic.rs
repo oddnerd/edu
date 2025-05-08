@@ -39851,6 +39851,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
+                                        #[expect(clippy::range_plus_one, reason = "the removed element")]
                                         for _ in 0..(front + back + 1) {
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
@@ -40956,6 +40957,7 @@ mod test {
 
                                         let allocation = actual.buffer;
 
+                                        #[expect(clippy::range_plus_one, reason = "the removed element")]
                                         for _ in 0..(front + back + 1) {
                                             _ = actual.append(usize::MAX).expect("uses capacity");
                                         }
@@ -41177,6 +41179,7 @@ mod test {
 
                                             let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements - 1) };
 
+                                            #[expect(clippy::range_plus_one, reason = "the removed element")]
                                             for _ in 0..(back + 1) {
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
@@ -41210,6 +41213,7 @@ mod test {
                                                 _ = actual.prepend(usize::MAX).expect("uses capacity");
                                             }
 
+                                            #[expect(clippy::range_plus_one, reason = "the removed element")]
                                             for _ in 0..(back + 1) {
                                                 _ = actual.append(usize::MAX).expect("uses capacity");
                                             }
