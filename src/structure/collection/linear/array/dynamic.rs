@@ -3277,7 +3277,7 @@ mod test {
                         for elements in 1..32 {
                             let actual: Dynamic<_> = (0..elements).collect();
 
-                            debug_assert_ne!(actual.initialized, 0);
+                            debug_assert_eq!(actual.initialized, elements);
                             debug_assert_eq!(actual.front_capacity, 0);
                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3362,7 +3362,7 @@ mod test {
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3379,7 +3379,7 @@ mod test {
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3402,7 +3402,7 @@ mod test {
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3494,7 +3494,7 @@ mod test {
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -3511,7 +3511,7 @@ mod test {
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -3534,7 +3534,7 @@ mod test {
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -3640,7 +3640,7 @@ mod test {
                                     _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -3661,7 +3661,7 @@ mod test {
 
                                     _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -3688,7 +3688,7 @@ mod test {
 
                                     _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -3736,7 +3736,7 @@ mod test {
                         for elements in 1..32 {
                             let actual: Dynamic<_> = (0..elements).collect();
 
-                            debug_assert_ne!(actual.initialized, 0);
+                            debug_assert_eq!(actual.initialized, elements);
                             debug_assert_eq!(actual.front_capacity, 0);
                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3800,7 +3800,7 @@ mod test {
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3819,7 +3819,7 @@ mod test {
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -3890,7 +3890,7 @@ mod test {
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -3961,7 +3961,7 @@ mod test {
                                     _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -3983,7 +3983,7 @@ mod test {
                                     _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -4031,7 +4031,7 @@ mod test {
                         for elements in 1..32 {
                             let actual: Dynamic<_> = (0..elements).collect();
 
-                            debug_assert_ne!(actual.initialized, 0);
+                            debug_assert_eq!(actual.initialized, elements);
                             debug_assert_eq!(actual.front_capacity, 0);
                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4095,7 +4095,7 @@ mod test {
 
                                 _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, capacity);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4160,7 +4160,7 @@ mod test {
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -4179,7 +4179,7 @@ mod test {
 
                                 _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -4260,7 +4260,7 @@ mod test {
                                     _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -4282,7 +4282,7 @@ mod test {
                                     _ = actual.reserve_front(front).expect("successful allocation");
                                     _ = actual.reserve_back(back).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, front);
                                     debug_assert_eq!(actual.back_capacity, back);
 
@@ -4348,7 +4348,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4363,7 +4363,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4380,7 +4380,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4473,7 +4473,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4489,7 +4489,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4508,7 +4508,7 @@ mod test {
 
                                     let mut actual: Dynamic<()> = core::iter::repeat_n((), elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4527,7 +4527,7 @@ mod test {
 
                                     let mut actual: Dynamic<usize> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4546,7 +4546,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4664,7 +4664,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4683,7 +4683,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4704,7 +4704,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4723,7 +4723,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4746,7 +4746,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4866,7 +4866,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4886,7 +4886,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4909,7 +4909,7 @@ mod test {
 
                                         _ = actual.reserve_front(power).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, power);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4936,7 +4936,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -4959,7 +4959,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5088,7 +5088,7 @@ mod test {
 
                                 _ = actual.reserve_front(isize::MAX as usize - elements).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, isize::MAX as usize - elements);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5106,7 +5106,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5125,7 +5125,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5146,7 +5146,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5165,7 +5165,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5188,7 +5188,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5311,7 +5311,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5332,7 +5332,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5355,7 +5355,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5376,7 +5376,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5401,7 +5401,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -5520,7 +5520,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5539,7 +5539,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5560,7 +5560,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5579,7 +5579,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5602,7 +5602,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5723,7 +5723,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5743,7 +5743,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5766,7 +5766,7 @@ mod test {
 
                                         _ = actual.reserve_back(power).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, power);
 
@@ -5789,7 +5789,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5812,7 +5812,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5941,7 +5941,7 @@ mod test {
 
                                 _ = actual.reserve_back(isize::MAX as usize - elements).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, isize::MAX as usize - elements);
 
@@ -5959,7 +5959,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5978,7 +5978,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -5999,7 +5999,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -6018,7 +6018,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -6041,7 +6041,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -6164,7 +6164,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -6185,7 +6185,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -6208,7 +6208,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -6229,7 +6229,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -6254,7 +6254,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -6391,7 +6391,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6413,7 +6413,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6437,7 +6437,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6459,7 +6459,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6485,7 +6485,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6516,7 +6516,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6547,7 +6547,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -6701,7 +6701,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -6724,7 +6724,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -6758,7 +6758,7 @@ mod test {
                                                 let front = usize::pow(2, front);
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, power - front);
 
@@ -6784,7 +6784,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -6810,7 +6810,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -6967,7 +6967,7 @@ mod test {
 
                                         _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, isize::MAX as usize - elements - front);
 
@@ -6988,7 +6988,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7010,7 +7010,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7034,7 +7034,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7056,7 +7056,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7082,7 +7082,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7225,7 +7225,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -7250,7 +7250,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -7277,7 +7277,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -7302,7 +7302,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -7331,7 +7331,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -7469,7 +7469,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7491,7 +7491,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7515,7 +7515,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7537,7 +7537,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7563,7 +7563,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -7696,7 +7696,7 @@ mod test {
                                             _ = actual.reserve_front(capacity ).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7718,7 +7718,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7742,7 +7742,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7764,7 +7764,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7790,7 +7790,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7821,7 +7821,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7852,7 +7852,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -7994,7 +7994,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8016,7 +8016,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8040,7 +8040,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8064,7 +8064,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8090,7 +8090,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8121,7 +8121,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8152,7 +8152,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -8291,7 +8291,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8314,7 +8314,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8339,7 +8339,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8362,7 +8362,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8389,7 +8389,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8421,7 +8421,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8453,7 +8453,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity + additional).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8583,7 +8583,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8603,7 +8603,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8625,7 +8625,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8647,7 +8647,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8671,7 +8671,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8700,7 +8700,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8729,7 +8729,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -8875,7 +8875,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -8899,7 +8899,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -8925,7 +8925,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -8949,7 +8949,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -8977,7 +8977,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -9120,7 +9120,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9144,7 +9144,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9170,7 +9170,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9194,7 +9194,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9222,7 +9222,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9255,7 +9255,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9288,7 +9288,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -9436,7 +9436,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9460,7 +9460,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9486,7 +9486,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9510,7 +9510,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9538,7 +9538,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9571,7 +9571,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9604,7 +9604,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -9680,7 +9680,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9695,7 +9695,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9712,7 +9712,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9803,7 +9803,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9819,7 +9819,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9836,7 +9836,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9855,7 +9855,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9874,7 +9874,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -9992,7 +9992,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10011,7 +10011,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10032,7 +10032,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10051,7 +10051,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10074,7 +10074,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10192,7 +10192,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10212,7 +10212,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10233,7 +10233,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10256,7 +10256,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10279,7 +10279,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10408,7 +10408,7 @@ mod test {
 
                                 _ = actual.reserve_front(isize::MAX as usize - elements).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, isize::MAX as usize - elements);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10426,7 +10426,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10445,7 +10445,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10466,7 +10466,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10485,7 +10485,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10508,7 +10508,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10631,7 +10631,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10652,7 +10652,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10675,7 +10675,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10696,7 +10696,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10721,7 +10721,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -10840,7 +10840,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -10859,7 +10859,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -10880,7 +10880,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -10899,7 +10899,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -10922,7 +10922,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11040,7 +11040,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11060,7 +11060,7 @@ mod test {
 
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11081,7 +11081,7 @@ mod test {
 
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11104,7 +11104,7 @@ mod test {
 
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11127,7 +11127,7 @@ mod test {
 
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11157,7 +11157,7 @@ mod test {
 
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11187,7 +11187,7 @@ mod test {
 
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11322,7 +11322,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11341,7 +11341,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11362,7 +11362,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11383,7 +11383,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11411,7 +11411,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11439,7 +11439,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -11567,7 +11567,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -11588,7 +11588,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -11611,7 +11611,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -11634,7 +11634,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -11664,7 +11664,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -11694,7 +11694,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -11836,7 +11836,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11858,7 +11858,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11882,7 +11882,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11904,7 +11904,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11930,7 +11930,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11961,7 +11961,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -11992,7 +11992,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -12137,7 +12137,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12160,7 +12160,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12184,7 +12184,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12210,7 +12210,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12236,7 +12236,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12269,7 +12269,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12302,7 +12302,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12462,7 +12462,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12484,7 +12484,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12508,7 +12508,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12532,7 +12532,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12563,7 +12563,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12594,7 +12594,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -12741,7 +12741,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12765,7 +12765,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12791,7 +12791,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12817,7 +12817,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12850,7 +12850,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -12883,7 +12883,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -13026,7 +13026,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13048,7 +13048,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13072,7 +13072,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13094,7 +13094,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13120,7 +13120,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13151,7 +13151,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13182,7 +13182,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13320,7 +13320,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13342,7 +13342,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13366,7 +13366,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13388,7 +13388,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13414,7 +13414,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13445,7 +13445,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13476,7 +13476,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -13618,7 +13618,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13640,7 +13640,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13664,7 +13664,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13688,7 +13688,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13719,7 +13719,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13750,7 +13750,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -13888,7 +13888,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -13910,7 +13910,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -13934,7 +13934,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -13956,7 +13956,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -13982,7 +13982,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14013,7 +14013,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14044,7 +14044,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14174,7 +14174,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14194,7 +14194,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14216,7 +14216,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14236,7 +14236,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14260,7 +14260,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14289,7 +14289,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14318,7 +14318,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -14464,7 +14464,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14488,7 +14488,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14514,7 +14514,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14538,7 +14538,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14566,7 +14566,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14599,7 +14599,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14632,7 +14632,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -14780,7 +14780,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -14804,7 +14804,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -14830,7 +14830,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -14856,7 +14856,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -14889,7 +14889,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -14922,7 +14922,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -15070,7 +15070,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15094,7 +15094,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15120,7 +15120,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15144,7 +15144,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15172,7 +15172,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15205,7 +15205,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15238,7 +15238,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -15314,7 +15314,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15329,7 +15329,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15346,7 +15346,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15437,7 +15437,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15453,7 +15453,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15470,7 +15470,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15489,7 +15489,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15508,7 +15508,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15626,7 +15626,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15645,7 +15645,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15666,7 +15666,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15685,7 +15685,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15708,7 +15708,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15826,7 +15826,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15846,7 +15846,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15867,7 +15867,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15890,7 +15890,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15913,7 +15913,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15943,7 +15943,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -15973,7 +15973,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16108,7 +16108,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16127,7 +16127,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16148,7 +16148,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16169,7 +16169,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16197,7 +16197,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16225,7 +16225,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16353,7 +16353,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16374,7 +16374,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16397,7 +16397,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16420,7 +16420,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16450,7 +16450,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16480,7 +16480,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional);
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -16604,7 +16604,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16623,7 +16623,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16644,7 +16644,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16663,7 +16663,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16686,7 +16686,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16804,7 +16804,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16824,7 +16824,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16845,7 +16845,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16868,7 +16868,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -16891,7 +16891,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -17020,7 +17020,7 @@ mod test {
 
                                 _ = actual.reserve_back(isize::MAX as usize - elements).expect("successful allocation");
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, isize::MAX as usize - elements);
 
@@ -17038,7 +17038,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -17057,7 +17057,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -17078,7 +17078,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -17097,7 +17097,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -17120,7 +17120,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -17243,7 +17243,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -17264,7 +17264,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -17287,7 +17287,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -17308,7 +17308,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -17333,7 +17333,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -17470,7 +17470,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17492,7 +17492,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17516,7 +17516,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17538,7 +17538,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17564,7 +17564,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17595,7 +17595,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17626,7 +17626,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -17771,7 +17771,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -17794,7 +17794,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -17818,7 +17818,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -17844,7 +17844,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -17870,7 +17870,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -17903,7 +17903,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -17936,7 +17936,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18096,7 +18096,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18118,7 +18118,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18142,7 +18142,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18166,7 +18166,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18197,7 +18197,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18228,7 +18228,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18375,7 +18375,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18399,7 +18399,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18425,7 +18425,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18451,7 +18451,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18484,7 +18484,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18517,7 +18517,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -18660,7 +18660,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18682,7 +18682,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18706,7 +18706,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18730,7 +18730,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18761,7 +18761,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18792,7 +18792,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -18930,7 +18930,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -18952,7 +18952,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -18976,7 +18976,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -18998,7 +18998,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -19024,7 +19024,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -19055,7 +19055,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -19086,7 +19086,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -19228,7 +19228,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19250,7 +19250,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19274,7 +19274,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19296,7 +19296,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19322,7 +19322,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19353,7 +19353,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19384,7 +19384,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -19522,7 +19522,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19544,7 +19544,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19568,7 +19568,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19590,7 +19590,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19616,7 +19616,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19647,7 +19647,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19678,7 +19678,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19808,7 +19808,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19828,7 +19828,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19850,7 +19850,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19870,7 +19870,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19894,7 +19894,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19923,7 +19923,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -19952,7 +19952,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -20098,7 +20098,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -20122,7 +20122,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -20148,7 +20148,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -20174,7 +20174,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -20207,7 +20207,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -20240,7 +20240,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -20388,7 +20388,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20412,7 +20412,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20438,7 +20438,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20462,7 +20462,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20490,7 +20490,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20523,7 +20523,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20556,7 +20556,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -20704,7 +20704,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20728,7 +20728,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20754,7 +20754,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20778,7 +20778,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20806,7 +20806,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20839,7 +20839,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20872,7 +20872,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -20948,7 +20948,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -20963,7 +20963,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -20980,7 +20980,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -20995,7 +20995,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21055,7 +21055,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21072,7 +21072,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21091,7 +21091,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21108,7 +21108,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21179,7 +21179,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21198,7 +21198,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21219,7 +21219,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21335,7 +21335,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21356,7 +21356,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21379,7 +21379,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21400,7 +21400,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21425,7 +21425,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21540,7 +21540,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successfull allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21559,7 +21559,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successfull allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21580,7 +21580,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successfull allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21599,7 +21599,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successfull allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21622,7 +21622,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successfull allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21724,7 +21724,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21745,7 +21745,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21768,7 +21768,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21791,7 +21791,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -21868,7 +21868,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -21887,7 +21887,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -21908,7 +21908,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22024,7 +22024,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22045,7 +22045,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22068,7 +22068,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22089,7 +22089,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22114,7 +22114,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22229,7 +22229,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22248,7 +22248,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22269,7 +22269,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22288,7 +22288,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22311,7 +22311,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -22413,7 +22413,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -22434,7 +22434,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -22457,7 +22457,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -22480,7 +22480,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -22567,7 +22567,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -22589,7 +22589,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -22613,7 +22613,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -22726,7 +22726,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -22750,7 +22750,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -22776,7 +22776,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -22802,7 +22802,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -22912,7 +22912,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -22934,7 +22934,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -22958,7 +22958,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -22982,7 +22982,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23099,7 +23099,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -23123,7 +23123,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -23149,7 +23149,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -23175,7 +23175,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -23290,7 +23290,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23312,7 +23312,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23336,7 +23336,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23360,7 +23360,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23471,7 +23471,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -23494,7 +23494,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -23519,7 +23519,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -23544,7 +23544,7 @@ mod test {
 
                                             _ = actual.shift(isize::try_from(capacity).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -23658,7 +23658,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23680,7 +23680,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23704,7 +23704,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23728,7 +23728,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -23838,7 +23838,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -23860,7 +23860,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -23884,7 +23884,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -23908,7 +23908,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -24012,7 +24012,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -24032,7 +24032,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -24054,7 +24054,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -24076,7 +24076,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -24192,7 +24192,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -24216,7 +24216,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -24242,7 +24242,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -24268,7 +24268,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -24386,7 +24386,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -24410,7 +24410,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -24436,7 +24436,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -24462,7 +24462,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -24580,7 +24580,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -24604,7 +24604,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -24630,7 +24630,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -24656,7 +24656,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -24727,7 +24727,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24742,7 +24742,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24759,7 +24759,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24774,7 +24774,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24834,7 +24834,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24851,7 +24851,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24870,7 +24870,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24887,7 +24887,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24958,7 +24958,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24977,7 +24977,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -24998,7 +24998,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25114,7 +25114,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("sucessful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25135,7 +25135,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("sucessful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25158,7 +25158,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("sucessful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25179,7 +25179,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("sucessful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25204,7 +25204,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("sucessful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25319,7 +25319,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25338,7 +25338,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25359,7 +25359,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25378,7 +25378,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25401,7 +25401,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25479,7 +25479,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25500,7 +25500,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25523,7 +25523,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25546,7 +25546,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -25623,7 +25623,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25642,7 +25642,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25663,7 +25663,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25682,7 +25682,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25705,7 +25705,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25828,7 +25828,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25849,7 +25849,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25872,7 +25872,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25893,7 +25893,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -25918,7 +25918,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -26033,7 +26033,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -26052,7 +26052,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -26073,7 +26073,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -26092,7 +26092,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -26115,7 +26115,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -26212,7 +26212,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -26233,7 +26233,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -26256,7 +26256,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -26277,7 +26277,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -26302,7 +26302,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -26389,7 +26389,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -26411,7 +26411,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -26435,7 +26435,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -26459,7 +26459,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -26604,7 +26604,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -26628,7 +26628,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -26654,7 +26654,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -26680,7 +26680,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -26713,7 +26713,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -26746,7 +26746,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -26885,7 +26885,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -26907,7 +26907,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -26931,7 +26931,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -26953,7 +26953,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -26979,7 +26979,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27010,7 +27010,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27041,7 +27041,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27163,7 +27163,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -27187,7 +27187,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -27213,7 +27213,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -27239,7 +27239,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -27272,7 +27272,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -27305,7 +27305,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -27425,7 +27425,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27447,7 +27447,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27471,7 +27471,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27493,7 +27493,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27519,7 +27519,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27550,7 +27550,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27581,7 +27581,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27696,7 +27696,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27718,7 +27718,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27742,7 +27742,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27764,7 +27764,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27790,7 +27790,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27821,7 +27821,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27852,7 +27852,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -27971,7 +27971,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -27993,7 +27993,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -28017,7 +28017,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -28039,7 +28039,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -28065,7 +28065,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -28096,7 +28096,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -28127,7 +28127,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -28242,7 +28242,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28264,7 +28264,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28288,7 +28288,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28312,7 +28312,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28343,7 +28343,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28374,7 +28374,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28483,7 +28483,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28503,7 +28503,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28525,7 +28525,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28545,7 +28545,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28569,7 +28569,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28598,7 +28598,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28627,7 +28627,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -28748,7 +28748,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -28772,7 +28772,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -28798,7 +28798,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -28824,7 +28824,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -28857,7 +28857,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -28890,7 +28890,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -29013,7 +29013,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29037,7 +29037,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29063,7 +29063,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29087,7 +29087,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29115,7 +29115,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29147,7 +29147,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29179,7 +29179,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -29300,7 +29300,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -29324,7 +29324,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -29350,7 +29350,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -29376,7 +29376,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -29409,7 +29409,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -29442,7 +29442,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -29518,7 +29518,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29533,7 +29533,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29550,7 +29550,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29565,7 +29565,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29625,7 +29625,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29642,7 +29642,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29661,7 +29661,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29678,7 +29678,7 @@ mod test {
                                 for capacity in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29749,7 +29749,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29768,7 +29768,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29789,7 +29789,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29808,7 +29808,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29831,7 +29831,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29954,7 +29954,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29975,7 +29975,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -29998,7 +29998,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30019,7 +30019,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30044,7 +30044,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30159,7 +30159,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30178,7 +30178,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30199,7 +30199,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30218,7 +30218,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30241,7 +30241,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30343,7 +30343,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30364,7 +30364,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30387,7 +30387,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30408,7 +30408,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30433,7 +30433,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity + additional);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -30510,7 +30510,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30529,7 +30529,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30550,7 +30550,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30666,7 +30666,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30687,7 +30687,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30710,7 +30710,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30731,7 +30731,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30756,7 +30756,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30871,7 +30871,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30890,7 +30890,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30911,7 +30911,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30930,7 +30930,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -30953,7 +30953,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -31055,7 +31055,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -31076,7 +31076,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -31099,7 +31099,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -31122,7 +31122,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -31209,7 +31209,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -31231,7 +31231,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -31255,7 +31255,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -31277,7 +31277,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -31422,7 +31422,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -31447,7 +31447,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -31474,7 +31474,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -31501,7 +31501,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -31535,7 +31535,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -31569,7 +31569,7 @@ mod test {
 
                                                 _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -31708,7 +31708,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31730,7 +31730,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31754,7 +31754,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31776,7 +31776,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31802,7 +31802,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31833,7 +31833,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31864,7 +31864,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -31986,7 +31986,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32010,7 +32010,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32036,7 +32036,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32060,7 +32060,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32088,7 +32088,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32121,7 +32121,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32154,7 +32154,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -32274,7 +32274,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32296,7 +32296,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32320,7 +32320,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32342,7 +32342,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32368,7 +32368,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32399,7 +32399,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32430,7 +32430,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32545,7 +32545,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -32567,7 +32567,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -32591,7 +32591,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -32615,7 +32615,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -32646,7 +32646,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -32677,7 +32677,7 @@ mod test {
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -32796,7 +32796,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32818,7 +32818,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32842,7 +32842,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32864,7 +32864,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32890,7 +32890,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32921,7 +32921,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -32952,7 +32952,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -33068,7 +33068,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33090,7 +33090,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33114,7 +33114,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33136,7 +33136,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33162,7 +33162,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33193,7 +33193,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33224,7 +33224,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33333,7 +33333,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33353,7 +33353,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33375,7 +33375,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33395,7 +33395,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33418,7 +33418,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33447,7 +33447,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33476,7 +33476,7 @@ mod test {
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -33597,7 +33597,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33621,7 +33621,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33647,7 +33647,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33671,7 +33671,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33699,7 +33699,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33732,7 +33732,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33765,7 +33765,7 @@ mod test {
                                             _ = actual.reserve_front(more).expect("successful allocation");
                                             _ = actual.reserve_back(less).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, more);
                                             debug_assert_eq!(actual.back_capacity, less);
 
@@ -33888,7 +33888,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -33912,7 +33912,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -33938,7 +33938,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -33964,7 +33964,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -33997,7 +33997,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -34030,7 +34030,7 @@ mod test {
                                             _ = actual.reserve_front(less).expect("successful allocation");
                                             _ = actual.reserve_back(more).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, less);
                                             debug_assert_eq!(actual.back_capacity, more);
 
@@ -34153,7 +34153,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -34177,7 +34177,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -34203,7 +34203,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -34229,7 +34229,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -34262,7 +34262,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -34295,7 +34295,7 @@ mod test {
                                             _ = actual.reserve_front(capacity + additional_front).expect("successful allocation");
                                             _ = actual.reserve_back(capacity + additional_back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional_front);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional_back);
 
@@ -34384,7 +34384,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34399,7 +34399,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34416,7 +34416,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34431,7 +34431,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34523,7 +34523,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34540,7 +34540,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34559,7 +34559,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34650,7 +34650,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34667,7 +34667,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34686,7 +34686,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34797,7 +34797,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34816,7 +34816,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34837,7 +34837,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34856,7 +34856,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -34879,7 +34879,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35023,7 +35023,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35044,7 +35044,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35067,7 +35067,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35088,7 +35088,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35113,7 +35113,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35245,7 +35245,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35264,7 +35264,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35285,7 +35285,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35304,7 +35304,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35327,7 +35327,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35464,7 +35464,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35485,7 +35485,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35508,7 +35508,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35529,7 +35529,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35554,7 +35554,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35584,7 +35584,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35614,7 +35614,7 @@ mod test {
 
                                             _ = actual.reserve_front(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, capacity + additional);
                                             debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35763,7 +35763,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35784,7 +35784,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35807,7 +35807,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35828,7 +35828,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35853,7 +35853,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -35988,7 +35988,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36007,7 +36007,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36028,7 +36028,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36047,7 +36047,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36070,7 +36070,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36212,7 +36212,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36233,7 +36233,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36256,7 +36256,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36277,7 +36277,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36302,7 +36302,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36448,7 +36448,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36469,7 +36469,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36492,7 +36492,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36513,7 +36513,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36538,7 +36538,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36670,7 +36670,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36689,7 +36689,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36710,7 +36710,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36729,7 +36729,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36752,7 +36752,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -36894,7 +36894,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -36915,7 +36915,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -36938,7 +36938,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -36959,7 +36959,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -36984,7 +36984,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -37014,7 +37014,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -37044,7 +37044,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity + additional).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity + additional);
 
@@ -37235,7 +37235,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37257,7 +37257,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37281,7 +37281,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37303,7 +37303,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37329,7 +37329,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37360,7 +37360,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37391,7 +37391,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -37593,7 +37593,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37617,7 +37617,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37643,7 +37643,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37667,7 +37667,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37695,7 +37695,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37728,7 +37728,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37761,7 +37761,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -37921,7 +37921,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -37943,7 +37943,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -37967,7 +37967,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -37989,7 +37989,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -38013,7 +38013,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -38207,7 +38207,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38231,7 +38231,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38257,7 +38257,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38281,7 +38281,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38309,7 +38309,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38341,7 +38341,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38373,7 +38373,7 @@ mod test {
                                                 _ = actual.reserve_front(front + additional).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front + additional);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38575,7 +38575,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38599,7 +38599,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38625,7 +38625,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38649,7 +38649,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38677,7 +38677,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38710,7 +38710,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38743,7 +38743,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -38904,7 +38904,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -38926,7 +38926,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -38950,7 +38950,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -38972,7 +38972,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -38996,7 +38996,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -39190,7 +39190,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39214,7 +39214,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39240,7 +39240,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39264,7 +39264,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39292,7 +39292,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39325,7 +39325,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39358,7 +39358,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back + additional).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back + additional);
 
@@ -39533,7 +39533,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39555,7 +39555,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39579,7 +39579,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39605,7 +39605,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39629,7 +39629,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39657,7 +39657,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39690,7 +39690,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -39723,7 +39723,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40639,7 +40639,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40661,7 +40661,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40685,7 +40685,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40711,7 +40711,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40735,7 +40735,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40763,7 +40763,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40796,7 +40796,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -40829,7 +40829,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -41640,7 +41640,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41655,7 +41655,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41672,7 +41672,7 @@ mod test {
 
                                 let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41687,7 +41687,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41747,7 +41747,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41764,7 +41764,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41783,7 +41783,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41800,7 +41800,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41894,7 +41894,7 @@ mod test {
                             for elements in 1..32 {
                                 let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                                debug_assert_ne!(actual.initialized, 0);
+                                debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41910,7 +41910,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41927,7 +41927,7 @@ mod test {
                                 for requested in 1..32 {
                                     let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41946,7 +41946,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -41965,7 +41965,7 @@ mod test {
 
                                     let mut actual: Dynamic<_> = expected.clone().collect();
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42083,7 +42083,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42102,7 +42102,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42123,7 +42123,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42142,7 +42142,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42165,7 +42165,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42288,7 +42288,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42309,7 +42309,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42332,7 +42332,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42353,7 +42353,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42378,7 +42378,7 @@ mod test {
 
                                         _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, capacity);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42497,7 +42497,7 @@ mod test {
 
                                     _ = actual.reserve_front(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, capacity);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42517,7 +42517,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42538,7 +42538,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42561,7 +42561,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42584,7 +42584,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42614,7 +42614,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42644,7 +42644,7 @@ mod test {
 
                                         _ = actual.reserve_front(front).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, 0);
 
@@ -42745,7 +42745,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42764,7 +42764,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42785,7 +42785,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42804,7 +42804,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42827,7 +42827,7 @@ mod test {
 
                                     _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                    debug_assert_ne!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42932,7 +42932,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42953,7 +42953,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42976,7 +42976,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -42999,7 +42999,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43072,7 +43072,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43091,7 +43091,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43112,7 +43112,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43228,7 +43228,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43249,7 +43249,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43272,7 +43272,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43293,7 +43293,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43318,7 +43318,7 @@ mod test {
 
                                             _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, 0);
                                             debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43422,7 +43422,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43443,7 +43443,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43466,7 +43466,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43489,7 +43489,7 @@ mod test {
 
                                         _ = actual.reserve_back(capacity).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, 0);
                                         debug_assert_eq!(actual.back_capacity, capacity);
 
@@ -43627,7 +43627,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43649,7 +43649,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43673,7 +43673,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43695,7 +43695,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43721,7 +43721,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43752,7 +43752,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43783,7 +43783,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -43908,7 +43908,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -43932,7 +43932,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -43958,7 +43958,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -43984,7 +43984,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44017,7 +44017,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44050,7 +44050,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44166,7 +44166,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44188,7 +44188,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44212,7 +44212,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44236,7 +44236,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44378,7 +44378,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44402,7 +44402,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44428,7 +44428,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44452,7 +44452,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44480,7 +44480,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44513,7 +44513,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44546,7 +44546,7 @@ mod test {
                                                 _ = actual.reserve_front(front).expect("successful allocation");
                                                 _ = actual.reserve_back(back).expect("successful allocation");
 
-                                                debug_assert_ne!(actual.initialized, 0);
+                                                debug_assert_eq!(actual.initialized, elements);
                                                 debug_assert_eq!(actual.front_capacity, front);
                                                 debug_assert_eq!(actual.back_capacity, back);
 
@@ -44690,7 +44690,7 @@ mod test {
                                         _ = actual.reserve_front(front).expect("successful allocation");
                                         _ = actual.reserve_back(back).expect("successful allocation");
 
-                                        debug_assert_ne!(actual.initialized, 0);
+                                        debug_assert_eq!(actual.initialized, elements);
                                         debug_assert_eq!(actual.front_capacity, front);
                                         debug_assert_eq!(actual.back_capacity, back);
 
@@ -44713,7 +44713,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44737,7 +44737,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44763,7 +44763,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44789,7 +44789,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44822,7 +44822,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
@@ -44855,7 +44855,7 @@ mod test {
                                             _ = actual.reserve_front(front).expect("successful allocation");
                                             _ = actual.reserve_back(back).expect("successful allocation");
 
-                                            debug_assert_ne!(actual.initialized, 0);
+                                            debug_assert_eq!(actual.initialized, elements);
                                             debug_assert_eq!(actual.front_capacity, front);
                                             debug_assert_eq!(actual.back_capacity, back);
 
