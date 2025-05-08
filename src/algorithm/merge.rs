@@ -74,7 +74,7 @@ pub fn iterative<T: Ord>(first: &mut [T], second: &mut [T], output: &mut [T]) {
                 _ = second.next();
             }
             (None, None) => unreachable!("more output elements than input"),
-        };
+        }
     }
 }
 

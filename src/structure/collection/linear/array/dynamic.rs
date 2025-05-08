@@ -1552,7 +1552,7 @@ impl<T> Iterator for Dynamic<T> {
                 self.front_capacity = incremented;
             } else {
                 unreachable!("cannot allocate more than `isize::MAX` bytes");
-            };
+            }
 
             // SAFETY:
             // * The `MaybeUninit<T>` is initialized.
@@ -1632,7 +1632,7 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
                 self.back_capacity = incremented;
             } else {
                 unreachable!("cannot allocate more than `isize::MAX` bytes");
-            };
+            }
 
             // SAFETY: stays aligned within the allocated object.
             let first = unsafe { self.buffer.add(self.front_capacity) };
@@ -1985,7 +1985,7 @@ impl<T> List for Dynamic<T> {
                     self.front_capacity = capacity;
                 } else {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
-                };
+                }
 
                 self.back_capacity = 0;
             }
@@ -1994,7 +1994,7 @@ impl<T> List for Dynamic<T> {
                 self.front_capacity = decremented;
             } else {
                 unreachable!("more than zero front capacity.");
-            };
+            }
 
             // SAFETY: aligned within the allocated object.
             unsafe { self.buffer.add(self.front_capacity) }
@@ -2008,7 +2008,7 @@ impl<T> List for Dynamic<T> {
                 self.back_capacity = decremented;
             } else {
                 unreachable!("more than zero back capacity");
-            };
+            }
 
             let Some(offset) = self.front_capacity.checked_add(index) else {
                 unreachable!("index is within bounds");
@@ -2028,7 +2028,7 @@ impl<T> List for Dynamic<T> {
             self.initialized = incremented;
         } else {
             unreachable!("cannot allocate more that `isize::MAX` bytes");
-        };
+        }
 
         // SAFETY:
         // * The `MaybeUninit<T>` is initialized.
@@ -2094,7 +2094,7 @@ impl<T> List for Dynamic<T> {
                 self.front_capacity = incremented;
             } else {
                 unreachable!("cannot allocate more that `isize::MAX` bytes");
-            };
+            }
         }
         // Increase back capacity.
         else {
@@ -2105,14 +2105,14 @@ impl<T> List for Dynamic<T> {
                 self.back_capacity = incremented;
             } else {
                 unreachable!("cannot allocate more that `isize::MAX` bytes");
-            };
+            }
         }
 
         if let Some(decremented) = self.initialized.checked_sub(1) {
             self.initialized = decremented;
         } else {
             unreachable!("at least the element being removed");
-        };
+        }
 
         Some(element)
     }
@@ -3011,7 +3011,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
                 self.trailing = incremented;
             } else {
                 unreachable!("cannot allocate more than `isize::MAX`");
-            };
+            }
         }
 
         None

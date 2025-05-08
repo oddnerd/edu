@@ -164,7 +164,7 @@ pub fn bidirectional<T: Ord>(elements: &mut [T]) {
             unsorted.clone().rev().for_each(bubble);
 
             unsorted = last_swap..unsorted.end;
-        };
+        }
 
         rightward = !rightward;
     }

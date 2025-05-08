@@ -352,7 +352,7 @@ pub fn three_way<T: Ord>(elements: &mut [T]) {
                         unreachable!("loop will exit so at most `usize::MAX`");
                     }
                 }
-            };
+            }
         }
 
         let (rest, greater) = partition.split_at_mut(equal.end);
