@@ -3210,22 +3210,32 @@ mod test {
                 }
 
                 #[test]
-                fn then_allocates_memory() {
-                    // TODO: change this to be prepend/append
-
+                fn then_requested_many_elements_can_be_prepended_without_reallocating_memory() {
                     for capacity in 1..32 {
-                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
+                        let mut actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
-                        for index in 0..capacity {
-                            let allocation = actual.buffer;
+                        let allocation = actual.buffer;
 
-                            let mut element = unsafe { allocation.add(index) };
-
-                            let element = unsafe { element.as_mut() };
-
-                            // Ideally, this will seg-fault if unowned memory.
-                            _ = element.write(index);
+                        for element in 0..capacity {
+                            _ = actual.prepend(element).expect("uses capacity");
                         }
+
+                        assert_eq!(actual.buffer, allocation);
+                    }
+                }
+
+                #[test]
+                fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
+                    for capacity in 1..32 {
+                        let mut actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
+
+                        let allocation = actual.buffer;
+
+                        for element in 0..capacity {
+                            _ = actual.append(element).expect("uses capacity");
+                        }
+
+                        assert_eq!(actual.buffer, allocation);
                     }
                 }
 
