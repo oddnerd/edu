@@ -10,38 +10,19 @@ use core::ptr::NonNull;
 
 /// An [`Array`] which can store a runtime defined number of elements.
 ///
-/// This is (mostly) equivalent to Rust's [`Vec`] or C++'s
-/// [`std::vector`](https://en.cppreference.com/w/cpp/container/vector).
+/// Similar to [`Fixed`], this stores elements contiguously in a single
+/// allocated object; however, [`Self`] stores them within 'heap' memory that
+/// is dynamically allocated rather than being sorted in 'stack' memory that is
+/// statically allocated. Moreover, while [`Fixed`] allocates only enough
+/// memory to store the predefined elements, [`Self`] can allocate additional
+/// 'capacity' such that elements can be inserted during runtime. This capacity
+/// can be before and/or after the contained elements as illustrated below:
 ///
-/// Contigious memory (one single allocated object) is heap-allocated with
-/// alignment and size to store elements of type `T`, referred to as the
-/// buffer. The front of the buffer (potentially) contains uninitialized
-/// elements, then all initialized elements in the order they were inserted,
-/// and finally the back is (potentially) other uninitialized elements.
-///
-/// The term 'capacity' refers to pre-allocated memory containing those
-/// uninitialized elements into which new elements can be added without
-/// altering the allocation. This means [`capacity`](`Self::capacity`)
-/// elements can be [`insert`](`Self::insert`) without invalidating pointers to
-/// the buffer. Note that pointers to specific elements may no longer point to
-/// the that element or might point to an uninitialized element as
-/// the pre-existing elements may be moved within the buffer to utilize said
-/// capacity. In contrast, consuming end-specific capacity via
-/// [`prepend`](`Self::prepend`) or [`append`](`Self::append`) alongside
-/// [`capacity_front`](`Self::capacity_front`) or
-/// [`capacity_back`](`Self::capacity_back`) _will_ maintain pointers to
-/// specific elements.
-///
-/// Capacity may be manually allocated via
-/// [`with_capacity`](`Self::with_capacity`) and
-/// [`reserve`](`Self::reserve`), or end-specific
-/// [`reserve_front`](`Self::reserve_front`) and
-/// [`reserve_back`](`Self::reserve_back`) methods which will reallocate
-/// thereby invaliding all pointers. Furthermore, capacity can be deallocated
-/// (retaining initialized elements) via [`shrink`](`Self::shrink`),
-/// or end-specific [`shrink_front`](`Self::shrink_front`) and
-/// [`shrink_back`](`Self::shrink_back`). Shrinking when no elements are
-/// initialized will deallocate freeing all memory.
+/// ```
+/// +----------------+--------------------+---------------+
+/// | front capacity | contained elements | back capacity |
+/// +----------------+--------------------+---------------+
+/// ```
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Dynamic_array).
 pub struct Dynamic<T> {
