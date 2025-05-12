@@ -49,27 +49,22 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory allocation fails.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// This method always consumes O(N) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
-    /// if let Ok(instance) = Dynamic::<i32>::with_capacity(256) {
-    ///     assert_eq!(instance.len(), 0);
-    ///     assert_eq!(instance.capacity(), 256);
-    ///     assert_eq!(instance.capacity_front(), 256);
-    ///     assert_eq!(instance.capacity_back(), 256);
-    /// } else {
+    /// let Ok(mut instance) = Dynamic::<usize>::with_capacity(256) else {
     ///     panic!("allocation failed");
+    /// };
+    ///
+    /// for element in 0..256 {
+    ///     // This is done in constant time without reallocating memory.
+    ///     let Ok(_inserted) = instance.append(element) else {
+    ///         unreachable!("using capacity cannot fail");
+    ///     };
     /// }
     /// ```
     pub fn with_capacity(count: usize) -> Result<Self, FailedAllocation> {
@@ -81,50 +76,46 @@ impl<T> Dynamic<T> {
         }
     }
 
-    /// Query how many elements could be added without reallocation.
+    /// Query how many elements could be inserted without reallocation.
     ///
-    /// Note that adding this many elements might still require rearranging the
-    /// underlying buffer in non-constant time. This means that although
-    /// pointers to the buffer remain valid, they may not point to an
-    /// initialized element let alone the element they were assigned to.
+    /// This many elements can be inserted without possibility of error.
+    /// However, adding this many elements might still require rearranging the
+    /// underlying buffer in non-constant time, thereby invalidating pointers.
     ///
-    /// See also [`Self::capacity_front`] and [`Self::capacity_back`] to know
+    /// See also: [`Self::capacity_front`] and [`Self::capacity_back`] to know
     /// how many elements can can be inserted at a specific end without
-    /// modifying the underlying allocation.
+    /// reallocation and without invalidating pointers.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
-    /// let mut instance = Dynamic::<i32>::with_capacity(6).expect("successful allocation");
+    /// let Ok(mut instance) = Dynamic::<i32>::with_capacity(6) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
-    /// // Won't double count capacity.
+    /// // Yields the shared front/back capacity when empty.
     /// assert_eq!(instance.capacity(), 6);
-    /// assert_eq!(instance.capacity_front(), 6);
-    /// assert_eq!(instance.capacity_back(), 6);
     ///
-    /// // Reflects when capacity is exhausted.
+    /// // Decreases when elements are inserted.
     /// instance.extend([0, 1, 2, 3, 4, 5]);
     /// assert_eq!(instance.capacity(), 0);
     ///
-    /// // Will count any end specific capacity.
-    /// instance.reserve_back(256).expect("successful allocation");
-    /// assert_eq!(instance.capacity(), 256);
-    ///
-    /// // Will include both ends' capacity.
+    /// // Sums end specific capacities when not empty.
     /// instance.reserve_front(256).expect("successful allocation");
+    /// instance.reserve_back(256).expect("successful allocation");
     /// assert_eq!(instance.capacity(), 512);
+    ///
+    /// for element in 0..512 {
+    ///     // This is done without reallocating memory.
+    ///     let Ok(_inserted) = instance.append(element) else {
+    ///         unreachable!("using capacity cannot fail");
+    ///     };
+    /// }
     /// ```
     #[must_use]
     pub fn capacity(&self) -> usize {
@@ -138,44 +129,47 @@ impl<T> Dynamic<T> {
     /// How many elements can be [`Self::prepend`] without reallocation.
     ///
     /// This many end-specific insertions will be constant time without
-    /// possibility of error. Moreover, this maintains pointer validity
-    /// even to specific elements.
+    /// possibility of error. Moreover, pointers to already contained elements
+    /// remain valid.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
-    /// // Constructing with generic capacity.
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    /// let Ok(mut instance) = Dynamic::<i32>::with_capacity(6) else {
+    ///     panic!("memory allocation failed");
+    /// };
+    ///
+    /// // Yields the shared front/back capacity when empty.
+    /// assert_eq!(instance.capacity_front(), 6);
+    ///
+    /// // Decreases when elements are inserted.
+    /// instance.extend([12345, 1, 2, 3, 4, 5]);
+    /// assert_eq!(instance.capacity_front(), 0);
+    ///
+    /// // Does not yield capacity from the other end when not empty.
+    /// instance.reserve_back(256).expect("successful memory allocation");
+    /// assert_eq!(instance.capacity_front(), 0);
+    ///
+    /// // But does yield capacity from this end when not empty.
+    /// instance.reserve_front(256).expect("successful memory allocation");
     /// assert_eq!(instance.capacity_front(), 256);
     ///
-    /// // Reserving for specific end of the buffer.
-    /// instance.reserve_front(512).expect("successful allocation");
-    /// assert_eq!(instance.capacity_front(), 512);
+    /// // This pointer remains valid for that many end specific insertions.
+    /// let pointer = core::ptr::from_ref(&instance[0]);
     ///
-    /// // Reserving for opposite end of the buffer, but be empty.
-    /// instance.reserve_back(1024).expect("successful allocation");
-    /// assert_eq!(instance.capacity_front(), 1024);
-    ///
-    /// // This many elements can be prepended without invalidating pointers.
-    /// let ptr = instance.as_ptr();
-    /// for element in 0..instance.capacity_front() {
-    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
+    /// for element in 0..256 {
+    ///     // This is done in constant time without reallocating memory.
+    ///     let Ok(_inserted) = instance.prepend(element) else {
+    ///         unreachable!("using capacity cannot fail");
+    ///     };
     /// }
-    /// assert_eq!(instance.as_ptr(), ptr)
+    ///
+    /// assert_eq!(unsafe { *pointer }, 12345);
     /// ```
     #[must_use]
     pub fn capacity_front(&self) -> usize {
@@ -189,44 +183,47 @@ impl<T> Dynamic<T> {
     /// How many elements can be [`Self::append`] without reallocation.
     ///
     /// This many end-specific insertions will be constant time without
-    /// possibility of error. Moreover, this maintains pointer validity
-    /// even to specific elements.
+    /// possibility of error. Moreover, pointers to already contained elements
+    /// remain valid.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
-    /// // Constructing with generic capacity.
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    /// let Ok(mut instance) = Dynamic::<i32>::with_capacity(6) else {
+    ///     panic!("memory allocation failed");
+    /// };
+    ///
+    /// // Yields the shared front/back capacity when empty.
+    /// assert_eq!(instance.capacity_back(), 6);
+    ///
+    /// // Decreases when elements are inserted.
+    /// instance.extend([12345, 1, 2, 3, 4, 5]);
+    /// assert_eq!(instance.capacity_back(), 0);
+    ///
+    /// // Does not yield capacity from the other end when not empty.
+    /// instance.reserve_front(256).expect("successful memory allocation");
+    /// assert_eq!(instance.capacity_back(), 0);
+    ///
+    /// // But does yield capacity from this end when not empty.
+    /// instance.reserve_back(256).expect("successful memory allocation");
     /// assert_eq!(instance.capacity_back(), 256);
     ///
-    /// // Reserving for specific end of the buffer.
-    /// instance.reserve_back(512).expect("successful allocation");
-    /// assert_eq!(instance.capacity_back(), 512);
+    /// // This pointer remains valid for that many end specific insertions.
+    /// let pointer = core::ptr::from_ref(&instance[0]);
     ///
-    /// // Reserving for wrong end of the buffer, but be empty.
-    /// instance.reserve_front(1024).expect("successful allocation");
-    /// assert_eq!(instance.capacity_back(), 1024);
-    ///
-    /// // That many elements can be appended without invalidating pointers.
-    /// let ptr = instance.as_ptr();
-    /// for element in 0..instance.capacity_back() {
-    ///     assert!(instance.append(element).is_ok()) // Cannot fail.
+    /// for element in 0..256 {
+    ///     // This is done in constant time without reallocating memory.
+    ///     let Ok(_inserted) = instance.append(element) else {
+    ///         unreachable!("using capacity cannot fail");
+    ///     };
     /// }
-    /// assert_eq!(instance.as_ptr(), ptr)
+    ///
+    /// assert_eq!(unsafe { *pointer }, 12345);
     /// ```
     #[must_use]
     pub fn capacity_back(&self) -> usize {
