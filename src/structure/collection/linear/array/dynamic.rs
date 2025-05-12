@@ -53,8 +53,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let Ok(mut instance) = Dynamic::<usize>::with_capacity(256) else {
     ///     panic!("allocation failed");
@@ -91,8 +91,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let Ok(mut instance) = Dynamic::<i32>::with_capacity(6) else {
     ///     panic!("memory allocation failed");
@@ -137,8 +137,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let Ok(mut instance) = Dynamic::<i32>::with_capacity(6) else {
     ///     panic!("memory allocation failed");
@@ -191,8 +191,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let Ok(mut instance) = Dynamic::<i32>::with_capacity(6) else {
     ///     panic!("memory allocation failed");
@@ -268,8 +268,8 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
@@ -340,10 +340,6 @@ impl<T> Dynamic<T> {
 
     /// Allocate space for exactly `capacity` elements to be [`Self::prepend`].
     ///
-    /// If this is okay, that many element can be prepended in constant time
-    /// without possibility of error. Moreover, this maintains pointer validity
-    /// even to specific elements.
-    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
@@ -402,10 +398,6 @@ impl<T> Dynamic<T> {
     }
 
     /// Allocate space for exactly `capacity` elements to be [`Self::append`].
-    ///
-    /// If this is okay, that many element can be appended in constant time
-    /// without possibility of error. Moreover, this maintains pointer validity
-    /// even to specific elements.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
