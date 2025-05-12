@@ -268,27 +268,39 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
+    /// use rust::structure::collection::linear::List;
     ///
     /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
     ///
-    /// // Reclaims front capacity before reallocation.
-    /// instance.reserve_front(256).expect("successful allocation");
-    /// assert!(instance.reserve(256).is_ok()); // Cannot fail.
-    /// assert_eq!(instance.capacity_back(), 256); // Reuses the allocation.
+    /// instance.reserve_front(256).expect("successful memory allocation");
+    /// instance.reserve_back(256).expect("successful memory allocation");
     ///
-    /// // Will allocate additional memory if needed.
-    /// instance.reserve(512).expect("successful allocation");
-    /// assert_eq!(instance.capacity_back(), 1018); // Not 512 - 6! Amortized!
+    /// // Does nothing if already enough back capacity.
+    /// let Ok(_) = instance.reserve(256) else {
+    ///     unreachable!("will not reallocate so cannot fail");
+    /// };
+    /// assert_eq!(instance.capacity_front(), 256);
+    /// assert_eq!(instance.capacity_back(), 256);
     ///
-    /// // That many elements can be inserted without invalidating pointers.
-    /// let ptr = instance.as_ptr();
-    /// for element in 0..instance.capacity_back() {
-    ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// }
-    /// assert_eq!(instance.as_ptr(), ptr);
+    /// // Shifts contained elements to reclaim front capacity without
+    /// // reallocating when that creates enough back capacity.
+    /// let Ok(_) = instance.reserve(256 + 1) else {
+    ///     unreachable!("will not reallocate so cannot fail");
+    /// };
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 512);
+    ///
+    /// // Otherwise, will reallocate memory.
+    /// let Ok(_) = instance.reserve(512 + 1) else {
+    ///     panic!("memory allocation failed");
+    /// };
+    /// assert!(instance.capacity_back() >= 512 + 1);
+    ///
+    /// // But may allocate more than requested.
+    /// // The 6 comes from the number of contained elements.
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 1024 - 6);
     /// ```
     pub fn reserve(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         // Prevent amortized growth when unnecessary.
