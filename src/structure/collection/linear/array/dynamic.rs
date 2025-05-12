@@ -236,19 +236,17 @@ impl<T> Dynamic<T> {
 
     /// Allocate space for _at least_ `capacity` additional elements.
     ///
-    /// This method emulates the behaviour of Rust's [`Vec::reserve`].
-    ///
-    /// In contrast to [`Self::reserve_back`], this method will shift the
-    /// initialized elements to consume [`Self::capacity_front`] (thereby
-    /// making it zero) before (re)allocating additional
-    /// [`Self::capacity_back`] if necessary to have at least `capacity`.
-    ///
-    /// Furthermore, this method increases the size of buffer by a geometric
-    /// progression with a growth factor of two (2), hence the buffer could
-    /// ideally contain a power of two (2) number of elements. This means it
-    /// may allocate more memory than explicitly requested, but will attempt
-    /// to recover when exactly `capacity` can be allocated, but not more. This
-    /// means you can apply
+    /// This method is similar to [`Self::reserve_back`] in that it will
+    /// increase [`Self::capacity_back`] so elements can be [`Self::append`]
+    /// in constant time without reallocating memory. However, in contrast,
+    /// this method exists to emulate the behaviour of [`Vec::reserve`] so it
+    /// will first [`Self::shift`] already contained elements to consume
+    /// any [`Self::capacity_front`] before then (re)allocating additional
+    /// memory if necessary so [`Self::capacity_back`] is at least `capacity`.
+    /// Furthermore, while [`Self::reserve_back`] allocates memory exactly
+    /// proportional to the requested `capacity`, this method may allocate
+    /// additional memory such that the maximum number of elements `self` can
+    /// hold within the allocation is a power of two (2) thereby allowing
     /// [amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis).
     ///
     /// See also: [`Self::reserve_front`] or [`Self::reserve_back`] to reserve
