@@ -904,9 +904,10 @@ impl<T> Dynamic<T> {
         Some(element)
     }
 
-    /// Exactly how much back capacity to allocate to apply amortized analysis.
+    /// The total back capacity to allocate to apply amortized analysis.
     ///
-    /// See also: [amortized analysis][amortized] and [dynamic array application][dynamic].
+    /// See also: [amortized analysis][amortized] and
+    /// [dynamic array application][dynamic].
     ///
     /// # Performance
     /// #### Time Complexity
