@@ -250,8 +250,8 @@ impl<T> Dynamic<T> {
     /// [amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis).
     ///
     /// See also: [`Self::reserve_front`] or [`Self::reserve_back`] to reserve
-    /// an exact amount of elements at a specific end of the buffer whilst
-    /// preserving existing capacity at the other end.
+    /// an exact amount of elements at a specific end whilst preserving
+    /// existing capacity at the other end.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
