@@ -765,10 +765,7 @@ impl<T> Dynamic<T> {
         Ok(self)
     }
 
-    /// Remove an element by swapping it with the first element.
-    ///
-    /// In contrast to [`Self::remove`], this method takes constant time and
-    /// does _NOT_ preserve order.
+    /// Remove the element at `index` replacing it with the one at the front.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
@@ -827,10 +824,7 @@ impl<T> Dynamic<T> {
         Some(element)
     }
 
-    /// Remove an element by swapping it with the last element.
-    ///
-    /// In contrast to [`Self::remove`], this method takes constant time and
-    /// does _NOT_ preserve order.
+    /// Remove the element at `index` replacing it with the one at the back.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
