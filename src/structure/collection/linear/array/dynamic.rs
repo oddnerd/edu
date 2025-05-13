@@ -684,15 +684,9 @@ impl<T> Dynamic<T> {
     /// Yields [`OutOfBounds`] is there is not enough capacity to shift into.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory but has varying time complexity
+    /// depending on the input. The best case is when `offset` is zero taking
+    /// 𝛀(N) time, otherwise it is the worst case taking O(N) time.
     ///
     /// # Examples
     /// ```
