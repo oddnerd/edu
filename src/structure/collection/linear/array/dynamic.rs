@@ -407,33 +407,34 @@ impl<T> Dynamic<T> {
     /// Yields [`FailedAllocation`] when memory (re)allocation fails.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// In the best case when [`Self::capacity_back`] is `capacity` or more,
+    /// then this method consumes 𝛀(1) memory and takes 𝛀(1) time. In the worst
+    /// case when reallocation is necessary, this method consumes O(N) memory
+    /// and takes O(N) time. On average, this method method consumes 𝚯(N)
+    /// memory and takes 𝚯(N) time.
     ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<usize>::default();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// _ = instance.reserve_front(256).expect("successful reallocation");
     ///
-    /// instance.reserve_back(256).expect("successful allocation");
+    /// // Will reallocate if no capacity at that specific end.
+    /// let Ok(_) = instance.reserve_back(256) else {
+    ///     panic!("memory allocation failed");
+    /// };
     /// assert_eq!(instance.capacity_back(), 256);
     ///
-    /// // That many elements can be appended without invalidating pointers.
-    /// let ptr = instance.as_ptr();
-    /// for element in 0..instance.capacity_back() {
-    ///     assert!(instance.append(element).is_ok()) // Cannot fail.
-    /// }
-    /// assert_eq!(instance.as_ptr(), ptr);
+    /// // Will not reallocate if already enough capacity.
+    /// let Ok(_) = instance.reserve_back(256) else {
+    ///     unreachable!("will not reallocate so cannot fail");
+    /// };
+    /// assert_eq!(instance.capacity_back(), 256);
+    ///
+    /// // Will not alter capacity on the other end.
+    /// assert_eq!(instance.capacity_front(), 256);
     /// ```
     pub fn reserve_back(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(capacity) = capacity.checked_sub(self.capacity_back()) else {
