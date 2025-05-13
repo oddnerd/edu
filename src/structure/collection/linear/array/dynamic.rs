@@ -771,15 +771,7 @@ impl<T> Dynamic<T> {
     /// does _NOT_ preserve order.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -841,15 +833,7 @@ impl<T> Dynamic<T> {
     /// does _NOT_ preserve order.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
