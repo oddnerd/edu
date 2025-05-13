@@ -940,15 +940,9 @@ impl<T> Dynamic<T> {
     /// * Must not overwrite initialized elements outside of the `range`.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory but has varying time complexity
+    /// depending on the input. The best case is when `offset` is zero taking
+    /// 𝛀(N) time, otherwise it is the worst case taking O(N) time.
     #[inline]
     unsafe fn shift_range(&mut self, range: impl core::ops::RangeBounds<usize>, offset: isize) {
         // TODO: various debug asserts have been added to verify safety within
