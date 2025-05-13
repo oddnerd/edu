@@ -452,17 +452,18 @@ impl<T> Dynamic<T> {
         self.resize(capacity)
     }
 
-    /// Attempt to reduce capacity to exactly `capacity`, or none/zero.
+    /// Reduce [`Self::capacity`] to exactly `capacity`.
     ///
-    /// This method emulates the behaviour of Rust's [`Vec::shrink_to`].
+    /// This method is similar to [`Self::shrink_back`] in that it will
+    /// decrease [`Self::capacity_back`] to reduce the memory overhead.
+    /// However, in contrast, this method exists to emulate the behaviour of
+    /// [`Vec::shrink`] so it will first [`Self::shift`] already contained
+    /// elements to consume any [`Self::capacity_front`] before then
+    /// reallocating if necessary to reduce [`Self::capacity_back`].
     ///
-    /// In contrast to [`Self::shrink_back`], this method will shift the
-    /// initialized elements to consume [`Self::capacity_front`] (thereby
-    /// making it zero) before reallocating if necessary to reduce
-    /// [`Self::capacity_back`].
-    ///
-    /// See also: [`Self::shrink_front`] or [`Self::shrink_back`] to shrink a
-    /// specific end of the buffer without shifting initialized elements.
+    /// See also: [`Self::shrink_front`] or [`Self::shrink_back`] to reduce
+    /// capacity at a specific end whilst preserving existing capacity at the
+    /// other end.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
