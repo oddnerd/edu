@@ -684,29 +684,20 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
-    ///
-    /// // Fill with elements.
-    /// instance.extend(0..256);
-    ///
-    /// // Allocate capacity at both ends.
-    /// instance.reserve_front(256).expect("successful allocation");
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     /// instance.reserve_back(256).expect("successful allocation");
     ///
-    /// // Shift initialized elements to the front of the buffer.
-    /// instance.shift(-256).expect("offset <= capacity_front()");
-    /// instance.shift(-1).expect_err("offset out of bounds");
-    /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_back(), 512);
-    ///
-    /// // Shift initialized elements to the end of the buffer.
-    /// instance.shift(512).expect("offset <= capacity_back()");
-    /// instance.shift(1).expect_err("offset out of bounds");
-    /// assert_eq!(instance.capacity_front(), 512);
+    /// // Can shift into back capacity to increase front capacity.
+    /// instance.shift(256).expect("enough back capacity to shift into");
+    /// assert_eq!(instance.capacity_front(), 256);
     /// assert_eq!(instance.capacity_back(), 0);
+    ///
+    /// // Can shift into front capacity to increase back capacity.
+    /// instance.shift(-256).expect("enough front capacity to shift into");
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 256);
     /// ```
     pub fn shift(&mut self, offset: isize) -> Result<&mut Self, OutOfBounds> {
         match offset.cmp(&0) {
