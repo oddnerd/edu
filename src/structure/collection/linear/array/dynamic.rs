@@ -928,13 +928,15 @@ impl<T> Dynamic<T> {
         total.checked_sub(retained)
     }
 
-    /// Shift the elements within `range` left or right by `offset`.
+    /// Move the elements within `range` `offset` positions in the allocation.
     ///
-    /// Note this does _NOT_ modify internal capacity state.
+    /// <div class="warning">
+    /// This does _not_ update internal capacity state.
+    /// </div>
     ///
     /// # Safety
     /// * The `range` must refer to initialized elements.
-    /// * Must remain in the allocated object whe moved `offset` positions.
+    /// * Must remain in the allocated object when moved `offset` positions.
     /// * Must not overwrite initialized elements outside of the `range`.
     ///
     /// # Performance
