@@ -262,9 +262,8 @@ impl<T> Dynamic<T> {
     /// # Performance
     /// In the best case when [`Self::capacity_back`] is already `capacity`
     /// or greater, this method consumes 𝛀(1) memory and takes 𝛀(1) time. In
-    /// the worst case when the sum of [`Self::capacity`] `capacity`, this
-    /// method consumes O(N) memory and takes O(N) time. On average, this
-    /// method consumes 𝚯(N) memory and takes 𝚯(N) time.
+    /// the worst case when [`Self::capacity`] is less than `capacity`, this
+    /// method consumes O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
@@ -348,10 +347,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_front`] is `capacity` or more,
-    /// then this method consumes 𝛀(1) memory and takes 𝛀(1) time. In the worst
-    /// case when reallocation is necessary, this method consumes O(N) memory
-    /// and takes O(N) time. On average, this method method consumes 𝚯(N)
-    /// memory and takes 𝚯(N) time.
+    /// then this method consumes 𝛀(1) memory and takes 𝛀(1) time. Otherwise,
+    /// it is the the worst case when reallocation is necessary, so this
+    /// method consumes O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
@@ -408,10 +406,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_back`] is `capacity` or more,
-    /// then this method consumes 𝛀(1) memory and takes 𝛀(1) time. In the worst
-    /// case when reallocation is necessary, this method consumes O(N) memory
-    /// and takes O(N) time. On average, this method method consumes 𝚯(N)
-    /// memory and takes 𝚯(N) time.
+    /// then this method consumes 𝛀(1) memory and takes 𝛀(1) time. Otherwise,
+    /// it is the the worst case when reallocation is necessary, so this
+    /// method consumes O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
@@ -473,10 +470,9 @@ impl<T> Dynamic<T> {
     ///
     /// # Performance
     /// In the best case when [`Self::capacity`] is `capacity` or less, this
-    /// method consumes 𝛀(1) memory and takes 𝛀(1) time. In the worst case
-    /// when reallocation is necessary, this method consumes O(N) memory and
-    /// takes O(N) time. On average, this method consumes 𝚯(N) memory and takes
-    /// 𝚯(N) time.
+    /// method consumes 𝛀(1) memory and takes 𝛀(1) time. Otherwise it is the
+    /// worst case when reallocation is necessary, so this method consumes O(N)
+    /// memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
