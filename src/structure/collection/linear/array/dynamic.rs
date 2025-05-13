@@ -533,15 +533,10 @@ impl<T> Dynamic<T> {
     /// the existing allocation unaltered.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// In the best case when [`Self::capacity_front`] is `capacity` or less,
+    /// this method consumes 𝛀(1) memory and takes 𝛀(1) time. Otherwise it is
+    /// the worst case when reallocation is necessary, so this method consumes
+    /// O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
@@ -615,15 +610,10 @@ impl<T> Dynamic<T> {
     /// the existing allocation unaltered.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// In the best case when [`Self::capacity_back`] is `capacity` or less,
+    /// this method consumes 𝛀(1) memory and takes 𝛀(1) time. Otherwise it is
+    /// the worst case when reallocation is necessary, so this method consumes
+    /// O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
