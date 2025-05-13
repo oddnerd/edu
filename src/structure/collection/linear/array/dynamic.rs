@@ -257,7 +257,8 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_back`] is already `capacity`
@@ -343,7 +344,8 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_front`] is `capacity` or more,
@@ -402,7 +404,8 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_back`] is `capacity` or more,
@@ -466,7 +469,8 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity`] is `capacity` or less, this
@@ -525,7 +529,8 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -606,7 +611,8 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -1047,6 +1053,10 @@ impl<T> Dynamic<T> {
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
+    ///
+    /// # Errors
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
+    /// the existing allocation unaltered.
     ///
     /// # Performance
     /// #### Time Complexity
