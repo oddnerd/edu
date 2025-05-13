@@ -495,11 +495,11 @@ impl<T> Dynamic<T> {
     /// assert_eq!(instance.capacity_back(), 512);
     ///
     /// // Will reallocate to reduce capacity.
-    /// let Ok(_) = instance.shrink(0) else {
+    /// let Ok(_) = instance.shrink(256) else {
     ///     panic!("reallocation failed");
     /// };
     /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_back(), 0);
+    /// assert_eq!(instance.capacity_back(), 256);
     ///
     /// // Will deallocate memory if empty.
     /// instance.clear();
