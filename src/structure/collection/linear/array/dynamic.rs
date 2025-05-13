@@ -506,6 +506,8 @@ impl<T> Dynamic<T> {
     /// let Ok(_) = instance.shrink(0) else {
     ///     unreachable!("deallocation cannot fail");
     /// };
+    /// assert_eq!(instance.capacity_front(), 0);
+    /// assert_eq!(instance.capacity_back(), 0);
     /// ```
     pub fn shrink(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Ok(offset) = isize::try_from(self.front_capacity) else {
@@ -543,23 +545,22 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// _ = instance.reserve_front(256).expect("successful allocation");
+    /// _ = instance.reserve_back(256).expect("successful allocation");
     ///
-    /// // Half fill with elements.
-    /// for element in 0..128 {
-    ///     instance.prepend(element).expect("enough capacity");
-    /// }
-    ///
+    /// // Does not modify capacity at the other end.
+    /// let Ok(_) = instance.shrink_front(128) else {
+    ///     unreachable!("does not reallocate so cannot fail");
+    /// };
     /// assert_eq!(instance.capacity_front(), 128);
-    /// assert_eq!(instance.capacity_back(), 0);
+    /// assert_eq!(instance.capacity_back(), 256);
     ///
-    /// // Shrink to have capacity of 64 elements at the front.
-    /// instance.shrink_front(Some(64)).expect("successful reallocation");
-    /// assert_eq!(instance.capacity_front(), 64);
-    /// assert_eq!(instance.capacity_back(), 0);
-    ///
-    /// // Shrink to have no capacity (shrink to fit).
-    /// instance.shrink_front(None).expect("successful reallocation");
+    /// // Will deallocate memory if empty.
+    /// instance.clear();
+    /// let Ok(_) = instance.shrink_front(0) else {
+    ///     unreachable!("deallocation cannot fail");
+    /// };
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
@@ -617,24 +618,25 @@ impl<T> Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<usize>::with_capacity(256).expect("successful allocation");
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// _ = instance.reserve_front(256).expect("successful allocation");
+    /// _ = instance.reserve_back(256).expect("successful allocation");
     ///
-    /// // Half fill with elements.
-    /// instance.extend(0..128);
-    ///
-    /// assert_eq!(instance.capacity_front(), 0);
+    /// // Does not modify capacity at the other end.
+    /// let Ok(_) = instance.shrink_back(128) else {
+    ///     unreachable!("does not reallocate so cannot fail");
+    /// };
+    /// assert_eq!(instance.capacity_front(), 256);
     /// assert_eq!(instance.capacity_back(), 128);
     ///
-    /// // Shrink to have capacity of 64 elements at the front.
-    /// instance.shrink_back(Some(64)).expect("successful reallocation");
-    /// assert_eq!(instance.capacity_front(), 0);
-    /// assert_eq!(instance.capacity_back(), 64);
-    ///
-    /// // Shrink to have no capacity (shrink to fit).
-    /// instance.shrink_back(None).expect("successful reallocation");
+    /// // Will deallocate memory if empty.
+    /// instance.clear();
+    /// let Ok(_) = instance.shrink_back(0) else {
+    ///     unreachable!("deallocation cannot fail");
+    /// };
     /// assert_eq!(instance.capacity_front(), 0);
     /// assert_eq!(instance.capacity_back(), 0);
     /// ```
