@@ -774,11 +774,17 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert_eq!(instance.remove_via_front(3), Some(3));
+    /// // Can remove the first element.
+    /// assert_eq!(instance.remove_via_front(0), Some(0));
+    ///
+    /// // Increases front capacity.
     /// assert_eq!(instance.capacity_front(), 1);
-    /// assert_eq!(instance[2], 0);
+    ///
+    /// // Removing a different element will replace it with the first.
+    /// instance.remove_via_front(2).expect("index is within bounds");
+    /// assert_eq!(instance[1], 1);
     /// ```
     #[must_use]
     pub fn remove_via_front(&mut self, index: usize) -> Option<T> {
@@ -833,11 +839,17 @@ impl<T> Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert_eq!(instance.remove_via_back(3), Some(3));
+    /// // Can remove the last element.
+    /// assert_eq!(instance.remove_via_back(5), Some(5));
+    ///
+    /// // Increases back capacity.
     /// assert_eq!(instance.capacity_back(), 1);
-    /// assert_eq!(instance[3], 5);
+    ///
+    /// // Removing a different element will replace it with the first.
+    /// instance.remove_via_back(2).expect("index is within bounds");
+    /// assert_eq!(instance[2], 4);
     /// ```
     #[must_use]
     pub fn remove_via_back(&mut self, index: usize) -> Option<T> {
