@@ -675,10 +675,6 @@ impl<T> Dynamic<T> {
 
     /// Move all contained elements `offset` positions within the allocation.
     ///
-    /// This method maintains the order of initialized elements, but shifts
-    /// them thereby converting some portion of the capacity from front to
-    /// back, or vice versa.
-    ///
     /// # Errors
     /// Yields [`OutOfBounds`] is there is not enough capacity to shift into.
     ///
