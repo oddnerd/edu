@@ -918,7 +918,7 @@ impl<T> Dynamic<T> {
     #[must_use]
     fn amortized(&self, capacity: usize) -> Option<usize> {
         let Some(retained) = self.front_capacity.checked_add(self.initialized) else {
-            unreachable!("cannot allocate more the `isize::MAX` bytes");
+            unreachable!("cannot allocate more than `isize::MAX` bytes");
         };
 
         let total = retained.checked_add(capacity)?;
