@@ -998,13 +998,11 @@ impl<T> Dynamic<T> {
     ///
     /// This method is the underlying way to modify the allocation. It works by
     /// increasing or decreasing the amount of back capacity hence it will not
-    /// modify front capacity of overwrite initialized elements. Back capacity
+    /// modify front capacity or overwrite initialized elements. Back capacity
     /// will be increased by `capacity` if positive and decreased by `capacity`
     /// if negative. Not only will this reallocate to change the size of the
     /// buffer, but it will also do the initial allocation if none exists, and
     /// deallocation if there is no front capacity and initialized elements.
-    ///
-    /// Note that failed allocation will _NOT_ modify the underlying buffer.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
