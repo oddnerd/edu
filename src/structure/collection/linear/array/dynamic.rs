@@ -1012,15 +1012,9 @@ impl<T> Dynamic<T> {
     /// the existing allocation unaltered.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// The best case is when `capacity` is zero consuming 𝛀(1) memory and
+    /// taking 𝛀(1) time, otherwise it is the worst case requiring reallocation
+    /// consuming O(N) memory and taking O(N) time.
     #[inline]
     fn resize(&mut self, capacity: isize) -> Result<&mut Self, FailedAllocation> {
         let capacity = self
