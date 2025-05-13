@@ -601,7 +601,7 @@ impl<T> Dynamic<T> {
         self.resize(extra)
     }
 
-    /// Reallocate to reduce back capacity to exactly `capacity` elements.
+    /// Reallocate to reduce [`Self::capacity_back`] to exactly `capacity`.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
