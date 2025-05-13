@@ -469,8 +469,9 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
-    /// the existing allocation unaltered.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails or if
+    /// [`Self::capacity`] is less than `capacity`, keeping the existing
+    /// allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity`] is `capacity` or less, this
@@ -531,8 +532,9 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
-    /// the existing allocation unaltered.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails or if
+    /// [`Self::capacity`] is less than `capacity`, keeping the existing
+    /// allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_front`] is `capacity` or less,
@@ -607,8 +609,9 @@ impl<T> Dynamic<T> {
     /// The Rust runtime might panic or otherwise `abort` if allocation fails.
     ///
     /// # Errors
-    /// Yields [`FailedAllocation`] when memory (re)allocation fails, keeping
-    /// the existing allocation unaltered.
+    /// Yields [`FailedAllocation`] when memory (re)allocation fails or if
+    /// [`Self::capacity`] is less than `capacity`, keeping the existing
+    /// allocation unaltered.
     ///
     /// # Performance
     /// In the best case when [`Self::capacity_back`] is `capacity` or less,
