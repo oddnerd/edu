@@ -356,20 +356,25 @@ impl<T> Dynamic<T> {
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::<usize>::default();
+    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// _ = instance.reserve_back(256).expect("successful reallocation");
     ///
-    /// instance.reserve_front(256).expect("successful allocation");
+    /// // Will reallocate if no capacity at that specific end.
+    /// let Ok(_) = instance.reserve_front(256) else {
+    ///     panic!("memory allocation failed");
+    /// };
     /// assert_eq!(instance.capacity_front(), 256);
     ///
-    /// // That many elements can be prepended without invalidating pointers.
-    /// let ptr = instance.as_ptr();
-    /// for element in 0..instance.capacity_front() {
-    ///     assert!(instance.prepend(element).is_ok()) // Cannot fail.
-    /// }
-    /// assert_eq!(instance.as_ptr(), ptr);
+    /// // Will not reallocate if already enough capacity.
+    /// let Ok(_) = instance.reserve_front(256) else {
+    ///     unreachable!("will not reallocate so cannot fail");
+    /// };
+    /// assert_eq!(instance.capacity_front(), 256);
+    ///
+    /// // Will not alter capacity on the other end.
+    /// assert_eq!(instance.capacity_back(), 256);
     /// ```
     pub fn reserve_front(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation> {
         let Some(capacity) = capacity.checked_sub(self.capacity_front()) else {
