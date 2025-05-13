@@ -357,7 +357,8 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
-    /// _ = instance.reserve_back(256).expect("successful reallocation");
+    ///
+    /// instance.reserve_back(256).expect("successful reallocation");
     ///
     /// // Will reallocate if no capacity at that specific end.
     /// let Ok(_) = instance.reserve_front(256) else {
@@ -416,7 +417,8 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
-    /// _ = instance.reserve_front(256).expect("successful reallocation");
+    ///
+    /// instance.reserve_front(256).expect("successful reallocation");
     ///
     /// // Will reallocate if no capacity at that specific end.
     /// let Ok(_) = instance.reserve_back(256) else {
@@ -481,8 +483,9 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
-    /// _ = instance.reserve_front(256).expect("successful allocation");
-    /// _ = instance.reserve_back(256).expect("successful allocation");
+    ///
+    /// instance.reserve_front(256).expect("successful allocation");
+    /// instance.reserve_back(256).expect("successful allocation");
     ///
     /// // Consumes front capacity before reallocating.
     /// let Ok(_) = instance.shrink(512) else {
@@ -543,8 +546,9 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
-    /// _ = instance.reserve_front(256).expect("successful allocation");
-    /// _ = instance.reserve_back(256).expect("successful allocation");
+    ///
+    /// instance.reserve_front(256).expect("successful allocation");
+    /// instance.reserve_back(256).expect("successful allocation");
     ///
     /// // Does not modify capacity at the other end.
     /// let Ok(_) = instance.shrink_front(128) else {
@@ -619,8 +623,9 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
-    /// _ = instance.reserve_front(256).expect("successful allocation");
-    /// _ = instance.reserve_back(256).expect("successful allocation");
+    ///
+    /// instance.reserve_front(256).expect("successful allocation");
+    /// instance.reserve_back(256).expect("successful allocation");
     ///
     /// // Does not modify capacity at the other end.
     /// let Ok(_) = instance.shrink_back(128) else {
@@ -687,6 +692,7 @@ impl<T> Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
+    ///
     /// instance.reserve_back(256).expect("successful allocation");
     ///
     /// // Can shift into back capacity to increase front capacity.
