@@ -674,7 +674,7 @@ impl<T> Dynamic<T> {
         self.resize(extra)
     }
 
-    /// Shift the initialized elements `offset` positions within the buffer.
+    /// Move all contained elements `offset` positions within the allocation.
     ///
     /// This method maintains the order of initialized elements, but shifts
     /// them thereby converting some portion of the capacity from front to
