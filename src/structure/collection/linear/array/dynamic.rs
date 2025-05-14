@@ -1186,25 +1186,21 @@ impl<T> FromIterator<T> for Dynamic<T> {
     /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// This method always consumes O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// // Note the lack of error handling.
+    /// let explicit = Dynamic::from_iter(0..=5);
     ///
-    /// let actual: Dynamic<_> = expected.clone().into_iter().collect();
+    /// // Can also be called implicitly via `collect`.
+    /// let implicit: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert!(actual.eq(expected))
+    /// // Either way, will contain elements from the iterator.
+    /// assert!(explicit.eq(0..=5));
+    /// assert!(implicit.eq(0..=5));
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iterator: Iter) -> Self {
         let mut instance = Self::default();
