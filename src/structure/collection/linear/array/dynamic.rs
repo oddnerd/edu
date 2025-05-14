@@ -1220,15 +1220,11 @@ impl<T> Extend<T> for Dynamic<T> {
     /// The Rust runtime might abort if allocation fails, panics otherwise.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// This method always consumes O(N) memory, but the time complexity
+    /// depends on memory allocation. The best case is when enough memory for
+    /// `iterator::size_hint` elements is allocated taking 𝛀(N) time, and the
+    /// worst case is when allocation fails such that memory must be
+    /// reallocated for each realized element taking O(N<sup>2</sup>) time.
     ///
     /// # Examples
     /// ```
