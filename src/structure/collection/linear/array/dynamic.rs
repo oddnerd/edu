@@ -1242,17 +1242,24 @@ impl<T> Extend<T> for Dynamic<T> {
     fn extend<Iter: IntoIterator<Item = T>>(&mut self, iterator: Iter) {
         let iterator = iterator.into_iter();
 
-        // `size_hint` can _NOT_ be trusted.
-        let count = {
+        // This is a hint for pre-allocating capacity to be appended into.
+        // However, `iterator::size_hint` can _NOT_ be trusted and might
+        // yield a value smaller or larger than the number of elements the
+        // iterator will actually yield.
+        let capacity = {
             let (min, max) = iterator.size_hint();
             max.unwrap_or(min)
         };
 
-        // Append will allocate for each realized element if reserve fails.
-        drop(self.reserve_back(count));
+        // Eagerly allocate that much memory, but it is okay if it fails.
+        _ = self.reserve(capacity);
 
         for element in iterator {
-            assert!(self.append(element).is_ok(), "allocation failed");
+            // Even if the above allocation fails, `append` will attempt to
+            // allocate enough memory for at least this singular element.
+            let Ok(_) = self.append(element) else {
+                panic!("could not allocate memory to append element");
+            };
         }
     }
 }
