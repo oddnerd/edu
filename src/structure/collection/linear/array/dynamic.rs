@@ -1161,10 +1161,14 @@ impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+    /// let from = [0, 1, 2, 3, 4, 5];
     ///
-    /// assert!(actual.eq(expected));
+    /// let Ok(instance) = Dynamic::try_from(from.as_slice()) else {
+    ///     panic!("memory allocation failed");
+    /// };
+    ///
+    /// // Has the same elements in the same order.
+    /// assert!(instance.eq(from));
     /// ```
     fn try_from(slice: &'a [T]) -> Result<Self, Self::Error> {
         let mut instance = Self::with_capacity(slice.len())?;
