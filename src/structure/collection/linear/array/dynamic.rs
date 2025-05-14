@@ -1230,27 +1230,28 @@ impl<T> Extend<T> for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
+    /// // This contains the elements `[0, 1, 2, 3, 4, 5]`.
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// let mut instance = Dynamic::<i32>::default();
+    /// // This appends the elements `[6, 7, 8, 9, 10]`.
+    /// instance.extend(6..=10);
     ///
-    /// instance.extend(expected.iter().cloned());
-    ///
-    /// assert!(instance.eq(expected))
+    /// // So it now contains `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]`.
+    /// assert!(instance.eq(0..=10));
     /// ```
-    fn extend<Iter: IntoIterator<Item = T>>(&mut self, iter: Iter) {
-        let iter = iter.into_iter();
+    fn extend<Iter: IntoIterator<Item = T>>(&mut self, iterator: Iter) {
+        let iterator = iterator.into_iter();
 
         // `size_hint` can _NOT_ be trusted.
         let count = {
-            let (min, max) = iter.size_hint();
+            let (min, max) = iterator.size_hint();
             max.unwrap_or(min)
         };
 
         // Append will allocate for each realized element if reserve fails.
         drop(self.reserve_back(count));
 
-        for element in iter {
+        for element in iterator {
             assert!(self.append(element).is_ok(), "allocation failed");
         }
     }
