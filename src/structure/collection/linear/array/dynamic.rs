@@ -1149,7 +1149,7 @@ impl<T> Default for Dynamic<T> {
 impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
     type Error = FailedAllocation;
 
-    /// Construct by cloning elements from an existing slice.
+    /// Construct an instance containing clones of all elements in `slice`.
     ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
