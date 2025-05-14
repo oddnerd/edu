@@ -1214,7 +1214,7 @@ impl<T> FromIterator<T> for Dynamic<T> {
 }
 
 impl<T> Extend<T> for Dynamic<T> {
-    /// Append elements of an iterator in order.
+    /// Append the elements of `iterator` in order.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
