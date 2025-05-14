@@ -1119,7 +1119,7 @@ impl<T> Dynamic<T> {
 }
 
 impl<T> Default for Dynamic<T> {
-    /// Construct an instance with no elements and no capacity/allocation.
+    /// Construct an instance without allocating memory.
     ///
     /// # Performance
     /// #### Time Complexity
