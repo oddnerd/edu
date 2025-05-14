@@ -1130,7 +1130,10 @@ impl<T> Default for Dynamic<T> {
     ///
     /// let instance = Dynamic::<()>::default();
     ///
+    /// // Contains no elements.
     /// assert_eq!(instance.len(), 0);
+    ///
+    /// // Has no capacity.
     /// assert_eq!(instance.capacity(), 0);
     /// ```
     fn default() -> Self {
