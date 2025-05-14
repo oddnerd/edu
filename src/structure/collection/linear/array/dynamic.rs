@@ -1180,7 +1180,7 @@ impl<'a, T: 'a + Clone> TryFrom<&'a [T]> for Dynamic<T> {
 }
 
 impl<T> FromIterator<T> for Dynamic<T> {
-    /// Construct by moving elements from an iterator.
+    /// Construct an instance containing elements from an `iterator`.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
@@ -1206,10 +1206,10 @@ impl<T> FromIterator<T> for Dynamic<T> {
     ///
     /// assert!(actual.eq(expected))
     /// ```
-    fn from_iter<Iter: IntoIterator<Item = T>>(iter: Iter) -> Self {
+    fn from_iter<Iter: IntoIterator<Item = T>>(iterator: Iter) -> Self {
         let mut instance = Self::default();
 
-        instance.extend(iter);
+        instance.extend(iterator);
 
         instance
     }
