@@ -1282,9 +1282,15 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// assert_eq!(expected.clone(), expected)
     /// ```
     fn clone(&self) -> Self {
-        let mut clone = Self::default();
+        let Ok(mut clone) = Dynamic::<T>::with_capacity(self.initialized) else {
+            panic!("memory allocation failed");
+        };
 
-        clone.extend(self.iter().cloned());
+        for element in self.iter().cloned() {
+            let Ok(_) = clone.append(element) else {
+                unreachable!("using capacity so cannot fail");
+            };
+        }
 
         clone
     }
