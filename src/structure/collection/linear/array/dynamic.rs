@@ -1265,7 +1265,7 @@ impl<T> Extend<T> for Dynamic<T> {
 }
 
 impl<T: Clone> Clone for Dynamic<T> {
-    /// Construct and instance with clones of all elements.
+    /// Construct an instance containing clones of all contained elements.
     ///
     /// # Panics
     /// The Rust runtime might abort if allocation fails, panics otherwise.
