@@ -1203,6 +1203,8 @@ impl<T> FromIterator<T> for Dynamic<T> {
     /// assert!(implicit.eq(0..=5));
     /// ```
     fn from_iter<Iter: IntoIterator<Item = T>>(iterator: Iter) -> Self {
+        // Do not pre-allocate memory because `Self::extend` handles
+        // untrustworthy `iterator::size_hint`.
         let mut instance = Self::default();
 
         instance.extend(iterator);
