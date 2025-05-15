@@ -2060,9 +2060,9 @@ impl<T> List for Dynamic<T> {
     /// Remove the elements which match some `predicate`.
     ///
     /// The `predicate` is called exactly once per each element, in order of
-    /// iteration. Elements for which the `predicate` is false
-    /// are shifted left to immediately after the previously retained element,
-    /// thereby maintaining order.
+    /// iteration. Elements for which the `predicate` is false are shifted left
+    /// to immediately after the previously retained element, thereby
+    /// maintaining order.
     ///
     /// # Performance
     /// #### Time Complexity
