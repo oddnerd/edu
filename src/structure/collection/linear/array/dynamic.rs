@@ -1856,7 +1856,8 @@ impl<T> List for Dynamic<T> {
 
         // Consume front capacity.
         let mut ptr = if index == 0 && self.capacity_front() > 0 {
-            // Shift all capacity to front capacity.
+            // Shift all capacity to front capacity if no contained elements.
+            // This allows multiple elements to be prepended in constant time.
             if self.initialized == 0 {
                 if let Some(capacity) = self.front_capacity.checked_add(self.back_capacity) {
                     self.front_capacity = capacity;
