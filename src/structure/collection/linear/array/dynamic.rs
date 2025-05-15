@@ -2350,15 +2350,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// Obtain the element with the lowest index yet to be yielded, if any.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
