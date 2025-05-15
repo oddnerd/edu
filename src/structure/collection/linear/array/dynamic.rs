@@ -1874,7 +1874,7 @@ impl<T> List for Dynamic<T> {
                 unreachable!("more than zero front capacity.");
             }
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stay aligned within the allocated object.
             unsafe { self.buffer.add(self.front_capacity) }
         }
         // Consume back capacity.
@@ -1892,7 +1892,7 @@ impl<T> List for Dynamic<T> {
                 unreachable!("index is within bounds");
             };
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             unsafe { self.buffer.add(offset) }
         }
         // The above allocation failed.
