@@ -2173,7 +2173,7 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// };
     ///
     /// // Allocate capacity for the following pushes.
-    /// instance.reserve(5).expect("successful memory allocation");
+    /// instance.reserve(1).expect("successful memory allocation");
     ///
     /// let Ok(_) = instance.push(0) else {
     ///     unreachable!("using capacity cannot fail");
