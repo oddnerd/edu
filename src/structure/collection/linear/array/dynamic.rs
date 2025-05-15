@@ -1805,15 +1805,10 @@ impl<T> List for Dynamic<T> {
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// The best case in when there is available capacity and no element
+    /// occupying `index` consuming 𝛀(1) memory and taking 𝛀(1) time, and the
+    /// worst case is when (re)allocation is necessary and element(s) must be
+    /// moved consuming O(N) memory and taking O(N) time.
     ///
     /// # Examples
     /// ```
@@ -1822,11 +1817,30 @@ impl<T> List for Dynamic<T> {
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
-    /// instance.insert(0, 1);
-    /// instance.insert(1, 3);
-    /// instance.insert(1, 2);
-    /// instance.insert(0, 0);
+    /// // Can insert into an empty instance. Note that this does allocation.
+    /// let Ok(_) = instance.insert(0, 2) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
+    /// // Allocate capacity for the following insertions.
+    /// instance.reserve(3).expect("successful memory allocation");
+    ///
+    /// // Can insert into the front, shifting the contained element rightward.
+    /// let Ok(_) = instance.insert(0, 0) else {
+    ///     unreachable!("using capacity cannot fail");
+    /// };
+    ///
+    /// // Can insert into the back, shifting the contained elements leftward.
+    /// let Ok(_) = instance.insert(2, 3) else {
+    ///     unreachable!("using capacity cannot fail");
+    /// };
+    ///
+    /// // Can insert into middle, shifting to create hole of the element.
+    /// let Ok(_) = instance.insert(1, 1) else {
+    ///     unreachable!("using capacity cannot fail");
+    /// };
+    ///
+    /// // Thus, this is the resulting ordering of the element.
     /// assert!(instance.into_iter().eq([0, 1, 2, 3]));
     /// ```
     fn insert(
