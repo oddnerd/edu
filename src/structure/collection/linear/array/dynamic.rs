@@ -1961,12 +1961,13 @@ impl<T> List for Dynamic<T> {
                 unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             let mut ptr = unsafe { self.buffer.add(offset) };
 
             // SAFETY:
+            // * Owned memory => valid for reads and writes.
             // * The `MaybeUninit<T>` is initialized.
-            // * We have a unique mutable reference to self and the element.
+            // * Has mutable reference to self => no other reference exists.
             let element = unsafe { ptr.as_mut() };
 
             // SAFETY:
