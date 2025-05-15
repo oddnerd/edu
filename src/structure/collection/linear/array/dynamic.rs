@@ -2134,11 +2134,14 @@ impl<T> List for Dynamic<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
     /// instance.clear();
     ///
+    /// // So no elements are contained.
     /// assert_eq!(instance.len(), 0);
+    ///
+    /// // But capacity is preserved.
     /// assert_eq!(instance.capacity(), 6);
     /// ```
     fn clear(&mut self) {
