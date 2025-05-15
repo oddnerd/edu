@@ -1636,12 +1636,10 @@ impl<T> Linear for Dynamic<T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Dynamic::from_iter(expected.clone());
+    /// let actual: Dynamic<_> = (0..=5).collect();
     ///
-    /// for (actual, expected) in actual.iter().zip(expected.iter()) {
-    ///     assert_eq!(actual, expected);
-    /// }
+    /// // Yields contained elements in order.
+    /// assert!(actual.iter().eq([0, 1, 2, 3, 4, 5].iter()))
     /// ```
     fn iter(
         &self,
@@ -1672,12 +1670,10 @@ impl<T> Linear for Dynamic<T> {
     /// use rust::structure::collection::Linear;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let mut actual = Dynamic::from_iter(expected.clone());
+    /// let mut actual: Dynamic<_> = (0..=5).collect();
     ///
-    /// for (actual, expected) in actual.iter_mut().zip(expected.iter_mut()) {
-    ///     assert_eq!(actual, expected);
-    /// }
+    /// // Yields contained elements in order.
+    /// assert!(actual.iter_mut().eq([0, 1, 2, 3, 4, 5].iter_mut()))
     /// ```
     fn iter_mut(
         &mut self,
