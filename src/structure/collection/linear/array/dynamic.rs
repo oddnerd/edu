@@ -2124,7 +2124,7 @@ impl<T> List for Dynamic<T> {
         }
     }
 
-    /// Drop all initialized elements
+    /// Drop all contained elements, preserving capacity.
     ///
     /// # Performance
     /// #### Time Complexity
