@@ -1592,8 +1592,10 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Dynamic::from_iter(expected.iter());
     ///
+    /// let actual: Dynamic<_> = expected.iter().cloned().collect();
+    ///
+    /// // Same formatting as an array/slice.
     /// assert_eq!(format!("{actual:?}"), format!("{expected:?}"));
     /// ```
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
