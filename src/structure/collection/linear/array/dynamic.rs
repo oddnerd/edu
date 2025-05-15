@@ -1909,8 +1909,9 @@ impl<T> List for Dynamic<T> {
         }
 
         // SAFETY:
-        // * The `MaybeUninit<T>` is initialized.
-        // * We have a unique mutable reference to self and the element.
+        // * Owned memory => valid for reads and writes.
+        // * The `MaybeUninit<T>` is initialized, the underlying `T` is not.
+        // * Has mutable reference to self => no other reference exists.
         let uninitialized = unsafe { ptr.as_mut() };
 
         Ok(uninitialized.write(element))
