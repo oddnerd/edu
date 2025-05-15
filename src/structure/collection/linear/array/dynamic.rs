@@ -2189,15 +2189,7 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// Remove the element at the top of the stack.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
