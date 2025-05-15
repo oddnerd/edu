@@ -2013,34 +2013,22 @@ impl<T> List for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6, 7]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// let mut drain = instance.drain(..2);
-    /// assert_eq!(drain.next(), Some(0));
-    /// assert_eq!(drain.next_back(), Some(1));
-    /// core::mem::drop(drain);
+    /// // Constructing the iterator in O(1) time.
+    /// let iterator = instance.drain(1..=4);
     ///
-    /// let mut drain = instance.drain(0..2);
-    /// assert_eq!(drain.next(), Some(2));
-    /// assert_eq!(drain.next_back(), Some(3));
-    /// core::mem::drop(drain);
+    /// // Actually removing the elements is O(N).
+    /// let removed: Vec<_> = iterator.collect();
     ///
-    /// let mut drain = instance.drain(0..=1);
-    /// assert_eq!(drain.next(), Some(4));
-    /// assert_eq!(drain.next_back(), Some(5));
-    /// core::mem::drop(drain);
+    /// // Thus these are the removed elements.
+    /// assert!(removed.eq([1, 2, 3, 4]));
     ///
-    /// let mut drain = instance.drain(0..);
-    /// assert_eq!(drain.next(), Some(6));
-    /// assert_eq!(drain.next_back(), Some(7));
-    /// core::mem::drop(drain);
-    ///
-    /// let mut drain = instance.drain(..);
-    /// assert_eq!(drain.next(), None);
-    /// assert_eq!(drain.next_back(), None);
+    /// // And these are the retained elements.
+    /// assert!(instance.eq([0, 5]));
     /// ```
     fn drain(
         &mut self,
