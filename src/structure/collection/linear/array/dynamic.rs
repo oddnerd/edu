@@ -1927,12 +1927,24 @@ impl<T> List for Dynamic<T> {
     /// use rust::structure::collection::linear::List;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0,1,2,3,4,5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// instance.remove(5);
-    /// instance.remove(2);
-    /// instance.remove(0);
+    /// // Can remove the back element, increasing back capacity.
+    /// let Some(_) = instance.remove(5) else {
+    ///     panic!("index was out of bounds");
+    /// };
     ///
+    /// // Can remove the front element, increasing front capacity.
+    /// let Some(_) = instance.remove(0) else {
+    ///     panic!("index was out of bounds");
+    /// };
+    ///
+    /// // Can remove a middle element, increasing some end's capacity.
+    /// let Some(_) = instance.remove(1) else {
+    ///     panic!("index was out of bounds");
+    /// };
+    ///
+    /// // Thus these are the remaining elements.
     /// assert!(instance.into_iter().eq([1, 3, 4]));
     /// ```
     fn remove(&mut self, index: usize) -> Option<Self::Element> {
