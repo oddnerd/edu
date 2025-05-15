@@ -1626,7 +1626,7 @@ impl<T> Collection for Dynamic<T> {
 }
 
 impl<T> Linear for Dynamic<T> {
-    /// Create an immutable iterator over the initialized elements.
+    /// Obtain an immutable iterator over the contained elements.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -1670,7 +1670,7 @@ impl<T> Linear for Dynamic<T> {
         unsafe { super::Iter::new(ptr, self.initialized) }
     }
 
-    /// Create a mutable iterator over the initialized elements.
+    /// Obtain a mutable iterator over the contained elements.
     ///
     /// # Performance
     /// #### Time Complexity
