@@ -2155,15 +2155,10 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// Insert an `element` on the top of the stack.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// The best case is when there is available capacity and no contained
+    /// elements consuming 𝛀(1) memory and taking 𝛀(1) time. The worst case is
+    /// when memory allocation is necessary and there are contained elements
+    /// consuming O(N) memory and taking O(N) time.
     ///
     /// # Examples
     /// ```
