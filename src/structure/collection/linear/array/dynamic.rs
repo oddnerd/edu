@@ -2278,30 +2278,26 @@ impl<T> super::super::Queue for Dynamic<T> {
     /// Remove the element at the front of the queue.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::Queue;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let Ok(mut instance) = Dynamic::<usize>::with_capacity(256) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
+    /// // Push some elements into the queue.
+    /// instance.push(0).expect("uses capacity");
+    /// instance.push(1).expect("uses capacity");
+    /// instance.push(2).expect("uses capacity");
+    ///
+    /// // And then they are popped in first-in first-out order.
     /// assert_eq!(instance.pop(), Some(0));
     /// assert_eq!(instance.pop(), Some(1));
     /// assert_eq!(instance.pop(), Some(2));
-    /// assert_eq!(instance.pop(), Some(3));
-    /// assert_eq!(instance.pop(), Some(4));
-    /// assert_eq!(instance.pop(), Some(5));
-    /// assert_eq!(instance.pop(), None);
     /// ```
     fn pop(&mut self) -> Option<Self::Element> {
         self.front()
