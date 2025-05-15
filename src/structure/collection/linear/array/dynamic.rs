@@ -1350,12 +1350,12 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let actual = Dynamic::from_iter(expected.iter().copied());
+    /// let instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// for index in 0..expected.len() {
+    /// for (index, expected) in (0..instance.len()).enumerate() {
     ///     use core::ops::Index;
-    ///     assert_eq!(actual.index(index), expected.index(index));
+    ///
+    ///     assert_eq!(instance.index(index), &expected);
     /// }
     /// ```
     fn index(&self, index: usize) -> &Self::Output {
@@ -1393,12 +1393,12 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut expected = [0, 1, 2, 3, 4, 5];
-    /// let mut actual = Dynamic::from_iter(expected.iter().copied());
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// for index in 0..expected.len() {
+    /// for (index, mut expected) in (0..instance.len()).enumerate() {
     ///     use core::ops::IndexMut;
-    ///     assert_eq!(actual.index_mut(index), expected.index_mut(index));
+    ///
+    ///     assert_eq!(instance.index_mut(index), &mut expected);
     /// }
     /// ```
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
