@@ -1277,9 +1277,20 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut original: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert_eq!(expected.clone(), expected)
+    /// // The original allocation is larger than necessary.
+    /// _ = original.reserve_front(256).expect("successful memory allocation");
+    /// _ = original.reserve_back(256).expect("successful memory allocation");
+    ///
+    /// // Note the lack of error handling.
+    /// let clone = original.clone();
+    ///
+    /// // The additional capacity is _NOT_ cloned.
+    /// assert_eq!(clone.capacity(), 0);
+    ///
+    /// // But has the same elements in the same order.
+    /// assert_eq!(original, clone);
     /// ```
     fn clone(&self) -> Self {
         let Ok(mut clone) = Dynamic::<T>::with_capacity(self.initialized) else {
