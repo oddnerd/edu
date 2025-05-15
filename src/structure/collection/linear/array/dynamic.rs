@@ -1280,8 +1280,8 @@ impl<T: Clone> Clone for Dynamic<T> {
     /// let mut original: Dynamic<_> = (0..=5).collect();
     ///
     /// // The original allocation is larger than necessary.
-    /// _ = original.reserve_front(256).expect("successful memory allocation");
-    /// _ = original.reserve_back(256).expect("successful memory allocation");
+    /// original.reserve_front(256).expect("successful memory allocation");
+    /// original.reserve_back(256).expect("successful memory allocation");
     ///
     /// // Note the lack of error handling.
     /// let clone = original.clone();
