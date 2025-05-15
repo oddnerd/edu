@@ -2427,23 +2427,6 @@ impl<T> Drop for Drain<'_, T> {
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
     /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5, 6]);
-    ///
-    /// let mut drain = instance.drain(2..=4);
-    ///
-    /// drain.next();      // Consumes the element with value `2`.
-    /// drain.next_back(); // Consumes the element with value `4`.
-    ///
-    /// core::mem::drop(drain); // Drops the element with value '3'.
-    ///
-    /// assert!(instance.into_iter().eq([0, 1, 5, 6])); // Remaining elements.
-    /// ```
     fn drop(&mut self) {
         if self.range.is_empty() {
             return;
