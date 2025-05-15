@@ -2415,7 +2415,11 @@ impl<T> ExactSizeIterator for Drain<'_, T> {}
 impl<T> core::iter::FusedIterator for Drain<'_, T> {}
 
 impl<T> Drop for Drain<'_, T> {
-    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    /// Drops elements that have yet to be yielded.
+    ///
+    /// Furthermore, [`Self::next`] and [`Self::next_back`] might create
+    /// a discontinuity resulting in two disjoint groups of contigious elements
+    /// so this method will shift one of those groups to remove the gap.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(N) time.
