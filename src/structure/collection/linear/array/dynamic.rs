@@ -1344,15 +1344,7 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     /// greater than the number of contained elements.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
@@ -1395,15 +1387,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// greater than the number of contained elements.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     ///
     /// # Examples
     /// ```
