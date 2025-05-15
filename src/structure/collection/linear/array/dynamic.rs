@@ -2204,15 +2204,19 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// use rust::structure::collection::linear::Stack;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let Ok(mut instance) = Dynamic::<usize>::with_capacity(256) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
-    /// assert_eq!(instance.pop(), Some(0));
-    /// assert_eq!(instance.pop(), Some(1));
+    /// // Push some elements into the stack.
+    /// instance.push(0).expect("uses capacity");
+    /// instance.push(1).expect("uses capacity");
+    /// instance.push(2).expect("uses capacity");
+    ///
+    /// // And then they are popped in last-in first-out order.
     /// assert_eq!(instance.pop(), Some(2));
-    /// assert_eq!(instance.pop(), Some(3));
-    /// assert_eq!(instance.pop(), Some(4));
-    /// assert_eq!(instance.pop(), Some(5));
-    /// assert_eq!(instance.pop(), None);
+    /// assert_eq!(instance.pop(), Some(1));
+    /// assert_eq!(instance.pop(), Some(0));
     /// ```
     fn pop(&mut self) -> Option<Self::Element> {
         self.front()
