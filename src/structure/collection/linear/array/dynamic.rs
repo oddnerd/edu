@@ -1252,7 +1252,7 @@ impl<T> Extend<T> for Dynamic<T> {
         };
 
         // Eagerly allocate that much memory, but it is okay if it fails.
-        _ = self.reserve(capacity);
+        _ = self.reserve_back(capacity);
 
         for element in iterator {
             // Even if the above allocation fails, `append` will attempt to
