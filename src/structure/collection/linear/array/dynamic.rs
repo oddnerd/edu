@@ -1308,7 +1308,7 @@ impl<T: Clone> Clone for Dynamic<T> {
 }
 
 impl<T: PartialEq> PartialEq for Dynamic<T> {
-    /// Query if self has the same elements in the same order as `other`.
+    /// Query if `other` has the same elements in the same order.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(N) time.
@@ -1317,13 +1317,15 @@ impl<T: PartialEq> PartialEq for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let left = [0, 1, 2, 3, 4, 5];
-    /// let right = left.clone();
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// let left = Dynamic::from_iter(left);
-    /// let right = Dynamic::from_iter(right);
+    /// instance.reserve_front(256).expect("successful memory allocation");
+    /// instance.reserve_back(256).expect("successful memory allocation");
     ///
-    /// assert_eq!(left, right);
+    /// let mut other = instance.clone();
+    ///
+    /// // Equivalent despite different capacities because same elements.
+    /// assert_eq!(instance, other);
     /// ```
     fn eq(&self, other: &Self) -> bool {
         self.iter().eq(other.iter())
