@@ -2422,7 +2422,11 @@ impl<T> Drop for Drain<'_, T> {
     /// so this method will shift one of those groups to remove the gap.
     ///
     /// # Performance
-    /// This method always consumes O(1) memory and takes O(N) time.
+    /// This method always consumes O(1) memory, but has time complexity
+    /// depending on the elements being removed. The best case is when the
+    /// range extends to the front or back end and all elements within that
+    /// have already been yielded taking 𝛀(1) time, otherwise it is the worst
+    /// case taking O(N) time.
     fn drop(&mut self) {
         if self.range.is_empty() {
             return;
