@@ -1739,7 +1739,7 @@ impl<T> Array for Dynamic<T> {
     fn as_ptr(&self) -> *const Self::Element {
         assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "no allocation to point to");
 
-        // SAFETY: aligned within the allocated object.
+        // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe { self.buffer.add(self.front_capacity) };
 
         // `MaybeUninit<T>` has the same layout as `T`.
@@ -1786,7 +1786,7 @@ impl<T> Array for Dynamic<T> {
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
         assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "no allocation to point to");
 
-        // SAFETY: aligned within the allocated object.
+        // SAFETY: stays aligned within the allocated object.
         let ptr = unsafe { self.buffer.add(self.front_capacity) };
 
         // `MaybeUninit<T>` has the same layout as `T`.
