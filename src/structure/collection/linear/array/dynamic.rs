@@ -1705,9 +1705,10 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// If there is no underlying allocation to point to. Note that a dangling
-    /// pointer will be given for zero-size types despite not occupying an
-    /// allocation because Rust guarantees it is still valid to interact with.
+    /// This method has the precondition that there is contained elements to
+    /// point to. Note that a dangling pointer will be given for zero-size
+    /// types despite not occupying an allocation because Rust guarantees it is
+    /// still valid to interact with.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -1751,9 +1752,10 @@ impl<T> Array for Dynamic<T> {
     /// * Modifying `self` might invalidate the pointer.
     ///
     /// # Panics
-    /// If there is no underlying allocation to point to. Note that a dangling
-    /// pointer will be given for zero-size types despite not occupying an
-    /// allocation because Rust guarantees it is still valid to interact with.
+    /// This method has the precondition that there is contained elements to
+    /// point to. Note that a dangling pointer will be given for zero-size
+    /// types despite not occupying an allocation because Rust guarantees it is
+    /// still valid to interact with.
     ///
     /// # Performance
     /// #### Time Complexity
