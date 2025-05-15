@@ -1564,12 +1564,13 @@ impl<T> Drop for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// instance.next();      // Consumes the element with value `0`.
-    /// instance.next_back(); // Consumes the element with value `5`.
+    /// instance.reserve_front(256).expect("successful memory allocation");
+    /// instance.reserve_back(256).expect("successful memory allocation");
     ///
-    /// core::mem::drop(instance); // Drops the elements with values `[1, 2, 3, 4]`.
+    /// // This will drop the contained elements, and deallocate capacity.
+    /// core::mem::drop(instance);
     /// ```
     fn drop(&mut self) {
         self.by_ref().for_each(drop);
