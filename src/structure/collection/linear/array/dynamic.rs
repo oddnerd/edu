@@ -1425,7 +1425,7 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
 impl<T> Iterator for Dynamic<T> {
     type Item = T;
 
-    /// Remove the leftmost element, if any.
+    /// Remove the front element, if any.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -1508,7 +1508,7 @@ impl<T> Iterator for Dynamic<T> {
 }
 
 impl<T> DoubleEndedIterator for Dynamic<T> {
-    /// Remove the rightmost element, if any.
+    /// Remove the back element, if any.
     ///
     /// # Performance
     /// #### Time Complexity
