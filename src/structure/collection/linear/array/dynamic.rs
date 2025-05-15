@@ -1916,15 +1916,11 @@ impl<T> List for Dynamic<T> {
     /// Remove the element at `index`.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// The method always consumes O(1) memory, but the time complexity depends
+    /// on the elements surrounding `index`. The best case is when the element
+    /// being removed is not between two other elements taking 𝛀(1) time,
+    /// otherwise it is the worst case requiring shifting remaining elements
+    /// taking O(N) time.
     ///
     /// # Examples
     /// ```
