@@ -2245,15 +2245,9 @@ impl<T> super::super::Queue for Dynamic<T> {
     /// Insert an `element` to the end of the queue.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// The best case is when there is available back capacity consuming 𝛀(1)
+    /// memory and taking 𝛀(1) time. Otherwise it is he worst case when memory
+    /// allocation is necessary consuming O(N) memory and taking O(N) time.
     ///
     /// # Examples
     /// ```
