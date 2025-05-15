@@ -2377,15 +2377,7 @@ impl<T> Iterator for Drain<'_, T> {
     /// Query how many times [`Self::next`] will yield some element.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.unyielded.len(), Some(self.unyielded.len()))
     }
@@ -2395,15 +2387,7 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// Obtain the element with the greatest index yet to be yielded, if any.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time.
     fn next_back(&mut self) -> Option<Self::Item> {
         self.unyielded.next_back().map(|index| {
             let Some(offset) = self.underlying.front_capacity.checked_add(index) else {
