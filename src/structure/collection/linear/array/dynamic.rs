@@ -2400,7 +2400,7 @@ impl<T> Iterator for Drain<'_, T> {
         )
     }
 
-    /// Query how many elements have yet to be yielded.
+    /// Query how many times [`Self::next`] will yield some element.
     ///
     /// # Performance
     /// #### Time Complexity
