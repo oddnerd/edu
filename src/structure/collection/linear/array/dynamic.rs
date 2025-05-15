@@ -2418,15 +2418,7 @@ impl<T> Drop for Drain<'_, T> {
     /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
+    /// This method always consumes O(1) memory and takes O(N) time.
     fn drop(&mut self) {
         if self.range.is_empty() {
             return;
