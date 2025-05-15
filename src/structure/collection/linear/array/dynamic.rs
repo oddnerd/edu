@@ -1797,6 +1797,10 @@ impl<T> Array for Dynamic<T> {
 impl<T> List for Dynamic<T> {
     /// Insert an `element` at `index`.
     ///
+    /// This method will shift contained elements (preserving order) to make
+    /// space at `index` to place the `element`, (re)allocating memory is no
+    /// capacity is available.
+    ///
     /// # Panics
     /// The Rust runtime might panic or otherwise abort if allocation fails.
     ///
