@@ -1462,13 +1462,14 @@ impl<T> Iterator for Dynamic<T> {
             }
 
             // SAFETY:
-            // * the `MaybeUninit<T>` is initialized.
-            // * there are no other references to self.
+            // * Owned memory => valid for reads and writes.
+            // * Underlying `MaybeUninit<T>` is initialized.
+            // * Has mutable reference to self => no other reference exists.
             let element = unsafe { first.as_mut() };
 
             // SAFETY:
-            // * the underlying `T` is initialized.
-            // * this element is prevented from being read after this move.
+            // * Underlying `T` is initialized.
+            // * Element is prevented from being read after this move.
             unsafe { element.assume_init_read() }
         })
     }
@@ -1538,13 +1539,14 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
             let mut last = unsafe { first.add(self.initialized) };
 
             // SAFETY:
-            // * the `MaybeUninit<T>` is initialized.
-            // * there are no other references to self.
+            // * Owned memory => valid for reads and writes.
+            // * Underlying `MaybeUninit<T>` is initialized.
+            // * Has mutable reference to self => no other reference exists.
             let element = unsafe { last.as_mut() };
 
             // SAFETY:
-            // * the underlying `T` is initialized.
-            // * this element is prevented from being read after this move.
+            // * Underlying `T` is initialized.
+            // * Element is prevented from being read after this move.
             unsafe { element.assume_init_read() }
         })
     }
@@ -2362,12 +2364,13 @@ impl<T> Iterator for Drain<'_, T> {
                 let mut ptr = unsafe { self.underlying.buffer.add(offset) };
 
                 // SAFETY:
-                // * The `MaybeUninit<T>` is initialized.
-                // * We have a unique mutable reference to self and the element.
+                // * Owned memory => valid for reads and writes.
+                // * Underlying `MaybeUninit<T>` is initialized.
+                // * Has mutable reference to self => no other reference exists.
                 let element = unsafe { ptr.as_mut() };
 
                 // SAFETY:
-                // * The underlying `T` is initialized.
+                // * Underlying `T` is initialized.
                 // * Element is prevented from being read after this move.
                 unsafe { element.assume_init_read() }
             },
@@ -2398,12 +2401,13 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
             let mut ptr = unsafe { self.underlying.buffer.add(offset) };
 
             // SAFETY:
-            // * The `MaybeUninit<T>` is initialized.
-            // * We have a unique mutable reference to self and the element.
+            // * Owned memory => valid for reads and writes.
+            // * Underlying `MaybeUninit<T>` is initialized.
+            // * Has mutable reference to self => no other reference exists.
             let element = unsafe { ptr.as_mut() };
 
             // SAFETY:
-            // * The underlying `T` is initialized.
+            // * Underlying `T` is initialized.
             // * Element is prevented from being read after this move.
             unsafe { element.assume_init_read() }
         })
