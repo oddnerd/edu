@@ -1877,7 +1877,7 @@ impl<T> List for Dynamic<T> {
             // SAFETY: stay aligned within the allocated object.
             unsafe { self.buffer.add(self.front_capacity) }
         }
-        // Consume back capacity.
+        // Consume (or allocate) back capacity.
         else if self.reserve(1).is_ok() {
             // SAFETY: there is back capacity to shift into.
             unsafe { self.shift_range(index.., 1); }
