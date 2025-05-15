@@ -1990,9 +1990,9 @@ impl<T> List for Dynamic<T> {
 
     /// Optimally remove elements within `range`.
     ///
-    /// This method is more efficient than using `remove` for sequential
-    /// elements, moving elements out of the buffer as iterated and shifting
-    /// once only when the iterator is dropped.
+    /// This method is more efficient than using [`Self::remove`] for
+    /// sequential elements, moving elements out of the buffer as iterated and
+    /// shifting once only when the iterator is dropped.
     ///
     /// # Performance
     /// #### Time Complexity
