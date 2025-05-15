@@ -1718,12 +1718,21 @@ impl<T> Array for Dynamic<T> {
     /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// let expected = core::ptr::from_ref(&instance[0]);
-    /// let actual = unsafe { instance.as_ptr() };
+    /// instance.reserve_front(256).expect("successful memory allocation");
     ///
-    /// assert_eq!(actual, expected);
+    /// // SAFETY:
+    /// // * `instance` will outlive this pointer.
+    /// // * `pointer` will not be written to.
+    /// // * `instance` is not modified during `pointers` lifetime.
+    /// let pointer = unsafe { instance.as_ptr() };
+    ///
+    /// // This is a pointer to the first element.
+    /// let first = core::ptr::from_ref(&instance[0]);
+    ///
+    /// // And that is what is yielded by this method, skipping front capacity.
+    /// assert_eq!(pointer, first);
     /// ```
     fn as_ptr(&self) -> *const Self::Element {
         assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "no allocation to point to");
@@ -1757,12 +1766,20 @@ impl<T> Array for Dynamic<T> {
     /// use rust::structure::collection::linear::Array;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// let expected = core::ptr::from_ref(&instance[0]).cast_mut();
-    /// let actual = unsafe { instance.as_mut_ptr() };
+    /// instance.reserve_front(256).expect("successful memory allocation");
     ///
-    /// assert_eq!(actual, expected);
+    /// // SAFETY:
+    /// // * `instance` will outlive this pointer.
+    /// // * `instance` is not modified during `pointers` lifetime.
+    /// let pointer = unsafe { instance.as_mut_ptr() };
+    ///
+    /// // This is a pointer to the first element.
+    /// let first = core::ptr::from_mut(&mut instance[0]);
+    ///
+    /// // And that is what is yielded by this method, skipping front capacity.
+    /// assert_eq!(pointer, first);
     /// ```
     fn as_mut_ptr(&mut self) -> *mut Self::Element {
         assert!(self.front_capacity > 0 || self.initialized > 0 || self.back_capacity > 0, "no allocation to point to");
