@@ -2071,17 +2071,21 @@ impl<T> List for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
     /// use rust::structure::collection::linear::List;
+    /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert_eq!(withdraw.next(), Some(0));
-    /// assert_eq!(withdraw.next_back(), Some(4));
+    /// // Constructing the iterator in O(1) time.
+    /// let iterator = instance.withdraw(|element| element % 2 == 0);
     ///
-    /// drop(withdraw);
+    /// // Actually removing the elements is O(N).
+    /// let removed: Vec<_> = iterator.collect();
     ///
+    /// // Thus these are the removed elements.
+    /// assert!(removed.eq(&[0, 2, 4]));
+    ///
+    /// // And these are the retained elements.
     /// assert!(instance.eq([1, 3, 5]));
     /// ```
     fn withdraw(
