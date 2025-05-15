@@ -2224,9 +2224,17 @@ impl<T> super::super::Stack for Dynamic<T> {
     /// use rust::structure::collection::linear::Stack;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
+    /// let Ok(mut instance) = Dynamic::<usize>::with_capacity(256) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
-    /// assert_eq!(instance.peek(), Some(&0));
+    /// // Push elements onto the stack.
+    /// instance.push(0).expect("uses capacity");
+    /// instance.push(1).expect("uses capacity");
+    /// instance.push(2).expect("uses capacity");
+    ///
+    /// // So peek yields the most recently pushed element.
+    /// assert_eq!(instance.peek(), Some(&2));
     /// ```
     fn peek(&self) -> Option<&Self::Element> {
         self.first()
