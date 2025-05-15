@@ -1484,7 +1484,13 @@ impl<T> Iterator for Dynamic<T> {
     ///
     /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert_eq!(instance.size_hint(), (6, Some(6)));
+    /// let (lower, upper) = instance.size_hint();
+    ///
+    /// // Will yield at least this many elements.
+    /// assert_eq!(lower, 6);
+    ///
+    /// // May yield up to this many elements.
+    /// assert_eq!(upper, Some(6));
     /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.initialized, Some(self.initialized))
