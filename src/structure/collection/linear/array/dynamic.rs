@@ -2007,15 +2007,9 @@ impl<T> List for Dynamic<T> {
     /// shifting once only when the iterator is dropped.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
+    /// This method always consumes O(1) memory and takes O(1) time. However,
+    /// actually removing the elements via the yielded iterator consumes O(1)
+    /// memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
