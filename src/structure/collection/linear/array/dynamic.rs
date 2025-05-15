@@ -2347,7 +2347,7 @@ struct Drain<'a, T> {
 impl<T> Iterator for Drain<'_, T> {
     type Item = T;
 
-    /// Obtain the element with the lowest index yet to be yielded, if any.
+    /// Remove the front element, if any.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
@@ -2384,7 +2384,7 @@ impl<T> Iterator for Drain<'_, T> {
 }
 
 impl<T> DoubleEndedIterator for Drain<'_, T> {
-    /// Obtain the element with the greatest index yet to be yielded, if any.
+    /// Remove the back element, if any.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
