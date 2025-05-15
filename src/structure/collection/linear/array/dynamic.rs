@@ -1538,13 +1538,13 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
             let mut last = unsafe { first.add(self.initialized) };
 
             // SAFETY:
-            // * The `MaybeUninit<T>` is initialized.
-            // * We have a unique mutable reference to self and the element.
+            // * the `MaybeUninit<T>` is initialized.
+            // * there are no other references to self.
             let element = unsafe { last.as_mut() };
 
             // SAFETY:
-            // * The underlying `T` is initialized.
-            // * Element is prevented from being read after this move.
+            // * the underlying `T` is initialized.
+            // * this element is prevented from being read after this move.
             unsafe { element.assume_init_read() }
         })
     }
