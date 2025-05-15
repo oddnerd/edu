@@ -1986,7 +1986,9 @@ impl<T> List for Dynamic<T> {
         }
         // Increase back capacity.
         else {
-            // SAFETY: shifting into the removed element.
+            // SAFETY:
+            // * Range is the initialized elements following the one removed.
+            // * They are shifted into the hold created by the removed element.
             unsafe { self.shift_range(index.saturating_add(1).., -1); }
 
             if let Some(incremented) = self.back_capacity.checked_add(1) {
