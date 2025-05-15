@@ -1616,10 +1616,9 @@ impl<T> Collection for Dynamic<T> {
     /// use rust::structure::Collection;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let expected = [0, 1, 2, 3, 4, 5];
-    /// let instance = Dynamic::from_iter(expected.clone());
+    /// let instance: Dynamic<_> = (0..=5).collect();
     ///
-    /// assert_eq!(Collection::count(&instance), expected.len());
+    /// assert_eq!(Collection::count(&instance), 6);
     /// ```
     fn count(&self) -> usize {
         self.initialized
