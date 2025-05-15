@@ -2025,7 +2025,7 @@ impl<T> List for Dynamic<T> {
     /// let removed: Vec<_> = iterator.collect();
     ///
     /// // Thus these are the removed elements.
-    /// assert!(removed.eq([1, 2, 3, 4]));
+    /// assert!(removed.eq(&[1, 2, 3, 4]));
     ///
     /// // And these are the retained elements.
     /// assert!(instance.eq([0, 5]));
