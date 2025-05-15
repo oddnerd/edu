@@ -1473,7 +1473,7 @@ impl<T> Iterator for Dynamic<T> {
         })
     }
 
-    /// Query how many elements have yet to be yielded.
+    /// Query how many times [`Self::next`] will yield some element.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
