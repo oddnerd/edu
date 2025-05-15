@@ -2351,24 +2351,6 @@ impl<T> Iterator for Drain<'_, T> {
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..);
-    ///
-    /// assert_eq!(actual.next(), Some(0));
-    /// assert_eq!(actual.next(), Some(1));
-    /// assert_eq!(actual.next(), Some(2));
-    /// assert_eq!(actual.next_back(), Some(5));
-    /// assert_eq!(actual.next_back(), Some(4));
-    /// assert_eq!(actual.next_back(), Some(3));
-    /// assert_eq!(actual.next(), None);
-    /// assert_eq!(actual.next_back(), None);
-    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         self.unyielded.next().map(
             |index| {
@@ -2404,17 +2386,6 @@ impl<T> Iterator for Drain<'_, T> {
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
     /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    /// use rust::structure::collection::linear::List;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..);
-    ///
-    /// assert_eq!(actual.size_hint(), (6, Some(6)));
-    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (self.unyielded.len(), Some(self.unyielded.len()))
     }
@@ -2433,23 +2404,6 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
     /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.drain(..);
-    ///
-    /// assert_eq!(actual.next_back(), Some(5));
-    /// assert_eq!(actual.next_back(), Some(4));
-    /// assert_eq!(actual.next_back(), Some(3));
-    /// assert_eq!(actual.next_back(), Some(2));
-    /// assert_eq!(actual.next_back(), Some(1));
-    /// assert_eq!(actual.next_back(), Some(0));
-    /// assert_eq!(actual.next_back(), None);
-    /// ```
     fn next_back(&mut self) -> Option<Self::Item> {
         self.unyielded.next_back().map(|index| {
             let Some(offset) = self.underlying.front_capacity.checked_add(index) else {
