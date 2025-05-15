@@ -131,7 +131,8 @@ impl<'a, T: 'a> core::ops::Index<usize> for Dope<'a, T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// If provided `index` is out of bounds.
+    /// This method has the precondition that `index` is not equal to or
+    /// greater than the number of contained elements.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
@@ -169,7 +170,8 @@ impl<'a, T: 'a> core::ops::IndexMut<usize> for Dope<'a, T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// If provided `index` is out of bounds.
+    /// This method has the precondition that `index` is not equal to or
+    /// greater than the number of contained elements.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.

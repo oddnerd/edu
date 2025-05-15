@@ -1340,7 +1340,8 @@ impl<T> core::ops::Index<usize> for Dynamic<T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// This method has the precondition that the `index` is within bounds.
+    /// This method has the precondition that `index` is not equal to or
+    /// greater than the number of contained elements.
     ///
     /// # Performance
     /// #### Time Complexity
@@ -1390,7 +1391,8 @@ impl<T> core::ops::IndexMut<usize> for Dynamic<T> {
     /// Obtain a reference to the element `index` positions from the start.
     ///
     /// # Panics
-    /// This method has the precondition that the `index` is within bounds.
+    /// This method has the precondition that `index` is not equal to or
+    /// greater than the number of contained elements.
     ///
     /// # Performance
     /// #### Time Complexity
