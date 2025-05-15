@@ -1482,7 +1482,7 @@ impl<T> Iterator for Dynamic<T> {
     /// ```
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).into_iter();
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
     ///
     /// assert_eq!(instance.size_hint(), (6, Some(6)));
     /// ```
