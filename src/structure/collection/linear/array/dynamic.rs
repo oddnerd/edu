@@ -1308,7 +1308,7 @@ impl<T: Clone> Clone for Dynamic<T> {
 }
 
 impl<T: PartialEq> PartialEq for Dynamic<T> {
-    /// Query if the elements contained are the same as `other`.
+    /// Query if self has the same elements in the same order as `other`.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(N) time.
