@@ -1648,7 +1648,7 @@ impl<T> Linear for Dynamic<T> {
     ) -> impl DoubleEndedIterator<Item = &Self::Element> + ExactSizeIterator + core::iter::FusedIterator
     {
         let ptr = if self.initialized > 0 {
-            // SAFETY: stays aligned with the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             unsafe { self.buffer.add(self.front_capacity) }
         } else {
             // The pointer will not be read.
@@ -1683,7 +1683,7 @@ impl<T> Linear for Dynamic<T> {
     + ExactSizeIterator
     + core::iter::FusedIterator {
         let ptr = if self.initialized > 0 {
-            // SAFETY: stays aligned with the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             unsafe { self.buffer.add(self.front_capacity) }
         } else {
             // The pointer will not be read.
