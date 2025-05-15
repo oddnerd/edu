@@ -1558,7 +1558,7 @@ impl<T> Drop for Dynamic<T> {
     /// Drops the elements that are initialized and deallocates memory.
     ///
     /// # Performance
-    /// This method always consumes O(1) memory and takes O(N) times.
+    /// This method always consumes O(1) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
