@@ -1606,7 +1606,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
 impl<T> Collection for Dynamic<T> {
     type Element = T;
 
-    /// Query the number of initialized elements contained.
+    /// Query the number of elements contained.
     ///
     /// # Performance
     /// This method always consumes O(1) memory and takes O(1) time.
