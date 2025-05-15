@@ -2251,19 +2251,25 @@ impl<T> super::super::Queue for Dynamic<T> {
     ///
     /// # Examples
     /// ```
-    /// use rust::structure::collection::linear::Stack;
+    /// use rust::structure::collection::linear::Queue;
     /// use rust::structure::collection::linear::array::Dynamic;
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
-    /// instance.push(5).expect("successful allocation");
-    /// instance.push(4).expect("successful allocation");
-    /// instance.push(3).expect("successful allocation");
-    /// instance.push(2).expect("successful allocation");
-    /// instance.push(1).expect("successful allocation");
-    /// instance.push(0).expect("successful allocation");
+    /// // Will allocate memory if necessary.
+    /// let Ok(_) = instance.push(0) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
-    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// // Allocate capacity for the following pushes.
+    /// instance.reserve(1).expect("successful memory allocation");
+    ///
+    /// let Ok(_) = instance.push(1) else {
+    ///     unreachable!("using capacity cannot fail");
+    /// };
+    ///
+    /// // This is the order elements are inserted.
+    /// assert!(instance.eq([0, 1]));
     /// ```
     fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.append(element)
