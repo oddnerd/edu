@@ -2167,14 +2167,20 @@ impl<T> super::super::Stack for Dynamic<T> {
     ///
     /// let mut instance = Dynamic::<usize>::default();
     ///
-    /// instance.push(5).expect("successful allocation");
-    /// instance.push(4).expect("successful allocation");
-    /// instance.push(3).expect("successful allocation");
-    /// instance.push(2).expect("successful allocation");
-    /// instance.push(1).expect("successful allocation");
-    /// instance.push(0).expect("successful allocation");
+    /// // Will allocate memory if necessary.
+    /// let Ok(_) = instance.push(1) else {
+    ///     panic!("memory allocation failed");
+    /// };
     ///
-    /// assert!(instance.eq([0, 1, 2, 3, 4, 5]));
+    /// // Allocate capacity for the following pushes.
+    /// instance.reserve(5).expect("successful memory allocation");
+    ///
+    /// let Ok(_) = instance.push(0) else {
+    ///     unreachable!("using capacity cannot fail");
+    /// };
+    ///
+    /// // This is the order elements are inserted.
+    /// assert!(instance.eq([0, 1]));
     /// ```
     fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element> {
         self.prepend(element)
