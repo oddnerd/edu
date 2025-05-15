@@ -1585,15 +1585,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     /// List the elements contained.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(N) | 𝚯(N) |
+    /// This method always consumes O(N) memory and takes O(N) time.
     ///
     /// # Examples
     /// ```
