@@ -1118,6 +1118,33 @@ impl<T> Dynamic<T> {
     }
 }
 
+impl<T> Drop for Dynamic<T> {
+    /// Drops the elements that are initialized and deallocates memory.
+    ///
+    /// # Performance
+    /// This method always consumes O(1) memory and takes O(N) time.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut instance: Dynamic<_> = (0..=5).collect();
+    ///
+    /// instance.reserve_front(256).expect("successful memory allocation");
+    /// instance.reserve_back(256).expect("successful memory allocation");
+    ///
+    /// // This will drop the contained elements, and deallocate capacity.
+    /// core::mem::drop(instance);
+    /// ```
+    fn drop(&mut self) {
+        self.by_ref().for_each(drop);
+
+        let Ok(_) = self.shrink(0) else {
+            unreachable!("deallocation cannot fail");
+        };
+    }
+}
+
 impl<T> Default for Dynamic<T> {
     /// Construct an instance without allocating memory.
     ///
@@ -1143,6 +1170,49 @@ impl<T> Default for Dynamic<T> {
             initialized: 0,
             back_capacity: 0,
         }
+    }
+}
+
+impl<T: Clone> Clone for Dynamic<T> {
+    /// Construct an instance containing clones of all contained elements.
+    ///
+    /// # Panics
+    /// The Rust runtime might abort if allocation fails, panics otherwise.
+    ///
+    /// # Performance
+    /// This method always consumes O(N) memory and takes O(N) time.
+    ///
+    /// # Examples
+    /// ```
+    /// use rust::structure::collection::linear::array::Dynamic;
+    ///
+    /// let mut original: Dynamic<_> = (0..=5).collect();
+    ///
+    /// // The original allocation is larger than necessary.
+    /// original.reserve_front(256).expect("successful memory allocation");
+    /// original.reserve_back(256).expect("successful memory allocation");
+    ///
+    /// // Note the lack of error handling.
+    /// let clone = original.clone();
+    ///
+    /// // The additional capacity is _NOT_ cloned.
+    /// assert_eq!(clone.capacity(), 0);
+    ///
+    /// // But has the same elements in the same order.
+    /// assert_eq!(original, clone);
+    /// ```
+    fn clone(&self) -> Self {
+        let Ok(mut clone) = Dynamic::<T>::with_capacity(self.initialized) else {
+            panic!("memory allocation failed");
+        };
+
+        for element in self.iter().cloned() {
+            let Ok(_) = clone.append(element) else {
+                unreachable!("using capacity so cannot fail");
+            };
+        }
+
+        clone
     }
 }
 
@@ -1261,49 +1331,6 @@ impl<T> Extend<T> for Dynamic<T> {
                 panic!("could not allocate memory to append element");
             };
         }
-    }
-}
-
-impl<T: Clone> Clone for Dynamic<T> {
-    /// Construct an instance containing clones of all contained elements.
-    ///
-    /// # Panics
-    /// The Rust runtime might abort if allocation fails, panics otherwise.
-    ///
-    /// # Performance
-    /// This method always consumes O(N) memory and takes O(N) time.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut original: Dynamic<_> = (0..=5).collect();
-    ///
-    /// // The original allocation is larger than necessary.
-    /// original.reserve_front(256).expect("successful memory allocation");
-    /// original.reserve_back(256).expect("successful memory allocation");
-    ///
-    /// // Note the lack of error handling.
-    /// let clone = original.clone();
-    ///
-    /// // The additional capacity is _NOT_ cloned.
-    /// assert_eq!(clone.capacity(), 0);
-    ///
-    /// // But has the same elements in the same order.
-    /// assert_eq!(original, clone);
-    /// ```
-    fn clone(&self) -> Self {
-        let Ok(mut clone) = Dynamic::<T>::with_capacity(self.initialized) else {
-            panic!("memory allocation failed");
-        };
-
-        for element in self.iter().cloned() {
-            let Ok(_) = clone.append(element) else {
-                unreachable!("using capacity so cannot fail");
-            };
-        }
-
-        clone
     }
 }
 
@@ -1555,33 +1582,6 @@ impl<T> DoubleEndedIterator for Dynamic<T> {
 impl<T> ExactSizeIterator for Dynamic<T> {}
 
 impl<T> core::iter::FusedIterator for Dynamic<T> {}
-
-impl<T> Drop for Dynamic<T> {
-    /// Drops the elements that are initialized and deallocates memory.
-    ///
-    /// # Performance
-    /// This method always consumes O(1) memory and takes O(N) time.
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance: Dynamic<_> = (0..=5).collect();
-    ///
-    /// instance.reserve_front(256).expect("successful memory allocation");
-    /// instance.reserve_back(256).expect("successful memory allocation");
-    ///
-    /// // This will drop the contained elements, and deallocate capacity.
-    /// core::mem::drop(instance);
-    /// ```
-    fn drop(&mut self) {
-        self.by_ref().for_each(drop);
-
-        let Ok(_) = self.shrink(0) else {
-            unreachable!("deallocation cannot fail");
-        };
-    }
-}
 
 impl<T: core::fmt::Debug> core::fmt::Debug for Dynamic<T> {
     /// List the elements contained.
