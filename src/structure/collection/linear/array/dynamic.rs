@@ -44572,6 +44572,10 @@ mod test {
                         _ = actual.reserve_front(front).expect("successful allocation");
                         _ = actual.reserve_back(back).expect("successful allocation");
 
+                        debug_assert_eq!(actual.initialized, elements);
+                        debug_assert_eq!(actual.front_capacity, front);
+                        debug_assert_eq!(actual.back_capacity, back);
+
                         drop(actual);
                     }
                 }
