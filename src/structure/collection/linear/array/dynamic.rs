@@ -2519,17 +2519,18 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut list = f.debug_list();
 
-        let slice = {
+        let unyielded = {
+            // This is the first initialized elements, not first of the range.
             let first = self.underlying.as_ptr();
 
             // SAFETY: stays aligned within the allocated object.
-            let start = unsafe { first.add(self.unyielded.start) };
+            let unyielded = unsafe { first.add(self.unyielded.start) };
 
             // SAFETY: points to that many initialized instances of `T`.
-            unsafe { core::slice::from_raw_parts(start, self.unyielded.len()) }
+            unsafe { core::slice::from_raw_parts(unyielded, self.unyielded.len()) }
         };
 
-        list.entries(slice).finish()
+        list.entries(unyielded).finish()
     }
 }
 
