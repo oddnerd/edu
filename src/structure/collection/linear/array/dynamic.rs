@@ -44806,50 +44806,28 @@ mod test {
         use super::*;
 
         #[test]
-        fn does_not_allocate_front_capacity() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+        fn then_contains_elements_from_the_slice() {
+            for elements in 0..32 {
+                let expected: Vec<_> = (0..elements).collect();
 
-            assert_eq!(actual.front_capacity, 0);
-        }
+                let slice = expected.as_slice();
 
-        #[test]
-        fn does_not_allocate_back_capacity() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+                let actual = Dynamic::try_from(slice).expect("successful allocation");
 
-            assert_eq!(actual.back_capacity, 0);
-        }
-
-        #[test]
-        fn allocates_memory() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
-
-            for index in 0..expected.len() {
-                let ptr = unsafe { actual.buffer.as_ptr().add(index) };
-
-                // Ideally, this will seg-fault if unowned memory.
-                _ = unsafe { &mut *ptr }.write(index);
+                assert!(actual.eq(expected));
             }
         }
 
         #[test]
-        fn has_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
+        fn then_does_not_have_capacity() {
+            for elements in 0..32 {
+                let expected: Vec<_> = (0..elements).collect();
 
-            assert_eq!(actual.initialized, expected.len());
-        }
+                let slice = expected.as_slice();
 
-        #[test]
-        fn initializes_elements() {
-            let expected = [0, 1, 2, 3, 4, 5];
+                let actual = Dynamic::try_from(slice).expect("successful allocation");
 
-            let actual = Dynamic::try_from(expected.as_slice()).expect("successful allocation");
-
-            for index in 0..expected.len() {
-                assert_eq!(actual[index], expected[index]);
+                assert_eq!(actual.capacity(), 0);
             }
         }
     }
