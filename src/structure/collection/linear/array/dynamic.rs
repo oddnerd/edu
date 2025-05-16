@@ -2563,7 +2563,7 @@ struct Withdraw<'a, T, F: FnMut(&T) -> bool> {
 impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     type Item = T;
 
-    /// Obtain the element with the lowest index yet to be yielded, if any.
+    /// Remove the front element, if any.
     ///
     /// # Performance
     /// This method always consumes O(1) memory, but the time complexity
@@ -2671,7 +2671,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
 }
 
 impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
-    /// Obtain the element with the greatest index yet to be yielded, if any.
+    /// Remove the back element, if any.
     ///
     /// # Performance
     /// This methods takes O(N) time and consumes O(1) memory.
