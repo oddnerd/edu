@@ -44653,6 +44653,137 @@ mod test {
         }
     }
 
+    mod clone {
+        use super::*;
+
+        #[test]
+        fn when_original_is_empty_then_clone_has_no_allocation() {
+            for front in 0..32 {
+                for back in 0..32 {
+                    let mut original = Dynamic::<usize>::default();
+
+                    _ = original.reserve_back(front + back).expect("successful allocation");
+
+                    _ = original.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacity to shift into");
+
+                    debug_assert_eq!(original.initialized, 0);
+                    debug_assert_eq!(original.front_capacity, front);
+                    debug_assert_eq!(original.back_capacity, back);
+
+                    let clone = original.clone();
+
+                    assert_eq!(clone.initialized, 0);
+                    assert_eq!(clone.front_capacity, 0);
+                    assert_eq!(clone.back_capacity, 0);
+                }
+            }
+        }
+
+        mod when_not_empty {
+            use super::*;
+
+            mod when_zero_size_type {
+                use super::*;
+
+                #[test]
+                fn then_clone_has_same_elements_as_original() {
+                    for elements in 1..32 {
+                        for front in 0..32 {
+                            for back in 0..32 {
+                                let mut original: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                _ = original.reserve_front(front).expect("successful allocation");
+                                _ = original.reserve_back(back).expect("successful allocation");
+
+                                debug_assert_eq!(original.initialized, elements);
+                                debug_assert_eq!(original.front_capacity, front);
+                                debug_assert_eq!(original.back_capacity, back);
+
+                                let clone = original.clone();
+
+                                assert_eq!(original, clone);
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_clone_does_not_have_capacity() {
+                    for elements in 1..32 {
+                        for front in 0..32 {
+                            for back in 0..32 {
+                                let mut original: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                _ = original.reserve_front(front).expect("successful allocation");
+                                _ = original.reserve_back(back).expect("successful allocation");
+
+                                debug_assert_eq!(original.initialized, elements);
+                                debug_assert_eq!(original.front_capacity, front);
+                                debug_assert_eq!(original.back_capacity, back);
+
+                                let clone = original.clone();
+
+                                assert_eq!(clone.capacity(), 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_non_zero_size_type {
+                use super::*;
+
+                #[test]
+                fn then_clone_has_same_elements_as_original() {
+                    for elements in 1..32 {
+                        for front in 0..32 {
+                            for back in 0..32 {
+                                let mut original: Dynamic<_> = (0..elements).collect();
+
+                                _ = original.reserve_front(front).expect("successful allocation");
+                                _ = original.reserve_back(back).expect("successful allocation");
+
+                                debug_assert_eq!(original.initialized, elements);
+                                debug_assert_eq!(original.front_capacity, front);
+                                debug_assert_eq!(original.back_capacity, back);
+
+                                let clone = original.clone();
+
+                                assert_eq!(original, clone);
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_clone_does_not_have_capacity() {
+                    for elements in 1..32 {
+                        for front in 0..32 {
+                            for back in 0..32 {
+                                let mut original: Dynamic<_> = (0..elements).collect();
+
+                                _ = original.reserve_front(front).expect("successful allocation");
+                                _ = original.reserve_back(back).expect("successful allocation");
+
+                                debug_assert_eq!(original.initialized, elements);
+                                debug_assert_eq!(original.front_capacity, front);
+                                debug_assert_eq!(original.back_capacity, back);
+
+                                let clone = original.clone();
+
+                                assert_eq!(clone.capacity(), 0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
     mod try_from {
         use super::*;
 
@@ -45324,42 +45455,6 @@ mod test {
 
                 assert_eq!(actual.len(), expected.len());
             }
-        }
-    }
-
-    mod clone {
-        use super::*;
-
-        #[test]
-        fn does_not_allocate_front_capacity() {
-            let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).clone().clone();
-
-            assert_eq!(actual.front_capacity, 0);
-        }
-
-        #[test]
-        fn does_not_allocate_back_capacity() {
-            let actual = Dynamic::from_iter([0, 1, 2, 3, 4, 5]).clone().clone();
-
-            assert_eq!(actual.back_capacity, 0);
-        }
-
-        #[test]
-        fn has_elements() {
-            let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-            let actual = expected.clone();
-
-            assert_eq!(actual.initialized, expected.len());
-        }
-
-        #[test]
-        fn is_equivalent() {
-            let expected = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-
-            let actual = expected.clone();
-
-            assert_eq!(actual, expected);
         }
     }
 
