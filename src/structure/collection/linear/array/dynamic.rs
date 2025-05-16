@@ -2568,9 +2568,10 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// # Performance
     /// This method always consumes O(1) memory, but the time complexity
     /// depends on how elements match the predicate. The best case is when the
-    /// next element matches the predicate taking 𝛀(1) time, otherwise it takes
-    /// O(N) time. Note, however, that iterating through all elements is still
-    /// O(N) time overall despite each call itself being O(N).
+    /// next element matches the predicate taking 𝛀(1) time, otherwise it is
+    /// the worst case taking O(N) time. Note, however, that iterating through
+    /// all elements is still O(N) time overall despite each call itself
+    /// being O(N).
     fn next(&mut self) -> Option<Self::Item> {
         // The first element that does not match the predicate.
         let first_retained = self.next_front;
