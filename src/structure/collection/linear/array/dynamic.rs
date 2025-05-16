@@ -44734,6 +44734,28 @@ mod test {
                 use super::*;
 
                 #[test]
+                fn then_clone_pointers_to_different_allocation() {
+                    for elements in 1..32 {
+                        for front in 0..32 {
+                            for back in 0..32 {
+                                let mut original: Dynamic<_> = (0..elements).collect();
+
+                                _ = original.reserve_front(front).expect("successful allocation");
+                                _ = original.reserve_back(back).expect("successful allocation");
+
+                                debug_assert_eq!(original.initialized, elements);
+                                debug_assert_eq!(original.front_capacity, front);
+                                debug_assert_eq!(original.back_capacity, back);
+
+                                let clone = original.clone();
+
+                                assert_ne!(original.buffer, clone.buffer);
+                            }
+                        }
+                    }
+                }
+
+                #[test]
                 fn then_clone_has_same_elements_as_original() {
                     for elements in 1..32 {
                         for front in 0..32 {
@@ -44779,10 +44801,6 @@ mod test {
             }
         }
     }
-
-
-
-
 
     mod try_from {
         use super::*;
