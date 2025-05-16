@@ -2742,40 +2742,17 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 impl<T, F: FnMut(&T) -> bool> core::iter::FusedIterator for Withdraw<'_, T, F> {}
 
 impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
-    /// Drops remaining elements and fixes the underlying [`Dynamic`] buffer.
+    /// Drops elements that have yet to be yielded.
+    ///
+    /// Furthermore, [`Self::next`] and [`Self::next_back`] might create
+    /// a discontinuity resulting in two disjoint groups of contigious elements
+    /// so this method will shift one of those groups to remove the gap.
     ///
     /// # Performance
-    /// #### Time Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(N) | 𝛀(1) | 𝚯(N) |
-    ///
-    /// #### Memory Complexity
-    /// | Worst | Best | Average |
-    /// | :-: | :-: | :-: |
-    /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut instance = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    ///
-    /// let mut withdraw = instance.withdraw(|element| element % 2 == 0);
-    ///
-    /// // Consumes the element with value `0`.
-    /// assert_eq!(withdraw.next(), Some(0));
-    ///
-    /// // Consumes the element with value `4`.
-    /// assert_eq!(withdraw.next_back(), Some(4));
-    ///
-    /// // Drops the element with value '2'.
-    /// drop(withdraw);
-    ///
-    /// // Retained elements.
-    /// assert!(instance.eq([1, 3, 5]));
-    /// ```
+    /// This method always consumes O(1) memory, but has time complexity
+    /// depending on the elements being removed. The best case is when there is
+    /// no gap between retained elements taking 𝛀(1) time, otherwise it is the
+    /// worst case taking O(N) time.
     fn drop(&mut self) {
         // Drop all elements yet to be yielded.
         self.for_each(drop);
