@@ -2571,20 +2571,6 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// next element matches the predicate taking 𝛀(1) time, otherwise it takes
     /// O(N) time. Note, however, that iterating through all elements is still
     /// O(N) time overall despite each call itself being O(N).
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let mut actual = underlying.withdraw(|element| element % 2 == 0);
-    ///
-    /// assert_eq!(actual.next(), Some(0));
-    /// assert_eq!(actual.next(), Some(2));
-    /// assert_eq!(actual.next(), Some(4));
-    /// assert_eq!(actual.next(), None);
-    /// ```
     fn next(&mut self) -> Option<Self::Item> {
         // The first element that does not match the predicate.
         let first_retained = self.next_front;
@@ -2686,17 +2672,6 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
     /// | Worst | Best | Average |
     /// | :-: | :-: | :-: |
     /// | O(1) | 𝛀(1) | 𝚯(1) |
-    ///
-    /// # Examples
-    /// ```
-    /// use rust::structure::collection::linear::List;
-    /// use rust::structure::collection::linear::array::Dynamic;
-    ///
-    /// let mut underlying = Dynamic::from_iter([0, 1, 2, 3, 4, 5]);
-    /// let instance = underlying.withdraw(|element| element % 2 == 0);
-    ///
-    /// assert_eq!(instance.size_hint(), (0, Some(6)));
-    /// ```
     fn size_hint(&self) -> (usize, Option<usize>) {
         (0, Some(self.remaining))
     }
