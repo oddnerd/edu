@@ -44679,7 +44679,7 @@ mod test {
             }
         }
 
-        mod when_not_empty {
+        mod when_original_is_not_empty {
             use super::*;
 
             mod when_zero_size_type {
