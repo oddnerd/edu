@@ -29,7 +29,7 @@ mod test {
     /// Types which implement interfaces with behaviour for testing purposes.
     pub(crate) mod mock {
         /// Mock element that updates an external counter when dropped.
-        #[derive(Debug)]
+        #[derive(Debug, Clone)]
         pub(crate) struct DropCounter {
             /// Access to the external counter.
             counter: alloc::rc::Rc<core::cell::RefCell<usize>>,
