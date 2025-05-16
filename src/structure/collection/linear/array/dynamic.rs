@@ -44624,6 +44624,31 @@ mod test {
         }
     }
 
+    mod default {
+        use super::*;
+
+        #[test]
+        fn then_does_not_allocate_front_capacity() {
+            let actual = Dynamic::<usize>::default();
+
+            assert_eq!(actual.front_capacity, 0);
+        }
+
+        #[test]
+        fn then_does_not_allocate_back_capacity() {
+            let actual = Dynamic::<usize>::default();
+
+            assert_eq!(actual.back_capacity, 0);
+        }
+
+        #[test]
+        fn then_does_not_initialize_elements() {
+            let actual = Dynamic::<()>::default();
+
+            assert_eq!(actual.initialized, 0);
+        }
+    }
+
     mod try_from {
         use super::*;
 
@@ -45295,31 +45320,6 @@ mod test {
 
                 assert_eq!(actual.len(), expected.len());
             }
-        }
-    }
-
-    mod default {
-        use super::*;
-
-        #[test]
-        fn does_not_allocate_front_capacity() {
-            let actual = Dynamic::<usize>::default();
-
-            assert_eq!(actual.front_capacity, 0);
-        }
-
-        #[test]
-        fn does_not_allocate_back_capacity() {
-            let actual = Dynamic::<usize>::default();
-
-            assert_eq!(actual.back_capacity, 0);
-        }
-
-        #[test]
-        fn does_not_initialize_elements() {
-            let actual = Dynamic::<()>::default();
-
-            assert_eq!(actual.initialized, 0);
         }
     }
 
