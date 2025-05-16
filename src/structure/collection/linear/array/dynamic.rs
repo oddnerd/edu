@@ -44563,78 +44563,64 @@ mod test {
         use super::*;
 
         #[test]
-        fn zero_size_type() {
-            drop(Dynamic::<()>::default());
-        }
+        fn when_zero_size_type_then_does_not_panic() {
+            for elements in 0..32 {
+                for front in 0..32 {
+                    for back in 0..32 {
+                        let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-        #[test]
-        fn empty() {
-            drop(Dynamic::<usize>::default());
-        }
+                        _ = actual.reserve_front(front).expect("successful allocation");
+                        _ = actual.reserve_back(back).expect("successful allocation");
 
-        #[test]
-        fn all_initialized() {
-            use crate::test::mock::DropCounter;
-
-            const ELEMENTS: usize = 256;
-
-            let dropped = DropCounter::new_counter();
-
-            let mut actual =
-                Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
-
-            for _ in 0..ELEMENTS {
-                _ = actual
-                    .append(DropCounter::new(&dropped))
-                    .expect("uses capacity");
+                        drop(actual);
+                    }
+                }
             }
-
-            drop(actual);
-
-            assert_eq!(dropped.take(), ELEMENTS);
         }
 
         #[test]
-        fn all_front_capacity() {
-            let mut actual = Dynamic::<usize>::default();
+        fn when_empty_then_does_not_panic() {
+            for front in 0..32 {
+                for back in 0..32 {
+                    let mut actual = Dynamic::<usize>::default();
 
-            _ = actual.reserve_front(256).expect("successful allocation");
+                    _ = actual.reserve_back(front + back).expect("successful allocation");
 
-            drop(actual);
-        }
+                    _ = actual.shift(isize::try_from(front).expect("too small to wrap")).expect("enough back capacioty to shift into");
 
-        #[test]
-        fn all_back_capacity() {
-            let mut actual = Dynamic::<usize>::default();
+                    debug_assert_eq!(actual.initialized, 0);
+                    debug_assert_eq!(actual.front_capacity, front);
+                    debug_assert_eq!(actual.back_capacity, back);
 
-            _ = actual.reserve_back(256).expect("successful allocation");
-
-            drop(actual);
-        }
-
-        #[test]
-        fn front_capacity_and_initialized_elements_and_back_capacity() {
-            use crate::test::mock::DropCounter;
-
-            const ELEMENTS: usize = 256;
-
-            let dropped = DropCounter::new_counter();
-
-            let mut actual =
-                Dynamic::<DropCounter>::with_capacity(ELEMENTS).expect("successful allocation");
-
-            for _ in 0..ELEMENTS {
-                _ = actual
-                    .append(DropCounter::new(&dropped))
-                    .expect("uses capacity");
+                    drop(actual);
+                }
             }
+        }
 
-            _ = actual.reserve_front(256).expect("successful allocation");
-            _ = actual.reserve_back(256).expect("successful allocation");
+        #[test]
+        fn when_not_empty_then_drops_contained_elements() {
+            for elements in 1..32 {
+                for front in 0..32 {
+                    for back in 0..32 {
+                        use crate::test::mock::DropCounter;
 
-            drop(actual);
+                        let dropped = DropCounter::new_counter();
 
-            assert_eq!(dropped.take(), ELEMENTS);
+                        let mut actual: Dynamic<_> = core::iter::repeat_n(DropCounter::new(&dropped), elements).collect();
+
+                        _ = actual.reserve_front(front).expect("successful allocation");
+                        _ = actual.reserve_back(back).expect("successful allocation");
+
+                        debug_assert_eq!(actual.initialized, elements);
+                        debug_assert_eq!(actual.front_capacity, front);
+                        debug_assert_eq!(actual.back_capacity, back);
+
+                        drop(actual);
+
+                        assert_eq!(dropped.take(), elements);
+                    }
+                }
+            }
         }
     }
 
