@@ -865,7 +865,7 @@ impl<T> Dynamic<T> {
                 unreachable!("at least one initialized element");
             };
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             unsafe { first.add(offset) }
         };
 
@@ -2103,7 +2103,7 @@ impl<T> List for Dynamic<T> {
             // The pointer will not be read.
             NonNull::dangling()
         } else {
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             unsafe { self.buffer.add(self.front_capacity) }
         }
         // `MaybeUninit<T>` has the same layout as `T`.
@@ -2112,7 +2112,7 @@ impl<T> List for Dynamic<T> {
         let tail = {
             let offset = self.initialized.saturating_sub(1);
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             unsafe { head.add(offset) }
         }
         // `MaybeUninit<T>` has the same layout as `T`.
@@ -2365,7 +2365,7 @@ impl<T> Iterator for Drain<'_, T> {
                     unreachable!("cannot allocate more than `isize::MAX` bytes");
                 };
 
-                // SAFETY: aligned within the allocated object.
+                // SAFETY: stays aligned within the allocated object.
                 let mut ptr = unsafe { self.underlying.buffer.add(offset) };
 
                 // SAFETY:
@@ -2402,7 +2402,7 @@ impl<T> DoubleEndedIterator for Drain<'_, T> {
                 unreachable!("cannot allocate more than `isize::MAX` bytes");
             };
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             let mut ptr = unsafe { self.underlying.buffer.add(offset) };
 
             // SAFETY:
@@ -2530,7 +2530,7 @@ impl<T: core::fmt::Debug> core::fmt::Debug for Drain<'_, T> {
         let slice = {
             let first = self.underlying.as_ptr();
 
-            // SAFETY: aligned within the allocated object.
+            // SAFETY: stays aligned within the allocated object.
             let start = unsafe { first.add(self.unyielded.start) };
 
             // SAFETY: points to that many initialized instances of `T`.
@@ -2613,7 +2613,7 @@ impl<T, F: FnMut(&T) -> bool> Iterator for Withdraw<'_, T, F> {
             // SAFETY: the element is initialized.
             let current = unsafe { self.next_front.as_ref() };
 
-            // SAFETY: aligned within the allocated object, or one byte past.
+            // SAFETY: stays aligned within the allocated object, or one byte past.
             self.next_front = unsafe { self.next_front.add(1) };
 
             if (self.predicate)(current) {
@@ -2746,7 +2746,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
             // Although it is safe to move a pointer one bytes past the
             // allocated object, it is _NOT_ safe to move it one bytes before.
             if self.remaining != 0 {
-                // SAFETY: aligned within the allocated object.
+                // SAFETY: stays aligned within the allocated object.
                 self.next_back = unsafe { self.next_back.sub(1) };
             }
 
@@ -2768,7 +2768,7 @@ impl<T, F: FnMut(&T) -> bool> DoubleEndedIterator for Withdraw<'_, T, F> {
 
                 let hole = NonNull::from(current);
 
-                // SAFETY: aligned within the allocated object, or one byte past.
+                // SAFETY: stays aligned within the allocated object, or one byte past.
                 let trailing = unsafe { hole.add(1) };
 
                 // SAFETY:
@@ -2833,7 +2833,7 @@ impl<T, F: FnMut(&T) -> bool> Drop for Withdraw<'_, T, F> {
         self.for_each(drop);
 
         if self.trailing > 0 {
-            // SAFETY: aligned within the allocated object, or one byte past.
+            // SAFETY: stays aligned within the allocated object, or one byte past.
             let trailing = unsafe { self.next_back.add(1) };
 
             // SAFETY:
