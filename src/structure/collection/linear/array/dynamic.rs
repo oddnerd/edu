@@ -44832,6 +44832,207 @@ mod test {
         }
     }
 
+    mod from_iterator {
+        use super::*;
+
+        #[test]
+        fn when_iterator_is_empty_then_has_no_allocation() {
+            let actual: Dynamic<usize> = core::iter::empty().collect();
+
+            assert_eq!(actual.initialized, 0);
+            assert_eq!(actual.front_capacity, 0);
+            assert_eq!(actual.back_capacity, 0);
+        }
+
+        mod when_valid_size_hint {
+            use super::*;
+
+            mod when_upper_is_bounded {
+                use super::*;
+
+                mod when_exact_size {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_elements() {
+                        use crate::test::mock::SizeHint;
+
+                        for elements in 1..32 {
+                            for lower in 0..=elements {
+                                let expected = 0..elements;
+
+                                let actual: Dynamic<_> = SizeHint {
+                                    data: expected.clone(),
+                                    size_hint: (lower, Some(elements))
+                                }.collect();
+
+                                assert!(actual.eq(expected));
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for elements in 1..32 {
+                            for lower in 0..=elements {
+                                let expected = 0..elements;
+
+                                let actual: Dynamic<_> = SizeHint {
+                                    data: expected.clone(),
+                                    size_hint: (lower, Some(elements))
+                                }.collect();
+
+                                assert_eq!(actual.capacity(), 0);
+                            }
+                        }
+                    }
+                }
+
+                mod when_more_than_elements {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_elements() {
+                        use crate::test::mock::SizeHint;
+
+                        for elements in 1..32 {
+                            for lower in 0..=elements {
+                                for upper in (elements + 1)..(elements + 32) {
+                                    let expected = 0..elements;
+
+                                    let actual: Dynamic<_> = SizeHint {
+                                        data: expected.clone(),
+                                        size_hint: (lower, Some(upper))
+                                    }.collect();
+
+                                    assert!(actual.eq(expected));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_upper_is_unbounded {
+                use super::*;
+
+                #[test]
+                fn then_contains_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for elements in 1..32 {
+                        for lower in 0..=elements {
+                            let expected = 0..elements;
+
+                            let actual: Dynamic<_> = SizeHint {
+                                data: expected.clone(),
+                                size_hint: (lower, None)
+                            }.collect();
+
+                            assert!(actual.eq(expected));
+                        }
+                    }
+                }
+            }
+        }
+
+        mod when_invalid_size_hint {
+            use super::*;
+
+            mod when_lower_bound_is_too_large {
+                use super::*;
+
+                #[test]
+                fn when_upper_is_bounded_then_contains_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for elements in 1..32 {
+                        for lower in (elements + 1)..(elements + 32) {
+                            for upper in elements..(elements + 32) {
+                                let expected = 0..elements;
+
+                                let actual: Dynamic<_> = SizeHint {
+                                    data: expected.clone(),
+                                    size_hint: (lower, Some(upper))
+                                }.collect();
+
+                                assert!(actual.eq(expected));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn when_upper_is_unbounded_then_contains_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for elements in 1..32 {
+                        for lower in (elements + 1)..(elements + 32) {
+                            let expected = 0..elements;
+
+                            let actual: Dynamic<_> = SizeHint {
+                                data: expected.clone(),
+                                size_hint: (lower, None)
+                            }.collect();
+
+                            assert!(actual.eq(expected));
+                        }
+                    }
+                }
+            }
+
+            mod when_upper_bound_is_too_small {
+                use super::*;
+
+                #[test]
+                fn then_contains_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for elements in 1..32 {
+                        for lower in 0..=elements {
+                            for upper in 0..elements {
+                                let expected = 0..elements;
+
+                                let actual: Dynamic<_> = SizeHint {
+                                    data: expected.clone(),
+                                    size_hint: (lower, Some(upper))
+                                }.collect();
+
+                                assert!(actual.eq(expected));
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_both_lower_bound_is_too_large_and_upper_bound_is_too_small {
+                use super::*;
+
+                #[test]
+                fn then_contains_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for elements in 1..32 {
+                        for lower in (elements + 1)..(elements + 32) {
+                            for upper in 0..elements {
+                                let expected = 0..elements;
+
+                                let actual: Dynamic<_> = SizeHint {
+                                    data: expected.clone(),
+                                    size_hint: (lower, Some(upper))
+                                }.collect();
+
+                                assert!(actual.eq(expected));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     mod index {
         use super::*;
 
