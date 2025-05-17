@@ -67,17 +67,17 @@ mod test {
 
         /// Mock iterator that provides an erroneous size hint.
         #[derive(Debug)]
-        pub(crate) struct SizeHint<I> {
+        pub(crate) struct SizeHint<Iter: Iterator> {
             /// Underlying supply of genuine elements.
-            pub data: core::iter::Copied<I>,
+            pub data: Iter,
 
             /// The hint returned when queried for the number of elements.
             pub size_hint: (usize, Option<usize>),
         }
 
-        impl<'a, T: 'a + Copy, I: Iterator<Item = &'a T>> Iterator for SizeHint<I> {
+        impl<Iter: Iterator> Iterator for SizeHint<Iter> {
             /// The type being yielded when iterated.
-            type Item = T;
+            type Item = Iter::Item;
 
             /// Obtain the next genuine element, if there is one.
             ///
