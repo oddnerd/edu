@@ -1321,8 +1321,38 @@ impl<T> Extend<T> for Dynamic<T> {
             max.unwrap_or(min)
         };
 
-        // Eagerly allocate that much memory, but it is okay if it fails.
-        _ = self.reserve_back(capacity);
+        // Eagerly allocate that much capacity.
+        if let Some(needed) = capacity.checked_sub(self.back_capacity) {
+            // Consume front capacity to increase back capacity.
+            if self.front_capacity >= needed {
+                let Ok(needed) = isize::try_from(needed) else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                };
+
+                let Some(needed) = needed.checked_neg() else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                };
+
+                let Ok(_) = self.shift(needed) else {
+                    unreachable!("at least that much front capacity");
+                };
+            } else {
+                let Ok(front_capacity) = isize::try_from(self.front_capacity) else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                };
+
+                let Some(front_capacity) = front_capacity.checked_neg() else {
+                    unreachable!("cannot allocate more than `isize::MAX` bytes");
+                };
+
+                let Ok(_) = self.shift(front_capacity) else {
+                    unreachable!("exactly that much front capacity");
+                };
+
+                // It is okay if this memory allocation fails.
+                _ = self.reserve_back(capacity);
+            }
+        }
 
         for element in iterator {
             // Even if the above allocation fails, `append` will attempt to
