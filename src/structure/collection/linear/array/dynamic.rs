@@ -2884,6 +2884,8 @@ mod test {
                         let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful allocation");
 
                         assert_eq!(actual.capacity(), capacity);
+                        assert_eq!(actual.capacity_front(), capacity);
+                        assert_eq!(actual.capacity_back(), capacity);
                     }
                 }
 
