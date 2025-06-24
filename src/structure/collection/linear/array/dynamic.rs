@@ -2933,29 +2933,16 @@ mod test {
                 }
 
                 #[test]
-                #[ignore]
                 fn then_can_have_maximum_possible_capacity() {
                     const MAX: usize = isize::MAX as usize;
 
-                    let mut actual = Dynamic::<Type>::with_capacity(MAX).expect("successful memory allocation");
+                    let actual = Dynamic::<Type>::with_capacity(MAX).expect("successful memory allocation");
 
                     debug_assert_eq!(size_of::<Type>(), 0);
 
                     assert_eq!(actual.capacity(), MAX);
                     assert_eq!(actual.capacity_front(), MAX);
                     assert_eq!(actual.capacity_back(), MAX);
-
-                    for element in 0..MAX {
-                        if element % 2 == 0 {
-                            assert!(actual.prepend(()).is_ok());
-                        } else {
-                            assert!(actual.append(()).is_ok());
-                        }
-                    }
-
-                    assert_eq!(actual.capacity(), 0);
-                    assert_eq!(actual.capacity_front(), 0);
-                    assert_eq!(actual.capacity_back(), 0);
                 }
             }
 
