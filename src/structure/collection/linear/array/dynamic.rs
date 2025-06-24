@@ -3050,19 +3050,15 @@ mod test {
             mod when_zero_size_type {
                 use super::*;
 
-                type Type = ();
-
                 #[test]
                 fn then_yields_sum_of_front_and_back_capacities() {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3080,12 +3076,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3109,12 +3103,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3137,19 +3129,15 @@ mod test {
             mod when_non_zero_size_type {
                 use super::*;
 
-                type Type = usize;
-
                 #[test]
                 fn then_yields_sum_of_front_and_back_capacities() {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = (0..elements).collect();
+                                let mut actual: Dynamic<_> = (0..elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3167,12 +3155,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = (0..elements).collect();
+                                let mut actual: Dynamic<_> = (0..elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3196,12 +3182,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = (0..elements).collect();
+                                let mut actual: Dynamic<_> = (0..elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3228,19 +3212,15 @@ mod test {
             mod when_zero_size_type {
                 use super::*;
 
-                type Type = ();
-
                 #[test]
                 fn then_yields_front_capacity() {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3258,12 +3238,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3286,8 +3264,6 @@ mod test {
             mod when_non_zero_size_type {
                 use super::*;
 
-                type Type = usize;
-
                 #[test]
                 fn then_yields_only_capacity() {
                     for elements in 0..32 {
@@ -3297,8 +3273,6 @@ mod test {
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3316,12 +3290,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = (0..elements).collect();
+                                let mut actual: Dynamic<_> = (0..elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3348,19 +3320,15 @@ mod test {
             mod when_zero_size_type {
                 use super::*;
 
-                type Type = ();
-
                 #[test]
                 fn then_yields_back_capacity() {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3378,12 +3346,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = core::iter::repeat_n((), elements).collect();
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_eq!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_none());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3406,8 +3372,6 @@ mod test {
             mod when_non_zero_size_type {
                 use super::*;
 
-                type Type = usize;
-
                 #[test]
                 fn then_yields_back_capacity() {
                     for elements in 0..32 {
@@ -3417,8 +3381,6 @@ mod test {
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
@@ -3436,12 +3398,10 @@ mod test {
                     for elements in 0..32 {
                         for front in 0..32 {
                             for back in 0..32 {
-                                let mut actual: Dynamic<Type> = (0..elements).collect();
+                                let mut actual: Dynamic<_> = (0..elements).collect();
 
                                 _ = actual.reserve_back(front + back).expect("successful memory reallocation");
                                 _ = actual.shift(isize::try_from(front).expect("smaller than `isize::MAX`")).expect("enough back capacity to shift into");
-
-                                debug_assert_ne!(size_of::<Type>(), 0);
 
                                 // TODO: debug_assert_eq!(actual.allocation.is_some());
                                 debug_assert_eq!(actual.initialized, elements);
