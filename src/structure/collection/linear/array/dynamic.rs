@@ -2859,10 +2859,14 @@ mod test {
             mod when_zero_size_type {
                 use super::*;
 
+                type Type = ();
+
                 #[test]
                 fn then_does_not_allocate_memory() {
                     for capacity in 0..32 {
-                        let actual = Dynamic::<()>::with_capacity(capacity).expect("successful memory allocation");
+                        let actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_eq!(size_of::<Type>(), 0);
 
                         // TODO: assert!(actual.allocation.is_none());
                     }
@@ -2871,7 +2875,9 @@ mod test {
                 #[test]
                 fn then_has_exactly_that_much_capacity() {
                     for capacity in 0..32 {
-                        let actual = Dynamic::<()>::with_capacity(capacity).expect("successful memory allocation");
+                        let actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_eq!(size_of::<Type>(), 0);
 
                         assert_eq!(actual.capacity(), capacity);
                         assert_eq!(actual.capacity_front(), capacity);
@@ -2882,7 +2888,9 @@ mod test {
                 #[test]
                 fn then_does_not_initialize_elements() {
                     for capacity in 0..32 {
-                        let actual = Dynamic::<()>::with_capacity(capacity).expect("successful memory allocation");
+                        let actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_eq!(size_of::<Type>(), 0);
 
                         assert_eq!(actual.initialized, 0);
                     }
@@ -2891,7 +2899,10 @@ mod test {
                 #[test]
                 fn then_capacity_many_elements_can_be_prepended_without_allocating_memory() {
                     for capacity in 0..32 {
-                        let mut actual = Dynamic::<()>::with_capacity(capacity).expect("successful memory allocation");
+                        let mut actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_eq!(size_of::<Type>(), 0);
+                        debug_assert_eq!(actual.capacity(), capacity);
 
                         let allocation = actual.buffer;
 
@@ -2906,7 +2917,10 @@ mod test {
                 #[test]
                 fn then_capacity_many_elements_can_be_appended_without_allocating_memory() {
                     for capacity in 0..32 {
-                        let mut actual = Dynamic::<()>::with_capacity(capacity).expect("successful memory allocation");
+                        let mut actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_eq!(size_of::<Type>(), 0);
+                        debug_assert_eq!(actual.capacity(), capacity);
 
                         let allocation = actual.buffer;
 
@@ -2923,7 +2937,9 @@ mod test {
                 fn then_can_have_maximum_possible_capacity() {
                     const MAX: usize = isize::MAX as usize;
 
-                    let mut actual = Dynamic::<()>::with_capacity(MAX).expect("successful memory allocation");
+                    let mut actual = Dynamic::<Type>::with_capacity(MAX).expect("successful memory allocation");
+
+                    debug_assert_eq!(size_of::<Type>(), 0);
 
                     assert_eq!(actual.capacity(), MAX);
                     assert_eq!(actual.capacity_front(), MAX);
@@ -2946,9 +2962,13 @@ mod test {
             mod when_sized_type {
                 use super::*;
 
+                type Type = usize;
+
                 #[test]
                 fn when_zero_requested_then_does_not_allocate_memory() {
-                    let actual = Dynamic::<usize>::with_capacity(0).expect("successful memory allocation");
+                    let actual = Dynamic::<Type>::with_capacity(0).expect("successful memory allocation");
+
+                    debug_assert_ne!(size_of::<Type>(), 0);
 
                     // TODO: assert!(actual.allocation.is_none());
                 }
@@ -2956,7 +2976,9 @@ mod test {
                 #[test]
                 fn when_more_than_zero_requested_then_allocates_memory() {
                     for capacity in 1..32 {
-                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful memory allocation");
+                        let actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_ne!(size_of::<Type>(), 0);
 
                         // TODO: assert!(actual.allocation.is_some());
                     }
@@ -2965,7 +2987,9 @@ mod test {
                 #[test]
                 fn then_has_exactly_that_much_capacity() {
                     for capacity in 0..32 {
-                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful memory allocation");
+                        let actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_ne!(size_of::<Type>(), 0);
 
                         assert_eq!(actual.capacity(), capacity);
                         assert_eq!(actual.capacity_front(), capacity);
@@ -2976,7 +3000,9 @@ mod test {
                 #[test]
                 fn then_does_not_initialize_elements() {
                     for capacity in 0..32 {
-                        let actual = Dynamic::<usize>::with_capacity(capacity).expect("successful memory allocation");
+                        let actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_ne!(size_of::<Type>(), 0);
 
                         assert_eq!(actual.initialized, 0);
                     }
@@ -2985,7 +3011,9 @@ mod test {
                 #[test]
                 fn then_capacity_many_elements_can_be_prepended_without_reallocating_memory() {
                     for capacity in 0..32 {
-                        let mut actual = Dynamic::<usize>::with_capacity(capacity).expect("successful memory allocation");
+                        let mut actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_ne!(size_of::<Type>(), 0);
 
                         let allocation = actual.buffer;
 
@@ -3000,7 +3028,9 @@ mod test {
                 #[test]
                 fn then_capacity_many_elements_can_be_appended_without_reallocating_memory() {
                     for capacity in 0..32 {
-                        let mut actual = Dynamic::<usize>::with_capacity(capacity).expect("successful memory allocation");
+                        let mut actual = Dynamic::<Type>::with_capacity(capacity).expect("successful memory allocation");
+
+                        debug_assert_ne!(size_of::<Type>(), 0);
 
                         let allocation = actual.buffer;
 
