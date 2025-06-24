@@ -337,6 +337,8 @@ impl<T> Dynamic<T> {
         }
     }
 
+    // TODO: pub fn reserve_exact(&mut self, capacity: usize) -> Result<&mut Self, FailedAllocation>;
+
     /// Allocate space for exactly `capacity` elements to be [`Self::prepend`].
     ///
     /// # Panics
@@ -3418,83 +3420,102 @@ mod test {
                 mod when_zero_requested {
                     use super::*;
 
-                    mod when_empty {
+                    mod when_zero_size_type {
                         use super::*;
 
                         #[test]
-                        fn then_does_not_modify_capacity() {
-                            let mut actual = Dynamic::<usize>::default();
-
-                            debug_assert_eq!(actual.initialized, 0);
-                            debug_assert_eq!(actual.front_capacity, 0);
-                            debug_assert_eq!(actual.back_capacity, 0);
-
-                            _ = actual.reserve(0).expect("does no allocation");
-
-                            assert_eq!(actual.capacity(), 0);
-                        }
-
-                        #[test]
-                        fn then_does_not_initialize_elements() {
-                            let mut actual = Dynamic::<usize>::default();
-
-                            debug_assert_eq!(actual.initialized, 0);
-                            debug_assert_eq!(actual.front_capacity, 0);
-                            debug_assert_eq!(actual.back_capacity, 0);
-
-                            _ = actual.reserve(0).expect("does no allocation");
-
-                            assert_eq!(actual.initialized, 0);
-                        }
-                    }
-
-                    mod when_not_empty {
-                        use super::*;
-
-                        #[test]
-                        fn then_does_not_modify_front_capacity() {
-                            for elements in 1..32 {
-                                let mut actual: Dynamic<_> = (0..elements).collect();
+                        fn then_does_not_allocate_memory() {
+                            for elements in 0..32 {
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("already enough capacity");
+                                _ = actual.reserve(0).expect("does not alter allocation");
 
-                                assert_eq!(actual.front_capacity, 0);
+                                // TODO: assert_eq!(actual.allocation.is_none());
                             }
                         }
 
                         #[test]
-                        fn then_does_not_modify_back_capacity() {
-                            for elements in 1..32 {
-                                let mut actual: Dynamic<_> = (0..elements).collect();
+                        fn then_does_not_have_capacity() {
+                            for elements in 0..32 {
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("already enough capacity");
+                                _ = actual.reserve(0).expect("does not alter allocation");
 
-                                assert_eq!(actual.back_capacity, 0);
+                                assert_eq!(actual.capacity(), 0);
                             }
                         }
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..32 {
-                                let expected = 0..elements;
-
-                                let mut actual: Dynamic<_> = expected.clone().collect();
+                            for elements in 0..32 {
+                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
                                 debug_assert_eq!(actual.initialized, elements);
                                 debug_assert_eq!(actual.front_capacity, 0);
                                 debug_assert_eq!(actual.back_capacity, 0);
 
-                                _ = actual.reserve(0).expect("already enough capacity");
+                                _ = actual.reserve(0).expect("does not alter allocation");
 
-                                assert!(actual.eq(expected));
+                                assert!(actual.eq(core::iter::repeat_n((), elements)));
+                            }
+                        }
+                    }
+
+                    mod when_non_zero_size_type {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_reallocate_memory() {
+                            for elements in 0..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_eq!(actual.initialized, elements);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                _ = actual.reserve(0).expect("does not alter allocation");
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_have_capacity() {
+                            for elements in 0..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_eq!(actual.initialized, elements);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve(0).expect("does not alter allocation");
+
+                                assert_eq!(actual.capacity(), 0);
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 0..32 {
+                                let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                debug_assert_eq!(actual.initialized, elements);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                _ = actual.reserve(0).expect("does not alter allocation");
+
+                                assert!(actual.eq(0..elements));
                             }
                         }
                     }
@@ -3503,105 +3524,39 @@ mod test {
                 mod when_more_than_zero_requested {
                     use super::*;
 
-                    mod when_empty {
+                    mod when_zero_size_type {
                         use super::*;
 
                         #[test]
-                        fn when_zero_size_type_then_can_allocate_maximum_possible_amount() {
-                            let mut actual = Dynamic::<()>::default();
+                        fn then_does_not_allocate_memory() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                            debug_assert_eq!(actual.initialized, 0);
-                            debug_assert_eq!(actual.front_capacity, 0);
-                            debug_assert_eq!(actual.back_capacity, 0);
-
-                            _ = actual.reserve(isize::MAX as usize).expect("ZSTs do not occupy memory");
-
-                            assert_eq!(actual.capacity(), isize::MAX as usize);
-                        }
-
-                        #[test]
-                        fn then_increases_capacity_to_bounding_power_of_two_of_requested() {
-                            for exponent in 0..(isize::BITS - 2) {
-                                let power = usize::pow(2, exponent);
-
-                                let mut actual = Dynamic::<()>::default();
-
-                                debug_assert_eq!(actual.initialized, 0);
-                                debug_assert_eq!(actual.front_capacity, 0);
-                                debug_assert_eq!(actual.back_capacity, 0);
-
-                                _ = actual.reserve(power + 1).expect("successful allocation");
-
-                                assert_eq!(actual.capacity(), (power + 1).next_power_of_two());
-                            }
-                        }
-
-                        #[test]
-                        fn then_does_not_initialize_elements() {
-                            for capacity in 1..32 {
-                                let mut actual = Dynamic::<usize>::default();
-
-                                debug_assert_eq!(actual.initialized, 0);
-                                debug_assert_eq!(actual.front_capacity, 0);
-                                debug_assert_eq!(actual.back_capacity, 0);
-
-                                _ = actual.reserve(capacity).expect("successful allocation");
-
-                                assert_eq!(actual.initialized, 0);
-                            }
-                        }
-
-                        #[test]
-                        fn then_requested_many_elements_can_be_appended_without_reallocating_memory() {
-                            for capacity in 1..32 {
-                                let mut actual = Dynamic::<usize>::default();
-
-                                debug_assert_eq!(actual.initialized, 0);
-                                debug_assert_eq!(actual.front_capacity, 0);
-                                debug_assert_eq!(actual.back_capacity, 0);
-
-                                _ = actual.reserve(capacity).expect("successful allocation");
-
-                                let allocation = actual.buffer;
-
-                                for element in 0..capacity {
-                                    _ = actual.append(element).expect("uses capacity");
-                                }
-
-                                assert_eq!(actual.buffer, allocation);
-                            }
-                        }
-                    }
-
-                    mod when_not_empty {
-                        use super::*;
-
-                        #[test]
-                        fn when_zero_size_type_then_can_allocate_maximum_possible_amount() {
-                            for elements in 1..32 {
-                                let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
-
-                                debug_assert_eq!(actual.initialized, elements);
-                                debug_assert_eq!(actual.front_capacity, 0);
-                                debug_assert_eq!(actual.back_capacity, 0);
-
-                                _ = actual.reserve(isize::MAX as usize - elements).expect("ZSTs do not occupy memory");
-
-                                assert_eq!(actual.capacity(), isize::MAX as usize - elements);
-                            }
-                        }
-
-                        #[test]
-                        fn then_does_not_modify_front_capacity() {
-                            for elements in 1..32 {
-                                for capacity in 1..32 {
-                                    let mut actual: Dynamic<_> = (0..elements).collect();
-
+                                    // TODO: debug_assert!(actual.allocation.is_none());
                                     debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("successful allocation");
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
+
+                                    // TODO: assert!(actual.allocation.is_none());
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_have_front_capacity() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_none());
+                                    debug_assert_eq!(actual.initialized, elements);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
 
                                     assert_eq!(actual.front_capacity, 0);
                                 }
@@ -3610,64 +3565,187 @@ mod test {
 
                         #[test]
                         fn then_increases_back_capacity_to_bounding_power_of_two_of_requested() {
-                            for elements in 1..32 {
-                                for exponent in 0..(isize::BITS - 2) {
+                            for elements in 0..32 {
+                                for exponent in 0..(isize::BITS - 1 - 1) {
                                     let power = usize::pow(2, exponent);
 
-                                    let mut actual: Dynamic<()> = core::iter::repeat_n((), elements).collect();
+                                    let Some(capacity) = power.checked_sub(elements) else {
+                                        continue;
+                                    };
 
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_none());
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(capacity + 1).expect("successful memory reallocation");
+
+                                    assert_eq!(actual.capacity(), (capacity + 1).next_power_of_two());
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_back_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_some());
                                     debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(power + 1).expect("successful allocation");
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
 
-                                    assert_eq!(actual.back_capacity, (power + 1 + elements).next_power_of_two() - elements);
+                                    let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
+
+                                    for _ in 0..actual.back_capacity {
+                                        let &mut () = actual.append(()).expect("uses capacity");
+                                    }
+
+                                    assert!(pointers.iter().copied().eq(core::iter::repeat_n((), elements)));
+                                }
+                            }
+
+                            for elements in 0..32 {
+                                for exponent in 0..(isize::BITS - 1 - 1) {
+                                    let power = usize::pow(2, exponent);
+
+                                    let Some(capacity) = power.checked_sub(elements) else {
+                                        continue;
+                                    };
+
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_none());
+                                    debug_assert_eq!(actual.initialized, 0);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(capacity + 1).expect("successful memory reallocation");
+
+                                    assert_eq!(actual.capacity(), (capacity + 1).next_power_of_two());
                                 }
                             }
                         }
 
                         #[test]
                         fn then_does_not_modify_initialized_elements() {
-                            for elements in 1..32 {
-                                for capacity in 1..32 {
-                                    let expected = 0..elements;
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
 
-                                    let mut actual: Dynamic<usize> = expected.clone().collect();
-
+                                    // TODO: debug_assert!(actual.allocation.is_none());
                                     debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("successful allocation");
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
 
-                                    assert!(actual.eq(expected));
+                                    assert!(actual.eq(core::iter::repeat_n((), elements)));
+                                }
+                            }
+                        }
+                    }
+
+                    mod when_non_zero_size_type {
+                        use super::*;
+
+                        #[test]
+                        fn then_reallocates_memory() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_some());
+                                    debug_assert_eq!(actual.initialized, elements);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
+
+                                    // TODO: assert!(actual.allocation.is_some());
                                 }
                             }
                         }
 
                         #[test]
-                        fn then_requested_many_elements_can_be_appended_without_invalidating_pointers() {
-                            for elements in 1..32 {
-                                for capacity in 1..32 {
-                                    let expected = 0..elements;
+                        fn then_does_not_have_front_capacity() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
 
-                                    let mut actual: Dynamic<_> = expected.clone().collect();
-
+                                    // TODO: debug_assert!(actual.allocation.is_some());
                                     debug_assert_eq!(actual.initialized, elements);
                                     debug_assert_eq!(actual.front_capacity, 0);
                                     debug_assert_eq!(actual.back_capacity, 0);
 
-                                    _ = actual.reserve(capacity).expect("successful allocation");
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_increases_back_capacity_to_bounding_power_of_two_of_requested() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_some());
+                                    debug_assert_eq!(actual.initialized, elements);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
+
+                                    assert_eq!(actual.back_capacity, (elements + requested).next_power_of_two() - elements);
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_back_capacity_many_elements_can_be_appended_without_invalidating_pointers() {
+                            for elements in 1..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_some());
+                                    debug_assert_eq!(actual.initialized, elements);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
 
                                     let pointers = unsafe { core::slice::from_raw_parts(actual.as_ptr(), elements) };
 
-                                    for _ in 0..capacity {
-                                        // NOTE: this is distinct from the expected values.
-                                        _ = actual.append(usize::MAX).expect("uses capacity");
+                                    for element in 0..actual.back_capacity {
+                                        _ = actual.append(element).expect("uses capacity");
                                     }
 
-                                    assert!(pointers.iter().copied().eq(expected));
+                                    assert!(pointers.iter().copied().eq(0..elements));
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {
+                            for elements in 0..32 {
+                                for requested in 1..32 {
+                                    let mut actual: Dynamic<_> = (0..elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_some());
+                                    debug_assert_eq!(actual.initialized, elements);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(requested).expect("successful memory reallocation");
+
+                                    assert!(actual.eq(0..elements));
                                 }
                             }
                         }
@@ -3680,6 +3758,64 @@ mod test {
 
                 mod when_zero_requested {
                     use super::*;
+
+                    mod when_zero_size_type {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_allocate_memory() {
+                            for elements in 0..32 {
+                                for capacity in 1..32 {
+                                    let mut actual: Dynamic<_> = core::iter::repeat_n((), elements).collect();
+
+                                    // TODO: debug_assert!(actual.allocation.is_none());
+                                    debug_assert_eq!(actual.initialized, elements);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    _ = actual.reserve(0).expect("successful memory allocation");
+
+                                    // TODO: assert!(actual.allocation.is_none());
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {
+
+                        }
+
+                        #[test]
+                        fn then_front_capacity_many_elements_can_be_prepended_without_invalidating_pointers() {}
+
+                        #[test]
+                        fn then_does_not_have_back_capacity() {}
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {}
+                    }
+
+                    mod when_non_zero_size_type {
+                        use super::*;
+
+                        #[test]
+                        fn then_does_not_reallocate_memory() {}
+
+                        #[test]
+                        fn then_does_not_modify_front_capacity() {}
+
+                        #[test]
+                        fn then_front_capacity_many_elements_can_be_prepended_without_invalidating_pointers() {}
+
+                        #[test]
+                        fn then_does_not_have_back_capacity() {}
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {}
+                    }
+
+
+
 
                     mod when_empty {
                         use super::*;
@@ -3876,6 +4012,69 @@ mod test {
 
                 mod when_less_than_requested {
                     use super::*;
+
+                    mod when_zero_size_type {
+                        use super::*;
+
+                        #[test]
+                        fn then_can_allocate_maximum_possible_amount() {
+                            for elements in 0..32 {
+                                for capacity in 1..32 {
+                                    for requested in (capacity + 1)..(capacity + 32) {
+                                        
+                                    }
+                                }
+                            }
+                        }
+
+                        #[test]
+                        fn then_does_not_allocate_memory() {}
+
+                        #[test]
+                        fn then_does_not_have_front_capacity() {}
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {}
+
+                        #[test]
+                        fn then_back_capacity_many_elements_can_be_appended_without_invalidating_pointers() {}
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {}
+                    }
+
+                    mod when_non_zero_size_type {
+                        use super::*;
+
+                        #[test]
+                        fn then_reallocates_memory() {}
+
+                        #[test]
+                        fn then_does_not_have_front_capacity() {}
+
+                        #[test]
+                        fn then_increases_back_capacity_to_exactly_requested() {}
+
+                        #[test]
+                        fn then_back_capacity_many_elements_can_be_appended_without_invalidating_pointers() {}
+
+                        #[test]
+                        fn then_does_not_modify_initialized_elements() {}
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     mod when_empty {
                         use super::*;
@@ -44269,6 +44468,8 @@ mod test {
     mod from_iterator {
         use super::*;
 
+        // TODO: redo base on extend.
+
         #[test]
         fn when_iterator_is_empty_then_has_no_allocation() {
             let actual: Dynamic<usize> = core::iter::empty().collect();
@@ -44464,6 +44665,5311 @@ mod test {
                     }
                 }
             }
+        }
+    }
+
+    mod extend {
+        use super::*;
+
+        // TODO: handles when cannot allocate size hint
+        // TODO: zero size type
+        // TODO: can actually use any extra back capacity?
+
+        mod when_no_capacity {
+            use super::*;
+
+            mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for upper in 0..new {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(upper))
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for upper in 0..new {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(upper))
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, Some(new))
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, Some(new))
+                                });
+
+                                assert_eq!(actual.capacity(), 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                            debug_assert_eq!(actual.initialized, old);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            actual.extend(SizeHint {
+                                data: 0..new,
+                                size_hint: (new, Some(new))
+                            });
+
+                            assert!(actual.eq((0..old).chain(0..new)));
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                            debug_assert_eq!(actual.initialized, old);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            actual.extend(SizeHint {
+                                data: 0..new,
+                                size_hint: (new, Some(new))
+                            });
+
+                            assert_eq!(actual.capacity(), 0);
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, Some(new))
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, Some(new))
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_less_and_upper_bound_is_greater {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_has_back_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.back_capacity, upper - new);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for upper in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(upper))
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for upper in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(upper))
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_has_back_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for upper in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(upper))
+                                });
+
+                                assert_eq!(actual.back_capacity, upper - new);
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_less_and_upper_bound_is_none {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, None)
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in 0..new {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, None)
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_none {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                            debug_assert_eq!(actual.initialized, old);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            actual.extend(SizeHint {
+                                data: 0..new,
+                                size_hint: (new, None)
+                            });
+
+                            assert!(actual.eq((0..old).chain(0..new)));
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                            debug_assert_eq!(actual.initialized, old);
+                            debug_assert_eq!(actual.front_capacity, 0);
+                            debug_assert_eq!(actual.back_capacity, 0);
+
+                            actual.extend(SizeHint {
+                                data: 0..new,
+                                size_hint: (new, None)
+                            });
+
+                            assert_eq!(actual.capacity(), 0);
+                        }
+                    }
+                }
+            }
+
+            mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_none {
+                use super::*;
+
+                #[test]
+                fn then_contains_new_elements_after_old_elements() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, None)
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_does_not_have_front_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, None)
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+                }
+
+                #[test]
+                fn then_has_back_capacity() {
+                    use crate::test::mock::SizeHint;
+
+                    for old in 0..32 {
+                        for new in 0..32 {
+                            for lower in (new + 1)..(new + 32) {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (lower, None)
+                                });
+
+                                assert_eq!(actual.back_capacity, lower - new);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        mod when_only_front_capacity {
+            use super::*;
+
+            mod when_less_capacity {
+                use super::*;
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.capacity(), 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.back_capacity, upper - new);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.back_capacity, upper - new);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 0..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.back_capacity, lower - new);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_exact_capacity {
+                use super::*;
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.capacity(), 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_front(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, new);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(new))
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_front(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, new);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(new))
+                                });
+
+                                assert_eq!(actual.capacity(), 0);
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_front(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, new);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(new))
+                                });
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.back_capacity, upper - new);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.back_capacity, upper - new);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, new);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_front(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, new);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, None)
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_front(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, new);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, None)
+                                });
+
+                                assert_eq!(actual.capacity(), 0);
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_front(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, new);
+                                debug_assert_eq!(actual.back_capacity, 0);
+
+                                let allocation = actual.buffer;
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, None)
+                                });
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, new);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert_eq!(actual.back_capacity, lower - new);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_more_capacity {
+                use super::*;
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_remaining_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, capacity - new);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.back_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            let allocation = actual.buffer;
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.buffer, allocation);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_remaining_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, capacity - new);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.back_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_remaining_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, capacity - new);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.back_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_remaining_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, capacity - new);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_no_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.back_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, capacity);
+                                            debug_assert_eq!(actual.back_capacity, 0);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_remaining_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.front_capacity, capacity - new);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.back_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_has_remaining_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert_eq!(actual.front_capacity, capacity - new);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_back_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert_eq!(actual.back_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, capacity);
+                                    debug_assert_eq!(actual.back_capacity, 0);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_front(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, capacity);
+                                        debug_assert_eq!(actual.back_capacity, 0);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        mod when_only_back_capacity {
+            use super::*;
+
+            // TODO: then does not reallocate memory
+
+            mod when_less_capacity {
+                use super::*;
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new +32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new +32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.capacity(), 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in (new + 1)..(new + 32) {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, None)
+                                    });
+
+                                    assert_eq!(actual.capacity(), 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in 1..new {
+                                    for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, None)
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_exact_capacity {
+                use super::*;
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_back(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, new);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(new))
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_back(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, new);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(new))
+                                });
+
+                                assert_eq!(actual.capacity(), 0);
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_back(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, new);
+
+                                let allocation = actual.buffer;
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, Some(new))
+                                });
+
+                                assert_eq!(actual.buffer, allocation);
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, Some(new))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for upper in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(upper))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    for upper in (new + 1)..(new + 32) {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(new).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, new);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in 0..new {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_back(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, new);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, None)
+                                });
+
+                                assert!(actual.eq((0..old).chain(0..new)));
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_back(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, new);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, None)
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                let mut actual: Dynamic<_> = (0..old).collect();
+
+                                _ = actual.reserve_back(new).expect("successful allocation");
+
+                                debug_assert_eq!(actual.initialized, old);
+                                debug_assert_eq!(actual.front_capacity, 0);
+                                debug_assert_eq!(actual.back_capacity, new);
+
+                                actual.extend(SizeHint {
+                                    data: 0..new,
+                                    size_hint: (new, None)
+                                });
+
+                                assert_eq!(actual.front_capacity, 0);
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_none {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for lower in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(new).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, new);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (lower, None)
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            mod when_more_capacity {
+                use super::*;
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            let allocation = actual.buffer;
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.buffer, allocation);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for upper in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (new, Some(upper))
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_less {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert!(actual.eq((0..old).chain(0..new)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in (new + 1)..(new + 32) {
+                                        for upper in 0..new {
+                                            let mut actual: Dynamic<_> = (0..old).collect();
+
+                                            _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                            debug_assert_eq!(actual.initialized, old);
+                                            debug_assert_eq!(actual.front_capacity, 0);
+                                            debug_assert_eq!(actual.back_capacity, capacity);
+
+                                            actual.extend(SizeHint {
+                                                data: 0..new,
+                                                size_hint: (lower, Some(upper))
+                                            });
+
+                                            assert_eq!(actual.front_capacity, 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_less_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        let allocation = actual.buffer;
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.buffer, allocation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_equal_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert!(actual.eq((0..old).chain(0..new)));
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.front_capacity, 0);
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_reallocate_memory() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    let mut actual: Dynamic<_> = (0..old).collect();
+
+                                    _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                    debug_assert_eq!(actual.initialized, old);
+                                    debug_assert_eq!(actual.front_capacity, 0);
+                                    debug_assert_eq!(actual.back_capacity, capacity);
+
+                                    let allocation = actual.buffer;
+
+                                    actual.extend(SizeHint {
+                                        data: 0..new,
+                                        size_hint: (new, Some(new))
+                                    });
+
+                                    assert_eq!(actual.buffer, allocation);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                mod when_size_hint_lower_bound_is_greater_and_upper_bound_is_equal {
+                    use super::*;
+
+                    #[test]
+                    fn then_contains_new_elements_after_old() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert!(actual.eq((0..old).chain(0..new)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn then_does_not_have_front_capacity() {
+                        use crate::test::mock::SizeHint;
+
+                        for old in 0..32 {
+                            for new in 0..32 {
+                                for capacity in (new + 1)..(new + 32) {
+                                    for lower in 0..new {
+                                        let mut actual: Dynamic<_> = (0..old).collect();
+
+                                        _ = actual.reserve_back(capacity).expect("successful allocation");
+
+                                        debug_assert_eq!(actual.initialized, old);
+                                        debug_assert_eq!(actual.front_capacity, 0);
+                                        debug_assert_eq!(actual.back_capacity, capacity);
+
+                                        actual.extend(SizeHint {
+                                            data: 0..new,
+                                            size_hint: (lower, Some(new))
+                                        });
+
+                                        assert_eq!(actual.front_capacity, 0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                // when_size_hint_lower_bound_is_less_and_upper_bound_is_greater
+                // when_size_hint_lower_bound_is_equal_and_upper_bound_is_greater
+                // when_size_hint_lower_bound_is_greater_and_upper_bound_is_greater
+
+                // when_size_hint_lower_bound_is_less_and_upper_bound_is_none
+                // when_size_hint_lower_bound_is_equal_and_upper_bound_is_none
+                // when_size_hint_lower_bound_is_greater_and_upper_bound_is_none
+            }
+        }
+
+        mod when_both_front_and_back_capacity {
+            use super::*;
+
+            // when_both_less_than_requested
+            // when_front_is_exactly_requested
+            // when_back_is_exactly_requested
+            // when_both_exactly_requested
+            // when_front_is_more_than_requested_and_back_is_less_than_requested
+            // when_back_is_more_than_requested_and_front_is_less_than_requested
+            // when_both_more_than_requested
         }
     }
 
