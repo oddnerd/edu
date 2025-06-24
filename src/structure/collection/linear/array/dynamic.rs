@@ -2959,7 +2959,7 @@ mod test {
                 }
             }
 
-            mod when_sized_type {
+            mod when_non_zero_size_type {
                 use super::*;
 
                 type Type = usize;
