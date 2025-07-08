@@ -10,6 +10,18 @@ use super::Linear;
 /// an element at a time from most to least recently inserted by
 /// [`Self::push`]ing.
 ///
+/// This can be visualized as vertical 'stack' of elements as visualized below
+/// where only the uncovered top can be accessed. The order is `[C, B, A]` such
+/// that C is the least recently pushed element, and A is the most recently
+/// pushed. Therefore popping will first remove A followed by B and then C.
+///
+/// ```
+///  ________
+/// |__ A __|
+/// |__ B __|
+/// |__ C __|
+/// ```
+///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
 pub trait Stack: Collection + Linear {
     /// Add a new element at the top of the stack.
