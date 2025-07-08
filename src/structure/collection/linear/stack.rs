@@ -24,17 +24,17 @@ use super::Linear;
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
 pub trait Stack: Collection + Linear {
-    /// Add a new element at the top of the stack.
+    /// Insert an element.
     ///
     /// # Errors
     /// Yields the `element` when it cannot be inserted.
     fn push(&mut self, element: Self::Element) -> Result<&mut Self::Element, Self::Element>;
 
-    /// Remove the most recently push element, if any.
+    /// Remove an element.
     #[must_use]
     fn pop(&mut self) -> Option<Self::Element>;
 
-    /// Query which element would next be popped.
+    /// The element which would be returned is [`Self::pop`] was called.
     #[must_use]
     fn peek(&self) -> Option<&Self::Element>;
 }
