@@ -16,10 +16,13 @@ use super::Linear;
 /// pushed. Therefore popping will first remove A followed by B and then C.
 ///
 /// ```
-///  ________
-/// |__ A __|
-/// |__ B __|
-/// |__ C __|
+/// +---+
+/// | A |
+/// +---+
+/// | B |
+/// +---+
+/// | C |
+/// +---+
 /// ```
 ///
 /// See also: [Wikipedia](https://en.wikipedia.org/wiki/Stack_(abstract_data_type)).
