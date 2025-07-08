@@ -1,4 +1,4 @@
-//! Implementation of [`Stack`].
+//! Implementations of [`Stack`].
 
 use super::Collection;
 use super::Linear;
