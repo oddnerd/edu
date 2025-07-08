@@ -52,15 +52,6 @@ use super::Collection;
 /// one greater than the element before it, hence the index increments by one
 /// for each element.
 ///
-/// The methods [`at`](`Self::at`)/[`at_mut`](`Self::at_mut`) provide access to
-/// the element at some given index, but will do bounds checking which means
-/// they are safe to input indexes which are past the last element likely at
-/// the cost of some performance. In contrast, [`index`](`core::ops::Index`)
-/// and [`index_mut`](`core::ops::IndexMut`) do _not_ bounds check instead
-/// causing undefined behaviour if an out of bounds index is provided, but this
-/// allows you to have external logic associating indexes to elements which
-/// prevents erroneous inputs.
-///
 /// [zbi]: https://en.wikipedia.org/wiki/Zero-based_numbering
 pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element> {
     /// Access an element at a particular `index`.
@@ -108,8 +99,8 @@ pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element
     fn iter_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
 }
 
-// TODO
-trait LinearMut {
+// A [`Linear`] [`Collection`] that can have elements inserted and removed.
+trait LinearMut: Linear + IntoIterator {
     /// Give [`self`] control of `element`'s lifetime.
     ///
     /// This will place `element` at position `index` relative to the already
@@ -141,9 +132,9 @@ trait LinearMut {
 
     // Construct an [`Iterator`] that removes elements within an index `range`.
     #[must_use]
-    fn drain(&mut self, range: impl core::ops::RangeBounds<usize>) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator;
+    fn drain(&mut self, range: impl core::ops::RangeBounds<usize>) -> impl DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator + core::iter::FusedIterator;
 
     // Construct an [`Iterator`] that removes elements matching a `predicate`.
     #[must_use]
-    fn withdraw(&mut self, predicate: impl FnMut(&Self::Element) -> bool) -> impl DoubleEndedIterator<Item = Self::Element>;
+    fn withdraw(&mut self, predicate: impl FnMut(&Self::Element) -> bool) -> impl DoubleEndedIterator<Item = Self::Element> + core::iter::FusedIterator;
 }
