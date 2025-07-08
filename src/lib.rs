@@ -26,9 +26,9 @@ pub mod structure;
 
 #[cfg(test)]
 mod test {
-    /// Types which implement interfaces with behaviour for testing purposes.
+    /// Implementation of types used in the testing of other implementations.
     pub(crate) mod mock {
-        /// Mock element that updates an external counter when dropped.
+        /// Element which updates an external counter when dropped.
         #[derive(Debug, Clone)]
         pub(crate) struct DropCounter {
             /// Access to the external counter.
@@ -56,20 +56,20 @@ mod test {
         }
 
         impl Drop for DropCounter {
-            /// Externally track that this instance was dropped.
+            /// Update the counter to track that this instance was dropped.
             ///
             /// # Performance
             /// This method take O(1) time and consumes O(1) memory.
             fn drop(&mut self) {
-                _ = self.counter.replace_with(|old| old.wrapping_add(1));
+                _ = self.counter.replace_with(|old| old.checked_add(1).expect("countably many elements"));
             }
         }
 
-        /// Mock iterator that provides an erroneous size hint.
+        /// Iterator that provides an untrustworthy size hint.
         #[derive(Debug)]
         pub(crate) struct SizeHint<Iter: Iterator> {
-            /// Underlying supply of genuine elements.
-            pub data: Iter,
+            /// Underlying supply of realized elements.
+            pub iterator: Iter,
 
             /// The hint returned when queried for the number of elements.
             pub size_hint: (usize, Option<usize>),
@@ -79,15 +79,15 @@ mod test {
             /// The type being yielded when iterated.
             type Item = Iter::Item;
 
-            /// Obtain the next genuine element, if there is one.
+            /// Obtain the next realized element, if there is one.
             ///
             /// # Performance
             /// This method has the characteristics of the underlying iterator.
             fn next(&mut self) -> Option<Self::Item> {
-                self.data.next()
+                self.iterator.next()
             }
 
-            /// Obtain the faulty hint for the remaining number of elements.
+            /// Obtain the arbitrary hint for the remaining number of elements.
             ///
             /// # Performance
             /// This method takes O(1) time and consumes O(1) memory.
@@ -96,7 +96,7 @@ mod test {
             }
         }
 
-        /// Mock element that can be default constructed.
+        /// Element that can be default constructed.
         #[derive(Debug, PartialEq, Eq)]
         pub(crate) struct DefaultValue {
             /// The underlying value to be compared against.
@@ -104,16 +104,20 @@ mod test {
         }
 
         impl Default for DefaultValue {
-            /// Construct a default instance with a mock value.
+            /// Construct an instance.
             ///
             /// # Performance
             /// This method takes O(1) time and consumes O(1) memory.
             fn default() -> Self {
                 DefaultValue {
-                    // Some clearly human-generated value is preferred over
-                    // default initializing because the purpose of this mock
-                    // is to prove they use this value so we don't want to
-                    // give false positives if they use something like zero.
+                    // The purpose of using this mock instead of a raw integer
+                    // is because some platforms will zero initialize memory
+                    // but the default value for integers is zero hence there
+                    // would be no measurable difference between correctly
+                    // using the default constructor for a type or simply
+                    // forcibly reading uninitialized memory. This provides a
+                    // centralized human-generated value that will eliminate
+                    // false positives when testing.
                     value: 31_415_926,
                 }
             }
@@ -132,7 +136,7 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn is_zero() {
+                        fn when_constructed_then_is_zero() {
                             let actual = DropCounter::new_counter();
 
                             assert_eq!(actual.take(), 0);
@@ -143,7 +147,7 @@ mod test {
                         use super::*;
 
                         #[test]
-                        fn clones_counter() {
+                        fn when_constructed_then_references_counter() {
                             let counter = DropCounter::new_counter();
 
                             let actual = DropCounter::new(&counter);
@@ -157,7 +161,7 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn increments_counter() {
+                    fn when_dropped_then_increments_counter() {
                         let counter = DropCounter::new_counter();
 
                         drop(DropCounter::new(&counter));
@@ -174,27 +178,51 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn yields_elements() {
-                        let expected = [0, 1, 2, 3, 4, 5];
+                    fn when_advanced_then_advances_underlying_iterator() {
+                        for elements in 0..32 {
+                            let expected: Vec<_> = (0..elements).collect();
 
-                        let actual = SizeHint {
-                            data: expected.iter().copied(),
-                            size_hint: (usize::default(), Some(usize::default())),
-                        };
+                            let actual = SizeHint {
+                                iterator: expected.iter().copied(),
+                                size_hint: (usize::default(), Some(usize::default())),
+                            };
 
-                        assert!(actual.eq(expected));
+                            assert!(actual.eq(expected));
+                        }
                     }
 
                     #[test]
-                    fn hint_is_custom_value() {
-                        let expected = [0, 1, 2, 3, 4, 5];
+                    fn when_size_hint_upper_is_none_then_is_custom_value() {
+                        for elements in 0..32 {
+                            for lower in 0..32 {
+                                let expected: Vec<_> = (0..elements).collect();
 
-                        let actual = SizeHint {
-                            data: expected.iter().copied(),
-                            size_hint: (12345, None),
-                        };
+                                let actual = SizeHint {
+                                    iterator: expected.iter().copied(),
+                                    size_hint: (lower, None),
+                                };
 
-                        assert_eq!(actual.size_hint(), (12345, None));
+                                assert_eq!(actual.size_hint(), (lower, None));
+                            }
+                        }
+                    }
+
+                    #[test]
+                    fn when_size_hint_upper_is_some_then_is_custom_value() {
+                        for elements in 0..32 {
+                            for lower in 0..32 {
+                                for upper in 0..32 {
+                                    let expected: Vec<_> = (0..elements).collect();
+
+                                    let actual = SizeHint {
+                                        iterator: expected.iter().copied(),
+                                        size_hint: (lower, Some(upper)),
+                                    };
+
+                                    assert_eq!(actual.size_hint(), (lower, Some(upper)));
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -206,7 +234,7 @@ mod test {
                     use super::*;
 
                     #[test]
-                    fn is_pi() {
+                    fn when_constructed_then_is_custom_value() {
                         let actual = DefaultValue::default();
 
                         assert_eq!(actual.value, 31_415_926);
