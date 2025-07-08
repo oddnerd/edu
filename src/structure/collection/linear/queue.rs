@@ -16,7 +16,7 @@ use super::Linear;
 /// the most recently pushed. Therefore popping will removed A followed by B
 /// and then C.
 ///
-/// ```
+/// ```text
 ///            +---+     +---+     +---+
 /// pushed --> | C | --> | B | --> | A | --> popped
 ///            +---+     +---+     +---+

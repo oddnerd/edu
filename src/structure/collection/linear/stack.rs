@@ -15,7 +15,7 @@ use super::Linear;
 /// that C is the least recently pushed element, and A is the most recently
 /// pushed. Therefore popping will first remove A followed by B and then C.
 ///
-/// ```
+/// ```text
 /// +---+
 /// | A |
 /// +---+
