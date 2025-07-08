@@ -29,15 +29,9 @@ pub trait Array: Linear {
     /// Obtain a mutable pointer to the underlying contigious memory buffer.
     fn as_mut_ptr(&mut self) -> *mut Self::Element;
 
-    /// Obtain an immutable slice to the elements.
-    fn as_slice(&self) -> &[Self::Element] {
-        // SAFETY: points to count many initialized elements.
-        unsafe { core::slice::from_raw_parts(self.as_ptr(), self.count()) }
-    }
+    /// Obtain an inclusive start and exclusive end pointer range.
+    fn as_ptr_range(&self) -> core::ops::Range<*const T>;
 
-    /// Obtain a mutable slice to the elements.
-    fn as_mut_slice(&mut self) -> &mut [Self::Element] {
-        // SAFETY: points to count many initialized elements.
-        unsafe { core::slice::from_raw_parts_mut(self.as_mut_ptr(), self.count()) }
-    }
+    /// Obtain an inclusive start and exclusive end pointer range.
+    fn as_mut_ptr_range(&mut self) -> core::ops::Range<*mut T>;
 }
