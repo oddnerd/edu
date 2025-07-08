@@ -4,18 +4,18 @@ pub mod linear;
 
 pub use linear::Linear;
 
-/// A data structure which stores multiple elements of a single type.
+/// A data structure which stores multiple instances of a single type.
 pub trait Collection {
-    /// The type of the elements.
+    /// The type that is instantiated.
     type Element;
 
-    /// Query the number of elements.
+    /// How many instances are contained.
     #[must_use]
-    fn count(&self) -> usize;
+    fn cardinality(&self) -> usize;
 
-    /// Query if no elements are contained.
+    /// Query if any instances are contained.
     #[must_use]
     fn is_empty(&self) -> bool {
-        self.count() == 0
+        self.cardinality() == 0
     }
 }
