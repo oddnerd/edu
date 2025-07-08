@@ -100,7 +100,7 @@ pub trait Linear: Collection + core::ops::IndexMut<usize, Output = Self::Element
 }
 
 // A [`Linear`] [`Collection`] that can have elements inserted and removed.
-trait LinearMut: Linear + IntoIterator {
+trait LinearMut: Linear + FromIterator<Self::Element> + Extend<Self::Element> + IntoIterator<Item = Self::Element> + DoubleEndedIterator<Item = Self::Element> + ExactSizeIterator + core::iter::FusedIterator {
     /// Give [`self`] control of `element`'s lifetime.
     ///
     /// This will place `element` at position `index` relative to the already
