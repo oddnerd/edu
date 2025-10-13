@@ -1,0 +1,51 @@
+
+# Rulers:
+#
+# 50 Characters ##################################
+# 72 Characters ########################################################
+#
+# Please conform to the following standardized commit message template.
+#
+# Structure your changelog into three parts separated by blank lines:
+#
+# ```
+# <header>
+#
+# <body>
+#
+# <footer>
+# ```
+#
+# The <header> is composed of a <type> categorizing the commit,
+# and a one-line <summary> for ease-of-access in logs:
+#
+# ```
+# <type>: <summary>
+# ```
+#
+# where <type> is restricted to one of:
+#
+# - feat     : a commit which adds new code.
+# - fix      : a commit which corrects the behaviour of existing code.
+# - refactor : a commit which modifies the implementation of existing code.
+# - chore    : a commit which only modifies configuration files.
+# - doc      : a commit which only modifies documentation.
+# - test     : a commit which only modifies tests.
+#
+# and <summary> is such that the following conventions are followed:
+#
+# - The entire <header> is no more than 50 characters.
+# - The entire <header> is lowercase ASCII.
+# - The <summary> is written in imperative structure (this commit will...).
+# - The <summary> does not contain any punctuation characters.
+#
+# The <body> is unstructured and provides creative freedom to elaborate in
+# whatever way deemed necessary. There are only two guidelines:
+#
+# - No line is more than 72 characters.
+# - Focus on *what* this commit does and *why* you did it, not *how*.
+#
+# The <footer> is for additional meta-data such as
+#
+# - Related issue tracking identifiers.
+# - Co-Authors.
