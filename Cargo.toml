@@ -1,19 +1,24 @@
 # https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package]
-name = "rust"
-version = "0.15.3"
+name = "edu"
+version = "0.16.0"
 edition = "2024"
+rust-version = "1.86"
+
+
 
 authors = ["Tyler St. Onge <tyler@stonge.dev>"]
-description = "Hand-written implementations in Rust for personal reference"
+description = " Hand-written implementations for educational reference"
+
 license = "Unlicense"
+license-file = "LICENSE"
 
 readme = "README.md"
-repository = "https://github.com/oddnerd/rust"
+repository = "https://github.com/oddnerd/edu"
 
 keywords = ["reference"]
-categories = ["algorithms", "data-structures", "rust-patterns", "mathematics"]
+categories = ["algorithms", "data-structures", "mathematics"]
 
 publish = false
 

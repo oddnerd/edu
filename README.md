@@ -1,60 +1,26 @@
-# Rust
+# edu
 
-Hand-written implementations in Rust for personal reference.
+This repository contains development artifacts for the `edu` library, a collection of various implementations of core computer science utilities written in the Rust language.
 
-## Algorithms
+This project exists to accomplish two goals:
 
-- [Merge](/src/algorithm/merge.rs)
-  - [Iterative](/src/algorithm/merge.rs#:~:text=iterative)
-  - [Parallel](/src/algorithm/merge.rs#:~:text=parallel)
-  - [In-Place](/src/algorithm/merge.rs#:~:text=in_place)
-- [Sorting](/src/algorithm/sort.rs)
-  - [Merge](/src/algorithm/sort/merge.rs)
-    - [Top Down](/src/algorithm/sort/merge.rs#:~:text=top_down)
-    - [Bottom Up](/src/algorithm/sort/merge.rs#:~:text=bottom_up)
-    - [Natural](/src/algorithm/sort/merge.rs#:~:text=natural)
-    - [In-Place](/src/algorithm/sort/merge.rs#:~:text=in_place)
-  - [Heap](/src/algorithm/sort/heap.rs)
-    - [Top Down](/src/algorithm/sort/heap.rs#:~:text=top_down)
-    - [Bottom Up](/src/algorithm/sort/heap.rs#:~:text=bottom_up)
-    - [Inline](/src/algorithm/sort/heap.rs#:~:text=inline)
-  - [Insertion](/src/algorithm/sort/insertion.rs)
-    - [Iterative](/src/algorithm/sort/insertion.rs#:~:text=iterative)
-    - [Recursive](/src/algorithm/sort/insertion.rs#:~:text=recursive)
-    - [Binary Search](/src/algorithm/sort/insertion.rs#:~:text=binary)
-    - [Gnome](/src/algorithm/sort/insertion.rs#:~:text=gnome)
-    - [Shell](/src/algorithm/sort/insertion.rs#:~:text=shell)
-  - [Bubble](/src/algorithm/sort/bubble.rs)
-    - [Naive](/src/algorithm/sort/bubble.rs#:~:text=naive)
-    - [Optimized](/src/algorithm/sort/bubble.rs#:~:text=optimized)
-    - [Bidirectional/Cocktail](/src/algorithm/sort/bubble.rs#:~:text=bidirectional)
-    - [Parallel/Odd-Even](/src/algorithm/sort/bubble.rs#:~:text=parallel)
-    - [Comb](/src/algorithm/sort/bubble.rs#:~:text=comb)
-  - [Selection](/src/algorithm/sort/selection.rs)
-    - [Naive](/src/algorithm/sort/selection.rs#:~:text=naive)
-    - [Optimized](/src/algorithm/sort/selection.rs#:~:text=optimized)
-    - [Stable](/src/algorithm/sort/selection.rs#:~:text=stable)
-    - [Bidirectional](/src/algorithm/sort/selection.rs#:~:text=bidirectional)
-    - [Bingo](/src/algorithm/sort/selection.rs#:~:text=bingo)
-  - [Quick](/src/algorithm/sort/quick.rs)
-    - [Hoare's](/src/algorithm/sort/quick.rs#:~:text=hoare)
-    - [Lomuto's](/src/algorithm/sort/quick.rs#:~:text=lomuto)
-    - [Three-Way/Dutch Flag](/src/algorithm/sort/quick.rs#:~:text=three_way)
-  - [Cycle](/src/algorithm/sort/misc.rs#:~:text=cycle)
-- [Search](/src/algorithm/search.rs)
-  - [linear](/src/algorithm/search.rs#:~:text=linear)
-  - [binary](/src/algorithm/search.rs#:~:text=binary)
+1. To organize a collections of high-quality, trustworthy educational reference implementations for myself and others;
+2. To act as a portfolio piece to exhibit my software engineering craftsmanship.
 
-## Data Structures
+## Code Quality
 
-- [Collections](/src/structure/collection.rs)
-  - [Linear](/src/structure/collection/linear.rs)
-    - [Stack](/src/structure/collection/linear/stack.rs)
-    - [Queue](/src/structure/collection/linear/queue.rs)
-    - [Array](/src/structure/collection/linear/array.rs)
-      - [Dope](/src/structure/collection/linear/array/dope.rs)
-      - [Fixed](/src/structure/collection/linear/array/fixed.rs)
-      - [Dynamic](/src/structure/collection/linear/array/dynamic.rs)
-    - [List](/src/structure/collection/linear/list.rs)
-      - [Singly Linked](/src/structure/collection/linear/list/singly.rs)
-      - [Doubly Linked](/src/structure/collection/linear/list/doubly.rs)
+The code contained is not merely a translation into Rust of listings found online---it is hand-written optimizing for clarity sufficient for being an education reference. Moreover, thanks to the wonders of modern compilers, the lower-complexity that makes this code easy to read also makes it easier to automagically optimize.
+
+Rust's standardized Clippy static analysis tool is used offensively to restrict compilation to only code worthy of it. The vast majority of lints offered have been enabled, and the vast majority of those have been upgraded from warnings to compilation errors.
+
+## Testing
+
+Unlike other online references which one merely hopes are correct, this repository is extensively tested providing certainty about what behaviour the code exhibits under various preconditions. No framework is used, behaviour-driven-development (BDD) style tests (given/when/then) are transparently implemented inside source code modules using Rust's standardized integration. Tests are parameterized when applicable via for-loops.
+
+## Documentation
+
+Although it is not expected for this library to be depended upon, consumer-facing documentation is required via Clippy for all public interfaces. These contain not only a brief description intended for tooltip is text-editor tooling, but also detailed explanation, memory and runtime performance notes including asymptotic complexity, and a runnable example that is automatically tested via Rust's Cargo build system.
+
+## Project Management
+
+The development of this project has been methodical therefore enabling potential reviewers ease with organization. Commit messages have been standardized based on the [Angular](https://github.com/angular/angular/blob/main/contributing-docs/commit-message-guidelines.md) guidelines, alongside issues and pull-requests being templatized.

@@ -1,0 +1,44 @@
+
+# Please conform to the following standardized commit message.
+#
+# Every commit message is structured into three parts separated by blank lines.
+#
+# ```
+# <header>
+#
+# <body>
+#
+# <footer>
+# ```
+#
+# The <header> is itself structured as followed:
+#
+# ```
+# <type>: <summary>
+# ```
+#
+# <type> is one of
+#
+# - feat     : a commit which adds new code.
+# - fix      : a commit which corrects the behaviour of existing code.
+# - refactor : a commit which modifies the implementation of existing code.
+# - chore    : a commit which only modifies configuration files.
+# - doc      : a commit which only modifies documentation.
+# - test     : a commit which only modifies tests.
+#
+# <summary> is
+#
+# - No more than 50 chars. #######################
+# - Written in imperative style (this commit will...)
+# - all lower case
+# - does not end with punctuation
+#
+# The <body> is for *what* this commit does and *why* it is the way it is.
+# This explicitly does not include *how* the commit achieves what it does.
+# No more than 72 characters ###########################################
+#
+#
+# The <footer> is for additional meta-data such as
+#
+# - Related issue tracking identifiers
+# - Co-Authors
