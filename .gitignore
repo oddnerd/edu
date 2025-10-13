@@ -1,0 +1,7 @@
+# Build artifacts.
+/target
+Cargo.lock
+
+# Development artifacts.
+tarpaulin-report.html
+lcov.info
