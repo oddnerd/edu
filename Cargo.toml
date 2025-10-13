@@ -6,7 +6,6 @@ version = "0.16.0"
 description = "An educational reference alternative standard library for Rust."
 
 license = "Unlicense"
-license-file = "LICENSE"
 
 edition = "2024"
 rust-version = "1.90"
