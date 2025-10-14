@@ -1,5 +1,4 @@
-//! Procedures on data.
+//! [fn] which perform operation upon [data structures](mod@structure).
 
-pub mod merge;
-pub mod search;
-pub mod sort;
+#[cfg(test)]
+mod test {}

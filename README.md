@@ -1,60 +1,42 @@
-# Rust
+# edu
 
-Hand-written implementations in Rust for personal reference.
+This repository contains development artifacts for the `edu` library, an
+educational reference alternative standard library for the Rust programming
+language.
 
-## Algorithms
+This project exists to accomplish two goals:
 
-- [Merge](/src/algorithm/merge.rs)
-  - [Iterative](/src/algorithm/merge.rs#:~:text=iterative)
-  - [Parallel](/src/algorithm/merge.rs#:~:text=parallel)
-  - [In-Place](/src/algorithm/merge.rs#:~:text=in_place)
-- [Sorting](/src/algorithm/sort.rs)
-  - [Merge](/src/algorithm/sort/merge.rs)
-    - [Top Down](/src/algorithm/sort/merge.rs#:~:text=top_down)
-    - [Bottom Up](/src/algorithm/sort/merge.rs#:~:text=bottom_up)
-    - [Natural](/src/algorithm/sort/merge.rs#:~:text=natural)
-    - [In-Place](/src/algorithm/sort/merge.rs#:~:text=in_place)
-  - [Heap](/src/algorithm/sort/heap.rs)
-    - [Top Down](/src/algorithm/sort/heap.rs#:~:text=top_down)
-    - [Bottom Up](/src/algorithm/sort/heap.rs#:~:text=bottom_up)
-    - [Inline](/src/algorithm/sort/heap.rs#:~:text=inline)
-  - [Insertion](/src/algorithm/sort/insertion.rs)
-    - [Iterative](/src/algorithm/sort/insertion.rs#:~:text=iterative)
-    - [Recursive](/src/algorithm/sort/insertion.rs#:~:text=recursive)
-    - [Binary Search](/src/algorithm/sort/insertion.rs#:~:text=binary)
-    - [Gnome](/src/algorithm/sort/insertion.rs#:~:text=gnome)
-    - [Shell](/src/algorithm/sort/insertion.rs#:~:text=shell)
-  - [Bubble](/src/algorithm/sort/bubble.rs)
-    - [Naive](/src/algorithm/sort/bubble.rs#:~:text=naive)
-    - [Optimized](/src/algorithm/sort/bubble.rs#:~:text=optimized)
-    - [Bidirectional/Cocktail](/src/algorithm/sort/bubble.rs#:~:text=bidirectional)
-    - [Parallel/Odd-Even](/src/algorithm/sort/bubble.rs#:~:text=parallel)
-    - [Comb](/src/algorithm/sort/bubble.rs#:~:text=comb)
-  - [Selection](/src/algorithm/sort/selection.rs)
-    - [Naive](/src/algorithm/sort/selection.rs#:~:text=naive)
-    - [Optimized](/src/algorithm/sort/selection.rs#:~:text=optimized)
-    - [Stable](/src/algorithm/sort/selection.rs#:~:text=stable)
-    - [Bidirectional](/src/algorithm/sort/selection.rs#:~:text=bidirectional)
-    - [Bingo](/src/algorithm/sort/selection.rs#:~:text=bingo)
-  - [Quick](/src/algorithm/sort/quick.rs)
-    - [Hoare's](/src/algorithm/sort/quick.rs#:~:text=hoare)
-    - [Lomuto's](/src/algorithm/sort/quick.rs#:~:text=lomuto)
-    - [Three-Way/Dutch Flag](/src/algorithm/sort/quick.rs#:~:text=three_way)
-  - [Cycle](/src/algorithm/sort/misc.rs#:~:text=cycle)
-- [Search](/src/algorithm/search.rs)
-  - [linear](/src/algorithm/search.rs#:~:text=linear)
-  - [binary](/src/algorithm/search.rs#:~:text=binary)
+1. To organize a collections of high-quality, trustworthy educational reference
+   implementations for myself and others;
+2. To act as a portfolio piece to exhibit my software engineering
+   craftsmanship.
 
-## Data Structures
+Notably, this explicitly does _not_ include being a drop-in replacement
+for the `std` crate. In fact, most implementations still base their interfaces
+around `core` types such as `Default` and `FromIterator`. It does,
+nevertheless, reimplement most types to exhibit how I believe one ought to look
+in optimal conditions when not bound to consumers. This repository is not
+merely reformatting existing implementations available online; the code here
+is hand-written from scratch without the use of any artificial intelligence
+providing implementation truly worthy of reference.
 
-- [Collections](/src/structure/collection.rs)
-  - [Linear](/src/structure/collection/linear.rs)
-    - [Stack](/src/structure/collection/linear/stack.rs)
-    - [Queue](/src/structure/collection/linear/queue.rs)
-    - [Array](/src/structure/collection/linear/array.rs)
-      - [Dope](/src/structure/collection/linear/array/dope.rs)
-      - [Fixed](/src/structure/collection/linear/array/fixed.rs)
-      - [Dynamic](/src/structure/collection/linear/array/dynamic.rs)
-    - [List](/src/structure/collection/linear/list.rs)
-      - [Singly Linked](/src/structure/collection/linear/list/singly.rs)
-      - [Doubly Linked](/src/structure/collection/linear/list/doubly.rs)
+## Building
+
+This project relies solely upon Rust, no other applications or libraries.
+
+To build a release binary, run `cargo build --release`. This will enable
+optimizations and strip the binary.
+
+To run the test suite and prove correctness, run `cargo test --tests`. This
+will compile a development build and automatically run all unit and integration
+tests.
+
+To verify all documentation examples both compile and have the expected runtime
+behaviour, run `cargo test --doc`. This will compile a development build and
+automatically run all example snippets as separate binaries.
+
+## Contributing
+
+This project is intended the be a lone adventure. Nevertheless, there exists
+extensive [documentation](CONTRIBUTING.md) about my development process to
+further highlight the skills I can bring to a development team.

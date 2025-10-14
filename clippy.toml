@@ -1,0 +1,58 @@
+module-item-order-groupings = [
+    [
+        "dependency",
+        [
+            "foreign_mod",
+            "extern_crate",
+        ],
+    ],
+    [
+        "use",
+        [
+            "use",
+        ],
+    ],
+    [
+        "type",
+        [
+            "trait_alias",
+            "ty_alias",
+            "union",
+            "enum",
+            "trait",
+            "struct",
+        ],
+    ],
+    [
+        "free",
+        [
+            "macro",
+            "global_asm",
+            "static",
+            "const",
+            "fn",
+        ],
+    ],
+    [
+        "module",
+        [
+            "mod",
+        ],
+    ],
+    [
+        "implementation",
+        [
+            "impl",
+        ],
+    ],
+]
+accept-comment-above-attributes = false
+allow-expect-in-tests = true
+allow-indexing-slicing-in-tests = true
+allow-unwrap-in-tests = true
+allowed-idents-below-min-chars = []
+avoid-breaking-exported-api = false
+check-incompatible-msrv-in-tests = true
+check-private-items = true
+enforce-iter-loop-reborrow = true
+module-items-ordered-within-groupings = "all"
