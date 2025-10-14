@@ -7,6 +7,10 @@
 //! [^1]: Because some aspects of the Rust standard library rely upon compiler
 //!       intrinsics for which this crate does not have access to, this does
 //!       nevertheless link against the `core` and `alloc` crates.
+//!
+//! This crate is divided into two top-level modules; all code is either
+//! implementing an [algorithm](mod@algorithm), or a
+//! [data structure](mod@structure).
 
 // Disable counter-productive lints within tests.
 #![cfg_attr(
@@ -32,6 +36,9 @@
 // Link against the `alloc` and `core` crates, the two which make up `std`.
 extern crate alloc;
 extern crate core;
+
+pub mod algorithm;
+pub mod structure;
 
 #[cfg(test)]
 mod test {}
