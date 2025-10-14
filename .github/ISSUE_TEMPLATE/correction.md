@@ -2,7 +2,7 @@
 name: correction
 about: correct behaviour
 title: ''
-labels: 'bug'
+labels: 'type: bug'
 assignees: oddnerd
 
 ---

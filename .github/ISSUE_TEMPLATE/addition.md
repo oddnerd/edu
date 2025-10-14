@@ -2,7 +2,7 @@
 name: addition
 about: add behaviour
 title: ''
-labels: 'feat'
+labels: 'type: feat'
 assignees: oddnerd
 
 ---

@@ -2,7 +2,7 @@
 name: alteration
 about: alter behaviour implementation
 title: ''
-labels: 'refactor'
+labels: 'type: refactor'
 assignees: oddnerd
 
 ---
