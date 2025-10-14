@@ -47,7 +47,6 @@ cargo = {level = "deny", priority = -1}
 nursery = {level = "warn", priority = -1}
 
 # Restriction
-absolute_paths = "deny"
 alloc_instead_of_core = "deny"
 allow_attributes = "deny"
 allow_attributes_without_reason = "deny"
