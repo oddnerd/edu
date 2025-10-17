@@ -25,5 +25,11 @@
     ),
 )]
 
+pub mod algorithm;
+pub mod primitive;
+pub mod structure;
+pub mod system;
+pub mod text;
+
 #[cfg(test)]
 mod test {}
