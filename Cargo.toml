@@ -3,7 +3,7 @@
 [package]
 name = "edu"
 version = "0.16.0"
-description = "An educational reference alternative standard library for Rust."
+description = "Implementations in the Rust programming language for educational reference."
 
 license = "Unlicense"
 
@@ -76,7 +76,6 @@ float_cmp_const = "deny"
 fn_to_numeric_cast_any = "deny"
 get_unwrap = "deny"
 if_then_some_else_none = "deny"
-impl_trait_in_params = "deny"
 implicit_return = "deny"
 indexing_slicing = "deny"
 infinite_loop = "deny"

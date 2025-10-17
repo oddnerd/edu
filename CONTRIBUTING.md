@@ -44,14 +44,14 @@ crate root.
 4. Develop
 
 The pride of this repository is code quality! In the
-[build configuration](Cargo.toml), all[^1] warnings available has been
+[build configuration](Cargo.toml), all[^1] warnings available have been
 enabled, and all[^1] warnings have been upgraded to errors. This project
 also uses static analysis via Clippy and dynamic analysis via Miri passing
 all[^1] checks.
 
 [^1]: Technically not all lints are enabled as some are contradictory and
-      cannot be simultaneously enabled alongside a handful which for stylistic
-      reasons remain suppressed.
+      cannot be simultaneously enabled alongside a handful which for, stylistic
+      reasons, remain suppressed.
 
 5. Commit
 
