@@ -24,12 +24,3 @@
         reason = "Using `unwrap`/`expect` without binding the value obscures the underlying assertion when that is the intent. Since use of this feature is allowed only within tests, implicitly ignoring the value is the explicit purpose of using it."
     ),
 )]
-
-pub mod algorithm;
-pub mod primitive;
-pub mod structure;
-pub mod system;
-pub mod text;
-
-#[cfg(test)]
-mod test {}
