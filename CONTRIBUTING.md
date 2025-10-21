@@ -55,7 +55,7 @@ all[^1] checks.
 
 5. Commit
 
-This project uses a standardized commit message style enforced via template
+This project uses a standardized commit message style enforced via [template](.commit)
 based upon the [Angular guidelines](https://github.com/angular/angular/blob/main/contributing-docs/commit-message-guidelines.md).
 
 6. Pull-Request
