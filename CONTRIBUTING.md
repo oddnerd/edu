@@ -60,6 +60,6 @@ based upon the [Angular guidelines](https://github.com/angular/angular/blob/main
 
 6. Pull-Request
 
-There is a final checklist to ensure all above conditions are met, and then
+There is a [final checklist](.github/pull_request_template.md) to ensure all above conditions are met, and then
 changes are merged into the main branch following Continuous Development (CD)
 practices.
