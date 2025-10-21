@@ -19,8 +19,7 @@ artificial intelligence providing implementations truly worthy of reference.
 
 This project relies solely upon Rust, no other applications or libraries.
 
-To build a release binary, run `cargo build --release`. This will enable
-optimizations and strip the binary.
+To build a release binary, run `cargo build --release`. This project enables Link-Time Optimization (LTO) by default alongside stripping the binary of unnecessary symbols.
 
 To run the test suite and prove correctness, run `cargo test --tests`. This
 will compile a development build and automatically run all unit and integration
@@ -28,7 +27,7 @@ tests.
 
 To verify all documentation examples both compile and have the expected runtime
 behaviour, run `cargo test --doc`. This will compile a development build and
-automatically run all example snippets as separate binaries.
+automatically run all example snippets as isolated binaries.
 
 ## Contributing
 
