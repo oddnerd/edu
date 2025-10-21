@@ -4,9 +4,9 @@
 
 This repository configures GitHub to limit issues to select templates:
 
-- Additions which add new functionality.
-- Alterations which modify how existing functionality is implemented.
-- Corrections which alter the behaviour of existing implementations.
+- [Additions](.github/ISSUE_TEMPLATE/addition.md) which add new functionality.
+- [Alterations](.github/ISSUE_TEMPLATE/alteration.md) which modify how existing functionality is implemented.
+- [Corrections](.github/ISSUE_TEMPLATE/correction.md) which alter the behaviour of existing implementations.
 
 From there a branch is created and tracked for the ticket.
 
