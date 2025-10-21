@@ -50,7 +50,7 @@ also uses static analysis via Clippy and dynamic analysis via Miri passing
 all[^1] checks.
 
 [^1]: Technically not all lints are enabled as some are contradictory and
-      cannot be simultaneously enabled alongside a handful which for, stylistic
+      cannot be simultaneously enabled alongside a handful which, for stylistic
       reasons, remain suppressed.
 
 5. Commit
